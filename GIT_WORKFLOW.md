@@ -129,7 +129,6 @@ git merge master
   - `Fast-forward` 또는 자동 merge 성공 → 끝
   - `CONFLICT` 발생 → **[공통 부록: 충돌 해결](#부록-충돌-해결-병합)** 참고 후 커밋까지 완료해야 다음 단계로 넘어간다
 - ⚠️ **첫 merge에서 충돌이 났으면 다 풀고 커밋한 뒤에 두 번째 merge를 한다.** 충돌을 남긴 채 `git merge master`을 치면 git이 `You have not concluded your merge` 로 거부한다.
-- `git merge master` 에서 가장 흔한 충돌 상대는 **`Web-NeoMES/frontend/package-lock.json`**(감춤 부품 버전)이다. 이 파일은 사람이 고르는 게 아니라 실제 설치된 버전에 맞추는 것이라 푸는 법이 따로 있다 → [자동 생성 파일 충돌 부록](#부록-자동-생성-파일-충돌-package-lockjson).
 - master을 받으면 **master의 배포 병합 커밋이 내 브랜치 이력에 들어오고**, 나중에 루틴3에서 dev으로도 흘러간다. 이력이 이어지는 것뿐이고 코드가 옛 버전으로 되돌아가지는 않는다(git이 공통 조상을 기준으로 병합하므로).
 
 ### 1-6. 아까 stash 했으면 복원
@@ -368,10 +367,6 @@ git diff master..dev --name-only -- '*/sql/*'
 - 표를 지우거나(`DROP`) 컬럼을 바꾸는 마이그레이션이면 되돌리기가 어렵다. 작성자와 실행 시점을
   먼저 맞춘다.
 
-#### 4-1-3. 릴리즈 노트 갱신 (`Web-NeoMES/CLAUDE.md`가 요구하는 절차)
-
-`Web-NeoMES/frontend/public/release-notes.json`의 `releases` 배열 맨 앞에 이번 배포 항목을
-추가한다 — 태그와 같은 버전 문자열을 쓴다. 이 단계는 지금까지 자주 빠졌으니 배포 전에 확인한다.
 
 ### 4-2. master 최신화
 ```bash
