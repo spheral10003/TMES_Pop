@@ -60,6 +60,7 @@ SEOJIN_MEIS.Client ──┬─→ SEOJIN_MEIS.Client.ApiClient ──┐
 | 프로젝트 | 규칙 파일 |
 | --- | --- |
 | WinForms UI (화면 · 테마 · 다국어) | [src/SEOJIN_MEIS.Client/CLAUDE.md](src/SEOJIN_MEIS.Client/CLAUDE.md) |
+| 화면 구동 방식 (탭=UserControl · 팝업=Form) | [SCREEN_GUIDE.md](SCREEN_GUIDE.md) |
 | 공용 계약 · 설정 · 로깅 | [src/SEOJIN_MEIS.Client.Common/CLAUDE.md](src/SEOJIN_MEIS.Client.Common/CLAUDE.md) |
 | REST API 클라이언트 | [src/SEOJIN_MEIS.Client.ApiClient/CLAUDE.md](src/SEOJIN_MEIS.Client.ApiClient/CLAUDE.md) |
 | 설비 Modbus-TCP | [src/SEOJIN_MEIS.Client.Equipment/CLAUDE.md](src/SEOJIN_MEIS.Client.Equipment/CLAUDE.md) |
