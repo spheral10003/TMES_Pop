@@ -9,7 +9,6 @@
 > ℹ️ `<내-깃-아이디>`는 개인 브랜치명 고정값이 아니라 **각자 로그인한 GitHub 계정 아이디로 치환**하는 자리표시자다. 예를 들어 본인 아이디가 `hong-gildong`이면 작업 브랜치는 `feat/hong-gildong`이 된다. 아래 모든 예시 명령어의 `feat/<내-깃-아이디>`도 동일하게 본인 아이디로 바꿔서 실행한다.
 
 > ℹ️ 이 문서는 **일상 작업 브랜치 흐름**(내 작업 → dev → master)을 다룬다.
-> `CLAUDE.md`의 "틀 갱신 받기
 
 ---
 
@@ -418,8 +417,6 @@ git push origin master --force-with-lease   # master force push는 사전 협의
 - [ ] dev이 배포 가능 상태로 검증됨
 - [ ] `git log master..dev`로 **이번 배포분만** 확인함(최근 N개가 아니라)
 - [ ] 남의 커밋이 섞여 있었다면 그 작성자에게 배포 동의를 받음
-- [ ] `sql/migrate`·`sql/create` 변경이 포함됐는지 확인하고, 있으면 DB 실행 시점을 맞춤
-- [ ] `release-notes.json`에 이번 배포 항목 추가함
 - [ ] master, dev 모두 최신화 상태에서 병합
 - [ ] 배포 태그(YYYY.MM.DD.NN) 생성 및 push 완료
 - [ ] 배포 후 실제 서비스 동작 확인
@@ -550,7 +547,7 @@ git stash drop        # 확인 끝난 뒤에만
                         → dev으로 이동 → merge feat/<내-깃-아이디> --no-ff → push origin dev
       ↓ (배포시점)
 "운영서버 올려줘"  [루틴4] dev pull → master..dev 로 이번 배포분 확인
-                        → 남의 커밋·DB 마이그레이션 포함 여부 점검 → 릴리즈 노트 추가
+                        → 남의 커밋 포함 여부 점검
                         → master pull → (승인) merge dev --no-ff
                         → tag YYYY.MM.DD.NN (최신 태그 확인 후 순번 결정)
                         → (승인) push origin master + push origin YYYY.MM.DD.NN
