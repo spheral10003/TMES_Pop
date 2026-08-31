@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <RootNamespace>SEOJIN_MEIS.Client.Equipment</RootNamespace>
+    <AssemblyName>SEOJIN_MEIS.Client.Equipment</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SEOJIN_MEIS.Client.Common\SEOJIN_MEIS.Client.Common.csproj" />
+  </ItemGroup>
+
+</Project>

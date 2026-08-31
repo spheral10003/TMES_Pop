@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <RootNamespace>SEOJIN_MEIS.Client.ApiClient</RootNamespace>
+    <AssemblyName>SEOJIN_MEIS.Client.ApiClient</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SEOJIN_MEIS.Client.Common\SEOJIN_MEIS.Client.Common.csproj" />
+  </ItemGroup>
+
+</Project>

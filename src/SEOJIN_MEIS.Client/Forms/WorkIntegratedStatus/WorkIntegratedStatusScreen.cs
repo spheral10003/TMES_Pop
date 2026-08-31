@@ -1,0 +1,243 @@
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using DevExpress.Utils;
+using DevExpress.XtraEditors;
+using DevExpress.XtraTreeList.Columns;
+using SEOJIN_MEIS.Client.ApiClient;
+using SEOJIN_MEIS.Client.Common.Logging;
+using SEOJIN_MEIS.Client.Common.Models;
+using SEOJIN_MEIS.Client.Composition;
+using SEOJIN_MEIS.Client.Forms.Common;
+using SEOJIN_MEIS.Client.Localization;
+using SEOJIN_MEIS.Client.Mock;
+using SEOJIN_MEIS.Client.Theme;
+
+namespace SEOJIN_MEIS.Client.Forms.WorkIntegratedStatus
+{
+    /// <summary>
+    /// MEIS &gt; 작업통합 개요 &gt; 작업통합 현황 조회.
+    ///
+    /// 생산품목 시리얼번호 하나가 <b>거쳐 온 전 과정</b>을 한 트리로 펼쳐 본다:
+    ///   품목 → 라우팅 그룹 → 라우팅 공정 → 페이지 공정 → 투입자재 → 스팩(토크/앵글 값)
+    ///
+    /// 값 컬럼(토크·앵글)은 스팩 줄에서만 채워지고, 상위 줄은 계층을 잡아 주는 역할만 한다.
+    /// 조회·집계·판정은 전부 서버가 하고 화면은 결과 표시와 엑셀 내보내기만 담당한다.
+    ///
+    /// VS 디자이너 호환을 위해 매개변수 없는 생성자만 두고, 실제 의존성은 Initialize()로 주입한다.
+    /// </summary>
+    public partial class WorkIntegratedStatusScreen : XtraUserControl, IThemedScreen
+    {
+        private ClientContext _context;
+
+        /// <summary>현재 트리에 물려 있는 결과. 엑셀 내보내기 전에 비어 있는지 판단하는 데 쓴다.</summary>
+        private List<WorkIntegratedNodeDto> _nodes = new List<WorkIntegratedNodeDto>();
+
+        public WorkIntegratedStatusScreen()
+        {
+            InitializeComponent();
+        }
+
+        public void Initialize(ClientContext context)
+        {
+            _context = context;
+
+            lblOverviewTitle.Text = Strings.WorkIntegrated_OverviewTitle;
+            lblFilterTitle.Text = Strings.ProductionStatus_FilterTitle;
+            lblSerialNo.Text = Strings.WorkEntry_SerialNo + "(*)";
+            btnSearch.Text = Strings.Common_Search;
+            btnExcelExport.Text = Strings.WorkIntegrated_ExcelExport;
+
+            ApplyTheme();
+            ConfigureTree();
+
+            // 바코드 스캐너처럼 Enter로 끝나는 입력을 그대로 조회로 연결한다.
+            txtSerialNo.KeyDown += SerialNo_KeyDown;
+        }
+
+        /// <summary>현재 테마 색을 화면에 입힌다(포인트 컬러: Violet).</summary>
+        public void ApplyTheme()
+        {
+            BackColor = AppTheme.Surface;
+            spacer.BackColor = AppTheme.Surface;
+
+            AppTheme.CardPanel(topCard);
+            AppTheme.CardPanel(overviewCard);
+            AppTheme.SectionTitle(lblFilterTitle, AppTheme.Violet);
+            AppTheme.SectionTitle(lblOverviewTitle, AppTheme.Violet);
+
+            AppTheme.BodyText(lblSerialNo);
+            AppTheme.Editor(txtSerialNo);
+
+            AppTheme.AccentButton(btnSearch, AppTheme.Violet, AppIcons.Search);
+            AppTheme.AccentButton(btnExcelExport, AppTheme.Emerald, AppIcons.Clipboard);
+
+            AppTheme.Tree(treeOverview, AppTheme.Violet);
+        }
+
+        /// <summary>
+        /// 트리 컬럼 구성. TreeList는 데이터 형식에서 컬럼을 자동 생성하면 DTO의 모든 속성이 나오므로
+        /// (NodeId/ParentNodeId/NodeKind 같은 내부 필드까지) 필요한 컬럼만 직접 만들어 붙인다.
+        /// </summary>
+        private void ConfigureTree()
+        {
+            treeOverview.BeginUpdate();
+            try
+            {
+                treeOverview.Columns.Clear();
+                treeOverview.OptionsBehavior.PopulateServiceColumns = false;
+                treeOverview.OptionsView.AutoWidth = false;
+
+                // 폭 합계(220 + 250 + 130*8 = 1510)를 화면 기본 폭에 맞춰, 값 컬럼은 고정 폭 + 가로 스크롤로 둔다
+                // (앵글 컬럼까지 억지로 줄여 넣지 않고 화면 설계서처럼 옆으로 밀어 본다).
+                AddColumn("NodeCode", Strings.Col_NodeCode, 220, HorzAlignment.Near);
+                AddColumn("NodeDescription", Strings.Col_NodeDescription, 250, HorzAlignment.Near);
+
+                AddValueColumn("TorqueResult", Strings.Col_TorqueResult, 130);
+                AddValueColumn("TorqueTarget", Strings.Col_TorqueTarget, 130);
+                AddValueColumn("TorqueLower", Strings.Col_TorqueLower, 130);
+                AddValueColumn("TorqueMax", Strings.Col_TorqueMax, 130);
+                AddValueColumn("AngleTarget", Strings.Col_AngleTarget, 130);
+                AddValueColumn("AngleLower", Strings.Col_AngleLower, 130);
+                AddValueColumn("AngleUpper", Strings.Col_AngleUpper, 130);
+                AddValueColumn("AngleResult", Strings.Col_AngleResult, 130);
+            }
+            finally
+            {
+                treeOverview.EndUpdate();
+            }
+
+            // 값이 없는 줄(계층만 잡아 주는 상위 줄)은 빈칸 대신 ".."로 표시한다 — 목업과 같은 표기.
+            treeOverview.CustomColumnDisplayText += TreeOverview_CustomColumnDisplayText;
+        }
+
+        private TreeListColumn AddColumn(string fieldName, string caption, int width, HorzAlignment alignment)
+        {
+            var column = treeOverview.Columns.Add();
+            column.FieldName = fieldName;
+            column.Caption = caption;
+            column.Width = width;
+            column.Visible = true;
+            column.VisibleIndex = treeOverview.Columns.Count - 1;
+            column.OptionsColumn.AllowEdit = false;
+            column.OptionsColumn.AllowSort = false;
+            column.AppearanceCell.TextOptions.HAlignment = alignment;
+            column.AppearanceCell.Options.UseTextOptions = true;
+            return column;
+        }
+
+        /// <summary>토크/앵글 값 컬럼 — 소수 세 자리 고정으로 자릿수를 맞춰 읽기 쉽게 한다(6.180 / 5.400).</summary>
+        private void AddValueColumn(string fieldName, string caption, int width)
+        {
+            var column = AddColumn(fieldName, caption, width, HorzAlignment.Center);
+            column.Format.FormatType = FormatType.Numeric;
+            column.Format.FormatString = "0.000";
+        }
+
+        /// <summary>
+        /// 값이 비어 있는 칸의 표기.
+        /// 항목 설명은 서버가 안 내려줄 수 있고, 값 컬럼은 스팩 줄에서만 채워지므로
+        /// 두 경우 모두 목업과 같이 ".."로 보여 준다(빈칸이면 어느 열인지 눈으로 따라가기 어렵다).
+        /// </summary>
+        private void TreeOverview_CustomColumnDisplayText(object sender, DevExpress.XtraTreeList.CustomColumnDisplayTextEventArgs e)
+        {
+            if (e.Value == null || (e.Value as string) == string.Empty)
+                e.DisplayText = "..";
+        }
+
+        private void SerialNo_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode != Keys.Enter)
+                return;
+
+            e.Handled = true;
+            _ = SearchAsync();
+        }
+
+        private async void btnSearch_Click(object sender, EventArgs e) => await SearchAsync();
+
+        /// <summary>
+        /// 생산품목 시리얼번호로 작업 통합 개요를 조회한다.
+        /// 시리얼번호는 필수다 — 이 화면은 "한 개체가 어떻게 만들어졌는가"를 보는 화면이라
+        /// 대상 없이 전체를 긁어오면 의미가 없다.
+        /// </summary>
+        private async Task SearchAsync()
+        {
+            var serialNo = txtSerialNo.Text?.Trim();
+            if (string.IsNullOrEmpty(serialNo))
+            {
+                AppMessageBox.Warn(this, Strings.WorkIntegrated_SerialRequired, Strings.WorkIntegratedStatus_Title);
+                txtSerialNo.Focus();
+                return;
+            }
+
+            try
+            {
+                btnSearch.Enabled = false;
+                _nodes = await FetchOverviewAsync(serialNo);
+
+                treeOverview.DataSource = _nodes;
+                treeOverview.ExpandAll();
+
+                if (_nodes.Count == 0)
+                    AppMessageBox.Info(this, Strings.WorkEntry_NoResult, Strings.WorkIntegratedStatus_Title);
+            }
+            catch (ApiException ex)
+            {
+                AppMessageBox.Warn(this, ex.Message, Strings.WorkIntegratedStatus_Title);
+            }
+            finally
+            {
+                btnSearch.Enabled = true;
+            }
+        }
+
+        private async Task<List<WorkIntegratedNodeDto>> FetchOverviewAsync(string serialNo)
+        {
+            if (_context.Settings.UseMockData)
+            {
+                await Task.Yield();
+                return MockWorkIntegratedData.GetOverview(serialNo);
+            }
+
+            return await _context.ApiClients.ProductionApiClient.GetWorkIntegratedOverviewAsync(serialNo)
+                   ?? new List<WorkIntegratedNodeDto>();
+        }
+
+        /// <summary>
+        /// [엑셀 내보내기] — 화면에 보이는 트리를 그대로 xlsx로 저장한다(계층/컬럼 구성 유지).
+        /// 저장 위치는 사용자가 고르며, 기본 파일명에 시리얼번호와 시각을 넣어 덮어쓰기를 피한다.
+        /// </summary>
+        private void btnExcelExport_Click(object sender, EventArgs e)
+        {
+            if (_nodes.Count == 0)
+            {
+                AppMessageBox.Info(this, Strings.WorkIntegrated_ExportEmpty, Strings.WorkIntegrated_ExcelExport);
+                return;
+            }
+
+            using (var dialog = new SaveFileDialog())
+            {
+                dialog.Filter = "Excel 통합 문서 (*.xlsx)|*.xlsx";
+                dialog.FileName = $"작업통합개요_{txtSerialNo.Text?.Trim()}_{DateTime.Now:yyyyMMdd_HHmmss}.xlsx";
+
+                if (dialog.ShowDialog(this) != DialogResult.OK)
+                    return;
+
+                try
+                {
+                    treeOverview.ExportToXlsx(dialog.FileName);
+                    AppLog.Info($"[작업통합] 엑셀 내보내기 완료 - {dialog.FileName}");
+                    AppMessageBox.Success(this, Strings.WorkIntegrated_ExportDone, Strings.WorkIntegrated_ExcelExport);
+                }
+                catch (Exception ex)
+                {
+                    // 파일이 열려 있거나 쓰기 권한이 없는 경우 등 — 화면은 계속 쓸 수 있어야 한다.
+                    AppLog.Info($"[작업통합] 엑셀 내보내기 실패 - {ex.Message}");
+                    AppMessageBox.Warn(this, $"{Strings.WorkIntegrated_ExportFailed}\n{ex.Message}", Strings.WorkIntegrated_ExcelExport);
+                }
+            }
+        }
+    }
+}
