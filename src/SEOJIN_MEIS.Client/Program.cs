@@ -47,7 +47,8 @@ namespace SEOJIN_MEIS.Client
             AppLog.Step($"문화권 적용 완료 - {Thread.CurrentThread.CurrentUICulture}");
 
             AppLog.Step("API 클라이언트 구성");
-            var apiOptions = new ApiClientOptions(settings.ApiBaseUrl, settings.ApiTimeoutSeconds);
+            var apiOptions = new ApiClientOptions(settings.ApiBaseUrl, settings.ApiTimeoutSeconds,
+                settings.LogApiResponseBody, settings.LogApiResponseBodyMaxLength);
             var apiClients = new ApiClientFactory(apiOptions);
 
             AppLog.Step("설비 Modbus 매니저 구성 및 등록 시작");

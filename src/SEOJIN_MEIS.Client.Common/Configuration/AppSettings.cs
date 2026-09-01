@@ -7,6 +7,16 @@ namespace SEOJIN_MEIS.Client.Common.Configuration
     {
         public string ApiBaseUrl { get; set; }
         public int ApiTimeoutSeconds { get; set; } = 30;
+
+        /// <summary>
+        /// API 응답 본문을 로그에 남길지 여부. 서버 연동을 맞추는 동안 응답 모양을 확인하려고 켠다.
+        /// 비밀번호·토큰 같은 필드는 기록 전에 가려지지만, <b>업무 데이터는 그대로 남으므로</b>
+        /// 현장 운영에서는 끄는 것을 권한다(로그 용량도 크게 늘어난다).
+        /// </summary>
+        public bool LogApiResponseBody { get; set; } = true;
+
+        /// <summary>로그에 남길 응답 본문의 최대 길이(자). 넘으면 잘라서 남긴다.</summary>
+        public int LogApiResponseBodyMaxLength { get; set; } = 4000;
         public string DefaultCulture { get; set; } = "ko-KR";
 
         /// <summary>자동 로그아웃까지의 세션 유지 시간(분). 메인 화면 우측 상단 카운트다운의 시작 값이다.</summary>

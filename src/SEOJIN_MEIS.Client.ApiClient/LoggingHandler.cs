@@ -1,5 +1,6 @@
 using System;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -10,8 +11,13 @@ using SEOJIN_MEIS.Client.Common.Logging;
 namespace SEOJIN_MEIS.Client.ApiClient
 {
     /// <summary>
-    /// 모든 REST 호출의 전체 URL·메서드·응답코드·소요시간을 AppLog로 남긴다.
-    /// 요청/응답 바디는 로그인 비밀번호 등 민감정보가 섞일 수 있어 기록하지 않는다.
+    /// 모든 REST 호출의 전체 URL·메서드·요청/응답 헤더·응답코드·소요시간을 AppLog로 남긴다.
+    /// <b>응답 본문</b>은 App.config의 <c>LogApiResponseBody</c>가 켜져 있을 때만 남긴다(서버 연동을 맞출 때 쓴다).
+    ///
+    /// 비밀 값은 기록 전에 가린다 — 헤더는 <c>Authorization=Bearer ***(61자)</c>,
+    /// 본문은 <c>"accessToken":"***"</c> 꼴이다. 로그 파일은 현장 PC에 그대로 쌓이므로
+    /// 토큰·비밀번호가 적히면 그 자체가 유출 경로가 된다.
+    /// <b>요청 본문은 남기지 않는다</b> — 로그인 바디처럼 통째로 민감한 경우가 있어서다.
     ///
     /// 통신 자체가 실패한 예외(서버 미기동, 네트워크 단절, 타임아웃 등)는 그대로 올리지 않고
     /// <see cref="ApiException"/>으로 바꿔서 올린다 — 화면마다 이미 catch(ApiException)로 안내 창을 띄우고 있어서,
@@ -19,8 +25,14 @@ namespace SEOJIN_MEIS.Client.ApiClient
     /// </summary>
     public class LoggingHandler : DelegatingHandler
     {
-        public LoggingHandler(HttpMessageHandler innerHandler) : base(innerHandler)
+        private readonly bool _logResponseBody;
+        private readonly int _bodyMaxLength;
+
+        public LoggingHandler(HttpMessageHandler innerHandler, bool logResponseBody = false, int bodyMaxLength = 4000)
+            : base(innerHandler)
         {
+            _logResponseBody = logResponseBody;
+            _bodyMaxLength = bodyMaxLength <= 0 ? 4000 : bodyMaxLength;
         }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -35,6 +47,10 @@ namespace SEOJIN_MEIS.Client.ApiClient
                 stopwatch.Stop();
                 AppLog.Info($"API 응답 {(int)response.StatusCode} {response.ReasonPhrase} ({stopwatch.ElapsedMilliseconds}ms) {request.Method} {request.RequestUri}");
                 AppLog.Info($"  응답 헤더 {Describe(response.Headers)}");
+
+                if (_logResponseBody)
+                    AppLog.Info($"  응답 본문 {await ReadBodyForLogAsync(response).ConfigureAwait(false)}");
+
                 return response;
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -52,6 +68,53 @@ namespace SEOJIN_MEIS.Client.ApiClient
                 throw ApiException.FromTransportFailure(request.Method?.Method, request.RequestUri?.ToString(), ex);
             }
         }
+
+        /// <summary>
+        /// 로그에 남길 응답 본문을 만든다.
+        ///
+        /// <b>본문을 먼저 버퍼에 올린 뒤</b> 읽는다 — 스트림을 여기서 소비해 버리면
+        /// 뒤에서 역직렬화할 내용이 사라진다(버퍼에 올려 두면 몇 번이든 다시 읽힌다).
+        /// 어떤 실패도 밖으로 던지지 않는다. 로그 때문에 정상 응답 처리가 깨지면 안 된다.
+        /// </summary>
+        private async Task<string> ReadBodyForLogAsync(HttpResponseMessage response)
+        {
+            if (response.Content == null)
+                return "(본문 없음)";
+
+            try
+            {
+                await response.Content.LoadIntoBufferAsync().ConfigureAwait(false);
+                var body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+
+                if (string.IsNullOrEmpty(body))
+                    return "(빈 본문)";
+
+                var masked = MaskSecrets(body);
+                return masked.Length > _bodyMaxLength
+                    ? masked.Substring(0, _bodyMaxLength) + $"... (전체 {masked.Length}자)"
+                    : masked;
+            }
+            catch (Exception ex)
+            {
+                return $"(본문을 읽지 못함: {ex.Message})";
+            }
+        }
+
+        /// <summary>
+        /// JSON 본문에서 비밀 값을 <c>***</c>로 바꾼다 — <c>"accessToken":"eyJ..."</c> → <c>"accessToken":"***"</c>.
+        ///
+        /// 로그 파일은 현장 PC에 그대로 쌓이므로 토큰·비밀번호가 적히면 그대로 유출 경로가 된다.
+        /// 문자열 값만 바꾸므로 본문의 나머지(업무 데이터)는 그대로 보여 연동 확인에는 지장이 없다.
+        /// </summary>
+        private static string MaskSecrets(string body) => SecretValuePattern.Replace(body, "$1\"***\"");
+
+        /// <summary>
+        /// <c>"키" : "값"</c> 에서 키가 비밀 항목인 경우를 잡는다(대소문자 무시).
+        /// 키 이름은 서버 스펙(accessToken/refreshToken/password/salt)과 흔한 변형을 함께 넣었다.
+        /// </summary>
+        private static readonly Regex SecretValuePattern = new Regex(
+            "(\"(?:access_?token|refresh_?token|password|passwd|pwd|salt|secret|api_?key|authorization)\"\\s*:\\s*)\"[^\"]*\"",
+            RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         /// <summary>
         /// 헤더를 한 줄로 정리한다. 값이 <b>비밀</b>인 헤더는 이름만 남기고 가린다 —

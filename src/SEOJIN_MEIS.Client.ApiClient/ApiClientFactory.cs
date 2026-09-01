@@ -22,10 +22,10 @@ namespace SEOJIN_MEIS.Client.ApiClient
         {
             TokenProvider = new TokenProvider();
 
-            var anonymousClient = new HttpClient(new LoggingHandler(new HttpClientHandler())) { BaseAddress = options.BaseUri, Timeout = options.Timeout };
+            var anonymousClient = new HttpClient(NewLoggingHandler(options)) { BaseAddress = options.BaseUri, Timeout = options.Timeout };
             AuthApiClient = new AuthApiClient(anonymousClient);
 
-            var authenticatedHandler = new AuthTokenHandler(TokenProvider, AuthApiClient, new LoggingHandler(new HttpClientHandler()));
+            var authenticatedHandler = new AuthTokenHandler(TokenProvider, AuthApiClient, NewLoggingHandler(options));
             var authenticatedClient = new HttpClient(authenticatedHandler) { BaseAddress = options.BaseUri, Timeout = options.Timeout };
 
             WorkOrderApiClient = new WorkOrderApiClient(authenticatedClient);
@@ -36,5 +36,12 @@ namespace SEOJIN_MEIS.Client.ApiClient
             PopApiClient = new PopApiClient(authenticatedClient);
             WorkStatusApiClient = new WorkStatusApiClient(authenticatedClient);
         }
+
+        /// <summary>
+        /// 인증 없는 쪽과 인증 포함 쪽이 <b>같은 로그 설정</b>을 쓰도록 한 곳에서 만든다.
+        /// 두 곳에 따로 적어 두면 한쪽만 고쳐져 로그인 응답만 안 찍히는 식으로 어긋난다.
+        /// </summary>
+        private static LoggingHandler NewLoggingHandler(ApiClientOptions options) =>
+            new LoggingHandler(new HttpClientHandler(), options.LogResponseBody, options.ResponseBodyMaxLength);
     }
 }

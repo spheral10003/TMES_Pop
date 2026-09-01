@@ -22,6 +22,12 @@ namespace SEOJIN_MEIS.Client.Composition
             if (int.TryParse(ConfigurationManager.AppSettings["SessionTimeoutMinutes"], out var sessionTimeout))
                 settings.SessionTimeoutMinutes = sessionTimeout;
 
+            if (bool.TryParse(ConfigurationManager.AppSettings["LogApiResponseBody"], out var logResponseBody))
+                settings.LogApiResponseBody = logResponseBody;
+
+            if (int.TryParse(ConfigurationManager.AppSettings["LogApiResponseBodyMaxLength"], out var bodyMaxLength))
+                settings.LogApiResponseBodyMaxLength = bodyMaxLength;
+
             if (bool.TryParse(ConfigurationManager.AppSettings["UseMockData"], out var useMockData))
                 settings.UseMockData = useMockData;
 
