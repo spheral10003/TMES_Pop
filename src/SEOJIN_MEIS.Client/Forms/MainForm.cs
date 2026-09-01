@@ -109,6 +109,7 @@ namespace SEOJIN_MEIS.Client.Forms
             lblBrand.Text = "MEIS POP";
             lblBrandSub.Text = "MANUFACTURING SYSTEM";
             lblBreadcrumb.Text = Strings.MainForm_Home;
+            lblVersion.Text = string.Format(Strings.MainForm_VersionFormat, AppVersion.Current);
 
             BuildLanguageList();
             RefreshWelcome();
@@ -140,6 +141,7 @@ namespace SEOJIN_MEIS.Client.Forms
             AppTheme.Sidebar(sidePanel);
             AppTheme.BrandPanel(brandPanel);
             AppTheme.Accordion(accordion);
+            AppTheme.SidebarVersion(lblVersion);
 
             // 브랜드 블록은 회사 로고 하나로 채운다(제품명 두 줄은 로고에 자리를 내주고 숨긴다).
             // 로고 워드마크는 원본이 검정이라 짙은 사이드바에서는 안 보이므로 흰색으로 바꿔 받는다.
@@ -470,6 +472,9 @@ namespace SEOJIN_MEIS.Client.Forms
 
             sidePanel.Width = _sidebarCollapsed ? SidebarCollapsedWidth : SidebarWidth;
             ApplyBrandLogo();
+
+            // 접힌 폭(64px)에는 "Ver. 1.0.0.7"이 들어가지 않아 잘린 글자만 남는다 — 아예 숨긴다.
+            lblVersion.Visible = !_sidebarCollapsed;
 
             // AccordionControl 자체의 최소화(아이콘만 표시) 기능을 사용한다.
             accordion.OptionsMinimizing.AllowMinimizing = true;

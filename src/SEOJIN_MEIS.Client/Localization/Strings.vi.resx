@@ -37,6 +37,7 @@
   <data name="Login_RememberId" xml:space="preserve"><value>Lưu tài khoản</value></data>
   <data name="MainForm_Title" xml:space="preserve"><value>Hệ thống MEIS POP</value></data>
   <data name="MainForm_Home" xml:space="preserve"><value>Trang chủ</value></data>
+  <data name="MainForm_VersionFormat" xml:space="preserve"><value>Ver. {0}</value></data>
   <data name="MainForm_Welcome" xml:space="preserve"><value>Chào mừng {0}.</value></data>
   <data name="MainForm_SessionRemainingHint" xml:space="preserve"><value>Thời gian còn lại trước khi tự động đăng xuất</value></data>
   <data name="MainForm_SessionExpired" xml:space="preserve"><value>Phiên làm việc đã hết hạn. Bạn sẽ được đăng xuất.</value></data>

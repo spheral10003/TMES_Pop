@@ -38,6 +38,7 @@
 
   <data name="MainForm_Title" xml:space="preserve"><value>MEIS POP System</value></data>
   <data name="MainForm_Home" xml:space="preserve"><value>Home</value></data>
+  <data name="MainForm_VersionFormat" xml:space="preserve"><value>Ver. {0}</value></data>
   <data name="MainForm_Welcome" xml:space="preserve"><value>Welcome, {0}.</value></data>
   <data name="MainForm_SessionRemainingHint" xml:space="preserve"><value>Time left before automatic logout</value></data>
   <data name="MainForm_SessionExpired" xml:space="preserve"><value>The session has expired. You will be logged out.</value></data>

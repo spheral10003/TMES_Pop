@@ -30,6 +30,7 @@ namespace SEOJIN_MEIS.Client.Forms
             this.brandIcon = new DevExpress.XtraEditors.SvgImageBox();
             this.lblBrand = new DevExpress.XtraEditors.LabelControl();
             this.lblBrandSub = new DevExpress.XtraEditors.LabelControl();
+            this.lblVersion = new DevExpress.XtraEditors.LabelControl();
             this.accordion = new DevExpress.XtraBars.Navigation.AccordionControl();
             this.mainArea = new DevExpress.XtraEditors.PanelControl();
             this.panelTop = new DevExpress.XtraEditors.PanelControl();
@@ -62,13 +63,28 @@ namespace SEOJIN_MEIS.Client.Forms
             //
             // sidePanel
             //
+            // Add 순서 주의 — WinForms는 나중에 Add한 컨트롤을 먼저 도킹한다.
+            // brandPanel(Top) → lblVersion(Bottom) → accordion(Fill) 순으로 자리를 잡아야 하므로
+            // Add는 그 반대인 accordion → lblVersion → brandPanel 순서다. 바꾸면 레이아웃이 무너진다.
             this.sidePanel.Controls.Add(this.accordion);
+            this.sidePanel.Controls.Add(this.lblVersion);
             this.sidePanel.Controls.Add(this.brandPanel);
             this.sidePanel.Dock = System.Windows.Forms.DockStyle.Left;
             this.sidePanel.Location = new System.Drawing.Point(0, 0);
             this.sidePanel.Name = "sidePanel";
             this.sidePanel.Size = new System.Drawing.Size(240, 800);
             this.sidePanel.TabIndex = 0;
+            //
+            // lblVersion — 사이드바 맨 아래 배포 버전. 실제 문구는 MainForm.Initialize()에서 채운다.
+            //
+            this.lblVersion.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.None;
+            this.lblVersion.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.lblVersion.Location = new System.Drawing.Point(0, 770);
+            this.lblVersion.Name = "lblVersion";
+            this.lblVersion.Padding = new System.Windows.Forms.Padding(0, 0, 0, 8);
+            this.lblVersion.Size = new System.Drawing.Size(240, 30);
+            this.lblVersion.TabIndex = 2;
+            this.lblVersion.Text = "Ver.";
             //
             // brandPanel
             //
@@ -274,6 +290,7 @@ namespace SEOJIN_MEIS.Client.Forms
         private DevExpress.XtraEditors.SvgImageBox brandIcon;
         private DevExpress.XtraEditors.LabelControl lblBrand;
         private DevExpress.XtraEditors.LabelControl lblBrandSub;
+        private DevExpress.XtraEditors.LabelControl lblVersion;
         private DevExpress.XtraBars.Navigation.AccordionControl accordion;
         private DevExpress.XtraEditors.PanelControl mainArea;
         private DevExpress.XtraEditors.PanelControl panelTop;

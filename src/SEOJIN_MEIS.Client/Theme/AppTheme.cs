@@ -541,6 +541,24 @@ namespace SEOJIN_MEIS.Client.Theme
             label.Appearance.Options.UseForeColor = true;
         }
 
+        /// <summary>
+        /// 사이드바 맨 아래 배포 버전 표시.
+        /// 짙은 그라데이션 위에 얹히므로 본문 색이 아니라 사이드바 전용 흐린 색을 쓴다.
+        /// 배경을 투명으로 두어야 뒤쪽 그라데이션이 그대로 비친다
+        /// (불투명 색을 주면 그 줄만 색이 끊겨 보인다).
+        /// </summary>
+        public static void SidebarVersion(LabelControl label)
+        {
+            label.Appearance.Font = SmallFont;
+            label.Appearance.ForeColor = SidebarTextMuted;
+            label.Appearance.BackColor = Color.Transparent;
+            label.Appearance.TextOptions.HAlignment = HorzAlignment.Center;
+            label.Appearance.Options.UseFont = true;
+            label.Appearance.Options.UseForeColor = true;
+            label.Appearance.Options.UseBackColor = true;
+            label.Appearance.Options.UseTextOptions = true;
+        }
+
         /// <summary>보조 설명/캡션 텍스트.</summary>
         public static void Caption(LabelControl label)
         {
