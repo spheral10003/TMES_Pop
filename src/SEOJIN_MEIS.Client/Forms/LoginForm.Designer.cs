@@ -121,8 +121,7 @@ namespace SEOJIN_MEIS.Client.Forms
             this.cboServer.Location = new System.Drawing.Point(140, 40);
             this.cboServer.Name = "cboServer";
             this.cboServer.Properties.Items.AddRange(new object[] {
-            "TEST-SERVER",
-            "PRD-SERVER"});
+            "GUM" });
             this.cboServer.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
             this.cboServer.Size = new System.Drawing.Size(260, 20);
             this.cboServer.TabIndex = 1;

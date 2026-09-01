@@ -173,10 +173,10 @@ namespace SEOJIN_MEIS.Client.Forms
             try
             {
                 // salt 조회 → SHA256(비밀번호 + salt) → 로그인. 세 단계 모두 AuthApiClient 안에서 이어진다.
-                //LoginResponse result = await _context.ApiClients.AuthApiClient.LoginAsync(userId, password);
+                LoginResponse result = await _context.ApiClients.AuthApiClient.LoginAsync(userId, password);
 
-                //_context.ApiClients.TokenProvider.SetTokens(result.AccessToken, result.RefreshToken);
-                //SaveUserIdPreference(userId);
+                _context.ApiClients.TokenProvider.SetTokens(result.AccessToken, result.RefreshToken);
+                SaveUserIdPreference(userId);
 
                 // 로그인 화면에서 선택한 접속서버/워크스테이션은 로그인 API 인자에는 없지만
                 // 화면 표시용으로 세션에 담아둔다(사용자 정보 팝업의 "워크스테이션" 항목이 이 값을 쓴다).
