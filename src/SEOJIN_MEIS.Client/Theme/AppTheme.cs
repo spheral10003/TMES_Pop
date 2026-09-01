@@ -53,6 +53,11 @@ namespace SEOJIN_MEIS.Client.Theme
         public static readonly Color ConsoleBack = Color.FromArgb(23, 23, 43);
         public static readonly Color ConsoleFore = Color.FromArgb(134, 239, 172);
 
+        // ── 내보내기 문서(엑셀) 색 ──
+        // 화면 색과 달리 다크 모드를 따라가면 안 된다 — 어두운 테마로 쓰던 중에 내보냈다고
+        // 검은 배경 엑셀이 나오면 인쇄·공유가 곤란하다. 그래서 라이트 톤 고정이다.
+        public static readonly Color ExportHeaderBack = Color.FromArgb(238, 236, 248); // #EEECF8
+
         /// <summary>현재 다크 모드 여부. <see cref="ApplySkin"/>가 갱신한다.</summary>
         public static bool IsDarkMode { get; private set; }
 

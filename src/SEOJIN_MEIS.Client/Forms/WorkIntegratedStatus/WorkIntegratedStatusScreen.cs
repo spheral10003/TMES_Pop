@@ -1,14 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.Utils;
 using DevExpress.XtraEditors;
 using DevExpress.XtraTreeList.Columns;
+using DevExpress.XtraTreeList.Nodes;
 using SEOJIN_MEIS.Client.ApiClient;
 using SEOJIN_MEIS.Client.Common.Logging;
 using SEOJIN_MEIS.Client.Common.Models;
 using SEOJIN_MEIS.Client.Composition;
+using SEOJIN_MEIS.Client.Export;
 using SEOJIN_MEIS.Client.Forms.Common;
 using SEOJIN_MEIS.Client.Localization;
 using SEOJIN_MEIS.Client.Mock;
@@ -143,8 +146,11 @@ namespace SEOJIN_MEIS.Client.Forms.WorkIntegratedStatus
         private void TreeOverview_CustomColumnDisplayText(object sender, DevExpress.XtraTreeList.CustomColumnDisplayTextEventArgs e)
         {
             if (e.Value == null || (e.Value as string) == string.Empty)
-                e.DisplayText = "..";
+                e.DisplayText = EmptyValueText;
         }
+
+        /// <summary>값이 없는 칸의 표기. 화면과 엑셀이 같은 표기를 쓰도록 한 곳에 둔다.</summary>
+        private const string EmptyValueText = "..";
 
         private void SerialNo_KeyDown(object sender, KeyEventArgs e)
         {
@@ -227,7 +233,7 @@ namespace SEOJIN_MEIS.Client.Forms.WorkIntegratedStatus
 
                 try
                 {
-                    treeOverview.ExportToXlsx(dialog.FileName);
+                    ExportOverviewToXlsx(dialog.FileName);
                     AppLog.Info($"[작업통합] 엑셀 내보내기 완료 - {dialog.FileName}");
                     AppMessageBox.Success(this, Strings.WorkIntegrated_ExportDone, Strings.WorkIntegrated_ExcelExport);
                 }
@@ -239,5 +245,76 @@ namespace SEOJIN_MEIS.Client.Forms.WorkIntegratedStatus
                 }
             }
         }
+
+        // ────────────────────────── 엑셀 내보내기 (아웃라인 계층) ──────────────────────────
+
+        /// <summary>
+        /// 트리를 xlsx로 쓴다. 계층은 <b>Excel 아웃라인(그룹)</b>이 되어 엑셀에서 접었다 펼 수 있다.
+        ///
+        /// <c>treeOverview.ExportToXlsx(...)</c>를 쓰지 않는 이유는
+        /// <see cref="XlsxOutlineWriter"/> 주석에 적어 두었다(요약: 그 API는 아웃라인을 만들지 못한다).
+        /// </summary>
+        private void ExportOverviewToXlsx(string fileName)
+        {
+            var writer = new XlsxOutlineWriter(Strings.WorkIntegrated_OverviewTitle, BuildExportColumns());
+            AppendNodes(writer, treeOverview.Nodes);
+            writer.Save(fileName);
+        }
+
+        /// <summary>내보낼 컬럼 구성 — 화면 컬럼의 제목·폭·정렬을 그대로 옮긴다(언어를 바꾸면 제목도 함께 바뀐다).</summary>
+        private List<XlsxColumn> BuildExportColumns()
+        {
+            var columns = new List<XlsxColumn>();
+            foreach (TreeListColumn column in treeOverview.Columns)
+            {
+                var align = column.AppearanceCell.TextOptions.HAlignment == HorzAlignment.Center
+                    ? XlsxAlign.Center
+                    : XlsxAlign.Left;
+                columns.Add(new XlsxColumn(column.Caption, column.Width, align));
+            }
+            return columns;
+        }
+
+        /// <summary>
+        /// 트리를 화면에 보이는 순서 그대로 재귀로 훑어 한 줄씩 넘긴다.
+        /// 노드의 <see cref="TreeListNode.Level"/>이 그대로 엑셀 아웃라인 레벨이 된다.
+        /// </summary>
+        private void AppendNodes(XlsxOutlineWriter writer, TreeListNodes nodes)
+        {
+            foreach (TreeListNode node in nodes)
+            {
+                var dto = treeOverview.GetDataRecordByNode(node) as WorkIntegratedNodeDto;
+                if (dto != null)
+                    writer.AddRow(node.Level, BuildExportValues(dto));
+
+                if (node.Nodes.Count > 0)
+                    AppendNodes(writer, node.Nodes);
+            }
+        }
+
+        /// <summary>
+        /// 한 줄의 값. 값이 있는 칸은 <b>숫자 그대로</b> 넘겨 엑셀에서 계산·비교가 되게 하고,
+        /// 값이 없는 칸은 화면과 같이 ".."로 채운다.
+        /// </summary>
+        private static object[] BuildExportValues(WorkIntegratedNodeDto dto)
+        {
+            return new object[]
+            {
+                dto.NodeCode ?? string.Empty,
+                string.IsNullOrEmpty(dto.NodeDescription) ? EmptyValueText : dto.NodeDescription,
+                ValueOrPlaceholder(dto.TorqueResult),
+                ValueOrPlaceholder(dto.TorqueTarget),
+                ValueOrPlaceholder(dto.TorqueLower),
+                ValueOrPlaceholder(dto.TorqueMax),
+                ValueOrPlaceholder(dto.AngleTarget),
+                ValueOrPlaceholder(dto.AngleLower),
+                ValueOrPlaceholder(dto.AngleUpper),
+                ValueOrPlaceholder(dto.AngleResult)
+            };
+        }
+
+        /// <summary>값이 있으면 <see cref="decimal"/>(숫자 칸), 없으면 ".." 문자열.</summary>
+        private static object ValueOrPlaceholder(decimal? value) =>
+            value.HasValue ? (object)value.Value : EmptyValueText;
     }
 }
