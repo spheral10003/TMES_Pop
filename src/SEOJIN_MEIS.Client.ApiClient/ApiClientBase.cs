@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace SEOJIN_MEIS.Client.ApiClient
 {
@@ -34,6 +35,39 @@ namespace SEOJIN_MEIS.Client.ApiClient
             {
                 return await ReadAsync<TResponse>(response).ConfigureAwait(false);
             }
+        }
+
+        /// <summary>
+        /// GET 후 <b>알맹이</b>만 돌려준다. 이 서버는 응답을 <c>{ "data": ... }</c>로 싸는 곳과
+        /// 그냥 내려주는 곳이 섞여 있고, Swagger 선언도 일관되지 않다
+        /// (같은 엔드포인트가 알맹이 타입으로 선언돼 있는데 실제로는 봉투로 오는 경우가 있었다).
+        ///
+        /// 그래서 <b>봉투가 있으면 벗기고 없으면 그대로</b> 읽는다.
+        /// 봉투 유무를 잘못 짚으면 값이 전부 null이 되는데, 예외가 나지 않아 발견이 늦다
+        /// (로그인 토큰·사용자 프로필에서 실제로 겪었다).
+        /// </summary>
+        protected async Task<TData> GetDataAsync<TData>(string relativeUrl, CancellationToken cancellationToken = default)
+        {
+            using (var response = await SendAsync("GET", relativeUrl, () => HttpClient.GetAsync(relativeUrl, cancellationToken), cancellationToken).ConfigureAwait(false))
+            {
+                var body = await ReadBodyAsync(response).ConfigureAwait(false);
+                return Unwrap<TData>(body);
+            }
+        }
+
+        /// <summary>봉투(<c>{"data":...}</c>)가 있으면 그 안을, 없으면 본문 전체를 대상 형식으로 읽는다.</summary>
+        private static TData Unwrap<TData>(string body)
+        {
+            if (string.IsNullOrWhiteSpace(body))
+                return default;
+
+            var token = JToken.Parse(body);
+
+            // 최상위가 객체이고 "data" 키가 있으면 그것이 알맹이다.
+            if (token is JObject obj && obj.TryGetValue("data", StringComparison.OrdinalIgnoreCase, out var data))
+                token = data;
+
+            return token.Type == JTokenType.Null ? default : token.ToObject<TData>();
         }
 
         protected async Task<TResponse> PostAsync<TRequest, TResponse>(string relativeUrl, TRequest body, CancellationToken cancellationToken = default)
@@ -102,11 +136,18 @@ namespace SEOJIN_MEIS.Client.ApiClient
 
         private static async Task<TResponse> ReadAsync<TResponse>(HttpResponseMessage response)
         {
+            var body = await ReadBodyAsync(response).ConfigureAwait(false);
+            return string.IsNullOrWhiteSpace(body) ? default : JsonConvert.DeserializeObject<TResponse>(body);
+        }
+
+        /// <summary>본문을 읽고, 실패 상태코드면 <see cref="ApiException"/>으로 올린다.</summary>
+        private static async Task<string> ReadBodyAsync(HttpResponseMessage response)
+        {
             var body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
                 throw new ApiException(response.StatusCode, body, $"API 호출 실패: {(int)response.StatusCode} {response.ReasonPhrase}");
 
-            return string.IsNullOrWhiteSpace(body) ? default : JsonConvert.DeserializeObject<TResponse>(body);
+            return body;
         }
 
         private static async Task EnsureSuccessAsync(HttpResponseMessage response)

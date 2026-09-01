@@ -12,10 +12,11 @@ namespace SEOJIN_MEIS.Client.ApiClient
     public interface INotificationApiClient
     {
         /// <summary>
-        /// 안 읽은 알림 개수. 상단 배지 숫자를 채우기 위해 1분 간격으로 폴링한다.
+        /// 내 알림 요약(안 읽은 개수 + 안 읽은 알림의 참조키 목록).
+        /// 상단 배지 숫자를 채우기 위해 1분 간격으로 폴링한다.
         /// 화면을 막지 않아야 하므로 실패는 호출부(MainForm)가 로그만 남기고 넘어간다.
         /// </summary>
-        Task<int> GetUnreadCountAsync(CancellationToken cancellationToken = default);
+        Task<MyAlarmSummaryDto> GetMyAlarmsAsync(CancellationToken cancellationToken = default);
 
         /// <summary>알림 목록. 값이 있는 조건만 쿼리에 붙는다(읽음여부 전체면 아예 보내지 않는다).</summary>
         Task<List<NotificationDto>> GetNotificationsAsync(string userName, string subject, NotificationReadState readState, CancellationToken cancellationToken = default);
@@ -30,11 +31,14 @@ namespace SEOJIN_MEIS.Client.ApiClient
         {
         }
 
-        public async Task<int> GetUnreadCountAsync(CancellationToken cancellationToken = default)
+        public async Task<MyAlarmSummaryDto> GetMyAlarmsAsync(CancellationToken cancellationToken = default)
         {
-            var response = await GetAsync<ApiDataResponse<int>>(ApiPrefix + "notifications/unread-count", cancellationToken)
-                               .ConfigureAwait(false);
-            return response?.Data ?? 0;
+            // 이 엔드포인트는 Swagger에 알맹이 타입으로 선언돼 있으나 서버가 봉투로 내려줄 수 있다.
+            // GetDataAsync가 두 형태를 모두 받아 주므로 어느 쪽이든 값이 채워진다.
+            var summary = await GetDataAsync<MyAlarmSummaryDto>(ApiPrefix + "gm/alarm-consumer/my-alarms", cancellationToken)
+                              .ConfigureAwait(false);
+
+            return summary ?? new MyAlarmSummaryDto();
         }
 
         public async Task<List<NotificationDto>> GetNotificationsAsync(string userName, string subject, NotificationReadState readState, CancellationToken cancellationToken = default)

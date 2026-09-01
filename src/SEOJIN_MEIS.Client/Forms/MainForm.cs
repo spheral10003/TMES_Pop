@@ -71,7 +71,7 @@ namespace SEOJIN_MEIS.Client.Forms
         private readonly Dictionary<string, string> _breadcrumbs = new Dictionary<string, string>();
         private readonly Dictionary<string, AccordionControlElement> _menuElements = new Dictionary<string, AccordionControlElement>();
         /// <summary>서버가 알려준 "안 읽은 알림" 개수. 폴링으로 갱신되며 배지 숫자의 근거가 된다.</summary>
-        private int _unreadNotificationCount;
+        private long _unreadNotificationCount;
 
         /// <summary>
         /// 홈 탭의 화면 키. 메뉴에서 오는 키(<see cref="MenuNode.Key"/>)와 겹치면 안 되므로
@@ -533,12 +533,12 @@ namespace SEOJIN_MEIS.Client.Forms
         {
             try
             {
-                var count = await _context.ApiClients.NotificationApiClient.GetUnreadCountAsync();
+                var summary = await _context.ApiClients.NotificationApiClient.GetMyAlarmsAsync();
 
                 if (IsDisposed)
                     return;
 
-                _unreadNotificationCount = count;
+                _unreadNotificationCount = summary.UnreadCount;
                 RefreshAlertBadge();
             }
             catch (ApiException ex)

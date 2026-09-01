@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 
 namespace SEOJIN_MEIS.Client.Common.Models
@@ -60,5 +61,23 @@ namespace SEOJIN_MEIS.Client.Common.Models
     {
         [JsonProperty("notificationIds")]
         public long[] NotificationIds { get; set; }
+    }
+
+    /// <summary>
+    /// <c>GET api/v1.0/gm/alarm-consumer/my-alarms</c> 응답
+    /// (Swagger 정의상 <c>WithUnreadCountAndAlarmSendRefListResponse</c>).
+    ///
+    /// 상단 종 배지를 채우는 폴링이 이 값을 쓴다. 개수와 함께 <b>안 읽은 알림의 참조키 목록</b>이 오므로,
+    /// 읽음 처리(<c>PATCH</c> 같은 경로)에 그대로 실어 보낼 수 있다.
+    /// </summary>
+    public class MyAlarmSummaryDto
+    {
+        /// <summary>안 읽은 알림 개수. 서버가 <c>int64</c>로 준다.</summary>
+        [JsonProperty("unreadCount")]
+        public long UnreadCount { get; set; }
+
+        /// <summary>안 읽은 알림의 발송 참조키 목록. 읽음 처리 요청 바디가 이 목록이다.</summary>
+        [JsonProperty("alarmSendRefList")]
+        public List<string> AlarmSendRefList { get; set; } = new List<string>();
     }
 }
