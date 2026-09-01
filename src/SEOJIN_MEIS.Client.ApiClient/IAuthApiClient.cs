@@ -14,7 +14,8 @@ namespace SEOJIN_MEIS.Client.ApiClient
         /// ① my-salt로 salt 수신 → ② 비밀번호 해시 + salt를 실어 login.
         /// 화면은 평문 비밀번호만 넘기면 되고, 해시/salt 처리는 여기서 끝난다.
         /// </summary>
-        Task<LoginResponse> LoginAsync(string orgNo, string password, CancellationToken cancellationToken = default);
+        /// <param name="corpCd">사업장 코드 — 로그인 화면의 접속서버 콤보에서 고른 값.</param>
+        Task<LoginResponse> LoginAsync(string corpCd, string orgNo, string password, CancellationToken cancellationToken = default);
 
         /// <summary>로그인 직전에 받아오는 salt(nonce). 로그인 바디에 그대로 다시 실어 보낸다.</summary>
         Task<string> GetSaltAsync(CancellationToken cancellationToken = default);
@@ -28,12 +29,13 @@ namespace SEOJIN_MEIS.Client.ApiClient
         {
         }
 
-        public async Task<LoginResponse> LoginAsync(string orgNo, string password, CancellationToken cancellationToken = default)
+        public async Task<LoginResponse> LoginAsync(string corpCd, string orgNo, string password, CancellationToken cancellationToken = default)
         {
             var salt = await GetSaltAsync(cancellationToken).ConfigureAwait(false);
 
             var request = new LoginRequest
             {
+                CorpCd = corpCd,
                 OrgNo = orgNo,
                 Password = PasswordHash.ForLogin(password, salt),
                 Salt = salt

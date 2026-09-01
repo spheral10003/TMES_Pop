@@ -167,23 +167,26 @@ namespace SEOJIN_MEIS.Client.Forms
                 return;
             }
 
+            // 접속서버 콤보에서 고른 값이 곧 사업장 코드(corpCd)다 — 서버가 이 값으로 계정을 찾는다.
+            var corpCd = cboServer.Text?.Trim();
+
             btnConnect.Enabled = false;
             lblMessage.Text = string.Empty;
-            AppLog.Step($"로그인 시도 - UserId={userId}");
+            AppLog.Step($"로그인 시도 - CorpCd={corpCd}, UserId={userId}");
             try
             {
                 // salt 조회 → SHA256(비밀번호 + salt) → 로그인. 세 단계 모두 AuthApiClient 안에서 이어진다.
-                LoginResponse result = await _context.ApiClients.AuthApiClient.LoginAsync(userId, password);
+                LoginResponse result = await _context.ApiClients.AuthApiClient.LoginAsync(corpCd, userId, password);
 
                 _context.ApiClients.TokenProvider.SetTokens(result.AccessToken, result.RefreshToken);
                 SaveUserIdPreference(userId);
 
-                // 로그인 화면에서 선택한 접속서버/워크스테이션은 로그인 API 인자에는 없지만
-                // 화면 표시용으로 세션에 담아둔다(사용자 정보 팝업의 "워크스테이션" 항목이 이 값을 쓴다).
+                // 워크스테이션은 로그인 API 인자가 아니라 화면 표시용이다
+                // (사용자 정보 팝업과 홈 화면의 "워크스테이션" 타일이 이 값을 쓴다).
                 _context.CurrentUser = new UserSession
                 {
                     UserId = userId,
-                    Server = cboServer.Text,
+                    Server = corpCd,
                     Workstation = cboWorkstation.Text
                 };
                 AppLog.Step($"로그인 성공 - UserId={userId}");
