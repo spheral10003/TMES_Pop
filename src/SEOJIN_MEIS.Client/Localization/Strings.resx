@@ -45,6 +45,7 @@
   <data name="MainForm_LogoutConfirm" xml:space="preserve"><value>로그아웃하면 열려 있는 화면이 모두 닫힙니다. 로그아웃하시겠습니까?</value></data>
   <data name="MainForm_WelcomeHint" xml:space="preserve"><value>좌측 메뉴에서 화면을 선택하면 위쪽 탭으로 열립니다.</value></data>
   <data name="MainForm_TileServer" xml:space="preserve"><value>접속 서버</value></data>
+  <data name="MainForm_TileWorkstation" xml:space="preserve"><value>워크스테이션</value></data>
   <data name="MainForm_TileEquipment" xml:space="preserve"><value>등록 설비</value></data>
   <data name="MainForm_TileUser" xml:space="preserve"><value>로그인 사용자</value></data>
   <data name="MainForm_EquipmentCount" xml:space="preserve"><value>{0} 대</value></data>

@@ -38,6 +38,7 @@ namespace SEOJIN_MEIS.Client.Localization
         public static string MainForm_LogoutConfirm => Get(nameof(MainForm_LogoutConfirm));
         public static string MainForm_WelcomeHint => Get(nameof(MainForm_WelcomeHint));
         public static string MainForm_TileServer => Get(nameof(MainForm_TileServer));
+        public static string MainForm_TileWorkstation => Get(nameof(MainForm_TileWorkstation));
         public static string MainForm_TileEquipment => Get(nameof(MainForm_TileEquipment));
         public static string MainForm_TileUser => Get(nameof(MainForm_TileUser));
         public static string MainForm_EquipmentCount => Get(nameof(MainForm_EquipmentCount));

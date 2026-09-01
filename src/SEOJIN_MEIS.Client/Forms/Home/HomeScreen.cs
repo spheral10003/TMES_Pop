@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -68,17 +69,30 @@ namespace SEOJIN_MEIS.Client.Forms.Home
             card.Controls.Add(_hint);
         }
 
-        /// <summary>정보 타일 세 개. 값은 <see cref="RefreshInfo"/>에서 채운다.</summary>
+        /// <summary>
+        /// 정보 타일 정의 — <b>표시 순서대로</b> 둔다.
+        /// 제목(다국어)·값·강조색을 한 자리에 모아 두는 이유는, 예전처럼 생성·값 채우기·언어 갱신을
+        /// 세 군데에서 인덱스로 다루면 타일을 하나 끼워 넣을 때 조용히 어긋나기 때문이다.
+        /// </summary>
+        private static readonly TileSpec[] TileSpecs =
+        {
+            new TileSpec(() => Strings.MainForm_TileServer,      s => s.ServerText(),          AppTheme.Indigo),
+            new TileSpec(() => Strings.MainForm_TileWorkstation, s => s.WorkstationText(),     AppTheme.Violet),
+            new TileSpec(() => Strings.MainForm_TileEquipment,   s => s.EquipmentText(),       AppTheme.Cyan),
+            new TileSpec(() => Strings.MainForm_TileUser,        s => s.LoginUserText(),       AppTheme.Emerald)
+        };
+
+        /// <summary>타일 폭(240) + 사이 간격(20).</summary>
+        private const int TileStride = 260;
+
         private void BuildTiles()
         {
-            _tiles.Add(new InfoTile(Strings.MainForm_TileServer, AppTheme.Indigo));
-            _tiles.Add(new InfoTile(Strings.MainForm_TileEquipment, AppTheme.Cyan));
-            _tiles.Add(new InfoTile(Strings.MainForm_TileUser, AppTheme.Emerald));
-
-            for (var i = 0; i < _tiles.Count; i++)
+            for (var i = 0; i < TileSpecs.Length; i++)
             {
-                _tiles[i].Panel.Location = new Point(28 + i * 260, 110);
-                card.Controls.Add(_tiles[i].Panel);
+                var tile = new InfoTile(TileSpecs[i].Caption(), TileSpecs[i].Accent);
+                tile.Panel.Location = new Point(28 + i * TileStride, 110);
+                card.Controls.Add(tile.Panel);
+                _tiles.Add(tile);
             }
         }
 
@@ -92,12 +106,11 @@ namespace SEOJIN_MEIS.Client.Forms.Home
         /// </summary>
         public void RefreshInfo()
         {
-            if (_context == null || _tiles.Count < 3)
+            if (_context == null)
                 return;
 
-            _tiles[0].Value = _context.Settings.ApiBaseUrl;
-            _tiles[1].Value = string.Format(Strings.MainForm_EquipmentCount, _context.Settings.Equipments.Count);
-            _tiles[2].Value = LoginUserText();
+            for (var i = 0; i < _tiles.Count; i++)
+                _tiles[i].Value = TileSpecs[i].Value(this);
         }
 
         /// <summary>로그인 사용자 — 이름을 알고 있으면 "이름 (아이디)", 아니면 아이디만.</summary>
@@ -110,6 +123,22 @@ namespace SEOJIN_MEIS.Client.Forms.Home
             return string.IsNullOrEmpty(user.UserName) ? user.UserId : $"{user.UserName} ({user.UserId})";
         }
 
+        /// <summary>
+        /// 로그인 화면에서 고른 워크스테이션.
+        /// 서버가 내려주는 값이 아니라 <b>접속할 때 사용자가 선택한 값</b>이라 세션에서 그대로 읽는다.
+        /// 고르지 않고 접속했으면 빈칸 대신 "-"로 두어 타일이 비어 보이지 않게 한다.
+        /// </summary>
+        private string WorkstationText()
+        {
+            var workstation = _context.CurrentUser?.Workstation;
+            return string.IsNullOrWhiteSpace(workstation) ? "-" : workstation;
+        }
+
+        private string ServerText() => _context.Settings.ApiBaseUrl;
+
+        private string EquipmentText() =>
+            string.Format(Strings.MainForm_EquipmentCount, _context.Settings.Equipments.Count);
+
         /// <summary>언어를 바꿨을 때 문구를 다시 읽는다(탭 제목은 MainForm이 갱신한다).</summary>
         public void ApplyLanguage()
         {
@@ -117,9 +146,10 @@ namespace SEOJIN_MEIS.Client.Forms.Home
                 return;
 
             _hint.Text = Strings.MainForm_WelcomeHint;
-            _tiles[0].Caption = Strings.MainForm_TileServer;
-            _tiles[1].Caption = Strings.MainForm_TileEquipment;
-            _tiles[2].Caption = Strings.MainForm_TileUser;
+
+            for (var i = 0; i < _tiles.Count; i++)
+                _tiles[i].Caption = TileSpecs[i].Caption();
+
             RefreshInfo();
         }
 
@@ -142,6 +172,24 @@ namespace SEOJIN_MEIS.Client.Forms.Home
 
             foreach (var tile in _tiles)
                 tile.ApplyTheme();
+        }
+
+        /// <summary>
+        /// 타일 하나의 정의. 제목은 언어가 바뀌면 다시 읽어야 하므로 <see cref="Func{TResult}"/>로,
+        /// 값은 세션·설정이 바뀌면 다시 읽어야 하므로 화면을 받는 함수로 둔다.
+        /// </summary>
+        private sealed class TileSpec
+        {
+            public Func<string> Caption { get; }
+            public Func<HomeScreen, string> Value { get; }
+            public Color Accent { get; }
+
+            public TileSpec(Func<string> caption, Func<HomeScreen, string> value, Color accent)
+            {
+                Caption = caption;
+                Value = value;
+                Accent = accent;
+            }
         }
 
         /// <summary>

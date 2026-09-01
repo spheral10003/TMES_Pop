@@ -45,6 +45,7 @@
   <data name="MainForm_LogoutConfirm" xml:space="preserve"><value>Logging out closes every open screen. Do you want to log out?</value></data>
   <data name="MainForm_WelcomeHint" xml:space="preserve"><value>Pick a screen from the left menu and it opens as a tab above.</value></data>
   <data name="MainForm_TileServer" xml:space="preserve"><value>Server</value></data>
+  <data name="MainForm_TileWorkstation" xml:space="preserve"><value>Workstation</value></data>
   <data name="MainForm_TileEquipment" xml:space="preserve"><value>Registered equipment</value></data>
   <data name="MainForm_TileUser" xml:space="preserve"><value>Signed-in user</value></data>
   <data name="MainForm_EquipmentCount" xml:space="preserve"><value>{0} units</value></data>

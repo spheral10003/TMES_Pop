@@ -44,6 +44,7 @@
   <data name="MainForm_LogoutConfirm" xml:space="preserve"><value>Đăng xuất sẽ đóng toàn bộ màn hình đang mở. Bạn có muốn đăng xuất?</value></data>
   <data name="MainForm_WelcomeHint" xml:space="preserve"><value>Chọn một màn hình từ menu bên trái, màn hình sẽ mở thành thẻ ở phía trên.</value></data>
   <data name="MainForm_TileServer" xml:space="preserve"><value>Máy chủ</value></data>
+  <data name="MainForm_TileWorkstation" xml:space="preserve"><value>Máy trạm</value></data>
   <data name="MainForm_TileEquipment" xml:space="preserve"><value>Thiết bị đã đăng ký</value></data>
   <data name="MainForm_TileUser" xml:space="preserve"><value>Người dùng đăng nhập</value></data>
   <data name="MainForm_EquipmentCount" xml:space="preserve"><value>{0} thiết bị</value></data>
