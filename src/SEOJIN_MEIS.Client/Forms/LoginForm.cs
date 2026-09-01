@@ -19,12 +19,12 @@ namespace SEOJIN_MEIS.Client.Forms
     ///
     /// 서버가 nonce 방식이라 로그인은 두 번의 호출로 이뤄진다(순서는 <see cref="AuthApiClient"/>가 담당한다):
     ///  1) GET  api/v1.0/common/my-salt  → salt 수신
-    ///  2) POST api/v1.0/auth/login      → { orgNo, password = SHA256(비밀번호 + salt), salt }
+    ///  2) POST api/v1.0/auth/login      → { corpCd, orgNo, password = SHA256(SHA256(비밀번호) + salt), salt }
     /// 화면은 평문 비밀번호만 넘기고, 해시/salt 처리는 API 클라이언트 안에서 끝난다(평문은 서버로 나가지 않는다).
     ///
     /// 응답 바디는 AccessToken/RefreshToken만 받는다.
     /// 성공/실패 판정은 HTTP 상태코드로 하고(서버가 401 등으로 응답), 클라이언트는 그 결과만 화면에 반영한다.
-    /// 접속서버/워크스테이션 항목은 로그인 API 인자에는 포함하지 않는다(TODO: 용도 확정 후 연결).
+    /// 접속서버는 사업장 코드(corpCd)로 로그인 바디에 실어 보내고, 워크스테이션은 화면 표시용으로만 쓴다.
     ///
     /// "아이디 저장"을 켜면 로그인 성공 시 아이디만 <see cref="UserPreferences"/>에 남긴다(비밀번호는 저장하지 않는다).
     ///
@@ -175,7 +175,7 @@ namespace SEOJIN_MEIS.Client.Forms
             AppLog.Step($"로그인 시도 - CorpCd={corpCd}, UserId={userId}");
             try
             {
-                // salt 조회 → SHA256(비밀번호 + salt) → 로그인. 세 단계 모두 AuthApiClient 안에서 이어진다.
+                // salt 조회 → SHA256(비밀번호) → SHA256(그 값 + salt) → 로그인. 네 단계 모두 AuthApiClient 안에서 이어진다.
                 LoginResponse result = await _context.ApiClients.AuthApiClient.LoginAsync(corpCd, userId, password);
 
                 _context.ApiClients.TokenProvider.SetTokens(result.AccessToken, result.RefreshToken);

@@ -11,7 +11,7 @@ namespace SEOJIN_MEIS.Client.ApiClient
     {
         /// <summary>
         /// 로그인. 서버가 nonce 방식이므로 내부에서 두 번 호출한다 —
-        /// ① my-salt로 salt 수신 → ② 비밀번호 해시 + salt를 실어 login.
+        /// ① my-salt로 salt 수신 → ② SHA256(SHA256(비밀번호) + salt)를 실어 login.
         /// 화면은 평문 비밀번호만 넘기면 되고, 해시/salt 처리는 여기서 끝난다.
         /// </summary>
         /// <param name="corpCd">사업장 코드 — 로그인 화면의 접속서버 콤보에서 고른 값.</param>
