@@ -1,6 +1,8 @@
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using SEOJIN_MEIS.Client.Common.Logging;
@@ -25,12 +27,14 @@ namespace SEOJIN_MEIS.Client.ApiClient
         {
             var stopwatch = Stopwatch.StartNew();
             AppLog.Info($"API 요청 {request.Method} {request.RequestUri}");
+            AppLog.Info($"  요청 헤더 {Describe(request.Headers)}");
 
             try
             {
                 var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
                 stopwatch.Stop();
                 AppLog.Info($"API 응답 {(int)response.StatusCode} {response.ReasonPhrase} ({stopwatch.ElapsedMilliseconds}ms) {request.Method} {request.RequestUri}");
+                AppLog.Info($"  응답 헤더 {Describe(response.Headers)}");
                 return response;
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -47,6 +51,63 @@ namespace SEOJIN_MEIS.Client.ApiClient
                 AppLog.Error($"API 호출 예외 ({stopwatch.ElapsedMilliseconds}ms) {request.Method} {request.RequestUri}", ex);
                 throw ApiException.FromTransportFailure(request.Method?.Method, request.RequestUri?.ToString(), ex);
             }
+        }
+
+        /// <summary>
+        /// 헤더를 한 줄로 정리한다. 값이 <b>비밀</b>인 헤더는 이름만 남기고 가린다 —
+        /// 로그 파일은 현장 PC에 그대로 쌓이므로 토큰이 적히면 그대로 유출 경로가 된다(루트 CLAUDE.md 규약).
+        /// 그래도 "헤더가 붙었는지 / 길이가 그럴듯한지"는 보이므로 인증 문제를 추적하는 데는 충분하다.
+        /// </summary>
+        private static string Describe(HttpHeaders headers)
+        {
+            if (headers == null)
+                return "(없음)";
+
+            var parts = headers
+                .Select(h => h.Key + "=" + Describe(h.Key, string.Join(", ", h.Value)))
+                .ToList();
+
+            return parts.Count == 0 ? "(없음)" : string.Join(" | ", parts);
+        }
+
+        /// <summary>
+        /// 인증 헤더 — <c>"Bearer eyJ..."</c>처럼 [방식 + 자격증명] 꼴이라 <b>방식만</b> 남기고 가린다.
+        /// 방식이 보여야 "헤더가 아예 안 붙음"과 "붙였는데 서버가 거절함"을 구분할 수 있다.
+        /// </summary>
+        private static readonly string[] AuthHeaders = { "Authorization", "Proxy-Authorization" };
+
+        /// <summary>값 전체가 비밀인 헤더 — 일부만 남겨도 세션을 재현할 수 있어 <b>통째로</b> 가린다.</summary>
+        private static readonly string[] FullySecretHeaders = { "Cookie", "Set-Cookie", "X-Api-Key" };
+
+        private static string Describe(string name, string value)
+        {
+            var isAuth = AuthHeaders.Contains(name, StringComparer.OrdinalIgnoreCase);
+            var isSecret = isAuth || FullySecretHeaders.Contains(name, StringComparer.OrdinalIgnoreCase);
+
+            if (!isSecret)
+                return value;
+
+            if (string.IsNullOrEmpty(value))
+                return "(빈 값)";
+
+            return isAuth
+                ? $"{SchemeOf(value)}***({value.Length}자)"
+                : $"***({value.Length}자)";
+        }
+
+        /// <summary>
+        /// 인증 헤더의 방식(Bearer/Basic 등)만 뽑는다.
+        /// 첫 낱말이 <b>영문자로만</b> 되어 있을 때에만 방식으로 인정한다 —
+        /// 그냥 "첫 공백 앞"으로 자르면 <c>JSESSIONID=비밀값;</c> 같은 값이 방식으로 오인돼 그대로 새어 나간다.
+        /// </summary>
+        private static string SchemeOf(string value)
+        {
+            var space = value.IndexOf(' ');
+            if (space <= 0)
+                return string.Empty;
+
+            var candidate = value.Substring(0, space);
+            return candidate.All(char.IsLetter) ? candidate + " " : string.Empty;
         }
     }
 }

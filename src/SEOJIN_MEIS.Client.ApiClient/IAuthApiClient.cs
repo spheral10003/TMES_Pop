@@ -1,3 +1,4 @@
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using SEOJIN_MEIS.Client.Common.Logging;
@@ -41,8 +42,27 @@ namespace SEOJIN_MEIS.Client.ApiClient
                 Salt = salt
             };
 
-            return await PostAsync<LoginRequest, LoginResponse>(ApiPrefix + "auth/login", request, cancellationToken)
-                       .ConfigureAwait(false);
+            // 응답은 { "data": { accessToken, refreshToken, user } } 형태다(my-salt와 같은 봉투).
+            // 봉투를 벗기지 않고 LoginResponse로 바로 받으면 토큰이 null이 되고,
+            // 그러면 이후 모든 API에 Authorization 헤더가 붙지 않아 전부 401이 된다.
+            var envelope = await PostAsync<LoginRequest, ApiDataResponse<LoginResponse>>(
+                ApiPrefix + "auth/login", request, cancellationToken).ConfigureAwait(false);
+
+            return RequireTokens(envelope?.Data, "로그인");
+        }
+
+        /// <summary>
+        /// 토큰이 실제로 담겨 왔는지 확인한다.
+        /// 200인데 토큰이 비어 있으면 <b>실패로 다루는 편이 안전하다</b> —
+        /// 그냥 넘기면 "로그인 성공"이라고 알린 뒤 모든 화면이 401로 실패해 원인을 찾기 어려워진다.
+        /// </summary>
+        private static LoginResponse RequireTokens(LoginResponse response, string what)
+        {
+            if (!string.IsNullOrEmpty(response?.AccessToken))
+                return response;
+
+            AppLog.Warn($"{what} 응답에 accessToken이 없다 - 서버 응답 형식을 확인할 것(봉투 구조 변경 여부)");
+            throw new ApiException(HttpStatusCode.Unauthorized, null, $"{what} 응답에 토큰이 없습니다.");
         }
 
         public async Task<string> GetSaltAsync(CancellationToken cancellationToken = default)
@@ -57,10 +77,16 @@ namespace SEOJIN_MEIS.Client.ApiClient
             return salt;
         }
 
-        public Task<LoginResponse> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
+        public async Task<LoginResponse> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
         {
             var request = new RefreshTokenRequest { RefreshToken = refreshToken };
-            return PostAsync<RefreshTokenRequest, LoginResponse>(ApiPrefix + "auth/refresh", request, cancellationToken);
+
+            // 경로는 auth/refresh 가 아니라 auth/login/refresh 다(Swagger: POST /api/v1.0/auth/login/refresh).
+            // 응답 봉투도 로그인과 같다.
+            var envelope = await PostAsync<RefreshTokenRequest, ApiDataResponse<LoginResponse>>(
+                ApiPrefix + "auth/login/refresh", request, cancellationToken).ConfigureAwait(false);
+
+            return RequireTokens(envelope?.Data, "토큰 갱신");
         }
     }
 }

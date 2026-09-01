@@ -30,17 +30,45 @@ namespace SEOJIN_MEIS.Client.Common.Models
     }
 
     /// <summary>
-    /// 서버 /api/auth/login 응답. 성공/실패 판정은 HTTP 상태코드로 하고(2xx=성공, 401 등=실패),
-    /// 본문에는 토큰만 내려온다. 만료 시각·사용자 정보 등은 응답 바디에 포함하지 않는다.
+    /// 서버 /api/v1.0/auth/login 응답의 <b>알맹이</b>(Swagger 정의상 <c>TokenResponse</c>).
+    ///
+    /// ⚠️ 서버는 이것을 <c>{ "data": { ... } }</c> 로 <b>한 겹 싸서</b> 내려준다
+    /// (Swagger 정의 <c>APIResponse«TokenResponse»</c>). 그래서 받을 때 반드시
+    /// <see cref="ApiDataResponse{T}"/>로 감싸서 역직렬화해야 한다 —
+    /// 이 타입으로 바로 받으면 <b>모든 필드가 조용히 null</b>이 되어,
+    /// 로그인은 200으로 성공한 것처럼 보이는데 이후 모든 API가 401로 실패한다(실제로 겪은 증상).
+    ///
+    /// 성공/실패 판정은 HTTP 상태코드로 한다(2xx=성공, 401 등=실패).
     /// </summary>
     public class LoginResponse
     {
+        [JsonProperty("accessToken")]
         public string AccessToken { get; set; }
+
+        [JsonProperty("refreshToken")]
         public string RefreshToken { get; set; }
+
+        /// <summary>로그인한 사용자 요약(사업장/아이디/이름). 서버가 토큰과 함께 내려준다.</summary>
+        [JsonProperty("user")]
+        public LoginUser User { get; set; }
+    }
+
+    /// <summary>로그인 응답에 함께 오는 사용자 정보(Swagger 정의상 <c>UserResponse</c>).</summary>
+    public class LoginUser
+    {
+        [JsonProperty("corpCd")]
+        public string CorpCd { get; set; }
+
+        [JsonProperty("orgNo")]
+        public string OrgNo { get; set; }
+
+        [JsonProperty("userNm")]
+        public string UserName { get; set; }
     }
 
     public class RefreshTokenRequest
     {
+        [JsonProperty("refreshToken")]
         public string RefreshToken { get; set; }
     }
 }
