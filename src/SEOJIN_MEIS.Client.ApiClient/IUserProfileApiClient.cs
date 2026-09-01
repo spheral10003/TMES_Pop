@@ -22,11 +22,15 @@ namespace SEOJIN_MEIS.Client.ApiClient
         {
         }
 
-        public Task<UserProfileDto> GetProfileAsync(string userId, CancellationToken cancellationToken = default)
+        public async Task<UserProfileDto> GetProfileAsync(string userId, CancellationToken cancellationToken = default)
         {
             // 아이디가 경로에 들어가므로 이스케이프한다 — '/'나 공백이 섞이면 엉뚱한 경로로 나간다.
             var path = ApiPrefix + "gm/users/" + Uri.EscapeDataString(userId ?? string.Empty);
-            return GetAsync<UserProfileDto>(path, cancellationToken);
+
+            // 응답은 { "data": { ... } } 봉투다(Swagger: APIResponse«WithCorpDetailResponse»).
+            // 벗기지 않고 UserProfileDto로 바로 받으면 모든 값이 null이 되어 팝업이 빈칸으로 뜬다.
+            var envelope = await GetAsync<ApiDataResponse<UserProfileDto>>(path, cancellationToken).ConfigureAwait(false);
+            return envelope?.Data;
         }
     }
 }
