@@ -109,10 +109,21 @@ namespace SEOJIN_MEIS.Client.Forms
         /// </summary>
         private async Task LoadProfileAsync()
         {
+            // 조회 대상은 로그인한 본인이다(경로에 아이디가 들어간다).
+            // 세션이 없으면 부를 수 있는 대상이 없으므로 조회 자체를 건너뛴다.
+            var userId = _context.CurrentUser?.UserId;
+            if (string.IsNullOrEmpty(userId))
+            {
+                ShowLoadFailed(Strings.UserProfile_LoadFailed);
+                return;
+            }
+
             lblMessage.Text = Strings.UserProfile_Loading;
             try
             {
-                var profile = await _context.ApiClients.UserProfileApiClient.GetMyProfileAsync();
+                var profile = await _context.ApiClients.UserProfileApiClient.GetProfileAsync(userId);
+                if (IsDisposed || Disposing) return;   // 응답을 기다리는 사이 사용자가 팝업을 닫았다
+
                 _context.CurrentUser?.ApplyProfile(profile);
                 FillFromSession();
                 lblMessage.Text = string.Empty;
@@ -131,6 +142,10 @@ namespace SEOJIN_MEIS.Client.Forms
 
         private void ShowLoadFailed(string message)
         {
+            // 조회 실패가 늦게 도착할 수 있다 — 그 사이 팝업이 닫혔으면 만지지 않는다(CLAUDE.md 6번).
+            if (IsDisposed || Disposing)
+                return;
+
             lblMessage.Text = message;
             lblMessage.Appearance.ForeColor = AppTheme.Rose;
             lblMessage.Appearance.Options.UseForeColor = true;
