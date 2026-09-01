@@ -39,12 +39,19 @@ namespace SEOJIN_MEIS.Client.Forms.Common
         /// <summary>탭 클릭(활성화 요청).</summary>
         public event EventHandler Activated;
 
-        /// <summary>✕ 클릭(닫기 요청).</summary>
+        /// <summary>✕ 클릭(닫기 요청). 닫을 수 없는 탭에서는 발생하지 않는다.</summary>
         public event EventHandler CloseRequested;
 
-        public TabChip(string key, string text)
+        /// <summary>
+        /// 닫기(✕)를 보여줄지. 홈 탭처럼 항상 열려 있어야 하는 탭은 <c>false</c>로 만든다 —
+        /// ✕를 그리지 않고 그 자리만큼 폭도 줄인다.
+        /// </summary>
+        public bool Closable { get; }
+
+        public TabChip(string key, string text, bool closable = true)
         {
             Key = key;
+            Closable = closable;
 
             SetStyle(ControlStyles.AllPaintingInWmPaint
                      | ControlStyles.UserPaint
@@ -91,16 +98,23 @@ namespace SEOJIN_MEIS.Client.Forms.Common
         private int MeasureWidth(string text)
         {
             var textWidth = TextRenderer.MeasureText(text ?? string.Empty, AppTheme.BodyBoldFont).Width;
-            var width = TextLeftPadding + textWidth + 8 + CloseButtonSize + CloseButtonRightMargin;
-            return Math.Max(MinimumWidth, Math.Min(MaximumWidth, width));
+            var width = Closable
+                ? TextLeftPadding + textWidth + 8 + CloseButtonSize + CloseButtonRightMargin
+                : TextLeftPadding + textWidth + TextLeftPadding;
+
+            // 닫기가 없는 탭은 최소 폭도 줄인다 — 짧은 제목("홈")에 빈 공간이 남지 않도록.
+            var minimum = Closable ? MinimumWidth : MinimumWidth / 2;
+            return Math.Max(minimum, Math.Min(MaximumWidth, width));
         }
 
-        /// <summary>✕ 버튼 영역(가운데 정렬).</summary>
+        /// <summary>✕ 버튼 영역(가운데 정렬). 닫을 수 없는 탭은 빈 영역이라 어디를 눌러도 활성화가 된다.</summary>
         private Rectangle CloseBounds =>
-            new Rectangle(Width - CloseButtonSize - CloseButtonRightMargin,
-                          (Height - CloseButtonSize) / 2,
-                          CloseButtonSize,
-                          CloseButtonSize);
+            Closable
+                ? new Rectangle(Width - CloseButtonSize - CloseButtonRightMargin,
+                                (Height - CloseButtonSize) / 2,
+                                CloseButtonSize,
+                                CloseButtonSize)
+                : Rectangle.Empty;
 
         protected override void OnPaint(PaintEventArgs e)
         {
@@ -129,15 +143,20 @@ namespace SEOJIN_MEIS.Client.Forms.Common
 
             var foreColor = _active ? Color.White : AppTheme.TextMuted;
 
+            var textRightPadding = Closable
+                ? CloseButtonSize + CloseButtonRightMargin + 4
+                : TextLeftPadding;
+
             var textBounds = new Rectangle(
                 TextLeftPadding, 0,
-                Width - TextLeftPadding - CloseButtonSize - CloseButtonRightMargin - 4, Height);
+                Width - TextLeftPadding - textRightPadding, Height);
 
             TextRenderer.DrawText(g, Text, Font, textBounds, foreColor,
                 TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis
                 | TextFormatFlags.NoPrefix);
 
-            DrawCloseButton(g, foreColor);
+            if (Closable)
+                DrawCloseButton(g, foreColor);
         }
 
         /// <summary>✕ 를 글꼴 대신 선 두 개로 그린다(작은 크기에서 글리프보다 또렷하다).</summary>

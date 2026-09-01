@@ -13,6 +13,7 @@ using DevExpress.XtraEditors.Controls;
 using SEOJIN_MEIS.Client.ApiClient;
 using SEOJIN_MEIS.Client.Common.Logging;
 using SEOJIN_MEIS.Client.Forms.Common;
+using SEOJIN_MEIS.Client.Forms.Home;
 using SEOJIN_MEIS.Client.Forms.Notification;
 using SEOJIN_MEIS.Client.Composition;
 using SEOJIN_MEIS.Client.Equipment;
@@ -72,7 +73,15 @@ namespace SEOJIN_MEIS.Client.Forms
         /// <summary>서버가 알려준 "안 읽은 알림" 개수. 폴링으로 갱신되며 배지 숫자의 근거가 된다.</summary>
         private int _unreadNotificationCount;
 
-        private PanelControl _welcomePanel;
+        /// <summary>
+        /// 홈 탭의 화면 키. 메뉴에서 오는 키(<see cref="MenuNode.Key"/>)와 겹치면 안 되므로
+        /// <c>MenuCatalog</c>가 쓰지 않는 이름으로 둔다.
+        /// </summary>
+        private const string HomeTabKey = "__HOME__";
+
+        /// <summary>홈 탭 내용. 항상 열려 있으므로(닫기 없음) null이 되지 않는다.</summary>
+        private HomeScreen _homeScreen;
+
         private string _activeKey;
         private bool _sidebarCollapsed;
 
@@ -106,7 +115,7 @@ namespace SEOJIN_MEIS.Client.Forms
 
             ApplyTheme();
             BuildMenu();
-            BuildWelcomePanel();
+            OpenHomeTab();
 
             accordion.ElementClick += Accordion_ElementClick;
             panelTop.Resize += (s, e) => LayoutTopBar();
@@ -172,8 +181,6 @@ namespace SEOJIN_MEIS.Client.Forms
                 screen.Chip.Invalidate(); // 테마 색이 바뀐 경우에도 탭이 새 색으로 다시 그려지도록
                 (screen.Content as IThemedScreen)?.ApplyTheme();
             }
-
-            StyleWelcomePanel();
         }
 
         // ────────────────────────────── 사용자 정보 ──────────────────────────────
@@ -193,6 +200,8 @@ namespace SEOJIN_MEIS.Client.Forms
             }
 
             RefreshWelcome();
+            // 프로필을 방금 받았으면 홈 탭의 사용자 타일도 아이디에서 이름으로 바뀐다.
+            _homeScreen?.RefreshInfo();
             LayoutTopBar();
         }
 
@@ -339,7 +348,9 @@ namespace SEOJIN_MEIS.Client.Forms
                 return;
             }
 
-            var openKeys = _openScreens.Keys.ToList();
+            // 화면들은 문구를 Initialize()에서 한 번 읽으므로, 언어가 바뀌면 닫았다 다시 연다.
+            // 홈 탭은 메뉴에서 오는 화면이 아니라 다시 열 수단이 없으니 제외하고, 문구만 갈아 끼운다.
+            var openKeys = _openScreens.Keys.Where(k => k != HomeTabKey).ToList();
             var activeKey = _activeKey;
             foreach (var key in openKeys)
                 CloseTab(key);
@@ -353,7 +364,7 @@ namespace SEOJIN_MEIS.Client.Forms
             btnLogout.ToolTip = Strings.Common_Logout;
 
             BuildMenu();
-            StyleWelcomePanel();
+            RefreshHomeTabLanguage();
 
             var root = MenuCatalog.BuildRoot();
             foreach (var key in openKeys)
@@ -705,9 +716,10 @@ namespace SEOJIN_MEIS.Client.Forms
         }
 
         /// <summary>열린 화면 1개를 나타내는 탭을 만든다(모양/색은 TabChip이 직접 그린다).</summary>
-        private OpenedScreen BuildTabChip(string key, string text)
+        /// <summary><paramref name="closable"/>가 false면 ✕ 없이 그려진다(홈 탭).</summary>
+        private OpenedScreen BuildTabChip(string key, string text, bool closable = true)
         {
-            var chip = new TabChip(key, text);
+            var chip = new TabChip(key, text, closable);
             chip.Activated += (s, e) => ActivateTab(key);
             chip.CloseRequested += (s, e) => CloseTab(key);
 
@@ -733,11 +745,15 @@ namespace SEOJIN_MEIS.Client.Forms
 
             lblBreadcrumb.Text = _breadcrumbs.ContainsKey(key) ? _breadcrumbs[key] : Strings.MainForm_Home;
             RefreshMenuHighlight();
-            UpdateWelcomeVisibility();
         }
 
         private void CloseTab(string key)
         {
+            // 홈 탭은 닫지 않는다. 칩에 ✕가 없어 사용자가 부를 일은 없지만,
+            // 코드에서 실수로 닫으면 다시 열 수단이 없어(메뉴에 없다) 여기서 막아 둔다.
+            if (key == HomeTabKey)
+                return;
+
             if (!_openScreens.TryGetValue(key, out var screen))
                 return;
 
@@ -747,20 +763,13 @@ namespace SEOJIN_MEIS.Client.Forms
             screen.Chip.Dispose();
             _openScreens.Remove(key);
 
-            if (_activeKey == key)
-            {
-                _activeKey = null;
-                var next = _openScreens.Keys.FirstOrDefault();
-                if (next != null)
-                {
-                    ActivateTab(next);
-                    return;
-                }
+            if (_activeKey != key)
+                return;
 
-                lblBreadcrumb.Text = Strings.MainForm_Home;
-                RefreshMenuHighlight();
-                UpdateWelcomeVisibility();
-            }
+            // 닫은 것이 보고 있던 탭이면 홈으로 돌아간다.
+            // 홈은 항상 열려 있으므로 "열린 탭이 하나도 없는" 상태는 생기지 않는다.
+            _activeKey = null;
+            ActivateTab(HomeTabKey);
         }
 
         /// <summary>스트립 크기가 바뀌면 탭을 다시 그린다(하단 경계선까지 함께 갱신되도록).</summary>
@@ -772,137 +781,47 @@ namespace SEOJIN_MEIS.Client.Forms
                 screen.Chip.Invalidate();
         }
 
-        // ────────────────────────────── 시작 화면(카드) ──────────────────────────────
+        // ────────────────────────────── 홈 탭 ──────────────────────────────
 
         /// <summary>
-        /// 열린 화면이 없을 때 보여주는 환영 카드.
-        /// 접속 서버/등록 설비 수/로그인 사용자처럼 지금 실제로 알고 있는 정보만 색 타일로 보여준다.
+        /// 홈 탭을 만들어 첫 화면으로 띄운다(앱 시작 시 1회).
+        ///
+        /// 다른 화면과 달리 <b>메뉴에서 오지 않고 닫히지도 않는다.</b>
+        /// 예전에는 "열린 탭이 없을 때만" 보이는 패널이라 화면을 하나라도 열면 홈 정보를 다시 볼 수 없었는데,
+        /// 탭으로 만들어 두면 여러 화면을 띄운 상태에서도 홈 탭을 눌러 언제든 돌아올 수 있다.
         /// </summary>
-        private void BuildWelcomePanel()
+        private void OpenHomeTab()
         {
-            _welcomePanel = new PanelControl();
-            _welcomePanel.Dock = DockStyle.Top;
-            _welcomePanel.Height = 232;
+            _homeScreen = new HomeScreen();
+            _homeScreen.Initialize(_context);
+            _homeScreen.Dock = DockStyle.Fill;
+            _homeScreen.Visible = false;
+            contentHost.Controls.Add(_homeScreen);
 
-            var icon = new SvgImageBox();
-            icon.SizeMode = SvgImageSizeMode.Stretch;
-            icon.Size = new Size(54, 54);
-            icon.Location = new Point(28, 26);
-            icon.BackColor = Color.Transparent;
+            var screen = BuildTabChip(HomeTabKey, Strings.MainForm_Home, closable: false);
+            screen.Content = _homeScreen;
+            tabStrip.Controls.Add(screen.Chip);
 
-            var title = new LabelControl();
-            title.Location = new Point(96, 32);
-            title.Text = "MEIS POP";
+            _openScreens[HomeTabKey] = screen;
+            _breadcrumbs[HomeTabKey] = Strings.MainForm_Home;
 
-            var hint = new LabelControl();
-            hint.Location = new Point(98, 58);
-            hint.Text = Strings.MainForm_WelcomeHint;
-
-            _welcomePanel.Controls.Add(icon);
-            _welcomePanel.Controls.Add(title);
-            _welcomePanel.Controls.Add(hint);
-
-            var tiles = new[]
-            {
-                new { Caption = Strings.MainForm_TileServer, Value = _context.Settings.ApiBaseUrl, Accent = AppTheme.Indigo },
-                new { Caption = Strings.MainForm_TileEquipment, Value = string.Format(Strings.MainForm_EquipmentCount, _context.Settings.Equipments.Count), Accent = AppTheme.Cyan },
-                new { Caption = Strings.MainForm_TileUser, Value = LoginUserText(), Accent = AppTheme.Emerald }
-            };
-
-            for (var i = 0; i < tiles.Length; i++)
-            {
-                var tile = BuildInfoTile(tiles[i].Caption, tiles[i].Value, tiles[i].Accent);
-                tile.Location = new Point(28 + i * 260, 110);
-                _welcomePanel.Controls.Add(tile);
-            }
-
-            _welcomePanel.Tag = icon;
-            contentHost.Controls.Add(_welcomePanel);
-            StyleWelcomePanel();
-            UpdateWelcomeVisibility();
+            ActivateTab(HomeTabKey);
         }
 
-        /// <summary>환영 카드에 표시할 로그인 사용자 — 이름을 알고 있으면 "이름 (아이디)", 아니면 아이디만.</summary>
-        private string LoginUserText()
+        /// <summary>
+        /// 언어를 바꿨을 때 홈 탭 문구를 갈아 끼운다.
+        /// 다른 화면은 닫았다 다시 열지만 홈은 다시 열 수단이 없어(메뉴에 없다) 제자리에서 고친다.
+        /// </summary>
+        private void RefreshHomeTabLanguage()
         {
-            var user = _context.CurrentUser;
-            if (user == null)
-                return string.Empty;
-
-            return string.IsNullOrEmpty(user.UserName) ? user.UserId : $"{user.UserName} ({user.UserId})";
-        }
-
-        private PanelControl BuildInfoTile(string caption, string value, Color accent)
-        {
-            var tile = new PanelControl();
-            tile.Size = new Size(240, 84);
-
-            var bar = new PanelControl();
-            bar.Dock = DockStyle.Left;
-            bar.Width = 5;
-            bar.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder;
-            bar.Appearance.BackColor = accent;
-            bar.Appearance.Options.UseBackColor = true;
-
-            var captionLabel = new LabelControl();
-            captionLabel.Location = new Point(20, 18);
-            captionLabel.Text = caption;
-
-            var valueLabel = new LabelControl();
-            valueLabel.Location = new Point(20, 42);
-            valueLabel.Text = value;
-            valueLabel.AutoSizeMode = LabelAutoSizeMode.None;
-            valueLabel.Size = new Size(205, 20);
-            valueLabel.AutoEllipsis = true;
-
-            tile.Controls.Add(captionLabel);
-            tile.Controls.Add(valueLabel);
-            tile.Controls.Add(bar);
-
-            AppTheme.CardPanel(tile);
-            AppTheme.Caption(captionLabel);
-            AppTheme.BodyText(valueLabel, true);
-            return tile;
-        }
-
-        private void StyleWelcomePanel()
-        {
-            if (_welcomePanel == null)
+            if (_homeScreen == null)
                 return;
 
-            AppTheme.CardPanel(_welcomePanel);
+            _homeScreen.ApplyLanguage();
+            _breadcrumbs[HomeTabKey] = Strings.MainForm_Home;
 
-            if (_welcomePanel.Tag is SvgImageBox icon)
-                icon.SvgImage = AppIcons.Get(AppIcons.Brand, AppTheme.Violet);
-
-            var labels = _welcomePanel.Controls.OfType<LabelControl>().ToList();
-            if (labels.Count >= 2)
-            {
-                AppTheme.SectionTitle(labels[0], AppTheme.Violet);
-                labels[0].Appearance.Font = AppTheme.TitleFont;
-                AppTheme.Caption(labels[1]);
-            }
-
-            foreach (var tile in _welcomePanel.Controls.OfType<PanelControl>())
-            {
-                AppTheme.CardPanel(tile);
-                var tileLabels = tile.Controls.OfType<LabelControl>().ToList();
-                if (tileLabels.Count >= 2)
-                {
-                    AppTheme.Caption(tileLabels[0]);
-                    AppTheme.BodyText(tileLabels[1], true);
-                }
-            }
-        }
-
-        private void UpdateWelcomeVisibility()
-        {
-            if (_welcomePanel == null)
-                return;
-
-            _welcomePanel.Visible = _openScreens.Count == 0;
-            if (_welcomePanel.Visible)
-                _welcomePanel.BringToFront();
+            if (_openScreens.TryGetValue(HomeTabKey, out var screen))
+                screen.Chip.Text = Strings.MainForm_Home;
         }
 
         /// <summary>언어 콤보 항목 — 표시 문구와 문화권 코드 한 쌍.</summary>
