@@ -37,7 +37,6 @@
   <data name="Login_RememberId" xml:space="preserve"><value>아이디 저장</value></data>
 
   <data name="MainForm_Title" xml:space="preserve"><value>MEIS POP 시스템</value></data>
-  <data name="MainForm_Home" xml:space="preserve"><value>홈</value></data>
   <data name="MainForm_VersionFormat" xml:space="preserve"><value>Ver. {0}</value></data>
   <data name="MainForm_Welcome" xml:space="preserve"><value>{0} 님 환영합니다.</value></data>
   <data name="MainForm_SessionRemainingHint" xml:space="preserve"><value>자동 로그아웃까지 남은 시간</value></data>

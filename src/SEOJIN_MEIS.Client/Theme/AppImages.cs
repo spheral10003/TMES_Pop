@@ -35,6 +35,9 @@ namespace SEOJIN_MEIS.Client.Theme
         public const string IconUser = "SEOJIN_MEIS.Client.Images.circle-user-regular.png";
         public const string IconPowerOff = "SEOJIN_MEIS.Client.Images.power-off-solid.png";
 
+        /// <summary>홈 — 상단 바 브레드크럼 맨 앞과 홈 탭에서 "홈"이라는 글자 대신 쓴다.</summary>
+        public const string IconHome = "SEOJIN_MEIS.Client.Images.house-solid.png";
+
         /// <summary>국기 아이콘(24×24). 뒤에 두 글자 언어 코드가 붙는다 — flag_ko / flag_en / flag_vi.</summary>
         private const string FlagResourcePrefix = "SEOJIN_MEIS.Client.Images.flag_";
 

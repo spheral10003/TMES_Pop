@@ -30,7 +30,6 @@ namespace SEOJIN_MEIS.Client.Localization
         public static string Login_RememberId => Get(nameof(Login_RememberId));
 
         public static string MainForm_Title => Get(nameof(MainForm_Title));
-        public static string MainForm_Home => Get(nameof(MainForm_Home));
         public static string MainForm_VersionFormat => Get(nameof(MainForm_VersionFormat));
         public static string MainForm_Welcome => Get(nameof(MainForm_Welcome));
         public static string MainForm_SessionRemainingHint => Get(nameof(MainForm_SessionRemainingHint));

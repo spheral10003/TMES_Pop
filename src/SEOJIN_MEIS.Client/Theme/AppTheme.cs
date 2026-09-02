@@ -273,13 +273,24 @@ namespace SEOJIN_MEIS.Client.Theme
             label.Appearance.Options.UseForeColor = true;
         }
 
-        /// <summary>브레드크럼(홈 / 대분류 / 화면) 텍스트.</summary>
+        /// <summary>브레드크럼 아이콘 한 변(px). 상단 바 글자 높이에 맞춘 크기다.</summary>
+        private const int BreadcrumbIconSize = 14;
+
+        /// <summary>
+        /// 브레드크럼(홈 / 대분류 / 화면) 텍스트.
+        /// 맨 앞의 "홈"은 글자 대신 <b>집 아이콘</b>으로 둔다 — 라벨 이미지로 붙이므로
+        /// 화면 코드는 아이콘 뒤 경로만 <c>Text</c>에 넣으면 된다.
+        /// </summary>
         public static void Breadcrumb(LabelControl label)
         {
             label.Appearance.Font = BodyFont;
             label.Appearance.ForeColor = TopBarForeMuted;
             label.Appearance.Options.UseFont = true;
             label.Appearance.Options.UseForeColor = true;
+
+            label.ImageOptions.Image = AppImages.Icon(AppImages.IconHome, BreadcrumbIconSize, TopBarForeMuted);
+            label.ImageAlignToText = ImageAlignToText.LeftCenter;
+            label.IndentBetweenImageAndText = 6;
         }
 
         /// <summary>배경 없는 아이콘 버튼(상단바의 햄버거/알림/테마 전환 등).</summary>

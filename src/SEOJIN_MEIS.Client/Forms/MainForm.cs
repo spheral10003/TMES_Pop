@@ -115,7 +115,7 @@ namespace SEOJIN_MEIS.Client.Forms
 
             lblBrand.Text = "MEIS POP";
             lblBrandSub.Text = "MANUFACTURING SYSTEM";
-            lblBreadcrumb.Text = Strings.MainForm_Home;
+            SetBreadcrumb(string.Empty);
             lblVersion.Text = string.Format(Strings.MainForm_VersionFormat, AppVersion.Current);
 
             BuildLanguageList();
@@ -371,7 +371,7 @@ namespace SEOJIN_MEIS.Client.Forms
                 CloseTab(key);
 
             Text = Strings.MainForm_Title;
-            lblBreadcrumb.Text = Strings.MainForm_Home;
+            SetBreadcrumb(string.Empty);
             RefreshWelcome();
             RefreshSessionTime();
             cboLanguage.ToolTip = Strings.MainForm_LanguageHint;
@@ -457,6 +457,17 @@ namespace SEOJIN_MEIS.Client.Forms
             cboLanguage.Left = btnAlerts.Left - 12 - cboLanguage.Width;
 
             CenterSessionTime();
+        }
+
+        /// <summary>
+        /// 브레드크럼을 채운다. 맨 앞의 "홈"은 글자가 아니라 <b>집 아이콘</b>(라벨의 이미지)이라
+        /// 여기에는 그 뒤 경로만 넣는다 — 홈 탭에서는 경로가 비어 아이콘만 남는다.
+        /// 경로가 있으면 아이콘과 이어지도록 구분자를 앞에 붙인다(🏠 / MEIS / 작업관리 / POP).
+        /// </summary>
+        private void SetBreadcrumb(string path)
+        {
+            lblBreadcrumb.Text = string.IsNullOrEmpty(path) ? string.Empty : "/ " + path;
+            LayoutTopBar();   // 글자 길이가 바뀌면 가운데 시계의 좌측 한계도 달라진다
         }
 
         /// <summary>상단 바 높이 기준으로 컨트롤을 세로 가운데에 놓을 Y를 구한다.</summary>
@@ -644,7 +655,7 @@ namespace SEOJIN_MEIS.Client.Forms
             _menuElements.Clear();
 
             accordion.Elements.Clear();
-            accordion.Elements.Add(BuildAccordionElement(root, Strings.MainForm_Home, 0));
+            accordion.Elements.Add(BuildAccordionElement(root, string.Empty, 0));
         }
 
         /// <summary>
@@ -679,7 +690,8 @@ namespace SEOJIN_MEIS.Client.Forms
                 element.ImageOptions.SvgImageSize = new Size(iconSize, iconSize);
             }
 
-            var path = parentPath + " / " + node.Text;
+            // 최상위는 부모 경로가 비어 있다 — 그 자리는 브레드크럼의 집 아이콘이 대신한다.
+            var path = string.IsNullOrEmpty(parentPath) ? node.Text : parentPath + " / " + node.Text;
             _breadcrumbs[node.Key] = path;
             _menuElements[node.Key] = element;
 
@@ -798,7 +810,7 @@ namespace SEOJIN_MEIS.Client.Forms
                 pair.Value.Chip.Active = isActive;
             }
 
-            lblBreadcrumb.Text = _breadcrumbs.ContainsKey(key) ? _breadcrumbs[key] : Strings.MainForm_Home;
+            SetBreadcrumb(_breadcrumbs.ContainsKey(key) ? _breadcrumbs[key] : string.Empty);
             RefreshMenuHighlight();
         }
 
@@ -853,12 +865,14 @@ namespace SEOJIN_MEIS.Client.Forms
             _homeScreen.Visible = false;
             contentHost.Controls.Add(_homeScreen);
 
-            var screen = BuildTabChip(HomeTabKey, Strings.MainForm_Home, closable: false);
+            // 홈 탭은 이름 대신 집 아이콘만 둔다 — 언어를 바꿔도 손댈 것이 없고 탭 폭도 아낀다.
+            var screen = BuildTabChip(HomeTabKey, string.Empty, closable: false);
+            screen.Chip.IconResource = AppImages.IconHome;
             screen.Content = _homeScreen;
             tabStrip.Controls.Add(screen.Chip);
 
             _openScreens[HomeTabKey] = screen;
-            _breadcrumbs[HomeTabKey] = Strings.MainForm_Home;
+            _breadcrumbs[HomeTabKey] = string.Empty;
 
             ActivateTab(HomeTabKey);
         }
@@ -866,6 +880,7 @@ namespace SEOJIN_MEIS.Client.Forms
         /// <summary>
         /// 언어를 바꿨을 때 홈 탭 문구를 갈아 끼운다.
         /// 다른 화면은 닫았다 다시 열지만 홈은 다시 열 수단이 없어(메뉴에 없다) 제자리에서 고친다.
+        /// (탭 칩과 브레드크럼은 집 아이콘이라 언어를 타지 않는다 — 화면 내용만 갈아 끼우면 된다.)
         /// </summary>
         private void RefreshHomeTabLanguage()
         {
@@ -873,10 +888,6 @@ namespace SEOJIN_MEIS.Client.Forms
                 return;
 
             _homeScreen.ApplyLanguage();
-            _breadcrumbs[HomeTabKey] = Strings.MainForm_Home;
-
-            if (_openScreens.TryGetValue(HomeTabKey, out var screen))
-                screen.Chip.Text = Strings.MainForm_Home;
         }
 
         /// <summary>언어 콤보 항목 — 표시 문구와 문화권 코드 한 쌍.</summary>

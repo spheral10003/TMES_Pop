@@ -29,9 +29,16 @@ namespace SEOJIN_MEIS.Client.Forms.Common
         private const int MinimumWidth = 110;
         private const int MaximumWidth = 240;
 
+        /// <summary>제목 대신(또는 앞에) 놓는 아이콘 한 변(px). 탭 글자 높이에 맞춘 크기다.</summary>
+        private const int IconSize = 14;
+
+        /// <summary>아이콘과 제목 사이 간격. 제목이 없으면 쓰이지 않는다.</summary>
+        private const int IconTextGap = 6;
+
         private bool _hover;
         private bool _closeHover;
         private bool _active;
+        private string _iconResource;
 
         /// <summary>이 탭이 나타내는 화면 키(메뉴 노드 키).</summary>
         public string Key { get; }
@@ -94,10 +101,34 @@ namespace SEOJIN_MEIS.Client.Forms.Common
             }
         }
 
+        /// <summary>
+        /// 제목 대신 보여줄 아이콘 — <see cref="AppImages"/>의 PNG 리소스 이름.
+        /// 홈 탭처럼 이름 없이 그림만 두는 탭은 <see cref="Text"/>를 비우고 이것만 준다.
+        /// 색은 활성/비활성에 따라 달라지므로 그릴 때마다 받아 온다(AppImages가 캐시한다).
+        /// </summary>
+        public string IconResource
+        {
+            get => _iconResource;
+            set
+            {
+                if (_iconResource == value)
+                    return;
+
+                _iconResource = value;
+                Width = MeasureWidth(Text);
+                Invalidate();
+            }
+        }
+
         /// <summary>글자 길이에 맞춘 탭 폭(너무 길면 잘라서 … 로 표시한다).</summary>
         private int MeasureWidth(string text)
         {
             var textWidth = TextRenderer.MeasureText(text ?? string.Empty, AppTheme.BodyBoldFont).Width;
+
+            // 아이콘이 있으면 그 폭을 더한다. 제목까지 있으면 사이 간격도 함께 든다.
+            if (_iconResource != null)
+                textWidth += IconSize + (string.IsNullOrEmpty(text) ? 0 : IconTextGap);
+
             var width = Closable
                 ? TextLeftPadding + textWidth + 8 + CloseButtonSize + CloseButtonRightMargin
                 : TextLeftPadding + textWidth + TextLeftPadding;
@@ -147,9 +178,24 @@ namespace SEOJIN_MEIS.Client.Forms.Common
                 ? CloseButtonSize + CloseButtonRightMargin + 4
                 : TextLeftPadding;
 
+            var contentLeft = TextLeftPadding;
+
+            if (_iconResource != null)
+            {
+                // 제목 없이 아이콘만 있는 탭(홈)은 최소 폭에 걸려 남는 자리가 생기므로 가로 가운데에 둔다.
+                var iconLeft = string.IsNullOrEmpty(Text)
+                    ? (Width - IconSize) / 2
+                    : contentLeft;
+
+                g.DrawImage(AppImages.Icon(_iconResource, IconSize, foreColor),
+                    iconLeft, (Height - IconSize) / 2, IconSize, IconSize);
+
+                contentLeft = iconLeft + IconSize + IconTextGap;
+            }
+
             var textBounds = new Rectangle(
-                TextLeftPadding, 0,
-                Width - TextLeftPadding - textRightPadding, Height);
+                contentLeft, 0,
+                Width - contentLeft - textRightPadding, Height);
 
             TextRenderer.DrawText(g, Text, Font, textBounds, foreColor,
                 TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis

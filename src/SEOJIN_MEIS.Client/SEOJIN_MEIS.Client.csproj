@@ -160,6 +160,9 @@
     <EmbeddedResource Include="Images\power-off-solid.png">
       <LogicalName>SEOJIN_MEIS.Client.Images.power-off-solid.png</LogicalName>
     </EmbeddedResource>
+    <EmbeddedResource Include="Images\house-solid.png">
+      <LogicalName>SEOJIN_MEIS.Client.Images.house-solid.png</LogicalName>
+    </EmbeddedResource>
 
     <!-- 언어 선택 국기. LogicalName의 flag_XX 는 AppImages.Flag(문화권 두 글자 코드)와 짝이다. -->
     <EmbeddedResource Include="Images\flag\ko.png">
