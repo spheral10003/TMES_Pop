@@ -67,6 +67,8 @@
   <data name="Common_Close" xml:space="preserve"><value>Close</value></data>
   <data name="Common_Confirm" xml:space="preserve"><value>OK</value></data>
   <data name="Common_Cancel" xml:space="preserve"><value>Cancel</value></data>
+  <data name="Common_PleaseWait" xml:space="preserve"><value>Please Wait</value></data>
+  <data name="Common_Loading" xml:space="preserve"><value>Loading ...</value></data>
   <data name="Common_Notice" xml:space="preserve"><value>Notice</value></data>
   <data name="Common_UnexpectedError" xml:space="preserve"><value>Something went wrong. Only this action was cancelled - you can keep working.</value></data>
   <data name="Message_TitleInfo" xml:space="preserve"><value>Information</value></data>

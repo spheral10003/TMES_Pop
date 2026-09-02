@@ -64,6 +64,8 @@
   <data name="Common_Close" xml:space="preserve"><value>Đóng</value></data>
   <data name="Common_Confirm" xml:space="preserve"><value>Đồng ý</value></data>
   <data name="Common_Cancel" xml:space="preserve"><value>Hủy</value></data>
+  <data name="Common_PleaseWait" xml:space="preserve"><value>Vui lòng đợi</value></data>
+  <data name="Common_Loading" xml:space="preserve"><value>Đang xử lý...</value></data>
   <data name="Common_Notice" xml:space="preserve"><value>Thông báo</value></data>
   <data name="Common_UnexpectedError" xml:space="preserve"><value>Đã xảy ra lỗi. Chỉ tác vụ này bị hủy - bạn có thể tiếp tục làm việc.</value></data>
   <data name="Message_TitleInfo" xml:space="preserve"><value>Thông tin</value></data>

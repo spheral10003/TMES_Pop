@@ -191,43 +191,51 @@ namespace SEOJIN_MEIS.Client.Forms.Notification
         /// </summary>
         private async Task SearchAsync()
         {
-            try
+            using (var busy = BusyOverlay.Show(this, cancelable: true))
             {
-                btnSearch.Enabled = false;
-
-                var result = await _context.ApiClients.NotificationApiClient.GetNotificationsAsync(
-                                 txtUserName.Text?.Trim(),
-                                 txtSubject.Text?.Trim(),
-                                 SelectedReadState())
-                             ?? new List<NotificationDto>();
-
-                if (IsClosed)
-                    return;
-
-                grid.DataSource = result;
-                gridView.ClearSelection();
-
-                if (result.Count > 0)
-                    gridView.FocusedRowHandle = 0;
-
-                // 결과가 0건이면 안내 창 대신 그리드의 "데이터 없음" 표시로 충분하다.
-                ShowDetail(FocusedNotification());
-            }
-            catch (ApiException ex)
-            {
-                if (IsClosed)
+                try
                 {
-                    // 사용자가 이미 창을 닫았다 — 없어진 창을 소유자로 안내 창을 띄울 수 없으므로 로그만 남긴다.
-                    AppLog.Warn($"[알림] 창을 닫은 뒤 조회 실패 응답이 도착(안내 생략): {ex.Message.Replace(Environment.NewLine, " ")}");
-                    return;
-                }
+                    btnSearch.Enabled = false;
 
-                AppMessageBox.Warn(this, ex.Message, Strings.Notification_Title);
-            }
-            finally
-            {
-                if (!IsClosed)
-                    btnSearch.Enabled = true;
+                    var result = await _context.ApiClients.NotificationApiClient.GetNotificationsAsync(
+                                     txtUserName.Text?.Trim(),
+                                     txtSubject.Text?.Trim(),
+                                     SelectedReadState(),
+                                     busy.Token)
+                                 ?? new List<NotificationDto>();
+
+                    if (IsClosed)
+                        return;
+
+                    grid.DataSource = result;
+                    gridView.ClearSelection();
+
+                    if (result.Count > 0)
+                        gridView.FocusedRowHandle = 0;
+
+                    // 결과가 0건이면 안내 창 대신 그리드의 "데이터 없음" 표시로 충분하다.
+                    ShowDetail(FocusedNotification());
+                }
+                catch (OperationCanceledException)
+                {
+                    // 사용자가 [취소]를 눌렀다 — 오류가 아니므로 조용히 끝낸다.
+                }
+                catch (ApiException ex)
+                {
+                    if (IsClosed)
+                    {
+                        // 사용자가 이미 창을 닫았다 — 없어진 창을 소유자로 안내 창을 띄울 수 없으므로 로그만 남긴다.
+                        AppLog.Warn($"[알림] 창을 닫은 뒤 조회 실패 응답이 도착(안내 생략): {ex.Message.Replace(Environment.NewLine, " ")}");
+                        return;
+                    }
+
+                    AppMessageBox.Warn(this, ex.Message, Strings.Notification_Title);
+                }
+                finally
+                {
+                    if (!IsClosed)
+                        btnSearch.Enabled = true;
+                }
             }
         }
 
@@ -251,31 +259,37 @@ namespace SEOJIN_MEIS.Client.Forms.Notification
                 return;
             }
 
-            try
+            // 읽음 처리는 서버 상태를 바꾸므로 [취소]를 주지 않는다 —
+            // 중간에 끊으면 어느 건까지 반영됐는지 알 수 없다.
+            using (BusyOverlay.Show(this))
             {
-                btnMarkRead.Enabled = false;
-                await _context.ApiClients.NotificationApiClient.MarkAsReadAsync(targetIds);
-            }
-            catch (ApiException ex)
-            {
-                if (IsClosed)
+                try
                 {
-                    AppLog.Warn($"[알림] 창을 닫은 뒤 읽음 처리 실패 응답이 도착(안내 생략): {ex.Message.Replace(Environment.NewLine, " ")}");
+                    btnMarkRead.Enabled = false;
+                    await _context.ApiClients.NotificationApiClient.MarkAsReadAsync(targetIds);
+                }
+                catch (ApiException ex)
+                {
+                    if (IsClosed)
+                    {
+                        AppLog.Warn($"[알림] 창을 닫은 뒤 읽음 처리 실패 응답이 도착(안내 생략): {ex.Message.Replace(Environment.NewLine, " ")}");
+                        return;
+                    }
+
+                    AppMessageBox.Warn(this, ex.Message, Strings.Notification_Title);
                     return;
                 }
-
-                AppMessageBox.Warn(this, ex.Message, Strings.Notification_Title);
-                return;
-            }
-            finally
-            {
-                if (!IsClosed)
-                    btnMarkRead.Enabled = true;
+                finally
+                {
+                    if (!IsClosed)
+                        btnMarkRead.Enabled = true;
+                }
             }
 
             if (IsClosed)
                 return;
 
+            // 대기 표시를 먼저 걷고 나서 다시 조회한다 — SearchAsync가 자기 것을 새로 띄운다.
             await SearchAsync();
         }
 

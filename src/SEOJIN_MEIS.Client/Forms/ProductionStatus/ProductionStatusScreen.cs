@@ -58,15 +58,27 @@ namespace SEOJIN_MEIS.Client.Forms.ProductionStatus
 
         private async System.Threading.Tasks.Task SearchAsync()
         {
-            try
+            // 조회는 되돌릴 것이 없으므로 [취소]를 제공한다.
+            using (var busy = BusyOverlay.Show(this, cancelable: true))
             {
-                var standardDate = dateStandard.EditValue is DateTime dt ? dt : DateTime.Today;
-                var result = await _context.ApiClients.ProductionApiClient.GetProductionStatusAsync(standardDate);
-                grid.DataSource = result;
-            }
-            catch (ApiException ex)
-            {
-                AppMessageBox.Warn(this, ex.Message, Strings.ProductionStatus_Title);
+                try
+                {
+                    var standardDate = dateStandard.EditValue is DateTime dt ? dt : DateTime.Today;
+                    var result = await _context.ApiClients.ProductionApiClient
+                                     .GetProductionStatusAsync(standardDate, busy.Token);
+
+                    if (IsDisposed || Disposing) return;   // 조회 중 탭을 닫았다
+                    grid.DataSource = result;
+                }
+                catch (OperationCanceledException)
+                {
+                    // 사용자가 [취소]를 눌렀다 — 오류가 아니므로 조용히 끝낸다.
+                }
+                catch (ApiException ex)
+                {
+                    if (IsDisposed || Disposing) return;
+                    AppMessageBox.Warn(this, ex.Message, Strings.ProductionStatus_Title);
+                }
             }
         }
     }

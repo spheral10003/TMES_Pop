@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.Utils;
@@ -178,28 +179,39 @@ namespace SEOJIN_MEIS.Client.Forms.WorkIntegratedStatus
                 return;
             }
 
-            try
+            using (var busy = BusyOverlay.Show(this, cancelable: true))
             {
-                btnSearch.Enabled = false;
-                _nodes = await FetchOverviewAsync(serialNo);
+                try
+                {
+                    btnSearch.Enabled = false;
+                    _nodes = await FetchOverviewAsync(serialNo, busy.Token);
 
-                treeOverview.DataSource = _nodes;
-                treeOverview.ExpandAll();
+                    if (IsDisposed || Disposing) return;   // 조회 중 탭을 닫았다
 
-                if (_nodes.Count == 0)
-                    AppMessageBox.Info(this, Strings.WorkEntry_NoResult, Strings.WorkIntegratedStatus_Title);
-            }
-            catch (ApiException ex)
-            {
-                AppMessageBox.Warn(this, ex.Message, Strings.WorkIntegratedStatus_Title);
-            }
-            finally
-            {
-                btnSearch.Enabled = true;
+                    treeOverview.DataSource = _nodes;
+                    treeOverview.ExpandAll();
+
+                    if (_nodes.Count == 0)
+                        AppMessageBox.Info(this, Strings.WorkEntry_NoResult, Strings.WorkIntegratedStatus_Title);
+                }
+                catch (OperationCanceledException)
+                {
+                    // 사용자가 [취소]를 눌렀다 — 오류가 아니므로 조용히 끝낸다.
+                }
+                catch (ApiException ex)
+                {
+                    if (IsDisposed || Disposing) return;
+                    AppMessageBox.Warn(this, ex.Message, Strings.WorkIntegratedStatus_Title);
+                }
+                finally
+                {
+                    if (!IsDisposed && !Disposing)
+                        btnSearch.Enabled = true;
+                }
             }
         }
 
-        private async Task<List<WorkIntegratedNodeDto>> FetchOverviewAsync(string serialNo)
+        private async Task<List<WorkIntegratedNodeDto>> FetchOverviewAsync(string serialNo, CancellationToken cancellationToken)
         {
             if (_context.Settings.UseMockData)
             {
@@ -207,7 +219,7 @@ namespace SEOJIN_MEIS.Client.Forms.WorkIntegratedStatus
                 return MockWorkIntegratedData.GetOverview(serialNo);
             }
 
-            return await _context.ApiClients.ProductionApiClient.GetWorkIntegratedOverviewAsync(serialNo)
+            return await _context.ApiClients.ProductionApiClient.GetWorkIntegratedOverviewAsync(serialNo, cancellationToken)
                    ?? new List<WorkIntegratedNodeDto>();
         }
 

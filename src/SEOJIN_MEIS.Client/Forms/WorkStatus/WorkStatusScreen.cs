@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.XtraEditors;
@@ -231,37 +232,48 @@ namespace SEOJIN_MEIS.Client.Forms.WorkStatus
             query.SerialNo = txtSerialNo.Text?.Trim();
             query.StatusName = SelectedFilterValue(cboStatus);
 
-            try
+            using (var busy = BusyOverlay.Show(this, cancelable: true))
             {
-                btnSearch.Enabled = false;
-                var result = await FetchWorkOrdersAsync(query);
-
-                // 새로 조회한 결과이므로 이전에 읽어 둔 진행 현황은 버린다(같은 지시라도 다시 읽는다).
-                ClearProgress();
-                gridOrders.DataSource = result;
-
-                if (result.Count == 0)
+                try
                 {
-                    AppMessageBox.Info(this, Strings.WorkEntry_NoResult, Strings.WorkStatus_Title);
-                    return;
-                }
+                    btnSearch.Enabled = false;
+                    var result = await FetchWorkOrdersAsync(query, busy.Token);
 
-                // 첫 행을 고르면 FocusedRowChanged가 걸려 진행 현황도 함께 채워진다.
-                // 이미 0번 행에 포커스가 있어 이벤트가 안 걸리는 경우를 위해 한 번 더 호출한다(중복은 위에서 걸러진다).
-                gridViewOrders.FocusedRowHandle = 0;
-                await LoadProgressAsync();
-            }
-            catch (ApiException ex)
-            {
-                AppMessageBox.Warn(this, ex.Message, Strings.WorkStatus_Title);
-            }
-            finally
-            {
-                btnSearch.Enabled = true;
+                    if (IsDisposed || Disposing) return;   // 조회 중 탭을 닫았다
+
+                    // 새로 조회한 결과이므로 이전에 읽어 둔 진행 현황은 버린다(같은 지시라도 다시 읽는다).
+                    ClearProgress();
+                    gridOrders.DataSource = result;
+
+                    if (result.Count == 0)
+                    {
+                        AppMessageBox.Info(this, Strings.WorkEntry_NoResult, Strings.WorkStatus_Title);
+                        return;
+                    }
+
+                    // 첫 행을 고르면 FocusedRowChanged가 걸려 진행 현황도 함께 채워진다.
+                    // 이미 0번 행에 포커스가 있어 이벤트가 안 걸리는 경우를 위해 한 번 더 호출한다(중복은 위에서 걸러진다).
+                    gridViewOrders.FocusedRowHandle = 0;
+                    await LoadProgressAsync();
+                }
+                catch (OperationCanceledException)
+                {
+                    // 사용자가 [취소]를 눌렀다 — 오류가 아니므로 조용히 끝낸다.
+                }
+                catch (ApiException ex)
+                {
+                    if (IsDisposed || Disposing) return;
+                    AppMessageBox.Warn(this, ex.Message, Strings.WorkStatus_Title);
+                }
+                finally
+                {
+                    if (!IsDisposed && !Disposing)
+                        btnSearch.Enabled = true;
+                }
             }
         }
 
-        private async Task<List<WorkOrderEntryDto>> FetchWorkOrdersAsync(WorkStatusQuery query)
+        private async Task<List<WorkOrderEntryDto>> FetchWorkOrdersAsync(WorkStatusQuery query, CancellationToken cancellationToken)
         {
             if (_context.Settings.UseMockData)
             {
@@ -269,7 +281,7 @@ namespace SEOJIN_MEIS.Client.Forms.WorkStatus
                 return MockWorkStatusData.SearchWorkOrders(query);
             }
 
-            return await _context.ApiClients.WorkStatusApiClient.SearchWorkOrdersAsync(query)
+            return await _context.ApiClients.WorkStatusApiClient.SearchWorkOrdersAsync(query, cancellationToken)
                    ?? new List<WorkOrderEntryDto>();
         }
 

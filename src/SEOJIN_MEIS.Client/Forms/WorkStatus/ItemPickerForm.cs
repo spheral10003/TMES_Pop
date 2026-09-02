@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.XtraEditors;
@@ -109,26 +110,37 @@ namespace SEOJIN_MEIS.Client.Forms.WorkStatus
 
         private async Task SearchAsync()
         {
-            try
+            using (var busy = BusyOverlay.Show(this, cancelable: true))
             {
-                btnSearch.Enabled = false;
-                var result = await FetchItemsAsync(txtKeyword.Text?.Trim());
+                try
+                {
+                    btnSearch.Enabled = false;
+                    var result = await FetchItemsAsync(txtKeyword.Text?.Trim(), busy.Token);
 
-                grid.DataSource = result;
-                if (gridView.RowCount > 0)
-                    gridView.FocusedRowHandle = 0;
-            }
-            catch (ApiException ex)
-            {
-                AppMessageBox.Warn(this, ex.Message, Strings.ItemPicker_Title);
-            }
-            finally
-            {
-                btnSearch.Enabled = true;
+                    if (IsDisposed || Disposing) return;   // 조회 중 팝업을 닫았다
+
+                    grid.DataSource = result;
+                    if (gridView.RowCount > 0)
+                        gridView.FocusedRowHandle = 0;
+                }
+                catch (OperationCanceledException)
+                {
+                    // 사용자가 [취소]를 눌렀다 — 오류가 아니므로 조용히 끝낸다.
+                }
+                catch (ApiException ex)
+                {
+                    if (IsDisposed || Disposing) return;
+                    AppMessageBox.Warn(this, ex.Message, Strings.ItemPicker_Title);
+                }
+                finally
+                {
+                    if (!IsDisposed && !Disposing)
+                        btnSearch.Enabled = true;
+                }
             }
         }
 
-        private async Task<List<ItemDto>> FetchItemsAsync(string keyword)
+        private async Task<List<ItemDto>> FetchItemsAsync(string keyword, CancellationToken cancellationToken)
         {
             if (_context.Settings.UseMockData)
             {
@@ -136,7 +148,7 @@ namespace SEOJIN_MEIS.Client.Forms.WorkStatus
                 return MockWorkStatusData.SearchItems(keyword);
             }
 
-            return await _context.ApiClients.WorkStatusApiClient.SearchItemsAsync(keyword)
+            return await _context.ApiClients.WorkStatusApiClient.SearchItemsAsync(keyword, cancellationToken)
                    ?? new List<ItemDto>();
         }
 

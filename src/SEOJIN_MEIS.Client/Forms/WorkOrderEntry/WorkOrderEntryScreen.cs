@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.XtraEditors;
@@ -126,26 +127,37 @@ namespace SEOJIN_MEIS.Client.Forms.WorkOrderEntry
                 return;
             }
 
-            try
+            using (var busy = BusyOverlay.Show(this, cancelable: true))
             {
-                btnSearch.Enabled = false;
-                var result = await FetchWorkOrdersAsync(workOrderNo, serialNo);
+                try
+                {
+                    btnSearch.Enabled = false;
+                    var result = await FetchWorkOrdersAsync(workOrderNo, serialNo, busy.Token);
 
-                grid.DataSource = result;
-                gridView.BestFitColumns();
+                    if (IsDisposed || Disposing) return;   // 조회 중 탭을 닫았다
 
-                if (result.Count == 0)
-                    AppMessageBox.Info(this, Strings.WorkEntry_NoResult, Strings.WorkEntry_Title);
-                else
-                    gridView.FocusedRowHandle = 0;
-            }
-            catch (ApiException ex)
-            {
-                AppMessageBox.Warn(this, ex.Message, Strings.WorkEntry_Title);
-            }
-            finally
-            {
-                btnSearch.Enabled = true;
+                    grid.DataSource = result;
+                    gridView.BestFitColumns();
+
+                    if (result.Count == 0)
+                        AppMessageBox.Info(this, Strings.WorkEntry_NoResult, Strings.WorkEntry_Title);
+                    else
+                        gridView.FocusedRowHandle = 0;
+                }
+                catch (OperationCanceledException)
+                {
+                    // 사용자가 [취소]를 눌렀다 — 오류가 아니므로 조용히 끝낸다.
+                }
+                catch (ApiException ex)
+                {
+                    if (IsDisposed || Disposing) return;
+                    AppMessageBox.Warn(this, ex.Message, Strings.WorkEntry_Title);
+                }
+                finally
+                {
+                    if (!IsDisposed && !Disposing)
+                        btnSearch.Enabled = true;
+                }
             }
         }
 
@@ -153,7 +165,7 @@ namespace SEOJIN_MEIS.Client.Forms.WorkOrderEntry
         /// 조회 결과를 가져온다. 목업 모드(App.config의 UseMockData=true)면 서버를 호출하지 않고
         /// 화면 설계서 샘플 데이터를 돌려준다 — 서버 없이도 화면/컬럼/서식을 그대로 확인하기 위한 임시 경로다.
         /// </summary>
-        private async Task<List<WorkOrderEntryDto>> FetchWorkOrdersAsync(string workOrderNo, string serialNo)
+        private async Task<List<WorkOrderEntryDto>> FetchWorkOrdersAsync(string workOrderNo, string serialNo, CancellationToken cancellationToken)
         {
             if (_context.Settings.UseMockData)
             {
@@ -162,7 +174,7 @@ namespace SEOJIN_MEIS.Client.Forms.WorkOrderEntry
                 return MockWorkOrderData.SearchWorkOrders(workOrderNo, serialNo);
             }
 
-            return await _context.ApiClients.WorkOrderApiClient.SearchWorkOrdersAsync(workOrderNo, serialNo)
+            return await _context.ApiClients.WorkOrderApiClient.SearchWorkOrdersAsync(workOrderNo, serialNo, cancellationToken)
                    ?? new List<WorkOrderEntryDto>();
         }
 
@@ -177,19 +189,32 @@ namespace SEOJIN_MEIS.Client.Forms.WorkOrderEntry
             }
 
             List<RoutingProcessDto> processes;
-            try
+
+            // 공정 목록을 받아오는 것뿐이라(아직 작업을 시작하지 않는다) 취소해도 남는 것이 없다.
+            using (var busy = BusyOverlay.Show(this, cancelable: true))
             {
-                btnWork.Enabled = false;
-                processes = await FetchRoutingProcessesAsync(selected.WorkOrderNo, selected.SerialNo);
-            }
-            catch (ApiException ex)
-            {
-                AppMessageBox.Warn(this, ex.Message, Strings.WorkEntryConfirm_Title);
-                return;
-            }
-            finally
-            {
-                btnWork.Enabled = true;
+                try
+                {
+                    btnWork.Enabled = false;
+                    processes = await FetchRoutingProcessesAsync(selected.WorkOrderNo, selected.SerialNo, busy.Token);
+
+                    if (IsDisposed || Disposing) return;
+                }
+                catch (OperationCanceledException)
+                {
+                    return;   // 사용자가 [취소]를 눌렀다
+                }
+                catch (ApiException ex)
+                {
+                    if (IsDisposed || Disposing) return;
+                    AppMessageBox.Warn(this, ex.Message, Strings.WorkEntryConfirm_Title);
+                    return;
+                }
+                finally
+                {
+                    if (!IsDisposed && !Disposing)
+                        btnWork.Enabled = true;
+                }
             }
 
             if (processes.Count == 0)
@@ -219,7 +244,7 @@ namespace SEOJIN_MEIS.Client.Forms.WorkOrderEntry
         /// 선택한 작업지시의 공정(라우팅) 목록을 가져온다.
         /// 목업 모드면 서버 대신 <see cref="MockWorkOrderData"/>의 샘플 공정을 돌려준다.
         /// </summary>
-        private async Task<List<RoutingProcessDto>> FetchRoutingProcessesAsync(string workOrderNo, string serialNo)
+        private async Task<List<RoutingProcessDto>> FetchRoutingProcessesAsync(string workOrderNo, string serialNo, CancellationToken cancellationToken)
         {
             if (_context.Settings.UseMockData)
             {
@@ -227,7 +252,7 @@ namespace SEOJIN_MEIS.Client.Forms.WorkOrderEntry
                 return MockWorkOrderData.GetRoutingProcesses(workOrderNo, serialNo);
             }
 
-            return await _context.ApiClients.WorkOrderApiClient.GetRoutingProcessesAsync(workOrderNo, serialNo)
+            return await _context.ApiClients.WorkOrderApiClient.GetRoutingProcessesAsync(workOrderNo, serialNo, cancellationToken)
                    ?? new List<RoutingProcessDto>();
         }
 

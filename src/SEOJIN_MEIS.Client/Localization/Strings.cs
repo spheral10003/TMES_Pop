@@ -60,6 +60,8 @@ namespace SEOJIN_MEIS.Client.Localization
         public static string Common_Close => Get(nameof(Common_Close));
         public static string Common_Confirm => Get(nameof(Common_Confirm));
         public static string Common_Cancel => Get(nameof(Common_Cancel));
+        public static string Common_PleaseWait => Get(nameof(Common_PleaseWait));
+        public static string Common_Loading => Get(nameof(Common_Loading));
         public static string Common_Notice => Get(nameof(Common_Notice));
         public static string Common_UnexpectedError => Get(nameof(Common_UnexpectedError));
         public static string Common_Search => Get(nameof(Common_Search));

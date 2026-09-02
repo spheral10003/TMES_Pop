@@ -892,27 +892,35 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
             gridViewInspection.CloseEditor();
             gridViewInspection.UpdateCurrentRow();
 
-            try
+            // 저장은 서버 상태를 바꾸는 처리라 [취소]를 주지 않는다 —
+            // 중간에 끊으면 무엇이 반영되고 무엇이 안 됐는지 화면에서 알 수 없다.
+            using (BusyOverlay.Show(this))
             {
-                btnSaveResults.Enabled = false;
-
-                if (!UseMock)
+                try
                 {
-                    if (_activeTab == PopTab.BomSpec)
-                        await _context.ApiClients.PopApiClient.SaveBomSpecResultsAsync(_key, _bomSpecs);
-                    else if (_activeTab == PopTab.Inspection)
-                        await _context.ApiClients.PopApiClient.SaveInspectionResultsAsync(_key, _inspections);
-                }
+                    btnSaveResults.Enabled = false;
 
-                AppMessageBox.Success(this, Strings.Pop_SavedResult, Strings.Pop_Title);
-            }
-            catch (ApiException ex)
-            {
-                AppMessageBox.Warn(this, ex.Message, Strings.Pop_Title);
-            }
-            finally
-            {
-                btnSaveResults.Enabled = true;
+                    if (!UseMock)
+                    {
+                        if (_activeTab == PopTab.BomSpec)
+                            await _context.ApiClients.PopApiClient.SaveBomSpecResultsAsync(_key, _bomSpecs);
+                        else if (_activeTab == PopTab.Inspection)
+                            await _context.ApiClients.PopApiClient.SaveInspectionResultsAsync(_key, _inspections);
+                    }
+
+                    if (IsDisposed || Disposing) return;   // 저장 중 탭을 닫았다
+                    AppMessageBox.Success(this, Strings.Pop_SavedResult, Strings.Pop_Title);
+                }
+                catch (ApiException ex)
+                {
+                    if (IsDisposed || Disposing) return;
+                    AppMessageBox.Warn(this, ex.Message, Strings.Pop_Title);
+                }
+                finally
+                {
+                    if (!IsDisposed && !Disposing)
+                        btnSaveResults.Enabled = true;
+                }
             }
         }
 
