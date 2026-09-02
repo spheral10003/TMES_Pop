@@ -70,8 +70,8 @@ namespace SEOJIN_MEIS.Client.Forms.WorkOrderEntry
 
             AppTheme.BodyText(lblWorkOrderNo);
             AppTheme.BodyText(lblSerialNo);
-            AppTheme.Editor(txtWorkOrderNo);
-            AppTheme.Editor(txtSerialNo);
+            AppTheme.CodeEditor(txtWorkOrderNo);
+            AppTheme.CodeEditor(txtSerialNo);
 
             AppTheme.AccentButton(btnSearch, AppTheme.Indigo, AppIcons.Search);
             AppTheme.AccentButton(btnWork, AppTheme.Emerald, AppIcons.Play);

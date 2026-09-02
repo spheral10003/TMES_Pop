@@ -668,6 +668,22 @@ namespace SEOJIN_MEIS.Client.Theme
             edit.Properties.BorderStyle = BorderStyles.Simple;
         }
 
+        /// <summary>
+        /// 코드·번호를 입력받는 칸 — <see cref="Editor"/> 톤에 <b>대문자 자동 변환</b>을 더한다.
+        /// 작업지시번호·시리얼번호·품목코드처럼 값이 대문자로 관리되는 항목에 쓴다
+        /// (바코드 스캐너는 대문자로 보내는데 손으로 칠 때만 소문자가 되어 조회가 어긋나는 것을 막는다).
+        ///
+        /// <b>아무 입력란에나 붙이지 말 것.</b> 이 설정은 사용자가 치는 글자뿐 아니라
+        /// 코드에서 넣는 값까지 대문자로 바꾼다. 그래서 다음에는 쓰면 안 된다:
+        ///  - 비밀번호 · 로그인 아이디(서버가 대소문자를 구분하면 인증이 실패한다)
+        ///  - 사람이 읽는 자유 문구(비고 등)와 서버가 내려준 값을 보여 주는 읽기 전용 칸
+        /// </summary>
+        public static void CodeEditor(TextEdit edit)
+        {
+            Editor(edit);
+            edit.Properties.CharacterCasing = CharacterCasing.Upper;
+        }
+
         /// <summary>체크박스(예: 로그인 화면의 "아이디 저장") — 카드 배경 위에 얹히도록 배경은 투명하게 둔다.</summary>
         public static void CheckBox(CheckEdit check)
         {

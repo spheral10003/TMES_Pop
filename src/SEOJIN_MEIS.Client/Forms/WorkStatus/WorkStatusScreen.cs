@@ -115,10 +115,10 @@ namespace SEOJIN_MEIS.Client.Forms.WorkStatus
 
             AppTheme.Editor(dateFrom);
             AppTheme.Editor(dateTo);
-            AppTheme.Editor(txtWorkOrderNo);
-            AppTheme.Editor(txtItemCode);
+            AppTheme.CodeEditor(txtWorkOrderNo);
+            AppTheme.CodeEditor(txtItemCode);
             AppTheme.Editor(txtItemName);
-            AppTheme.Editor(txtSerialNo);
+            AppTheme.CodeEditor(txtSerialNo);
             AppTheme.Editor(cboStatus);
             AppTheme.Editor(cboProgressState);
             AppTheme.Editor(cboSpecResultState);

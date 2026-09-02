@@ -74,7 +74,7 @@ namespace SEOJIN_MEIS.Client.Forms.WorkStatus
 
             AppTheme.SectionTitle(lblListTitle, AppTheme.Cyan);
             AppTheme.BodyText(lblKeyword);
-            AppTheme.Editor(txtKeyword);
+            AppTheme.CodeEditor(txtKeyword);
             AppTheme.AccentButton(btnSearch, AppTheme.Cyan, AppIcons.Search);
             AppTheme.Grid(grid, gridView, AppTheme.Cyan);
 
