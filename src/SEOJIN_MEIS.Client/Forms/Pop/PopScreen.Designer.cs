@@ -590,16 +590,16 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
             //   화살표 글자와 색은 PopScreen.cs 에서 상태에 따라 런타임에 넣는다.
             //
             this.btnInfoAccordion.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnInfoAccordion.Location = new System.Drawing.Point(518, 6);
+            this.btnInfoAccordion.Location = new System.Drawing.Point(528, 8);
             this.btnInfoAccordion.Name = "btnInfoAccordion";
-            this.btnInfoAccordion.Size = new System.Drawing.Size(30, 26);
+            this.btnInfoAccordion.Size = new System.Drawing.Size(20, 64);
             this.btnInfoAccordion.TabIndex = 20;
             this.btnInfoAccordion.Click += new System.EventHandler(this.btnInfoAccordion_Click);
             //
             this.btnTabsAccordion.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnTabsAccordion.Location = new System.Drawing.Point(1163, 7);
+            this.btnTabsAccordion.Location = new System.Drawing.Point(1455, 13);
             this.btnTabsAccordion.Name = "btnTabsAccordion";
-            this.btnTabsAccordion.Size = new System.Drawing.Size(30, 32);
+            this.btnTabsAccordion.Size = new System.Drawing.Size(34, 20);
             this.btnTabsAccordion.TabIndex = 21;
             this.btnTabsAccordion.Click += new System.EventHandler(this.btnTabsAccordion_Click);
             //
@@ -771,7 +771,7 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
             // chkManualWrench
             // 
             this.chkManualWrench.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.chkManualWrench.Location = new System.Drawing.Point(1227, 11);
+            this.chkManualWrench.Location = new System.Drawing.Point(1179, 11);
             this.chkManualWrench.Name = "chkManualWrench";
             this.chkManualWrench.Properties.Caption = "수동 렌치";
             this.chkManualWrench.Size = new System.Drawing.Size(110, 20);
@@ -781,7 +781,7 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
             // btnSaveResults
             // 
             this.btnSaveResults.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSaveResults.Location = new System.Drawing.Point(1355, 7);
+            this.btnSaveResults.Location = new System.Drawing.Point(1307, 7);
             this.btnSaveResults.Name = "btnSaveResults";
             this.btnSaveResults.Size = new System.Drawing.Size(134, 32);
             this.btnSaveResults.TabIndex = 5;

@@ -119,6 +119,11 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
             SetActiveTab(PopTab.Material);
 
             viewerSurface.Paint += ViewerSurface_Paint;
+
+            // Panel은 크기가 커져도 <b>새로 드러난 부분만</b> 다시 그린다.
+            // 이 표면은 전체를 채우는 X와 가운데 문구를 직접 그리므로, 그대로 두면
+            // 아코디언으로 넓어질 때 예전 그림이 남아 X가 겹치고 문구 조각이 떠 있는다(실제로 그랬다).
+            viewerSurface.Resize += (s, e) => viewerSurface.Invalidate();
             _viewerMessage = Strings.Pop_DrawingNone;
             gridViewMaterial.RowCellClick += GridViewMaterial_RowCellClick;
 
@@ -976,6 +981,8 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
                 mainPanel.ResumeLayout(true);
             }
 
+            // 자리를 옮기지 않은 컨트롤은 레이아웃만으로는 다시 그려지지 않아 잔상이 남는다.
+            mainPanel.Invalidate(true);
             RefreshAccordionButtons();
         }
 
@@ -1002,6 +1009,7 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
                 ResumeLayout(true);
             }
 
+            Invalidate(true);
             RefreshAccordionButtons();
         }
 
@@ -1011,13 +1019,30 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
         /// </summary>
         private void RefreshAccordionButtons()
         {
-            btnInfoAccordion.Text = _infoExpanded ? "▶" : "◀";
-            btnInfoAccordion.ToolTip = _infoExpanded ? Strings.Pop_Collapse : Strings.Pop_Expand;
-            AppTheme.QuietButton(btnInfoAccordion, AppTheme.Violet);
+            StyleAccordionHandle(btnInfoAccordion, _infoExpanded ? "›" : "‹", _infoExpanded, AppTheme.Violet);
+            StyleAccordionHandle(btnTabsAccordion, _bottomExpanded ? "⌄" : "⌃", _bottomExpanded, AppTheme.Cyan);
+        }
 
-            btnTabsAccordion.Text = _bottomExpanded ? "▼" : "▲";
-            btnTabsAccordion.ToolTip = _bottomExpanded ? Strings.Pop_Collapse : Strings.Pop_Expand;
-            AppTheme.QuietButton(btnTabsAccordion, AppTheme.Cyan);
+        /// <summary>
+        /// 손잡이 모양 — 시안처럼 가장자리에 붙은 <b>얇은 띠</b>다.
+        /// 화살표는 누르면 일어날 일을 가리킨다(펼쳐져 있으면 접는 방향).
+        /// 글자가 화살표 하나뿐이라 본문 글꼴은 커서 잘리므로 작은 글꼴을 쓴다.
+        /// </summary>
+        private static void StyleAccordionHandle(SimpleButton button, string glyph, bool expanded, Color accent)
+        {
+            AppTheme.QuietButton(button, accent);
+            button.Text = glyph;
+            button.Appearance.Font = AppTheme.SmallFont;
+            button.Appearance.Options.UseFont = true;
+
+            // 접혀 있을 때는 "여기 뭔가 숨어 있다"가 드러나야 하므로 포인트 색으로 남겨 둔다.
+            if (!expanded)
+            {
+                button.Appearance.ForeColor = accent;
+                button.Appearance.BorderColor = accent;
+                button.Appearance.Options.UseForeColor = true;
+                button.Appearance.Options.UseBorderColor = true;
+            }
         }
 
         // ─────────────────────────────────────────────────────────────────────────
