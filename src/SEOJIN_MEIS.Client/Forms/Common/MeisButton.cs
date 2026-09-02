@@ -23,7 +23,20 @@ namespace SEOJIN_MEIS.Client.Forms.Common
         private const int CornerRadius = 2;
         private const int IconSize = 16;
         private const int IconLeft = 14;
+
+        /// <summary>아이콘과 글자 사이 간격.</summary>
         private const int IconTextGap = 10;
+
+        /// <summary>아이콘+글자 덩어리 양옆에 두는 여백.</summary>
+        private const int ContentPadding = 6;
+
+        /// <summary>
+        /// 폭이 빠듯할 때 쓰는 간격·여백. 글자를 …로 자르기 전에 여기까지 줄여서 버텨 본다
+        /// (언어를 바꾸면 같은 버튼에 더 긴 문구가 들어온다 — 예: "조회" → "Tra cứu").
+        /// 이 값 밑으로는 내려가지 않으므로 아이콘과 글자가 붙어 보이는 일은 없다.
+        /// </summary>
+        private const int TightIconTextGap = 4;
+        private const int TightContentPadding = 2;
 
         private string _icon;
         private SvgImage _iconImage;
@@ -121,15 +134,51 @@ namespace SEOJIN_MEIS.Client.Forms.Common
             var fore = ResolveForeColor();
 
             DrawSurface(g, back, border);
+            DrawContent(g, fore);
+        }
 
-            var textLeft = 0;
-            if (!string.IsNullOrEmpty(_icon))
+        /// <summary>
+        /// 아이콘과 글자를 놓는다.
+        ///
+        /// 가운데 정렬(<see cref="TextAfterIcon"/>가 false)일 때는 <b>아이콘과 글자를 한 덩어리로 보고</b>
+        /// 그 덩어리를 버튼 가운데에 둔다. 예전에는 아이콘을 왼쪽 14px에 고정해 놓고 글자만 버튼 전체
+        /// 기준으로 가운데 정렬해서, 폭이 빠듯한 버튼(104px에 "새로고침")에서는 글자가 아이콘에 딱 붙어
+        /// "Q새로고침"처럼 보였다. 이제는 폭·언어와 무관하게 <see cref="IconTextGap"/>만큼 벌어진다.
+        /// </summary>
+        private void DrawContent(Graphics g, Color fore)
+        {
+            var text = Text ?? string.Empty;
+            var textWidth = text.Length == 0 ? 0 : TextRenderer.MeasureText(text, Font).Width;
+
+            if (string.IsNullOrEmpty(_icon))
             {
-                DrawIcon(g, fore);
-                textLeft = IconLeft + IconSize + IconTextGap;
+                // 아이콘이 없으면 예전 그대로 — 가운데 정렬이거나, 왼쪽부터 채운다.
+                DrawText(g, fore, 0, Width - (TextAfterIcon ? IconLeft : 0), centered: !TextAfterIcon);
+                return;
             }
 
-            DrawText(g, fore, textLeft);
+            var gap = IconTextGap;
+            var padding = ContentPadding;
+
+            if (IconSize + gap + textWidth + padding * 2 > Width)
+            {
+                gap = TightIconTextGap;
+                padding = TightContentPadding;
+            }
+
+            var content = IconSize + (textWidth > 0 ? gap + textWidth : 0);
+
+            var iconLeft = TextAfterIcon
+                ? IconLeft
+                : Math.Max(padding, (Width - content) / 2);
+
+            DrawIcon(g, fore, iconLeft);
+
+            if (textWidth == 0)
+                return;
+
+            var textLeft = iconLeft + IconSize + gap;
+            DrawText(g, fore, textLeft, Width - textLeft - padding, centered: false);
         }
 
         private Color ResolveBackColor()
@@ -181,7 +230,7 @@ namespace SEOJIN_MEIS.Client.Forms.Common
             }
         }
 
-        private void DrawIcon(Graphics g, Color color)
+        private void DrawIcon(Graphics g, Color color, int left)
         {
             // 색이 바뀌면(비활성 등) 다시 만든다 — SVG 템플릿에 색을 끼워 넣는 방식이라 캐시가 색에 묶인다.
             if (_iconImage == null || _iconColor != color)
@@ -192,22 +241,18 @@ namespace SEOJIN_MEIS.Client.Forms.Common
 
             var top = (Height - IconSize) / 2;
             using (var image = _iconImage.Render(new Size(IconSize, IconSize), null))
-                g.DrawImage(image, new Rectangle(IconLeft, top, IconSize, IconSize));
+                g.DrawImage(image, new Rectangle(left, top, IconSize, IconSize));
         }
 
-        private void DrawText(Graphics g, Color color, int textLeft)
+        private void DrawText(Graphics g, Color color, int left, int width, bool centered)
         {
-            if (string.IsNullOrEmpty(Text))
+            if (string.IsNullOrEmpty(Text) || width <= 0)
                 return;
 
-            // 기본은 "아이콘을 뺀 나머지 폭의 가운데" — 첨부 시안이 그 배치다.
-            var left = TextAfterIcon ? textLeft : 0;
-            var bounds = new Rectangle(left, 0, Width - left - (TextAfterIcon ? IconLeft : 0), Height);
-
             var flags = TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix
-                        | (TextAfterIcon ? TextFormatFlags.Left : TextFormatFlags.HorizontalCenter);
+                        | (centered ? TextFormatFlags.HorizontalCenter : TextFormatFlags.Left);
 
-            TextRenderer.DrawText(g, Text, Font, bounds, color, flags);
+            TextRenderer.DrawText(g, Text, Font, new Rectangle(left, 0, width, Height), color, flags);
         }
 
         private static GraphicsPath RoundedPath(Rectangle bounds, int radius)

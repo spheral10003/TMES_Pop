@@ -265,9 +265,11 @@ namespace SEOJIN_MEIS.Client.Forms.Notification
             // btnMarkRead
             //
             this.btnMarkRead.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnMarkRead.Location = new System.Drawing.Point(620, 7);
+            // 폭 120 — 아이콘(16) + 간격 + "Mark read"(영어가 가장 길다)가 잘리지 않는 크기.
+            // 우측 고정(Anchor Right)이라 왼쪽으로 자라며, 왼쪽에는 제목 라벨뿐이라 부딪히지 않는다.
+            this.btnMarkRead.Location = new System.Drawing.Point(584, 7);
             this.btnMarkRead.Name = "btnMarkRead";
-            this.btnMarkRead.Size = new System.Drawing.Size(84, 26);
+            this.btnMarkRead.Size = new System.Drawing.Size(120, 26);
             this.btnMarkRead.TabIndex = 1;
             this.btnMarkRead.Text = "읽음";
             this.btnMarkRead.Click += new System.EventHandler(this.btnMarkRead_Click);
