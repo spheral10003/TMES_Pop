@@ -106,8 +106,8 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
             this.btnTabEquipment = new DevExpress.XtraEditors.SimpleButton();
             this.chkManualWrench = new DevExpress.XtraEditors.CheckEdit();
             this.btnSaveResults = new DevExpress.XtraEditors.SimpleButton();
-            this.btnInfoAccordion = new DevExpress.XtraEditors.SimpleButton();
-            this.btnTabsAccordion = new DevExpress.XtraEditors.SimpleButton();
+            this.btnInfoAccordion = new SEOJIN_MEIS.Client.Forms.Common.AccordionHandle();
+            this.btnTabsAccordion = new SEOJIN_MEIS.Client.Forms.Common.AccordionHandle();
             ((System.ComponentModel.ISupportInitialize)(this.toolbarCard)).BeginInit();
             this.toolbarCard.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.mainPanel)).BeginInit();
@@ -589,17 +589,19 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
             //   접히는 본문(fieldPanel / tabBodyPanel)이 아니라 그 바깥에 붙인다.
             //   화살표 글자와 색은 PopScreen.cs 에서 상태에 따라 런타임에 넣는다.
             //
-            this.btnInfoAccordion.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnInfoAccordion.Location = new System.Drawing.Point(528, 8);
+            //   손잡이는 <b>패널 왼쪽 가장자리에 세로 띠로 도킹</b>한다.
+            //   Dock=Left 라 공정 정보 내용은 자동으로 그만큼 오른쪽으로 밀린다(좌표를 손댈 필요가 없다).
+            //   infoCard 에는 가장 나중에 Add 되므로 도킹도 가장 먼저 잡혀 왼쪽 전체 높이를 차지한다.
+            this.btnInfoAccordion.Dock = System.Windows.Forms.DockStyle.Left;
             this.btnInfoAccordion.Name = "btnInfoAccordion";
-            this.btnInfoAccordion.Size = new System.Drawing.Size(20, 64);
+            this.btnInfoAccordion.Size = new System.Drawing.Size(26, 410);
             this.btnInfoAccordion.TabIndex = 20;
             this.btnInfoAccordion.Click += new System.EventHandler(this.btnInfoAccordion_Click);
             //
-            this.btnTabsAccordion.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnTabsAccordion.Location = new System.Drawing.Point(1455, 13);
+            //   하단 손잡이는 탭 줄 오른쪽 끝에 도킹한다(앵커로 두면 창 폭에 따라 결과 저장 버튼과 겹쳤다).
+            this.btnTabsAccordion.Dock = System.Windows.Forms.DockStyle.Right;
             this.btnTabsAccordion.Name = "btnTabsAccordion";
-            this.btnTabsAccordion.Size = new System.Drawing.Size(34, 20);
+            this.btnTabsAccordion.Size = new System.Drawing.Size(96, 46);
             this.btnTabsAccordion.TabIndex = 21;
             this.btnTabsAccordion.Click += new System.EventHandler(this.btnTabsAccordion_Click);
             //
@@ -771,7 +773,7 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
             // chkManualWrench
             // 
             this.chkManualWrench.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.chkManualWrench.Location = new System.Drawing.Point(1179, 11);
+            this.chkManualWrench.Location = new System.Drawing.Point(1069, 11);
             this.chkManualWrench.Name = "chkManualWrench";
             this.chkManualWrench.Properties.Caption = "수동 렌치";
             this.chkManualWrench.Size = new System.Drawing.Size(110, 20);
@@ -781,7 +783,7 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
             // btnSaveResults
             // 
             this.btnSaveResults.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSaveResults.Location = new System.Drawing.Point(1307, 7);
+            this.btnSaveResults.Location = new System.Drawing.Point(1197, 7);
             this.btnSaveResults.Name = "btnSaveResults";
             this.btnSaveResults.Size = new System.Drawing.Size(134, 32);
             this.btnSaveResults.TabIndex = 5;
@@ -867,8 +869,8 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
         private System.Windows.Forms.Panel spacerMain;
         private DevExpress.XtraEditors.PanelControl infoCard;
         private DevExpress.XtraEditors.LabelControl lblInfoTitle;
-        private DevExpress.XtraEditors.SimpleButton btnInfoAccordion;
-        private DevExpress.XtraEditors.SimpleButton btnTabsAccordion;
+        private SEOJIN_MEIS.Client.Forms.Common.AccordionHandle btnInfoAccordion;
+        private SEOJIN_MEIS.Client.Forms.Common.AccordionHandle btnTabsAccordion;
         private DevExpress.XtraEditors.PanelControl fieldPanel;
         private DevExpress.XtraEditors.LabelControl lblWorkOrderNo;
         private DevExpress.XtraEditors.TextEdit txtWorkOrderNo;

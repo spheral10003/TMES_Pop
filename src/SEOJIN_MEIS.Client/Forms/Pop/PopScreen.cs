@@ -938,8 +938,8 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
         //  아코디언 — 우측 공정 정보 / 하단 탭을 접어 도면을 크게 본다
         // ─────────────────────────────────────────────────────────────────────────
 
-        /// <summary>접었을 때 남기는 우측 패널 폭. 손잡이 버튼만 보일 만큼만 남긴다.</summary>
-        private const int InfoCollapsedWidth = 40;
+        /// <summary>접었을 때 남기는 우측 패널 폭 = 세로 손잡이 띠의 폭.</summary>
+        private const int InfoCollapsedWidth = 26;
 
         /// <summary>펼쳤을 때 우측 패널 폭(디자이너의 infoCard 폭과 같게 둘 것).</summary>
         private const int InfoExpandedWidth = 560;
@@ -1017,32 +1017,21 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
         /// 손잡이 버튼의 화살표와 색을 지금 상태에 맞춘다.
         /// 화살표는 <b>누르면 일어날 일</b>을 가리킨다 — 펼쳐져 있으면 접는 방향(▶ / ▼)이다.
         /// </summary>
+        /// <summary>
+        /// 손잡이의 방향·이름·색을 지금 상태에 맞춘다.
+        /// 이름을 함께 보여 주는 이유는, 화살표만 있으면 <b>무엇이 접혀 있는지</b> 알 수 없기 때문이다.
+        /// </summary>
         private void RefreshAccordionButtons()
         {
-            StyleAccordionHandle(btnInfoAccordion, _infoExpanded ? "›" : "‹", _infoExpanded, AppTheme.Violet);
-            StyleAccordionHandle(btnTabsAccordion, _bottomExpanded ? "⌄" : "⌃", _bottomExpanded, AppTheme.Cyan);
-        }
+            btnInfoAccordion.Edge = AccordionEdge.Left;
+            btnInfoAccordion.Accent = AppTheme.Violet;
+            btnInfoAccordion.Text = Strings.Pop_ProcessInfoTitle;
+            btnInfoAccordion.Expanded = _infoExpanded;
 
-        /// <summary>
-        /// 손잡이 모양 — 시안처럼 가장자리에 붙은 <b>얇은 띠</b>다.
-        /// 화살표는 누르면 일어날 일을 가리킨다(펼쳐져 있으면 접는 방향).
-        /// 글자가 화살표 하나뿐이라 본문 글꼴은 커서 잘리므로 작은 글꼴을 쓴다.
-        /// </summary>
-        private static void StyleAccordionHandle(SimpleButton button, string glyph, bool expanded, Color accent)
-        {
-            AppTheme.QuietButton(button, accent);
-            button.Text = glyph;
-            button.Appearance.Font = AppTheme.SmallFont;
-            button.Appearance.Options.UseFont = true;
-
-            // 접혀 있을 때는 "여기 뭔가 숨어 있다"가 드러나야 하므로 포인트 색으로 남겨 둔다.
-            if (!expanded)
-            {
-                button.Appearance.ForeColor = accent;
-                button.Appearance.BorderColor = accent;
-                button.Appearance.Options.UseForeColor = true;
-                button.Appearance.Options.UseBorderColor = true;
-            }
+            btnTabsAccordion.Edge = AccordionEdge.Bottom;
+            btnTabsAccordion.Accent = AppTheme.Cyan;
+            btnTabsAccordion.Text = Strings.Pop_ToggleTabs;
+            btnTabsAccordion.Expanded = _bottomExpanded;
         }
 
         // ─────────────────────────────────────────────────────────────────────────
