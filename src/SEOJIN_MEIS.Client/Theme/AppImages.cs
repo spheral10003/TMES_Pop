@@ -27,6 +27,9 @@ namespace SEOJIN_MEIS.Client.Theme
         private const string LoginIllustrationResource = "SEOJIN_MEIS.Client.Images.login_icon.png";
         private const string BrandLogoResource = "SEOJIN_MEIS.Client.Images.texon_logo.svg";
 
+        /// <summary>창·작업 표시줄 아이콘. exe 아이콘(csproj의 ApplicationIcon)과 같은 파일이다.</summary>
+        private const string AppIconResource = "SEOJIN_MEIS.Client.Images.texon.ico";
+
         /// <summary>상단 바 아이콘(원본은 640×640 단색 실루엣 + 투명 배경).</summary>
         public const string IconBell = "SEOJIN_MEIS.Client.Images.bell-regular.png";
         public const string IconUser = "SEOJIN_MEIS.Client.Images.circle-user-regular.png";
@@ -49,9 +52,30 @@ namespace SEOJIN_MEIS.Client.Theme
         private const string MarkViewBox = "28 -6 150 108";
 
         private static Image _loginIllustration;
+        private static Icon _appIcon;
         private static SvgImage _brandSignature;
         private static Color _brandSignatureColor;
         private static SvgImage _brandMark;
+
+        /// <summary>
+        /// 창·작업 표시줄에 뜨는 프로그램 아이콘.
+        ///
+        /// exe 아이콘(csproj의 <c>ApplicationIcon</c>)과 <b>같은 파일</b>이지만 경로가 다르다 —
+        /// 그쪽은 빌드할 때 실행 파일에 박히고, 이쪽은 실행 중에 각 Form의 <c>Icon</c>에 넣는 값이다.
+        /// 둘 중 하나만 지정하면 탐색기와 작업 표시줄의 그림이 서로 달라진다.
+        ///
+        /// 아이콘은 앱이 끝날 때까지 재사용하므로 한 번 만들어 캐시한다.
+        /// </summary>
+        public static Icon AppIcon()
+        {
+            if (_appIcon == null)
+            {
+                using (var stream = OpenResource(AppIconResource))
+                    _appIcon = new Icon(stream);
+            }
+
+            return _appIcon;
+        }
 
         /// <summary>로그인 화면 좌측에 놓는 일러스트(스마트팩토리 아이소메트릭, 배경 투명).</summary>
         public static Image LoginIllustration()

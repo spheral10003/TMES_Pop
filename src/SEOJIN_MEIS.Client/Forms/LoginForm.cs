@@ -47,6 +47,11 @@ namespace SEOJIN_MEIS.Client.Forms
             _context = context;
 
             Text = Strings.Login_Title;
+
+            // 로그인 창이 앱의 첫 창이라, 작업 표시줄에 처음 뜨는 아이콘이 이 값이다.
+            Icon = AppImages.AppIcon();
+            ShowIcon = true;   // FixedDialog는 기본으로 제목 줄 아이콘을 감춘다
+
             groupUserInfo.Text = Strings.Login_UserInfoGroup;
             lblServer.Text = Strings.Login_Server;
             lblUserId.Text = Strings.Login_UserId;

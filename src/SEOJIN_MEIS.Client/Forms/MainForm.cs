@@ -106,6 +106,13 @@ namespace SEOJIN_MEIS.Client.Forms
             _context = context;
 
             Text = Strings.MainForm_Title;
+
+            // 작업 표시줄 아이콘은 이 값이 결정한다.
+            // 이 창은 제목 줄이 없어(FormBorderStyle.None) 창 좌상단에는 안 보이지만,
+            // 작업 표시줄·Alt+Tab에는 그대로 쓰이므로 반드시 지정해야 한다.
+            // (Designer가 아니라 여기서 넣는 이유는 프로젝트 CLAUDE.md 1번 — 디자이너에 커스텀 static 호출 금지.)
+            Icon = AppImages.AppIcon();
+
             lblBrand.Text = "MEIS POP";
             lblBrandSub.Text = "MANUFACTURING SYSTEM";
             lblBreadcrumb.Text = Strings.MainForm_Home;
