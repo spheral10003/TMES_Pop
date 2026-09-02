@@ -934,8 +934,12 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
         /// <summary>접었을 때 남기는 우측 패널 폭 = 세로 손잡이 띠의 폭.</summary>
         private const int InfoCollapsedWidth = 26;
 
-        /// <summary>펼쳤을 때 우측 패널 폭(디자이너의 infoCard 폭과 같게 둘 것).</summary>
-        private const int InfoExpandedWidth = 560;
+        /// <summary>
+        /// 펼쳤을 때 우측 패널 폭(디자이너의 infoCard 폭과 같게 둘 것).
+        /// 손잡이 띠(26px)가 왼쪽을 차지하므로 <b>내용 영역 560 + 손잡이 26</b>이다 —
+        /// 손잡이를 넣으면서 이 값을 그대로 두었더니 우측 입력칸이 잘렸다.
+        /// </summary>
+        private const int InfoExpandedWidth = 586;
 
         /// <summary>펼쳤을 때 하단 영역 높이(디자이너의 bottomCard 높이와 같게 둘 것).</summary>
         private const int BottomExpandedHeight = 320;

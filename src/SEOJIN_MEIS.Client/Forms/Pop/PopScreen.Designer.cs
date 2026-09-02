@@ -348,7 +348,7 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
             this.infoCard.Location = new System.Drawing.Point(947, 2);
             this.infoCard.Name = "infoCard";
             this.infoCard.Padding = new System.Windows.Forms.Padding(1);
-            this.infoCard.Size = new System.Drawing.Size(560, 416);
+            this.infoCard.Size = new System.Drawing.Size(586, 416);
             this.infoCard.TabIndex = 2;
             // 
             // fieldPanel
