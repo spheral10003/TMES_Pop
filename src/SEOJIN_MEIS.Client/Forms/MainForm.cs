@@ -25,7 +25,7 @@ namespace SEOJIN_MEIS.Client.Forms
 {
     /// <summary>
     /// 메인 셸: 좌측 브랜드 블록 + 3-Depth 트리 메뉴(AccordionControl), 상단 바, 우측 탭 스트립 + 화면 영역.
-    /// 상단 바 우측 정보 묶음은 "언어 · 알림 · {이름} 님 환영합니다. · 사용자 · 로그아웃" 순서로 배치하고,
+    /// 상단 바 우측 정보 묶음은 "언어 · 알림 · {이름} 님 환영합니다. · 사용자 · 최소화 · 최대화 · 로그아웃" 순서로 배치하고,
     /// 현재 일시(시계)는 상단 바 가로 가운데에 따로 둔다.
     ///
     /// 색·폰트·아이콘은 전부 <see cref="AppTheme"/>/<see cref="AppIcons"/>를 통해 적용한다(런타임).
@@ -173,7 +173,7 @@ namespace SEOJIN_MEIS.Client.Forms
             AppTheme.ImageIconButton(btnAlerts, AppImages.IconBell, AppTheme.TopBarFore, 18);
             AppTheme.Badge(lblAlertBadge, 16);
 
-            // 우측 상단 정보 묶음: 언어 · 알림 · "{이름} 님 환영합니다." · 사용자 · 로그아웃 (현재 일시는 상단 바 가운데)
+            // 우측 상단 정보 묶음: 언어 · 알림 · "{이름} 님 환영합니다." · 사용자 · 창 버튼 · 로그아웃 (현재 일시는 상단 바 가운데)
             AppTheme.TopBarText(lblWelcome);
             AppTheme.SessionTime(lblSessionTime);
             AppTheme.TopBarCombo(cboLanguage);
@@ -415,7 +415,7 @@ namespace SEOJIN_MEIS.Client.Forms
 
         /// <summary>
         /// 상단 바를 배치한다.
-        /// 우측 묶음(왼쪽 → 오른쪽): 언어 · 알림 · "{이름} 님 환영합니다." · 사용자 · 로그아웃
+        /// 우측 묶음(왼쪽 → 오른쪽): 언어 · 알림 · "{이름} 님 환영합니다." · 사용자 · 최소화 · 최대화 · 로그아웃
         /// 남은 시간은 이 묶음에서 빼내 <b>상단 바 가로 가운데</b>에 따로 둔다.
         /// </summary>
         private void LayoutTopBar()
@@ -429,19 +429,20 @@ namespace SEOJIN_MEIS.Client.Forms
             // 세로 위치는 좌표를 박지 않고 <b>바 높이에서 계산</b>한다 —
             // 예전에는 11/15/21 같은 값이 박혀 있어 바 높이를 줄이자 요소들이 아래로 삐져나왔다.
 
-            // 창 버튼(최소화 · 최대화)은 윈도우 관례대로 맨 오른쪽 끝에 붙이고,
-            // 업무 버튼(로그아웃 등)과는 한 칸 띄워 "창 조작"과 "화면 조작"이 섞여 보이지 않게 한다.
+            // 로그아웃이 맨 오른쪽 끝이다(가장 자주 쓰는 버튼이라 위치를 고정해 둔다).
+            btnLogout.Top = CenterTop(btnLogout);
+            btnLogout.Left = right - btnLogout.Width;
+
+            // 창 버튼(최소화 · 최대화)은 그 왼쪽에 붙이되, 업무 버튼과 한 칸 띄워
+            // "창 조작"과 "화면 조작"이 섞여 보이지 않게 한다.
             btnMaximize.Top = CenterTop(btnMaximize);
-            btnMaximize.Left = right - btnMaximize.Width;
+            btnMaximize.Left = btnLogout.Left - 12 - btnMaximize.Width;
 
             btnMinimize.Top = CenterTop(btnMinimize);
             btnMinimize.Left = btnMaximize.Left - 2 - btnMinimize.Width;
 
-            btnLogout.Top = CenterTop(btnLogout);
-            btnLogout.Left = btnMinimize.Left - 12 - btnLogout.Width;
-
             btnUser.Top = CenterTop(btnUser);
-            btnUser.Left = btnLogout.Left - 4 - btnUser.Width;
+            btnUser.Left = btnMinimize.Left - 12 - btnUser.Width;
 
             lblWelcome.Top = CenterTop(lblWelcome);
             lblWelcome.Left = btnUser.Left - 10 - lblWelcome.Width;
