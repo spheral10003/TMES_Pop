@@ -36,8 +36,8 @@ namespace SEOJIN_MEIS.Client.Forms.WorkIntegratedStatus
             this.lblFilterTitle = new DevExpress.XtraEditors.LabelControl();
             this.lblSerialNo = new DevExpress.XtraEditors.LabelControl();
             this.txtSerialNo = new DevExpress.XtraEditors.TextEdit();
-            this.btnSearch = new DevExpress.XtraEditors.SimpleButton();
-            this.btnExcelExport = new DevExpress.XtraEditors.SimpleButton();
+            this.btnSearch = new SEOJIN_MEIS.Client.Forms.Common.MeisButton();
+            this.btnExcelExport = new SEOJIN_MEIS.Client.Forms.Common.MeisButton();
             this.spacer = new System.Windows.Forms.Panel();
             this.overviewCard = new DevExpress.XtraEditors.PanelControl();
             this.treeOverview = new DevExpress.XtraTreeList.TreeList();
@@ -170,8 +170,8 @@ namespace SEOJIN_MEIS.Client.Forms.WorkIntegratedStatus
         private DevExpress.XtraEditors.LabelControl lblFilterTitle;
         private DevExpress.XtraEditors.LabelControl lblSerialNo;
         private DevExpress.XtraEditors.TextEdit txtSerialNo;
-        private DevExpress.XtraEditors.SimpleButton btnSearch;
-        private DevExpress.XtraEditors.SimpleButton btnExcelExport;
+        private SEOJIN_MEIS.Client.Forms.Common.MeisButton btnSearch;
+        private SEOJIN_MEIS.Client.Forms.Common.MeisButton btnExcelExport;
         private System.Windows.Forms.Panel spacer;
         private DevExpress.XtraEditors.PanelControl overviewCard;
         private DevExpress.XtraEditors.LabelControl lblOverviewTitle;

@@ -39,8 +39,8 @@ namespace SEOJIN_MEIS.Client.Forms
             this.chkRememberId = new DevExpress.XtraEditors.CheckEdit();
             this.panelBottom = new DevExpress.XtraEditors.PanelControl();
             this.lblMessage = new DevExpress.XtraEditors.LabelControl();
-            this.btnConnect = new DevExpress.XtraEditors.SimpleButton();
-            this.btnClose = new DevExpress.XtraEditors.SimpleButton();
+            this.btnConnect = new SEOJIN_MEIS.Client.Forms.Common.MeisButton();
+            this.btnClose = new SEOJIN_MEIS.Client.Forms.Common.MeisButton();
             ((System.ComponentModel.ISupportInitialize)(this.panelLeft)).BeginInit();
             this.panelLeft.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picLogo.Properties)).BeginInit();
@@ -121,7 +121,7 @@ namespace SEOJIN_MEIS.Client.Forms
             this.cboServer.Location = new System.Drawing.Point(140, 40);
             this.cboServer.Name = "cboServer";
             this.cboServer.Properties.Items.AddRange(new object[] {
-            "GUM" });
+            "GUM"});
             this.cboServer.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
             this.cboServer.Size = new System.Drawing.Size(260, 20);
             this.cboServer.TabIndex = 1;
@@ -209,8 +209,6 @@ namespace SEOJIN_MEIS.Client.Forms
             // 
             // btnConnect
             // 
-            this.btnConnect.Appearance.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.btnConnect.Appearance.Options.UseFont = true;
             this.btnConnect.Location = new System.Drawing.Point(368, 22);
             this.btnConnect.Name = "btnConnect";
             this.btnConnect.Size = new System.Drawing.Size(130, 40);
@@ -281,7 +279,7 @@ namespace SEOJIN_MEIS.Client.Forms
         private DevExpress.XtraEditors.CheckEdit chkRememberId;
         private DevExpress.XtraEditors.PanelControl panelBottom;
         private DevExpress.XtraEditors.LabelControl lblMessage;
-        private DevExpress.XtraEditors.SimpleButton btnConnect;
-        private DevExpress.XtraEditors.SimpleButton btnClose;
+        private SEOJIN_MEIS.Client.Forms.Common.MeisButton btnConnect;
+        private SEOJIN_MEIS.Client.Forms.Common.MeisButton btnClose;
     }
 }

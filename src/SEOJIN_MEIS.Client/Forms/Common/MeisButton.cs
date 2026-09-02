@@ -18,7 +18,7 @@ namespace SEOJIN_MEIS.Client.Forms.Common
     /// 아이콘은 <see cref="AppIcons"/>의 SVG 템플릿 문자열을 <see cref="Icon"/>에 넣는다
     /// (예: <c>AppIcons.Search</c>). 넣지 않으면 글자만 가운데에 그린다.
     /// </summary>
-    public class MeisButton : Control
+    public class MeisButton : Control, IButtonControl
     {
         private const int CornerRadius = 2;
         private const int IconSize = 16;
@@ -30,6 +30,8 @@ namespace SEOJIN_MEIS.Client.Forms.Common
         private Color _iconColor;
         private bool _hover;
         private bool _pressed;
+        private bool _selected;
+        private Color _accent = AppTheme.Indigo;
 
         public MeisButton()
         {
@@ -63,10 +65,49 @@ namespace SEOJIN_MEIS.Client.Forms.Common
         /// <summary>글자가 있는 자리를 아이콘 오른쪽부터로 볼지(false면 버튼 전체 기준으로 가운데 정렬).</summary>
         public bool TextAfterIcon { get; set; }
 
+        /// <summary>
+        /// 선택된 상태로 그릴지(탭처럼 여럿 중 하나가 켜져 있는 경우).
+        /// 켜면 <see cref="Accent"/>를 옅게 깐 칩 모양이 된다.
+        /// </summary>
+        public bool Selected
+        {
+            get => _selected;
+            set { _selected = value; _iconImage = null; Invalidate(); }
+        }
+
+        /// <summary>선택 상태에서 쓰는 색. 평상시 모양은 이 값과 무관하게 중립 톤이다.</summary>
+        public Color Accent
+        {
+            get => _accent;
+            set { _accent = value; _iconImage = null; Invalidate(); }
+        }
+
         public override string Text
         {
             get => base.Text;
             set { base.Text = value; Invalidate(); }
+        }
+
+        // ── IButtonControl ─────────────────────────────────────────────────────
+        // 팝업들이 AcceptButton/CancelButton과 DialogResult를 쓴다.
+        // 이걸 구현하지 않으면 <b>대화상자에서 Enter/Esc가 먹지 않는다</b> — 현장에서 자주 쓰는 조작이라
+        // 단순한 모양 교체로 끝낼 수 없는 부분이다.
+
+        /// <summary>이 버튼을 누르면 대화상자가 돌려줄 결과. 팝업의 [확인]/[닫기]가 쓴다.</summary>
+        public DialogResult DialogResult { get; set; } = DialogResult.None;
+
+        /// <summary>기본 버튼(Enter로 눌리는 버튼)으로 지정될 때 호출된다. 표시는 바꾸지 않는다.</summary>
+        public void NotifyDefault(bool value)
+        {
+        }
+
+        /// <summary>클릭한 것과 같게 동작시킨다(Enter/Esc가 이 경로로 들어온다).</summary>
+        public void PerformClick()
+        {
+            if (!Enabled)
+                return;
+
+            OnClick(EventArgs.Empty);
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -77,7 +118,7 @@ namespace SEOJIN_MEIS.Client.Forms.Common
 
             var back = ResolveBackColor();
             var border = ResolveBorderColor();
-            var fore = Enabled ? AppTheme.TextPrimary : AppTheme.ButtonDisabledFore;
+            var fore = ResolveForeColor();
 
             DrawSurface(g, back, border);
 
@@ -99,6 +140,10 @@ namespace SEOJIN_MEIS.Client.Forms.Common
             if (_pressed)
                 return AppTheme.ButtonQuietPressed;
 
+            // 선택된 탭은 포인트 색을 아주 옅게 깐 칩으로 — 글자는 그대로 읽혀야 하므로 진하게 깔지 않는다.
+            if (_selected)
+                return AppTheme.Blend(_accent, AppTheme.Card, 0.18f);
+
             return _hover ? AppTheme.GridRowAlt : AppTheme.Card;
         }
 
@@ -107,9 +152,19 @@ namespace SEOJIN_MEIS.Client.Forms.Common
             if (!Enabled)
                 return AppTheme.ButtonDisabledBack;
 
+            if (_selected)
+                return _accent;
+
             // 올려놓거나 누르면 테두리만 한 톤 진해진다 — 시안처럼 색을 쓰지 않는다.
             return _hover || _pressed ? AppTheme.TextMuted : AppTheme.CardBorder;
         }
+
+        /// <summary>
+        /// 글자·아이콘 색. 선택 상태여도 진한 글자를 그대로 둔다 —
+        /// 바탕 칩이 이미 상태를 말해 주므로 글자까지 물들이면 오히려 읽기 나빠진다.
+        /// </summary>
+        private Color ResolveForeColor() =>
+            Enabled ? AppTheme.TextPrimary : AppTheme.ButtonDisabledFore;
 
         private void DrawSurface(Graphics g, Color back, Color border)
         {
@@ -199,6 +254,23 @@ namespace SEOJIN_MEIS.Client.Forms.Common
             base.OnMouseUp(e);
             _pressed = false;
             Invalidate();
+        }
+
+        /// <summary>
+        /// <see cref="DialogResult"/>가 지정돼 있으면 누를 때 대화상자 결과를 세운다.
+        /// WinForms의 Button이 하는 일을 그대로 옮긴 것으로, 이게 없으면
+        /// <c>btnClose.DialogResult = Cancel</c> 같은 지정이 아무 일도 하지 않는다.
+        /// </summary>
+        protected override void OnClick(EventArgs e)
+        {
+            base.OnClick(e);
+
+            if (DialogResult == DialogResult.None)
+                return;
+
+            var form = FindForm();
+            if (form != null)
+                form.DialogResult = DialogResult;
         }
 
         protected override void OnEnabledChanged(EventArgs e)

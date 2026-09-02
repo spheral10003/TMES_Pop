@@ -26,7 +26,7 @@ namespace SEOJIN_MEIS.Client.Forms.ProductionStatus
             this.lblFilterTitle = new DevExpress.XtraEditors.LabelControl();
             this.lblDate = new DevExpress.XtraEditors.LabelControl();
             this.dateStandard = new DevExpress.XtraEditors.DateEdit();
-            this.btnSearch = new DevExpress.XtraEditors.SimpleButton();
+            this.btnSearch = new SEOJIN_MEIS.Client.Forms.Common.MeisButton();
             this.spacer = new System.Windows.Forms.Panel();
             this.gridCard = new DevExpress.XtraEditors.PanelControl();
             this.lblGridTitle = new DevExpress.XtraEditors.LabelControl();
@@ -157,7 +157,7 @@ namespace SEOJIN_MEIS.Client.Forms.ProductionStatus
         private DevExpress.XtraEditors.LabelControl lblFilterTitle;
         private DevExpress.XtraEditors.LabelControl lblDate;
         private DevExpress.XtraEditors.DateEdit dateStandard;
-        private DevExpress.XtraEditors.SimpleButton btnSearch;
+        private SEOJIN_MEIS.Client.Forms.Common.MeisButton btnSearch;
         private System.Windows.Forms.Panel spacer;
         private DevExpress.XtraEditors.PanelControl gridCard;
         private DevExpress.XtraEditors.LabelControl lblGridTitle;

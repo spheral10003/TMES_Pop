@@ -40,8 +40,8 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
             this.lblAlarmType = new DevExpress.XtraEditors.LabelControl();
             this.cboAlarmType = new DevExpress.XtraEditors.ComboBoxEdit();
             this.footerPanel = new DevExpress.XtraEditors.PanelControl();
-            this.btnSend = new DevExpress.XtraEditors.SimpleButton();
-            this.btnClose = new DevExpress.XtraEditors.SimpleButton();
+            this.btnSend = new SEOJIN_MEIS.Client.Forms.Common.MeisButton();
+            this.btnClose = new SEOJIN_MEIS.Client.Forms.Common.MeisButton();
             ((System.ComponentModel.ISupportInitialize)(this.headerPanel)).BeginInit();
             this.headerPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.headerIcon)).BeginInit();
@@ -282,7 +282,7 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
         private DevExpress.XtraEditors.LabelControl lblRemark;
         private DevExpress.XtraEditors.MemoEdit txtRemark;
         private DevExpress.XtraEditors.PanelControl footerPanel;
-        private DevExpress.XtraEditors.SimpleButton btnSend;
-        private DevExpress.XtraEditors.SimpleButton btnClose;
+        private SEOJIN_MEIS.Client.Forms.Common.MeisButton btnSend;
+        private SEOJIN_MEIS.Client.Forms.Common.MeisButton btnClose;
     }
 }

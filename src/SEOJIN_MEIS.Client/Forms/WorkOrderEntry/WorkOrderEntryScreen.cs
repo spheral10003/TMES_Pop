@@ -73,8 +73,8 @@ namespace SEOJIN_MEIS.Client.Forms.WorkOrderEntry
             AppTheme.CodeEditor(txtWorkOrderNo);
             AppTheme.CodeEditor(txtSerialNo);
 
-            AppTheme.AccentButton(btnSearch, AppTheme.Indigo, AppIcons.Search);
-            AppTheme.AccentButton(btnWork, AppTheme.Emerald, AppIcons.Play);
+            btnSearch.Icon = AppIcons.Search;
+            btnWork.Icon = AppIcons.Play;
 
             AppTheme.Grid(grid, gridView, AppTheme.Indigo);
         }

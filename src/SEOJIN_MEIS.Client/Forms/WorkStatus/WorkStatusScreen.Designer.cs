@@ -31,7 +31,7 @@ namespace SEOJIN_MEIS.Client.Forms.WorkStatus
         private void InitializeComponent()
         {
             this.topCard = new DevExpress.XtraEditors.PanelControl();
-            this.btnSearch = new DevExpress.XtraEditors.SimpleButton();
+            this.btnSearch = new SEOJIN_MEIS.Client.Forms.Common.MeisButton();
             this.lblOrderDate = new DevExpress.XtraEditors.LabelControl();
             this.dateFrom = new DevExpress.XtraEditors.DateEdit();
             this.lblDateTilde = new DevExpress.XtraEditors.LabelControl();
@@ -415,7 +415,7 @@ namespace SEOJIN_MEIS.Client.Forms.WorkStatus
         #endregion
 
         private DevExpress.XtraEditors.PanelControl topCard;
-        private DevExpress.XtraEditors.SimpleButton btnSearch;
+        private SEOJIN_MEIS.Client.Forms.Common.MeisButton btnSearch;
         private DevExpress.XtraEditors.LabelControl lblOrderDate;
         private DevExpress.XtraEditors.DateEdit dateFrom;
         private DevExpress.XtraEditors.LabelControl lblDateTilde;

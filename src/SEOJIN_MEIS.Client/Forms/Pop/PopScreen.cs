@@ -219,7 +219,6 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
             AppTheme.Banner(lblProgressState, AppTheme.Violet, BannerHeight);
 
             AppTheme.CheckBox(chkManualWrench);
-            AppTheme.AccentButton(btnSaveResults, AppTheme.Indigo);
 
             AppTheme.Grid(gridMaterial, gridViewMaterial, AppTheme.Emerald);
             AppTheme.Grid(gridBomSpec, gridViewBomSpec, AppTheme.Indigo);
@@ -740,18 +739,11 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
             StyleTabButton(btnTabEquipment, _activeTab == PopTab.Equipment);
         }
 
-        /// <summary>선택된 탭은 연한 초록 칩, 나머지는 회색 외곽선 버튼으로 그린다.</summary>
-        private static void StyleTabButton(SimpleButton button, bool active)
+        /// <summary>선택된 탭은 연한 초록 칩, 나머지는 기본(흰 바탕 + 회색 테두리)으로 그린다.</summary>
+        private static void StyleTabButton(MeisButton button, bool active)
         {
-            if (!active)
-            {
-                AppTheme.QuietButton(button, AppTheme.Slate);
-                return;
-            }
-
-            AppTheme.QuietButton(button, AppTheme.Emerald);
-            button.Appearance.BackColor = AppTheme.Blend(AppTheme.Emerald, AppTheme.Card, 0.18f);
-            button.Appearance.Options.UseBackColor = true;
+            button.Accent = AppTheme.Emerald;
+            button.Selected = active;
         }
 
         // ─────────────────────────────────────────────────────────────────────────

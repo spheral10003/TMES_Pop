@@ -99,8 +99,6 @@ namespace SEOJIN_MEIS.Client.Forms.Common
             AppTheme.IconButton(btnClose, AppIcons.Close, Color.White, 14);
             btnClose.AppearanceHovered.BackColor = ControlPaint.Dark(accent, 0.2f);
             btnClose.AppearanceHovered.Options.UseBackColor = true;
-            AppTheme.AccentButton(btnOk, accent);
-            AppTheme.QuietButton(btnCancel, AppTheme.Slate);
         }
 
         /// <summary>성격별 기본 제목(제목을 지정하지 않았을 때).</summary>

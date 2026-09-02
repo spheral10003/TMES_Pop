@@ -50,7 +50,7 @@ namespace SEOJIN_MEIS.Client.Forms.ProductionStatus
             AppTheme.SectionTitle(lblGridTitle, AppTheme.Cyan);
             AppTheme.BodyText(lblDate);
             AppTheme.Editor(dateStandard);
-            AppTheme.AccentButton(btnSearch, AppTheme.Cyan, AppIcons.Search);
+            btnSearch.Icon = AppIcons.Search;
             AppTheme.Grid(grid, gridView, AppTheme.Cyan);
         }
 

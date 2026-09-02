@@ -75,15 +75,13 @@ namespace SEOJIN_MEIS.Client.Forms.WorkStatus
             AppTheme.SectionTitle(lblListTitle, AppTheme.Cyan);
             AppTheme.BodyText(lblKeyword);
             AppTheme.CodeEditor(txtKeyword);
-            AppTheme.AccentButton(btnSearch, AppTheme.Cyan, AppIcons.Search);
+            btnSearch.Icon = AppIcons.Search;
             AppTheme.Grid(grid, gridView, AppTheme.Cyan);
 
             headerIcon.SvgImage = AppIcons.Get(AppIcons.Search, Color.White);
             headerIcon.SizeMode = SvgImageSizeMode.Stretch;
             headerIcon.BackColor = Color.Transparent;
 
-            AppTheme.AccentButton(btnSelect, AppTheme.Cyan);
-            AppTheme.QuietButton(btnClose, AppTheme.Slate);
         }
 
         private void ConfigureGrid()

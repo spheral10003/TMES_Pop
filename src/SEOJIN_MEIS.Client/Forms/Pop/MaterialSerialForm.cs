@@ -87,8 +87,6 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
             headerIcon.SizeMode = SvgImageSizeMode.Stretch;
             headerIcon.BackColor = Color.Transparent;
 
-            AppTheme.AccentButton(btnSave, AppTheme.Indigo);
-            AppTheme.QuietButton(btnClose, AppTheme.Slate);
         }
 
         /// <summary>

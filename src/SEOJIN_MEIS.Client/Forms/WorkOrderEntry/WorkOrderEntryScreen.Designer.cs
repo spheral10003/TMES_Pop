@@ -25,8 +25,8 @@ namespace SEOJIN_MEIS.Client.Forms.WorkOrderEntry
         private void InitializeComponent()
         {
             this.topCard = new DevExpress.XtraEditors.PanelControl();
-            this.btnSearch = new DevExpress.XtraEditors.SimpleButton();
-            this.btnWork = new DevExpress.XtraEditors.SimpleButton();
+            this.btnSearch = new SEOJIN_MEIS.Client.Forms.Common.MeisButton();
+            this.btnWork = new SEOJIN_MEIS.Client.Forms.Common.MeisButton();
             this.lblWorkOrderNo = new DevExpress.XtraEditors.LabelControl();
             this.txtWorkOrderNo = new DevExpress.XtraEditors.TextEdit();
             this.lblSerialNo = new DevExpress.XtraEditors.LabelControl();
@@ -178,8 +178,8 @@ namespace SEOJIN_MEIS.Client.Forms.WorkOrderEntry
         #endregion
 
         private DevExpress.XtraEditors.PanelControl topCard;
-        private DevExpress.XtraEditors.SimpleButton btnSearch;
-        private DevExpress.XtraEditors.SimpleButton btnWork;
+        private SEOJIN_MEIS.Client.Forms.Common.MeisButton btnSearch;
+        private SEOJIN_MEIS.Client.Forms.Common.MeisButton btnWork;
         private DevExpress.XtraEditors.LabelControl lblWorkOrderNo;
         private DevExpress.XtraEditors.TextEdit txtWorkOrderNo;
         private DevExpress.XtraEditors.LabelControl lblSerialNo;

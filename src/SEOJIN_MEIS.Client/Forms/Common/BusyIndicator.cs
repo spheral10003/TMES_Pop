@@ -130,12 +130,12 @@ namespace SEOJIN_MEIS.Client.Forms.Common
 
         private void DrawTexts(Graphics g)
         {
-            var titleBounds = new Rectangle(TextLeft, 28, Width - TextLeft - 14, 22);
-            TextRenderer.DrawText(g, Strings.Common_PleaseWait, AppTheme.TitleFont, titleBounds,
+            var titleBounds = new Rectangle(TextLeft, 20, Width - TextLeft - 12, 20);
+            TextRenderer.DrawText(g, Strings.Common_PleaseWait, AppTheme.BodyBoldFont, titleBounds,
                 AppTheme.TextPrimary, TextFormatFlags.Left | TextFormatFlags.NoPrefix);
 
-            var messageBounds = new Rectangle(TextLeft, 54, Width - TextLeft - 14, 20);
-            TextRenderer.DrawText(g, Strings.Common_Loading, AppTheme.BodyFont, messageBounds,
+            var messageBounds = new Rectangle(TextLeft, 42, Width - TextLeft - 12, 18);
+            TextRenderer.DrawText(g, Strings.Common_Loading, AppTheme.SmallFont, messageBounds,
                 AppTheme.TextMuted, TextFormatFlags.Left | TextFormatFlags.NoPrefix);
         }
 

@@ -74,7 +74,6 @@ namespace SEOJIN_MEIS.Client.Forms
             AppTheme.BodyText(lblWorkstation, true);
 
             AppTheme.Caption(lblMessage);
-            AppTheme.QuietButton(btnClose, AppTheme.Slate);
         }
 
         private string GetInitial()

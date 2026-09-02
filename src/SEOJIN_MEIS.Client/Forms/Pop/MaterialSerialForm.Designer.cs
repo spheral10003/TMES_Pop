@@ -42,8 +42,8 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
             this.lblItemCode = new DevExpress.XtraEditors.LabelControl();
             this.txtItemCode = new DevExpress.XtraEditors.TextEdit();
             this.footerPanel = new DevExpress.XtraEditors.PanelControl();
-            this.btnSave = new DevExpress.XtraEditors.SimpleButton();
-            this.btnClose = new DevExpress.XtraEditors.SimpleButton();
+            this.btnSave = new SEOJIN_MEIS.Client.Forms.Common.MeisButton();
+            this.btnClose = new SEOJIN_MEIS.Client.Forms.Common.MeisButton();
             ((System.ComponentModel.ISupportInitialize)(this.headerPanel)).BeginInit();
             this.headerPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.headerIcon)).BeginInit();
@@ -296,7 +296,7 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
         private DevExpress.XtraGrid.GridControl grid;
         private SEOJIN_MEIS.Client.Forms.Common.MeisGridView gridView;
         private DevExpress.XtraEditors.PanelControl footerPanel;
-        private DevExpress.XtraEditors.SimpleButton btnSave;
-        private DevExpress.XtraEditors.SimpleButton btnClose;
+        private SEOJIN_MEIS.Client.Forms.Common.MeisButton btnSave;
+        private SEOJIN_MEIS.Client.Forms.Common.MeisButton btnClose;
     }
 }

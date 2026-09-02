@@ -67,8 +67,6 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
             headerIcon.SizeMode = SvgImageSizeMode.Stretch;
             headerIcon.BackColor = Color.Transparent;
 
-            AppTheme.AccentButton(btnSave, AppTheme.Violet);
-            AppTheme.QuietButton(btnClose, AppTheme.Slate);
         }
 
         /// <summary>부모 창(없으면 화면) 가운데에 띄운다.</summary>

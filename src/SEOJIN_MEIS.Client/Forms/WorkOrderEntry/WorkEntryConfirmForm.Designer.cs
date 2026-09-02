@@ -33,8 +33,8 @@ namespace SEOJIN_MEIS.Client.Forms.WorkOrderEntry
             this.gridView = new SEOJIN_MEIS.Client.Forms.Common.MeisGridView();
             this.lblListTitle = new DevExpress.XtraEditors.LabelControl();
             this.footerPanel = new DevExpress.XtraEditors.PanelControl();
-            this.btnMove = new DevExpress.XtraEditors.SimpleButton();
-            this.btnClose = new DevExpress.XtraEditors.SimpleButton();
+            this.btnMove = new SEOJIN_MEIS.Client.Forms.Common.MeisButton();
+            this.btnClose = new SEOJIN_MEIS.Client.Forms.Common.MeisButton();
             ((System.ComponentModel.ISupportInitialize)(this.headerPanel)).BeginInit();
             this.headerPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.headerIcon)).BeginInit();
@@ -197,7 +197,7 @@ namespace SEOJIN_MEIS.Client.Forms.WorkOrderEntry
         private DevExpress.XtraGrid.GridControl grid;
         private SEOJIN_MEIS.Client.Forms.Common.MeisGridView gridView;
         private DevExpress.XtraEditors.PanelControl footerPanel;
-        private DevExpress.XtraEditors.SimpleButton btnMove;
-        private DevExpress.XtraEditors.SimpleButton btnClose;
+        private SEOJIN_MEIS.Client.Forms.Common.MeisButton btnMove;
+        private SEOJIN_MEIS.Client.Forms.Common.MeisButton btnClose;
     }
 }

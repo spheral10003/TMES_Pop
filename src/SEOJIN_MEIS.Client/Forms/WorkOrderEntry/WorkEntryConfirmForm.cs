@@ -74,8 +74,6 @@ namespace SEOJIN_MEIS.Client.Forms.WorkOrderEntry
             headerIcon.SizeMode = SvgImageSizeMode.Stretch;
             headerIcon.BackColor = Color.Transparent;
 
-            AppTheme.AccentButton(btnMove, AppTheme.Indigo);
-            AppTheme.QuietButton(btnClose, AppTheme.Slate);
         }
 
         /// <summary>부모 창(없으면 화면) 가운데에 띄운다.</summary>

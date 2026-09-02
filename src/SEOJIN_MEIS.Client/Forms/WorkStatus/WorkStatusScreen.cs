@@ -123,7 +123,7 @@ namespace SEOJIN_MEIS.Client.Forms.WorkStatus
             AppTheme.Editor(cboProgressState);
             AppTheme.Editor(cboSpecResultState);
 
-            AppTheme.AccentButton(btnSearch, AppTheme.Cyan, AppIcons.Search);
+            btnSearch.Icon = AppIcons.Search;
             AppTheme.IconButton(btnItemPick, AppIcons.Search, AppTheme.Cyan, 16);
 
             AppTheme.Grid(gridOrders, gridViewOrders, AppTheme.Cyan);

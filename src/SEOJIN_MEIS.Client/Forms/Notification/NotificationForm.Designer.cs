@@ -29,8 +29,8 @@ namespace SEOJIN_MEIS.Client.Forms.Notification
             this.headerPanel = new DevExpress.XtraEditors.PanelControl();
             this.headerIcon = new DevExpress.XtraEditors.SvgImageBox();
             this.lblTitle = new DevExpress.XtraEditors.LabelControl();
-            this.btnSearch = new DevExpress.XtraEditors.SimpleButton();
-            this.btnClose = new DevExpress.XtraEditors.SimpleButton();
+            this.btnSearch = new SEOJIN_MEIS.Client.Forms.Common.MeisButton();
+            this.btnClose = new SEOJIN_MEIS.Client.Forms.Common.MeisButton();
             this.bodyPanel = new DevExpress.XtraEditors.PanelControl();
             this.detailCard = new DevExpress.XtraEditors.PanelControl();
             this.lblSenderId = new DevExpress.XtraEditors.LabelControl();
@@ -45,7 +45,7 @@ namespace SEOJIN_MEIS.Client.Forms.Notification
             this.gridView = new SEOJIN_MEIS.Client.Forms.Common.MeisGridView();
             this.listHeader = new DevExpress.XtraEditors.PanelControl();
             this.lblListTitle = new DevExpress.XtraEditors.LabelControl();
-            this.btnMarkRead = new DevExpress.XtraEditors.SimpleButton();
+            this.btnMarkRead = new SEOJIN_MEIS.Client.Forms.Common.MeisButton();
             this.spacerFilter = new System.Windows.Forms.Panel();
             this.filterCard = new DevExpress.XtraEditors.PanelControl();
             this.lblUserName = new DevExpress.XtraEditors.LabelControl();
@@ -389,8 +389,8 @@ namespace SEOJIN_MEIS.Client.Forms.Notification
         private DevExpress.XtraEditors.PanelControl headerPanel;
         private DevExpress.XtraEditors.SvgImageBox headerIcon;
         private DevExpress.XtraEditors.LabelControl lblTitle;
-        private DevExpress.XtraEditors.SimpleButton btnSearch;
-        private DevExpress.XtraEditors.SimpleButton btnClose;
+        private SEOJIN_MEIS.Client.Forms.Common.MeisButton btnSearch;
+        private SEOJIN_MEIS.Client.Forms.Common.MeisButton btnClose;
         private DevExpress.XtraEditors.PanelControl bodyPanel;
         private DevExpress.XtraEditors.PanelControl filterCard;
         private DevExpress.XtraEditors.LabelControl lblUserName;
@@ -403,7 +403,7 @@ namespace SEOJIN_MEIS.Client.Forms.Notification
         private DevExpress.XtraEditors.PanelControl listCard;
         private DevExpress.XtraEditors.PanelControl listHeader;
         private DevExpress.XtraEditors.LabelControl lblListTitle;
-        private DevExpress.XtraEditors.SimpleButton btnMarkRead;
+        private SEOJIN_MEIS.Client.Forms.Common.MeisButton btnMarkRead;
         private DevExpress.XtraGrid.GridControl grid;
         private SEOJIN_MEIS.Client.Forms.Common.MeisGridView gridView;
         private System.Windows.Forms.Panel spacerMiddle;

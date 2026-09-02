@@ -74,8 +74,8 @@ namespace SEOJIN_MEIS.Client.Forms.WorkIntegratedStatus
             AppTheme.BodyText(lblSerialNo);
             AppTheme.CodeEditor(txtSerialNo);
 
-            AppTheme.AccentButton(btnSearch, AppTheme.Violet, AppIcons.Search);
-            AppTheme.AccentButton(btnExcelExport, AppTheme.Emerald, AppIcons.Clipboard);
+            btnSearch.Icon = AppIcons.Search;
+            btnExcelExport.Icon = AppIcons.Clipboard;
 
             AppTheme.Tree(treeOverview, AppTheme.Violet);
         }

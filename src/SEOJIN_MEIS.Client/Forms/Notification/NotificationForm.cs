@@ -97,13 +97,9 @@ namespace SEOJIN_MEIS.Client.Forms.Notification
             headerIcon.SizeMode = SvgImageSizeMode.Stretch;
             headerIcon.BackColor = Color.Transparent;
 
-            // 색 띠 위에 얹히는 버튼이라 본문 버튼과 달리 흰 바탕/남보라 글자로 둔다.
-            AppTheme.AccentButton(btnSearch, Color.White);
-            btnSearch.Appearance.ForeColor = AppTheme.Indigo;
-            btnSearch.Appearance.Options.UseForeColor = true;
-            AppTheme.AccentButton(btnClose, Color.White);
-            btnClose.Appearance.ForeColor = AppTheme.Indigo;
-            btnClose.Appearance.Options.UseForeColor = true;
+            // 헤더 색 띠 위에 얹히지만 버튼 자체가 흰 바탕이라 그대로 두어도 읽힌다
+            // (MeisButton은 스스로 흰 바탕 + 회색 테두리로 그린다).
+            btnSearch.Icon = AppIcons.Search;
 
             AppTheme.ContentSurface(bodyPanel);
             spacerFilter.BackColor = AppTheme.Surface;
@@ -122,7 +118,7 @@ namespace SEOJIN_MEIS.Client.Forms.Notification
             AppTheme.Editor(cboReadState);
 
             AppTheme.SectionTitle(lblListTitle, AppTheme.Indigo);
-            AppTheme.QuietButton(btnMarkRead, AppTheme.Indigo, AppIcons.Check);
+            btnMarkRead.Icon = AppIcons.Check;
             AppTheme.Grid(grid, gridView, AppTheme.Indigo);
 
             AppTheme.BodyText(lblSenderId);

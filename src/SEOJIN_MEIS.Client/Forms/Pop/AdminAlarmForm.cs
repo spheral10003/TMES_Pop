@@ -93,8 +93,6 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
             headerIcon.SizeMode = SvgImageSizeMode.Stretch;
             headerIcon.BackColor = Color.Transparent;
 
-            AppTheme.AccentButton(btnSend, AppTheme.Amber);
-            AppTheme.QuietButton(btnClose, AppTheme.Slate);
         }
 
         private void cboAlarmType_SelectedIndexChanged(object sender, EventArgs e) => ApplySelectedType();

@@ -92,8 +92,6 @@ namespace SEOJIN_MEIS.Client.Forms
             AppTheme.Editor(cboWorkstation);
             AppTheme.CheckBox(chkRememberId);
 
-            AppTheme.AccentButton(btnConnect, AppTheme.Indigo);
-            AppTheme.QuietButton(btnClose, AppTheme.Slate);
 
             lblMessage.Appearance.ForeColor = AppTheme.Rose;
             lblMessage.Appearance.Font = AppTheme.BodyBoldFont;

@@ -37,10 +37,10 @@ namespace SEOJIN_MEIS.Client.Forms.WorkStatus
             this.searchCard = new DevExpress.XtraEditors.PanelControl();
             this.lblKeyword = new DevExpress.XtraEditors.LabelControl();
             this.txtKeyword = new DevExpress.XtraEditors.TextEdit();
-            this.btnSearch = new DevExpress.XtraEditors.SimpleButton();
+            this.btnSearch = new SEOJIN_MEIS.Client.Forms.Common.MeisButton();
             this.footerPanel = new DevExpress.XtraEditors.PanelControl();
-            this.btnSelect = new DevExpress.XtraEditors.SimpleButton();
-            this.btnClose = new DevExpress.XtraEditors.SimpleButton();
+            this.btnSelect = new SEOJIN_MEIS.Client.Forms.Common.MeisButton();
+            this.btnClose = new SEOJIN_MEIS.Client.Forms.Common.MeisButton();
             ((System.ComponentModel.ISupportInitialize)(this.headerPanel)).BeginInit();
             this.headerPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.headerIcon)).BeginInit();
@@ -253,14 +253,14 @@ namespace SEOJIN_MEIS.Client.Forms.WorkStatus
         private DevExpress.XtraEditors.PanelControl searchCard;
         private DevExpress.XtraEditors.LabelControl lblKeyword;
         private DevExpress.XtraEditors.TextEdit txtKeyword;
-        private DevExpress.XtraEditors.SimpleButton btnSearch;
+        private SEOJIN_MEIS.Client.Forms.Common.MeisButton btnSearch;
         private System.Windows.Forms.Panel spacer;
         private DevExpress.XtraEditors.PanelControl listCard;
         private DevExpress.XtraEditors.LabelControl lblListTitle;
         private DevExpress.XtraGrid.GridControl grid;
         private SEOJIN_MEIS.Client.Forms.Common.MeisGridView gridView;
         private DevExpress.XtraEditors.PanelControl footerPanel;
-        private DevExpress.XtraEditors.SimpleButton btnSelect;
-        private DevExpress.XtraEditors.SimpleButton btnClose;
+        private SEOJIN_MEIS.Client.Forms.Common.MeisButton btnSelect;
+        private SEOJIN_MEIS.Client.Forms.Common.MeisButton btnClose;
     }
 }

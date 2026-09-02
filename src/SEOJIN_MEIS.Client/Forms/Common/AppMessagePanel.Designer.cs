@@ -31,8 +31,8 @@ namespace SEOJIN_MEIS.Client.Forms.Common
             this.bodyPanel = new DevExpress.XtraEditors.PanelControl();
             this.lblMessage = new DevExpress.XtraEditors.LabelControl();
             this.footerPanel = new DevExpress.XtraEditors.PanelControl();
-            this.btnOk = new DevExpress.XtraEditors.SimpleButton();
-            this.btnCancel = new DevExpress.XtraEditors.SimpleButton();
+            this.btnOk = new SEOJIN_MEIS.Client.Forms.Common.MeisButton();
+            this.btnCancel = new SEOJIN_MEIS.Client.Forms.Common.MeisButton();
             ((System.ComponentModel.ISupportInitialize)(this.headerPanel)).BeginInit();
             this.headerPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.bodyPanel)).BeginInit();
@@ -145,7 +145,7 @@ namespace SEOJIN_MEIS.Client.Forms.Common
         private DevExpress.XtraEditors.PanelControl bodyPanel;
         private DevExpress.XtraEditors.LabelControl lblMessage;
         private DevExpress.XtraEditors.PanelControl footerPanel;
-        private DevExpress.XtraEditors.SimpleButton btnOk;
-        private DevExpress.XtraEditors.SimpleButton btnCancel;
+        private SEOJIN_MEIS.Client.Forms.Common.MeisButton btnOk;
+        private SEOJIN_MEIS.Client.Forms.Common.MeisButton btnCancel;
     }
 }
