@@ -74,6 +74,10 @@
   <data name="Message_TitleWarning" xml:space="preserve"><value>Cảnh báo</value></data>
   <data name="Message_TitleError" xml:space="preserve"><value>Lỗi</value></data>
   <data name="Pop_Title" xml:space="preserve"><value>POP</value></data>
+  <data name="Pop_Collapse" xml:space="preserve"><value>Thu gọn</value></data>
+  <data name="Pop_Expand" xml:space="preserve"><value>Mở rộng</value></data>
+  <data name="Pop_ToggleInfo" xml:space="preserve"><value>Thông tin công đoạn</value></data>
+  <data name="Pop_ToggleTabs" xml:space="preserve"><value>Tab dưới</value></data>
   <data name="Pop_EquipmentStatus" xml:space="preserve"><value>Trạng thái thiết bị</value></data>
   <data name="Pop_Start" xml:space="preserve"><value>Bắt đầu</value></data>
   <data name="Pop_Stop" xml:space="preserve"><value>Dừng</value></data>

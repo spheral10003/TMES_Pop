@@ -182,6 +182,11 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
             AppTheme.PlainPanel(bannerPanel);
             AppTheme.PlainPanel(tabHeaderPanel);
             AppTheme.PlainPanel(tabBodyPanel);
+
+            // 헤더(도킹된 제목/탭 줄) 위에 얹혀 보이도록 맨 앞으로 올린다.
+            btnInfoAccordion.BringToFront();
+            btnTabsAccordion.BringToFront();
+            RefreshAccordionButtons();
             viewerSurface.BackColor = AppTheme.Card;
 
             // 공정 제어는 TileBar 타일 — 색은 동작의 성격을 따른다
@@ -922,6 +927,97 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
                         btnSaveResults.Enabled = true;
                 }
             }
+        }
+
+        // ─────────────────────────────────────────────────────────────────────────
+        //  아코디언 — 우측 공정 정보 / 하단 탭을 접어 도면을 크게 본다
+        // ─────────────────────────────────────────────────────────────────────────
+
+        /// <summary>접었을 때 남기는 우측 패널 폭. 손잡이 버튼만 보일 만큼만 남긴다.</summary>
+        private const int InfoCollapsedWidth = 40;
+
+        /// <summary>펼쳤을 때 우측 패널 폭(디자이너의 infoCard 폭과 같게 둘 것).</summary>
+        private const int InfoExpandedWidth = 560;
+
+        /// <summary>펼쳤을 때 하단 영역 높이(디자이너의 bottomCard 높이와 같게 둘 것).</summary>
+        private const int BottomExpandedHeight = 320;
+
+        private bool _infoExpanded = true;
+        private bool _bottomExpanded = true;
+
+        private void btnInfoAccordion_Click(object sender, EventArgs e) => SetInfoExpanded(!_infoExpanded);
+
+        private void btnTabsAccordion_Click(object sender, EventArgs e) => SetBottomExpanded(!_bottomExpanded);
+
+        /// <summary>
+        /// 우측 &lt;진행 중 공정 정보&gt;를 접었다 편다.
+        ///
+        /// 도면(viewerCard)은 <c>Dock = Fill</c>이라 <b>옆 패널 폭만 줄이면 그만큼 자동으로 넓어진다</b> —
+        /// 도면 크기를 직접 계산해 넣지 말 것(창 크기가 바뀌면 어긋난다).
+        /// 접어도 손잡이는 남겨야 하므로 폭을 0으로 만들지 않고 <see cref="InfoCollapsedWidth"/>만 남긴다.
+        /// </summary>
+        private void SetInfoExpanded(bool expanded)
+        {
+            _infoExpanded = expanded;
+
+            // 여러 컨트롤을 연달아 바꾸면 그때마다 다시 배치되어 화면이 깜빡인다.
+            mainPanel.SuspendLayout();
+            try
+            {
+                lblInfoTitle.Visible = expanded;
+                fieldPanel.Visible = expanded;
+                bannerPanel.Visible = expanded;
+
+                infoCard.Width = expanded ? InfoExpandedWidth : InfoCollapsedWidth;
+                spacerMain.Visible = expanded;
+            }
+            finally
+            {
+                mainPanel.ResumeLayout(true);
+            }
+
+            RefreshAccordionButtons();
+        }
+
+        /// <summary>
+        /// 하단 탭 영역을 접었다 편다. 접어도 <b>탭 줄(tabHeaderPanel)은 그대로 남긴다</b> —
+        /// 어떤 탭을 보고 있었는지 유지되고, 다시 펴는 손잡이도 그 줄에 있다.
+        /// </summary>
+        private void SetBottomExpanded(bool expanded)
+        {
+            _bottomExpanded = expanded;
+
+            SuspendLayout();
+            try
+            {
+                tabBodyPanel.Visible = expanded;
+
+                // 접었을 때 높이 = 탭 줄 + 카드 안쪽 여백(위/아래).
+                bottomCard.Height = expanded
+                    ? BottomExpandedHeight
+                    : tabHeaderPanel.Height + bottomCard.Padding.Vertical + 4;
+            }
+            finally
+            {
+                ResumeLayout(true);
+            }
+
+            RefreshAccordionButtons();
+        }
+
+        /// <summary>
+        /// 손잡이 버튼의 화살표와 색을 지금 상태에 맞춘다.
+        /// 화살표는 <b>누르면 일어날 일</b>을 가리킨다 — 펼쳐져 있으면 접는 방향(▶ / ▼)이다.
+        /// </summary>
+        private void RefreshAccordionButtons()
+        {
+            btnInfoAccordion.Text = _infoExpanded ? "▶" : "◀";
+            btnInfoAccordion.ToolTip = _infoExpanded ? Strings.Pop_Collapse : Strings.Pop_Expand;
+            AppTheme.QuietButton(btnInfoAccordion, AppTheme.Violet);
+
+            btnTabsAccordion.Text = _bottomExpanded ? "▼" : "▲";
+            btnTabsAccordion.ToolTip = _bottomExpanded ? Strings.Pop_Collapse : Strings.Pop_Expand;
+            AppTheme.QuietButton(btnTabsAccordion, AppTheme.Cyan);
         }
 
         // ─────────────────────────────────────────────────────────────────────────

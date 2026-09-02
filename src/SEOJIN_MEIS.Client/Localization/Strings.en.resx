@@ -78,6 +78,10 @@
   <data name="Message_TitleError" xml:space="preserve"><value>Error</value></data>
 
   <data name="Pop_Title" xml:space="preserve"><value>POP</value></data>
+  <data name="Pop_Collapse" xml:space="preserve"><value>Collapse</value></data>
+  <data name="Pop_Expand" xml:space="preserve"><value>Expand</value></data>
+  <data name="Pop_ToggleInfo" xml:space="preserve"><value>Process info</value></data>
+  <data name="Pop_ToggleTabs" xml:space="preserve"><value>Bottom tabs</value></data>
   <data name="Pop_EquipmentStatus" xml:space="preserve"><value>Equipment Status</value></data>
   <data name="Pop_Start" xml:space="preserve"><value>Start</value></data>
   <data name="Pop_Stop" xml:space="preserve"><value>Stop</value></data>

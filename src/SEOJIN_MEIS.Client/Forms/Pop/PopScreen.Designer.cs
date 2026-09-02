@@ -106,6 +106,8 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
             this.btnTabEquipment = new DevExpress.XtraEditors.SimpleButton();
             this.chkManualWrench = new DevExpress.XtraEditors.CheckEdit();
             this.btnSaveResults = new DevExpress.XtraEditors.SimpleButton();
+            this.btnInfoAccordion = new DevExpress.XtraEditors.SimpleButton();
+            this.btnTabsAccordion = new DevExpress.XtraEditors.SimpleButton();
             ((System.ComponentModel.ISupportInitialize)(this.toolbarCard)).BeginInit();
             this.toolbarCard.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.mainPanel)).BeginInit();
@@ -339,6 +341,9 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
             this.infoCard.Controls.Add(this.fieldPanel);
             this.infoCard.Controls.Add(this.bannerPanel);
             this.infoCard.Controls.Add(this.lblInfoTitle);
+            // 접기 버튼은 도킹하지 않으므로 Add 순서(도킹 우선순위)에 영향을 주지 않는다.
+            // 다만 위에 얹혀 보이도록 PopScreen.cs 에서 BringToFront()를 부른다.
+            this.infoCard.Controls.Add(this.btnInfoAccordion);
             this.infoCard.Dock = System.Windows.Forms.DockStyle.Right;
             this.infoCard.Location = new System.Drawing.Point(947, 2);
             this.infoCard.Name = "infoCard";
@@ -578,9 +583,28 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
             this.lblWorkstation.Name = "lblWorkstation";
             this.lblWorkstation.Size = new System.Drawing.Size(0, 14);
             this.lblWorkstation.TabIndex = 0;
-            // 
+            //
+            // btnInfoAccordion / btnTabsAccordion — 아코디언 접기/펼치기 손잡이
+            //   각 영역의 <b>헤더 자리</b>에 둔다. 접혀도 헤더는 남아 있어야 다시 펼 수 있기 때문에,
+            //   접히는 본문(fieldPanel / tabBodyPanel)이 아니라 그 바깥에 붙인다.
+            //   화살표 글자와 색은 PopScreen.cs 에서 상태에 따라 런타임에 넣는다.
+            //
+            this.btnInfoAccordion.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnInfoAccordion.Location = new System.Drawing.Point(518, 6);
+            this.btnInfoAccordion.Name = "btnInfoAccordion";
+            this.btnInfoAccordion.Size = new System.Drawing.Size(30, 26);
+            this.btnInfoAccordion.TabIndex = 20;
+            this.btnInfoAccordion.Click += new System.EventHandler(this.btnInfoAccordion_Click);
+            //
+            this.btnTabsAccordion.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnTabsAccordion.Location = new System.Drawing.Point(1163, 7);
+            this.btnTabsAccordion.Name = "btnTabsAccordion";
+            this.btnTabsAccordion.Size = new System.Drawing.Size(30, 32);
+            this.btnTabsAccordion.TabIndex = 21;
+            this.btnTabsAccordion.Click += new System.EventHandler(this.btnTabsAccordion_Click);
+            //
             // lblInfoTitle
-            // 
+            //
             this.lblInfoTitle.Dock = System.Windows.Forms.DockStyle.Top;
             this.lblInfoTitle.Location = new System.Drawing.Point(3, 3);
             this.lblInfoTitle.Name = "lblInfoTitle";
@@ -701,6 +725,7 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
             this.tabHeaderPanel.Controls.Add(this.btnTabEquipment);
             this.tabHeaderPanel.Controls.Add(this.chkManualWrench);
             this.tabHeaderPanel.Controls.Add(this.btnSaveResults);
+            this.tabHeaderPanel.Controls.Add(this.btnTabsAccordion);
             this.tabHeaderPanel.Dock = System.Windows.Forms.DockStyle.Top;
             this.tabHeaderPanel.Location = new System.Drawing.Point(3, 3);
             this.tabHeaderPanel.Name = "tabHeaderPanel";
@@ -842,6 +867,8 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
         private System.Windows.Forms.Panel spacerMain;
         private DevExpress.XtraEditors.PanelControl infoCard;
         private DevExpress.XtraEditors.LabelControl lblInfoTitle;
+        private DevExpress.XtraEditors.SimpleButton btnInfoAccordion;
+        private DevExpress.XtraEditors.SimpleButton btnTabsAccordion;
         private DevExpress.XtraEditors.PanelControl fieldPanel;
         private DevExpress.XtraEditors.LabelControl lblWorkOrderNo;
         private DevExpress.XtraEditors.TextEdit txtWorkOrderNo;

@@ -88,6 +88,10 @@ namespace SEOJIN_MEIS.Client.Localization
         public static string Message_TitleError => Get(nameof(Message_TitleError));
 
         public static string Pop_Title => Get(nameof(Pop_Title));
+        public static string Pop_Collapse => Get(nameof(Pop_Collapse));
+        public static string Pop_Expand => Get(nameof(Pop_Expand));
+        public static string Pop_ToggleInfo => Get(nameof(Pop_ToggleInfo));
+        public static string Pop_ToggleTabs => Get(nameof(Pop_ToggleTabs));
         public static string Pop_EquipmentStatus => Get(nameof(Pop_EquipmentStatus));
         public static string Pop_Start => Get(nameof(Pop_Start));
         public static string Pop_Stop => Get(nameof(Pop_Stop));
