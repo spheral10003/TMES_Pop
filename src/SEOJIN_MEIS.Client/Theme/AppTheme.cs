@@ -700,9 +700,14 @@ namespace SEOJIN_MEIS.Client.Theme
 
             view.OptionsView.ShowGroupPanel = false;
             view.OptionsView.ShowIndicator = false;
-            view.OptionsView.ShowVerticalLines = DefaultBoolean.False;
+            // 세로선을 켜서 컬럼 경계를 눈으로 따라갈 수 있게 한다
+            // (컬럼이 10개를 넘는 화면이 많아, 선이 없으면 어느 열의 값인지 놓치기 쉽다).
+            view.OptionsView.ShowVerticalLines = DefaultBoolean.True;
             view.OptionsView.ShowHorizontalLines = DefaultBoolean.True;
-            view.OptionsView.EnableAppearanceEvenRow = false;
+
+            // 한 줄 걸러 옅은 톤을 깔아 행을 구분한다(줄무늬).
+            // 짝수 행만 켜면 홀수 행은 Appearance.Row(흰색)가 그대로 쓰여 두 톤이 번갈아 나온다.
+            view.OptionsView.EnableAppearanceEvenRow = true;
             view.OptionsView.EnableAppearanceOddRow = false;
             view.OptionsView.ColumnAutoWidth = true;
             view.OptionsBehavior.Editable = false;
@@ -720,6 +725,7 @@ namespace SEOJIN_MEIS.Client.Theme
             view.Appearance.HeaderPanel.Options.UseTextOptions = true;
 
             Paint(view.Appearance.Row, Card, TextPrimary, BodyFont);
+            Paint(view.Appearance.EvenRow, GridRowAlt, TextPrimary, BodyFont);
             Paint(view.Appearance.FocusedRow, Blend(accent, Card, 0.14f), TextPrimary, BodyBoldFont);
             Paint(view.Appearance.SelectedRow, Blend(accent, Card, 0.11f), TextPrimary, BodyFont);
             Paint(view.Appearance.HotTrackedRow, Blend(accent, Card, 0.06f), TextPrimary, BodyFont);
@@ -742,9 +748,12 @@ namespace SEOJIN_MEIS.Client.Theme
             tree.BorderStyle = BorderStyles.NoBorder;
 
             tree.OptionsView.ShowIndicator = false;
-            tree.OptionsView.EnableAppearanceEvenRow = false;
+
+            // 그리드와 같은 규칙 — 한 줄 걸러 옅은 톤 + 세로선으로 컬럼 경계 표시.
+            // 트리도 값 컬럼이 10개라 그리드와 다르게 두면 화면끼리 어긋나 보인다.
+            tree.OptionsView.EnableAppearanceEvenRow = true;
             tree.OptionsView.ShowHorzLines = true;
-            tree.OptionsView.ShowVertLines = false;
+            tree.OptionsView.ShowVertLines = true;
             tree.OptionsBehavior.Editable = false;
             tree.RowHeight = 34;
             tree.ColumnPanelRowHeight = 38;
