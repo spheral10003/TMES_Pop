@@ -914,7 +914,7 @@ namespace SEOJIN_MEIS.Client.Theme
         /// </summary>
         private static void RoundButtonCorners(SimpleButton button)
         {
-            RoundButtonCorners(button);
+            RoundCorners(button, ButtonCornerRadius);
 
             button.SizeChanged -= OnRoundedButtonResized;
             button.SizeChanged += OnRoundedButtonResized;
