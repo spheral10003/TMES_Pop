@@ -53,6 +53,14 @@ namespace SEOJIN_MEIS.Client.Theme
         public static readonly Color ConsoleBack = Color.FromArgb(23, 23, 43);
         public static readonly Color ConsoleFore = Color.FromArgb(134, 239, 172);
 
+        // ── 버튼 상태 색 ──
+        // 시안의 disabled는 "회색 바탕 + 회색 글자"다(흰 글자가 아니다 — 흰 글자는 아직 누를 수 있어 보인다).
+        public static Color ButtonDisabledBack => IsDarkMode ? Color.FromArgb(52, 51, 78) : Color.FromArgb(245, 245, 245);
+        public static Color ButtonDisabledFore => IsDarkMode ? Color.FromArgb(110, 108, 140) : Color.FromArgb(191, 191, 191);
+
+        /// <summary>테두리만 있는 버튼(시안의 Normal)이 눌렸을 때 채우는 색.</summary>
+        public static Color ButtonQuietPressed => IsDarkMode ? Color.FromArgb(58, 56, 90) : Color.FromArgb(232, 234, 240);
+
         // ── 내보내기 문서(엑셀) 색 ──
         // 화면 색과 달리 다크 모드를 따라가면 안 된다 — 어두운 테마로 쓰던 중에 내보냈다고
         // 검은 배경 엑셀이 나오면 인쇄·공유가 곤란하다. 그래서 라이트 톤 고정이다.
@@ -320,10 +328,13 @@ namespace SEOJIN_MEIS.Client.Theme
             button.AppearancePressed.Options.UseBackColor = true;
             button.AppearancePressed.Options.UseForeColor = true;
 
-            button.AppearanceDisabled.BackColor = Color.FromArgb(206, 209, 224);
-            button.AppearanceDisabled.ForeColor = Color.White;
+            // 시안대로 "회색 바탕 + 회색 글자". 테두리도 함께 지워야 눌리지 않는 상태로 읽힌다.
+            button.AppearanceDisabled.BackColor = ButtonDisabledBack;
+            button.AppearanceDisabled.ForeColor = ButtonDisabledFore;
+            button.AppearanceDisabled.BorderColor = ButtonDisabledBack;
             button.AppearanceDisabled.Options.UseBackColor = true;
             button.AppearanceDisabled.Options.UseForeColor = true;
+            button.AppearanceDisabled.Options.UseBorderColor = true;
 
             if (icon != null)
             {
@@ -333,6 +344,8 @@ namespace SEOJIN_MEIS.Client.Theme
                 button.ImageOptions.Location = ImageLocation.MiddleLeft;
                 button.ImageOptions.ImageToTextIndent = 8;
             }
+
+            RoundButtonCorners(button);
         }
 
         /// <summary>
@@ -423,28 +436,51 @@ namespace SEOJIN_MEIS.Client.Theme
         public static void QuietButton(SimpleButton button, Color accent, string icon = null)
         {
             Flat(button);
-            button.Appearance.BackColor = IsDarkMode ? Color.FromArgb(45, 44, 70) : Color.White;
-            button.Appearance.ForeColor = accent;
+
+            // 시안의 Normal — 흰 바탕 + <b>중립 회색</b> 테두리 + 진한 글자.
+            // 테두리와 글자를 포인트 색으로 칠하면 solid 버튼과 비중이 비슷해져,
+            // 한 화면에 둘이 나란히 있을 때 무엇이 주 동작인지 흐려진다.
+            button.Appearance.BackColor = Card;
+            button.Appearance.ForeColor = TextPrimary;
             button.Appearance.Font = BodyBoldFont;
-            button.Appearance.BorderColor = accent;
+            button.Appearance.BorderColor = CardBorder;
             button.Appearance.Options.UseBackColor = true;
             button.Appearance.Options.UseForeColor = true;
             button.Appearance.Options.UseFont = true;
             button.Appearance.Options.UseBorderColor = true;
 
-            button.AppearanceHovered.BackColor = Blend(accent, Card, 0.12f);
+            // 올려놓으면 포인트 색이 테두리·글자에만 살짝 드러난다(바탕은 흰색 유지).
+            button.AppearanceHovered.BackColor = Card;
             button.AppearanceHovered.ForeColor = accent;
+            button.AppearanceHovered.BorderColor = accent;
             button.AppearanceHovered.Options.UseBackColor = true;
             button.AppearanceHovered.Options.UseForeColor = true;
+            button.AppearanceHovered.Options.UseBorderColor = true;
+
+            button.AppearancePressed.BackColor = ButtonQuietPressed;
+            button.AppearancePressed.ForeColor = accent;
+            button.AppearancePressed.BorderColor = accent;
+            button.AppearancePressed.Options.UseBackColor = true;
+            button.AppearancePressed.Options.UseForeColor = true;
+            button.AppearancePressed.Options.UseBorderColor = true;
+
+            button.AppearanceDisabled.BackColor = Card;
+            button.AppearanceDisabled.ForeColor = ButtonDisabledFore;
+            button.AppearanceDisabled.BorderColor = ButtonDisabledBack;
+            button.AppearanceDisabled.Options.UseBackColor = true;
+            button.AppearanceDisabled.Options.UseForeColor = true;
+            button.AppearanceDisabled.Options.UseBorderColor = true;
 
             if (icon != null)
             {
-                button.ImageOptions.SvgImage = AppIcons.Get(icon, accent);
+                button.ImageOptions.SvgImage = AppIcons.Get(icon, TextPrimary);
                 button.ImageOptions.SvgImageSize = new Size(16, 16);
                 button.ImageOptions.SvgImageColorizationMode = SvgImageColorizationMode.None;
                 button.ImageOptions.Location = ImageLocation.MiddleLeft;
                 button.ImageOptions.ImageToTextIndent = 8;
             }
+
+            RoundButtonCorners(button);
         }
 
         /// <summary>
@@ -858,6 +894,34 @@ namespace SEOJIN_MEIS.Client.Theme
                 control.Region = new Region(path);
             }
         }
+
+        /// <summary>버튼 모서리 반경(px). 디자인 시안 기준.</summary>
+        private const int ButtonCornerRadius = 6;
+
+        /// <summary>
+        /// 모서리를 둥글게 깎는다(Region으로 잘라 내는 방식).
+        ///
+        /// 크기가 바뀌면 Region도 다시 만들어야 하므로 <see cref="Control.SizeChanged"/>에 걸어 둔다 —
+        /// 한 번만 잘라 두면 버튼 폭이 바뀌는 화면에서 잘린 자국이 남는다.
+        /// </summary>
+        /// <summary>
+        /// 버튼 모서리를 둥글게 깎고, <b>크기가 바뀌면 다시 깎는다</b>
+        /// (한 번만 잘라 두면 폭이 바뀌는 화면에서 잘린 자국이 남는다).
+        ///
+        /// 핸들러는 반드시 <b>이름 있는 static 메서드</b>여야 한다 —
+        /// 람다나 지역 함수는 호출할 때마다 다른 인스턴스라 <c>-=</c>로 지워지지 않고,
+        /// 테마를 전환할 때마다(ApplyTheme 재호출) 같은 핸들러가 계속 쌓인다.
+        /// </summary>
+        private static void RoundButtonCorners(SimpleButton button)
+        {
+            RoundButtonCorners(button);
+
+            button.SizeChanged -= OnRoundedButtonResized;
+            button.SizeChanged += OnRoundedButtonResized;
+        }
+
+        private static void OnRoundedButtonResized(object sender, EventArgs e) =>
+            RoundCorners((Control)sender, ButtonCornerRadius);
 
         /// <summary>컨트롤 네 귀퉁이를 둥글게 잘라낸다(탭 칩 등).</summary>
         public static void RoundCorners(Control control, int radius)
