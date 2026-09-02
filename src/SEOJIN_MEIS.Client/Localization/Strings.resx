@@ -81,7 +81,7 @@
   <data name="Pop_Collapse" xml:space="preserve"><value>접기</value></data>
   <data name="Pop_Expand" xml:space="preserve"><value>펼치기</value></data>
   <data name="Pop_ToggleInfo" xml:space="preserve"><value>공정 정보</value></data>
-  <data name="Pop_ToggleTabs" xml:space="preserve"><value>하단 탭</value></data>
+  <data name="Pop_ToggleTabs" xml:space="preserve"><value>상세 정보</value></data>
   <data name="Pop_EquipmentStatus" xml:space="preserve"><value>설비 상태</value></data>
   <data name="Pop_Start" xml:space="preserve"><value>가동</value></data>
   <data name="Pop_Stop" xml:space="preserve"><value>정지</value></data>

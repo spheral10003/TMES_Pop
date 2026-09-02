@@ -116,19 +116,23 @@ namespace SEOJIN_MEIS.Client.Forms.Common
             // ⚠️ 여기서는 TextRenderer(GDI)를 쓸 수 없다. TextRenderer는 Graphics의 변환 행렬을 무시해서
             // 회전이 먹지 않고 글자가 엉뚱한 자리(컨트롤 밖)에 그려진다 — 실제로 그렇게 나왔다.
             // 회전된 글자는 GDI+의 DrawString으로 그린다.
+            // 화살표 아래로 남는 구간 전체를 글자 자리로 잡고, 그 안에서 가운데 정렬한다.
+            // (아래에 붙여 두면 띠가 길어질수록 글자만 바닥에 몰려 어색해진다.)
+            var top = ChevronMargin + 20;
+            var textLength = Math.Max(0, Height - top - ChevronMargin);
+
             var state = g.Save();
             try
             {
                 g.TranslateTransform(Width / 2f, Height - ChevronMargin);
                 g.RotateTransform(-90f);
 
-                var textLength = Math.Max(0, Height - ChevronMargin * 2 - 20);
                 var layout = new RectangleF(0, -Font.Height / 2f, textLength, Font.Height + 2);
 
                 using (var brush = new SolidBrush(fore))
                 using (var format = new StringFormat())
                 {
-                    format.Alignment = StringAlignment.Near;
+                    format.Alignment = StringAlignment.Center;
                     format.LineAlignment = StringAlignment.Center;
                     format.Trimming = StringTrimming.EllipsisCharacter;
                     format.FormatFlags = StringFormatFlags.NoWrap;

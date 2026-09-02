@@ -188,9 +188,10 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
             AppTheme.PlainPanel(tabHeaderPanel);
             AppTheme.PlainPanel(tabBodyPanel);
 
-            // 헤더(도킹된 제목/탭 줄) 위에 얹혀 보이도록 맨 앞으로 올린다.
-            btnInfoAccordion.BringToFront();
-            btnTabsAccordion.BringToFront();
+            // ⚠️ 손잡이에 BringToFront()를 부르지 말 것.
+            // 도킹은 z-순서의 <b>역순</b>으로 처리되므로, 앞으로 끌어올리면 도킹이 가장 늦게 잡힌다.
+            // 그러면 Fill인 fieldPanel이 먼저 영역을 다 가져가고 손잡이가 그 위에 겹쳐 글자를 가린다
+            // (실제로 그렇게 보였다). Designer의 Add 순서가 이미 올바른 도킹 순서를 만든다.
             RefreshAccordionButtons();
             viewerSurface.BackColor = AppTheme.Card;
 

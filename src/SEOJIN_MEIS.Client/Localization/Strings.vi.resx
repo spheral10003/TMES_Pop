@@ -77,7 +77,7 @@
   <data name="Pop_Collapse" xml:space="preserve"><value>Thu gọn</value></data>
   <data name="Pop_Expand" xml:space="preserve"><value>Mở rộng</value></data>
   <data name="Pop_ToggleInfo" xml:space="preserve"><value>Thông tin công đoạn</value></data>
-  <data name="Pop_ToggleTabs" xml:space="preserve"><value>Tab dưới</value></data>
+  <data name="Pop_ToggleTabs" xml:space="preserve"><value>Chi tiết</value></data>
   <data name="Pop_EquipmentStatus" xml:space="preserve"><value>Trạng thái thiết bị</value></data>
   <data name="Pop_Start" xml:space="preserve"><value>Bắt đầu</value></data>
   <data name="Pop_Stop" xml:space="preserve"><value>Dừng</value></data>
