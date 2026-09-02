@@ -122,6 +122,7 @@ namespace SEOJIN_MEIS.Client.Forms
             RefreshWelcome();
 
             ApplyTheme();
+            SetupWindowChrome();
             BuildMenu();
             OpenHomeTab();
 
@@ -166,21 +167,26 @@ namespace SEOJIN_MEIS.Client.Forms
             AppTheme.ContentSurface(contentHost);
             AppTheme.TabStrip(tabStrip);
 
-            AppTheme.IconButton(btnMenuToggle, AppIcons.Menu, AppTheme.TextPrimary);
+            AppTheme.IconButton(btnMenuToggle, AppIcons.Menu, AppTheme.TopBarFore, 16);
 
             // 알림/사용자/로그아웃은 Images 폴더의 PNG 아이콘을 쓴다(모양만 쓰고 색은 테마에서 받는다).
-            AppTheme.ImageIconButton(btnAlerts, AppImages.IconBell, AppTheme.TextPrimary);
+            AppTheme.ImageIconButton(btnAlerts, AppImages.IconBell, AppTheme.TopBarFore, 18);
             AppTheme.Badge(lblAlertBadge, 16);
 
             // 우측 상단 정보 묶음: 언어 · 알림 · "{이름} 님 환영합니다." · 사용자 · 로그아웃 (현재 일시는 상단 바 가운데)
-            AppTheme.BodyText(lblWelcome, true);
+            AppTheme.TopBarText(lblWelcome);
             AppTheme.SessionTime(lblSessionTime);
             AppTheme.TopBarCombo(cboLanguage);
             cboLanguage.ToolTip = Strings.MainForm_LanguageHint;
-            AppTheme.ImageIconButton(btnUser, AppImages.IconUser, AppTheme.Indigo);
+            AppTheme.ImageIconButton(btnUser, AppImages.IconUser, AppTheme.TopBarFore, 18);
             btnUser.ToolTip = Strings.UserProfile_Title;
-            AppTheme.ImageIconButton(btnLogout, AppImages.IconPowerOff, AppTheme.TextMuted);
+            AppTheme.ImageIconButton(btnLogout, AppImages.IconPowerOff, AppTheme.TopBarForeMuted, 18);
             btnLogout.ToolTip = Strings.Common_Logout;
+
+            // 창 버튼(최소화 · 최대화/복원) — 제목 줄이 없어 상단 바가 대신 낸다. MainForm.Window.cs 참고.
+            AppTheme.IconButton(btnMinimize, AppIcons.WindowMinimize, AppTheme.TopBarFore, 16);
+            btnMinimize.ToolTip = Strings.MainForm_Minimize;
+            ApplyWindowStatePresentation();   // 최대화 버튼은 상태에 따라 아이콘·툴팁이 달라진다
 
             lblAlertBadge.BringToFront();
 
@@ -371,6 +377,8 @@ namespace SEOJIN_MEIS.Client.Forms
             cboLanguage.ToolTip = Strings.MainForm_LanguageHint;
             btnUser.ToolTip = Strings.UserProfile_Title;
             btnLogout.ToolTip = Strings.Common_Logout;
+            btnMinimize.ToolTip = Strings.MainForm_Minimize;
+            ApplyWindowStatePresentation();
 
             BuildMenu();
             RefreshHomeTabLanguage();
@@ -420,8 +428,17 @@ namespace SEOJIN_MEIS.Client.Forms
 
             // 세로 위치는 좌표를 박지 않고 <b>바 높이에서 계산</b>한다 —
             // 예전에는 11/15/21 같은 값이 박혀 있어 바 높이를 줄이자 요소들이 아래로 삐져나왔다.
+
+            // 창 버튼(최소화 · 최대화)은 윈도우 관례대로 맨 오른쪽 끝에 붙이고,
+            // 업무 버튼(로그아웃 등)과는 한 칸 띄워 "창 조작"과 "화면 조작"이 섞여 보이지 않게 한다.
+            btnMaximize.Top = CenterTop(btnMaximize);
+            btnMaximize.Left = right - btnMaximize.Width;
+
+            btnMinimize.Top = CenterTop(btnMinimize);
+            btnMinimize.Left = btnMaximize.Left - 2 - btnMinimize.Width;
+
             btnLogout.Top = CenterTop(btnLogout);
-            btnLogout.Left = right - btnLogout.Width;
+            btnLogout.Left = btnMinimize.Left - 12 - btnLogout.Width;
 
             btnUser.Top = CenterTop(btnUser);
             btnUser.Left = btnLogout.Left - 4 - btnUser.Width;
@@ -471,17 +488,31 @@ namespace SEOJIN_MEIS.Client.Forms
         /// </summary>
         private void ApplyBrandLogo()
         {
+            // 접힘/펼침에 따라 그림과 크기가 함께 바뀐다.
+            //
+            // 폭은 sidePanel 기준으로 계산한다 — brandPanel은 Dock=Top이라 이 시점에 아직
+            // 예전 폭을 들고 있을 수 있어, brandPanel.Width로 재면 접었을 때 로고가 줄지 않는다.
+            var width = _sidebarCollapsed ? SidebarCollapsedWidth : SidebarWidth;
+
             if (_sidebarCollapsed)
             {
                 brandIcon.SvgImage = AppImages.BrandMark();
-                brandIcon.Bounds = new Rectangle(12, 22, 40, 29);
-                return;
+                brandIcon.Size = new Size(36, 26);
+            }
+            else
+            {
+                // 로고는 원본 색을 그대로 쓴다 — 스우시(파랑)·심벌(초록)에 검정 워드마크.
+                // 사이드바가 밝아졌으므로 흰색으로 빼거나 다른 색으로 물들이지 않는다.
+                brandIcon.SvgImage = AppImages.BrandSignature(Color.Black);
+                brandIcon.Size = new Size(196, 46);
             }
 
-            // 로고는 원본 색을 그대로 쓴다 — 스우시(파랑)·심벌(초록)에 검정 워드마크.
-            // 사이드바가 밝아졌으므로 흰색으로 빼거나 다른 색으로 물들이지 않는다.
-            brandIcon.SvgImage = AppImages.BrandSignature(Color.Black);
-            brandIcon.Bounds = new Rectangle(22, 14, 196, 46);
+            brandIcon.Location = new Point(
+                Math.Max(0, (width - brandIcon.Width) / 2),
+                Math.Max(0, (brandPanel.Height - brandIcon.Height) / 2));
+
+            // 그림과 크기를 함께 바꿨으므로 다시 그리게 한다(크기만 바뀌면 갱신이 늦을 수 있다).
+            brandIcon.Invalidate();
         }
 
         private void btnMenuToggle_Click(object sender, EventArgs e)

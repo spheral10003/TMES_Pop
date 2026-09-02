@@ -43,6 +43,8 @@ namespace SEOJIN_MEIS.Client.Forms
             this.cboLanguage = new DevExpress.XtraEditors.ImageComboBoxEdit();
             this.btnUser = new DevExpress.XtraEditors.SimpleButton();
             this.btnLogout = new DevExpress.XtraEditors.SimpleButton();
+            this.btnMinimize = new DevExpress.XtraEditors.SimpleButton();
+            this.btnMaximize = new DevExpress.XtraEditors.SimpleButton();
             this.rightPanel = new DevExpress.XtraEditors.PanelControl();
             this.tabStrip = new System.Windows.Forms.FlowLayoutPanel();
             this.contentHost = new DevExpress.XtraEditors.PanelControl();
@@ -149,17 +151,19 @@ namespace SEOJIN_MEIS.Client.Forms
             this.panelTop.Controls.Add(this.cboLanguage);
             this.panelTop.Controls.Add(this.btnUser);
             this.panelTop.Controls.Add(this.btnLogout);
+            this.panelTop.Controls.Add(this.btnMinimize);
+            this.panelTop.Controls.Add(this.btnMaximize);
             this.panelTop.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelTop.Location = new System.Drawing.Point(0, 0);
             this.panelTop.Name = "panelTop";
-            this.panelTop.Size = new System.Drawing.Size(1040, 40);
+            this.panelTop.Size = new System.Drawing.Size(1040, 28);
             this.panelTop.TabIndex = 0;
             //
             // btnMenuToggle
             //
             this.btnMenuToggle.Location = new System.Drawing.Point(12, 11);
             this.btnMenuToggle.Name = "btnMenuToggle";
-            this.btnMenuToggle.Size = new System.Drawing.Size(28, 28);
+            this.btnMenuToggle.Size = new System.Drawing.Size(22, 22);
             this.btnMenuToggle.TabIndex = 0;
             this.btnMenuToggle.Click += new System.EventHandler(this.btnMenuToggle_Click);
             //
@@ -174,7 +178,7 @@ namespace SEOJIN_MEIS.Client.Forms
             //
             this.btnAlerts.Location = new System.Drawing.Point(800, 11);
             this.btnAlerts.Name = "btnAlerts";
-            this.btnAlerts.Size = new System.Drawing.Size(34, 34);
+            this.btnAlerts.Size = new System.Drawing.Size(24, 24);
             this.btnAlerts.TabIndex = 3;
             this.btnAlerts.Click += new System.EventHandler(this.btnAlerts_Click);
             //
@@ -207,14 +211,14 @@ namespace SEOJIN_MEIS.Client.Forms
             this.cboLanguage.Name = "cboLanguage";
             this.cboLanguage.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
             // 국기 아이콘(20px) + 언어명 + 펼침 버튼이 들어가야 하므로 글자만 있을 때보다 넓고 높게 잡는다.
-            this.cboLanguage.Size = new System.Drawing.Size(124, 28);
+            this.cboLanguage.Size = new System.Drawing.Size(118, 22);
             this.cboLanguage.TabIndex = 7;
             //
             // btnUser
             //
             this.btnUser.Location = new System.Drawing.Point(950, 11);
             this.btnUser.Name = "btnUser";
-            this.btnUser.Size = new System.Drawing.Size(34, 34);
+            this.btnUser.Size = new System.Drawing.Size(24, 24);
             this.btnUser.TabIndex = 8;
             this.btnUser.Click += new System.EventHandler(this.btnUser_Click);
             //
@@ -222,9 +226,23 @@ namespace SEOJIN_MEIS.Client.Forms
             //
             this.btnLogout.Location = new System.Drawing.Point(990, 11);
             this.btnLogout.Name = "btnLogout";
-            this.btnLogout.Size = new System.Drawing.Size(34, 34);
+            this.btnLogout.Size = new System.Drawing.Size(24, 24);
             this.btnLogout.TabIndex = 9;
             this.btnLogout.Click += new System.EventHandler(this.btnLogout_Click);
+            //
+            // btnMinimize / btnMaximize — 제목 줄이 없는 창(FormBorderStyle.None)이라 창 버튼을 상단 바가 대신 낸다.
+            //
+            this.btnMinimize.Location = new System.Drawing.Point(1022, 11);
+            this.btnMinimize.Name = "btnMinimize";
+            this.btnMinimize.Size = new System.Drawing.Size(24, 24);
+            this.btnMinimize.TabIndex = 10;
+            this.btnMinimize.Click += new System.EventHandler(this.btnMinimize_Click);
+            //
+            this.btnMaximize.Location = new System.Drawing.Point(1046, 11);
+            this.btnMaximize.Name = "btnMaximize";
+            this.btnMaximize.Size = new System.Drawing.Size(24, 24);
+            this.btnMaximize.TabIndex = 11;
+            this.btnMaximize.Click += new System.EventHandler(this.btnMaximize_Click);
             //
             // rightPanel
             //
@@ -261,8 +279,9 @@ namespace SEOJIN_MEIS.Client.Forms
             this.ClientSize = new System.Drawing.Size(1280, 800);
             this.Controls.Add(this.mainArea);
             this.Controls.Add(this.sidePanel);
-            // 윈도우 제목 줄(캡션 + 최소화/최대화/닫기)을 없앤다 — POP 단말은 항상 최대화 상태로 쓰고
-            // 창 조작은 상단 바(로그아웃)로만 하므로 제목 줄이 화면 높이만 잡아먹는다.
+            // 윈도우 제목 줄(캡션 + 최소화/최대화/닫기)을 없앤다 — 좁은 POP 화면에서 높이만 잡아먹는다.
+            // 대신 상단 바가 제목 줄 노릇을 한다: 최소화/최대화 버튼 · 끌어서 이동 · 가장자리 크기 조절은
+            // MainForm.Window.cs가 되살려 놓는다. 없애면 창을 줄이지도 옮기지도 못하게 되니 함께 봐야 한다.
             // 최대화 영역 제한은 MainForm.cs 생성자에서 잡는다(작업 표시줄까지 덮지 않도록).
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "MainForm";
@@ -303,6 +322,8 @@ namespace SEOJIN_MEIS.Client.Forms
         private DevExpress.XtraEditors.ImageComboBoxEdit cboLanguage;
         private DevExpress.XtraEditors.SimpleButton btnUser;
         private DevExpress.XtraEditors.SimpleButton btnLogout;
+        private DevExpress.XtraEditors.SimpleButton btnMinimize;
+        private DevExpress.XtraEditors.SimpleButton btnMaximize;
         private DevExpress.XtraEditors.PanelControl rightPanel;
         private System.Windows.Forms.FlowLayoutPanel tabStrip;
         private DevExpress.XtraEditors.PanelControl contentHost;

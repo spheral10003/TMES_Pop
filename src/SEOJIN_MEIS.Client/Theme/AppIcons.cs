@@ -69,6 +69,15 @@ namespace SEOJIN_MEIS.Client.Theme
         /// <summary>탭 닫기.</summary>
         public const string Close = "<path d=\"M7 7l10 10M17 7L7 17\" stroke=\"{0}\" stroke-width=\"2\"/>";
 
+        /// <summary>창 최소화(가로줄 한 개).</summary>
+        public const string WindowMinimize = "<path d=\"M6 12.5h12\" stroke=\"{0}\" stroke-width=\"1.8\"/>";
+
+        /// <summary>창 최대화(빈 사각형).</summary>
+        public const string WindowMaximize = "<rect x=\"6.5\" y=\"6.5\" width=\"11\" height=\"11\" rx=\"1.4\" stroke=\"{0}\" stroke-width=\"1.6\"/>";
+
+        /// <summary>창 복원(겹친 사각형 두 개) — 최대화 상태에서는 최대화 버튼이 이 모양으로 바뀐다.</summary>
+        public const string WindowRestore = "<path d=\"M8.6 8.6V7.3a1.2 1.2 0 0 1 1.2-1.2h6.9a1.2 1.2 0 0 1 1.2 1.2v6.9a1.2 1.2 0 0 1-1.2 1.2h-1.3\" stroke=\"{0}\" stroke-width=\"1.6\"/><rect x=\"6\" y=\"8.6\" width=\"9.3\" height=\"9.3\" rx=\"1.2\" stroke=\"{0}\" stroke-width=\"1.6\"/>";
+
         /// <summary>메뉴 하위 항목 표시용 점.</summary>
         public const string Dot = "<circle cx=\"12\" cy=\"12\" r=\"3.2\" fill=\"{0}\"/>";
 

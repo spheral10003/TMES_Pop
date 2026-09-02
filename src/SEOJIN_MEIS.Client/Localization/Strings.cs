@@ -36,6 +36,9 @@ namespace SEOJIN_MEIS.Client.Localization
         public static string MainForm_SessionRemainingHint => Get(nameof(MainForm_SessionRemainingHint));
         public static string MainForm_SessionExpired => Get(nameof(MainForm_SessionExpired));
         public static string MainForm_LanguageHint => Get(nameof(MainForm_LanguageHint));
+        public static string MainForm_Minimize => Get(nameof(MainForm_Minimize));
+        public static string MainForm_Maximize => Get(nameof(MainForm_Maximize));
+        public static string MainForm_Restore => Get(nameof(MainForm_Restore));
         public static string MainForm_LogoutConfirm => Get(nameof(MainForm_LogoutConfirm));
         public static string MainForm_WelcomeHint => Get(nameof(MainForm_WelcomeHint));
         public static string MainForm_TileServer => Get(nameof(MainForm_TileServer));

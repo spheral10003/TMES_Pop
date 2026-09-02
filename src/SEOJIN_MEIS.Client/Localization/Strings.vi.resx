@@ -42,6 +42,9 @@
   <data name="MainForm_SessionRemainingHint" xml:space="preserve"><value>Thời gian còn lại trước khi tự động đăng xuất</value></data>
   <data name="MainForm_SessionExpired" xml:space="preserve"><value>Phiên làm việc đã hết hạn. Bạn sẽ được đăng xuất.</value></data>
   <data name="MainForm_LanguageHint" xml:space="preserve"><value>Ngôn ngữ hiển thị</value></data>
+  <data name="MainForm_Minimize" xml:space="preserve"><value>Thu nhỏ</value></data>
+  <data name="MainForm_Maximize" xml:space="preserve"><value>Phóng to</value></data>
+  <data name="MainForm_Restore" xml:space="preserve"><value>Khôi phục</value></data>
   <data name="MainForm_LogoutConfirm" xml:space="preserve"><value>Đăng xuất sẽ đóng toàn bộ màn hình đang mở. Bạn có muốn đăng xuất?</value></data>
   <data name="MainForm_WelcomeHint" xml:space="preserve"><value>Chọn một màn hình từ menu bên trái, màn hình sẽ mở thành thẻ ở phía trên.</value></data>
   <data name="MainForm_TileServer" xml:space="preserve"><value>Máy chủ</value></data>

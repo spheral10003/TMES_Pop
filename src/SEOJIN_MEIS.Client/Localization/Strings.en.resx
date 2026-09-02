@@ -43,6 +43,9 @@
   <data name="MainForm_SessionRemainingHint" xml:space="preserve"><value>Time left before automatic logout</value></data>
   <data name="MainForm_SessionExpired" xml:space="preserve"><value>The session has expired. You will be logged out.</value></data>
   <data name="MainForm_LanguageHint" xml:space="preserve"><value>Display language</value></data>
+  <data name="MainForm_Minimize" xml:space="preserve"><value>Minimize</value></data>
+  <data name="MainForm_Maximize" xml:space="preserve"><value>Maximize</value></data>
+  <data name="MainForm_Restore" xml:space="preserve"><value>Restore down</value></data>
   <data name="MainForm_LogoutConfirm" xml:space="preserve"><value>Logging out closes every open screen. Do you want to log out?</value></data>
   <data name="MainForm_WelcomeHint" xml:space="preserve"><value>Pick a screen from the left menu and it opens as a tab above.</value></data>
   <data name="MainForm_TileServer" xml:space="preserve"><value>Server</value></data>

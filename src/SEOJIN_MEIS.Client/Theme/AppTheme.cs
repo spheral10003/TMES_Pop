@@ -80,7 +80,18 @@ namespace SEOJIN_MEIS.Client.Theme
         public static Color Surface => IsDarkMode ? Color.FromArgb(28, 27, 46) : Color.FromArgb(244, 246, 251);
         public static Color Card => IsDarkMode ? Color.FromArgb(38, 37, 61) : Color.White;
         public static Color CardBorder => IsDarkMode ? Color.FromArgb(58, 56, 90) : Color.FromArgb(228, 231, 240);
-        public static Color TopBar => IsDarkMode ? Color.FromArgb(33, 32, 54) : Color.White;
+        /// <summary>
+        /// 상단 바 배경 — TEXON 로고의 파란색(스우시)과 같은 <c>#225EA8</c>.
+        /// 진한 색이므로 그 위에 얹히는 글자·아이콘은 <see cref="TopBarFore"/> 계열을 써야 한다
+        /// (본문용 TextPrimary/TextMuted를 쓰면 파란 바탕에 묻힌다).
+        /// </summary>
+        public static Color TopBar => Color.FromArgb(34, 94, 168);
+
+        /// <summary>상단 바 위의 글자·아이콘 색.</summary>
+        public static Color TopBarFore => Color.White;
+
+        /// <summary>상단 바 위의 보조 글자(브레드크럼 등).</summary>
+        public static Color TopBarForeMuted => Color.FromArgb(198, 222, 244);
         public static Color TextPrimary => IsDarkMode ? Color.FromArgb(233, 233, 245) : Color.FromArgb(30, 33, 56);
         public static Color TextMuted => IsDarkMode ? Color.FromArgb(160, 158, 190) : Color.FromArgb(115, 122, 145);
         public static Color GridRowAlt => IsDarkMode ? Color.FromArgb(45, 44, 70) : Color.FromArgb(247, 248, 253);
@@ -253,11 +264,20 @@ namespace SEOJIN_MEIS.Client.Theme
             panel.Padding = new Padding(0, 0, 0, 1);
         }
 
+        /// <summary>상단 바 위의 본문 글자(환영 문구 등). 파란 바탕이라 흰 글자를 쓴다.</summary>
+        public static void TopBarText(LabelControl label)
+        {
+            label.Appearance.Font = BodyBoldFont;
+            label.Appearance.ForeColor = TopBarFore;
+            label.Appearance.Options.UseFont = true;
+            label.Appearance.Options.UseForeColor = true;
+        }
+
         /// <summary>브레드크럼(홈 / 대분류 / 화면) 텍스트.</summary>
         public static void Breadcrumb(LabelControl label)
         {
             label.Appearance.Font = BodyFont;
-            label.Appearance.ForeColor = TextMuted;
+            label.Appearance.ForeColor = TopBarForeMuted;
             label.Appearance.Options.UseFont = true;
             label.Appearance.Options.UseForeColor = true;
         }
@@ -303,7 +323,7 @@ namespace SEOJIN_MEIS.Client.Theme
         public static void TopBarCombo(ComboBoxEdit combo)
         {
             combo.Properties.Appearance.Font = BodyFont;
-            combo.Properties.Appearance.ForeColor = TextPrimary;
+            combo.Properties.Appearance.ForeColor = TopBarFore;
             combo.Properties.Appearance.BackColor = TopBar;
             combo.Properties.Appearance.Options.UseFont = true;
             combo.Properties.Appearance.Options.UseForeColor = true;
@@ -589,7 +609,7 @@ namespace SEOJIN_MEIS.Client.Theme
         public static void SessionTime(LabelControl label)
         {
             label.Appearance.Font = new Font("Consolas", 11F, FontStyle.Bold);
-            label.Appearance.ForeColor = Indigo;
+            label.Appearance.ForeColor = TopBarFore;
             label.Appearance.Options.UseFont = true;
             label.Appearance.Options.UseForeColor = true;
         }
