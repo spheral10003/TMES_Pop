@@ -90,6 +90,16 @@ namespace SEOJIN_MEIS.Client
                 // 로그 파일은 마지막에 닫는다 — 위 정리 과정에서 나는 로그까지 파일에 남겨야 한다.
                 AppLog.Close();
             }
+
+            // 프로세스를 확실히 끝낸다.
+            //
+            // Debug 구성은 콘솔 서브시스템(OutputType=Exe)이라 앱이 자기 콘솔 창을 하나 갖는데,
+            // 화면을 닫아도 프로세스가 남아 있으면 그 콘솔 창만 덩그러니 남는다.
+            // 설비 수신 스레드는 전부 IsBackground=true라 붙잡지 않지만,
+            // 통신·타이머 쪽에서 뒤늦게 도는 작업이 남을 수 있어 여기서 매듭짓는다.
+            //
+            // 정리(Dispose·로그 닫기)는 위 finally에서 이미 끝났으므로 남는 작업은 없다.
+            Environment.Exit(0);
         }
 
         private static void ApplyCulture(string cultureName)
