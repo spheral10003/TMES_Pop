@@ -40,7 +40,7 @@ namespace SEOJIN_MEIS.Client.Forms.Notification
         /// 이 창이 이미 닫혀 사라졌는지. <b>await 뒤에는 반드시 확인해야 한다.</b>
         ///
         /// 이 창은 <c>using (var form = new NotificationForm())</c>으로 띄우므로 닫는 즉시 Dispose된다.
-        /// 그런데 조회는 Load 시점에 시작되어 서버 응답을 기다리는 중일 수 있고,
+        /// 그런데 조회가 서버 응답을 기다리는 중에 사용자가 창을 닫을 수 있고,
         /// 응답(특히 실패)이 늦게 도착하면 이미 없어진 창에 결과를 채우거나
         /// 그 창을 소유자로 안내 창을 띄우려다 ObjectDisposedException이 난다
         /// (ShowDialog(owner)가 Dispose된 owner의 Handle을 건드린다).
@@ -83,7 +83,8 @@ namespace SEOJIN_MEIS.Client.Forms.Notification
             // 목록에서 행이 바뀌면 우측 상세를 갱신한다.
             gridView.FocusedRowChanged += (s, e) => ShowDetail(FocusedNotification());
 
-            Load += async (s, e) => await SearchAsync();
+            // 창을 열 때는 서버를 부르지 않는다 — 조회는 [조회] 버튼(또는 조건란에서 Enter)으로만 시작한다.
+            // 종 아이콘을 누르는 것만으로 조회가 나가면, 알림을 확인할 생각이 없는 클릭에도 서버 부하가 걸린다.
         }
 
         /// <summary>현재 테마 색을 팝업에 입힌다(포인트 컬러: Indigo).</summary>
