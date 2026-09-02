@@ -765,6 +765,12 @@ namespace SEOJIN_MEIS.Client.Theme
             tree.Appearance.HeaderPanel.Options.UseTextOptions = true;
 
             Paint(tree.Appearance.Row, Card, TextPrimary, BodyFont);
+
+            // 줄무늬 색은 그리드와 같은 값(GridRowAlt)을 써야 한다.
+            // EnableAppearanceEvenRow만 켜고 색을 지정하지 않으면 DevExpress 기본색이 쓰여
+            // 이 화면만 다른 톤으로 보인다(실제로 그렇게 어긋났었다).
+            Paint(tree.Appearance.EvenRow, GridRowAlt, TextPrimary, BodyFont);
+
             Paint(tree.Appearance.FocusedRow, Blend(accent, Card, 0.14f), TextPrimary, BodyBoldFont);
             Paint(tree.Appearance.SelectedRow, Blend(accent, Card, 0.11f), TextPrimary, BodyFont);
             Paint(tree.Appearance.HotTrackedRow, Blend(accent, Card, 0.06f), TextPrimary, BodyFont);
