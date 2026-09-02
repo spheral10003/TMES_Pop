@@ -146,7 +146,8 @@ namespace SEOJIN_MEIS.Client.Forms
             var title = new LabelControl();
             title.Text = "MEIS POP";
             title.Appearance.Font = new Font("맑은 고딕", 15F, FontStyle.Bold);
-            title.Appearance.ForeColor = Color.White;
+            // 좌측 패널이 밝은 하늘색이라 흰 글자는 보이지 않는다 — 사이드바 글자색을 쓴다.
+            title.Appearance.ForeColor = AppTheme.SidebarText;
             title.Appearance.Options.UseFont = true;
             title.Appearance.Options.UseForeColor = true;
 

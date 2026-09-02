@@ -30,17 +30,21 @@ namespace SEOJIN_MEIS.Client.Theme
     /// </summary>
     public static class AppTheme
     {
-        // ── 사이드바(파스텔 라벤더) : 라이트/다크 모드와 무관하게 같은 톤을 유지한다 ──
+        // ── 사이드바(파스텔 하늘색) : 라이트/다크 모드와 무관하게 같은 톤을 유지한다 ──
         //
-        // 예전에는 짙은 남보라였다. 파스텔로 바꾸면 <b>글자와 로고를 함께 어둡게</b> 해야 한다 —
-        // 흰 글자/흰 로고를 그대로 두면 옅은 바탕에서 아예 보이지 않는다.
-        public static readonly Color SidebarTop = Color.FromArgb(245, 243, 255);    // #F5F3FF
-        public static readonly Color SidebarBottom = Color.FromArgb(233, 229, 253); // #E9E5FD
-        public static readonly Color SidebarBrand = Color.FromArgb(238, 235, 254);  // #EEEBFE
-        public static readonly Color SidebarText = Color.FromArgb(49, 43, 96);      // #312B60
-        public static readonly Color SidebarTextMuted = Color.FromArgb(108, 101, 158);
-        public static readonly Color SidebarHover = Color.FromArgb(224, 218, 251);
-        public static readonly Color SidebarSelected = Color.FromArgb(199, 191, 247); // #C7BFF7
+        // 예전에는 짙은 남보라였다. 밝은 톤으로 바꿀 때는 <b>바탕색만 바꾸면 안 된다</b> —
+        // 흰 글자로 그리던 곳(메뉴 최상위·hover·pressed, 로고 워드마크, 로그인 화면 제목,
+        // 사용자 정보 팝업 헤더)과 진한 색으로 깔던 곳(SidebarLeafBack)을 함께 손봐야
+        // 글자가 사라지거나 검은 덩어리가 남지 않는다. 실제로 그 두 가지가 모두 발생했다.
+        //
+        // 이 색을 쓰는 곳: MainForm 사이드바 · LoginForm 좌측 · UserProfileForm 헤더.
+        public static readonly Color SidebarTop = Color.FromArgb(240, 248, 255);    // #F0F8FF
+        public static readonly Color SidebarBottom = Color.FromArgb(219, 237, 251); // #DBEDFB
+        public static readonly Color SidebarBrand = Color.FromArgb(255, 255, 255);  // 로고는 흰 바탕에서 원래 색으로 보인다
+        public static readonly Color SidebarText = Color.FromArgb(16, 57, 92);      // #10395C
+        public static readonly Color SidebarTextMuted = Color.FromArgb(71, 105, 138);
+        public static readonly Color SidebarHover = Color.FromArgb(205, 231, 248);
+        public static readonly Color SidebarSelected = Color.FromArgb(169, 214, 245); // #A9D6F5
 
         // ── 포인트 컬러 ──
         public static readonly Color Indigo = Color.FromArgb(79, 70, 229);   // #4F46E5
@@ -143,7 +147,7 @@ namespace SEOJIN_MEIS.Client.Theme
         public static void BrandTitle(LabelControl label)
         {
             label.Appearance.Font = BrandFont;
-            label.Appearance.ForeColor = Color.White;
+            label.Appearance.ForeColor = SidebarText;
             label.Appearance.Options.UseFont = true;
             label.Appearance.Options.UseForeColor = true;
         }
@@ -151,7 +155,7 @@ namespace SEOJIN_MEIS.Client.Theme
         public static void BrandSubTitle(LabelControl label)
         {
             label.Appearance.Font = BrandSubFont;
-            label.Appearance.ForeColor = Color.FromArgb(168, 162, 224);
+            label.Appearance.ForeColor = SidebarTextMuted;
             label.Appearance.Options.UseFont = true;
             label.Appearance.Options.UseForeColor = true;
         }
@@ -163,11 +167,15 @@ namespace SEOJIN_MEIS.Client.Theme
         /// <summary>깊이별 행 높이(px). 아래로 갈수록 조금씩 낮아져 계층이 눈에 들어온다.</summary>
         private static readonly int[] MenuHeights = { 44, 40, 34 };
 
-        /// <summary>화면(리프) 항목이 대분류 아래에 "들어가 있는" 느낌을 주는 살짝 어두운 배경.</summary>
-        public static readonly Color SidebarLeafBack = Color.FromArgb(34, 29, 88); // #221D58
+        /// <summary>
+        /// 화면(리프) 항목이 대분류 아래에 "들어가 있는" 느낌을 주는 배경.
+        /// 사이드바가 밝아졌으므로 <b>한 톤 진한 하늘색</b>이다 — 예전의 진한 남보라를 그대로 두면
+        /// 밝은 사이드바에 검은 덩어리가 박힌 것처럼 보인다(실제로 그렇게 남아 있었다).
+        /// </summary>
+        public static readonly Color SidebarLeafBack = Color.FromArgb(230, 243, 252); // #E6F3FC
 
         /// <summary>트리 계층 안내선(리프 앞의 └ 가지) 색.</summary>
-        public static readonly Color SidebarGuide = Color.FromArgb(120, 112, 190);
+        public static readonly Color SidebarGuide = Color.FromArgb(127, 180, 216);
 
         /// <summary>좌측 메뉴(AccordionControl)를 사이드바 톤에 맞춘다.</summary>
         public static void Accordion(AccordionControl accordion)
@@ -194,9 +202,10 @@ namespace SEOJIN_MEIS.Client.Theme
 
         private static void StyleAccordionElement(AccordionControlElementAppearances appearances, Color fore, Font font)
         {
+            // 밝은 사이드바라 hover/pressed 글자도 흰색이 아니라 진한 색이어야 읽힌다.
             Paint(appearances.Normal, Color.Transparent, fore, font);
-            Paint(appearances.Hovered, SidebarHover, Color.White, font);
-            Paint(appearances.Pressed, SidebarSelected, Color.White, font);
+            Paint(appearances.Hovered, SidebarHover, SidebarText, font);
+            Paint(appearances.Pressed, SidebarSelected, SidebarText, font);
         }
 
         /// <summary>
@@ -214,12 +223,15 @@ namespace SEOJIN_MEIS.Client.Theme
             element.Height = MenuHeights[depth];
 
             var font = isLeaf ? BodyFont : BodyBoldFont;
-            var fore = depth == 0 ? Color.White : (isLeaf ? SidebarTextMuted : SidebarText);
+
+            // 최상위("MEIS")는 예전 진한 사이드바에서 흰 글자였다. 밝은 바탕에서는 보이지 않으므로
+            // 다른 항목과 같은 진한 글자로 두되, 굵기로 계층을 구분한다.
+            var fore = isLeaf ? SidebarTextMuted : SidebarText;
             var back = isLeaf ? SidebarLeafBack : Color.Transparent;
 
             Paint(element.Appearance.Normal, back, fore, font);
-            Paint(element.Appearance.Hovered, SidebarHover, Color.White, font);
-            Paint(element.Appearance.Pressed, SidebarSelected, Color.White, font);
+            Paint(element.Appearance.Hovered, SidebarHover, SidebarText, font);
+            Paint(element.Appearance.Pressed, SidebarSelected, SidebarText, font);
         }
 
         /// <summary>선택된 화면 항목을 보라색 밴드로 강조한다(선택 해제 시 <paramref name="selected"/>=false).</summary>

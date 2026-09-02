@@ -478,8 +478,9 @@ namespace SEOJIN_MEIS.Client.Forms
                 return;
             }
 
-            // 사이드바가 파스텔이라 워드마크를 흰색으로 빼면 보이지 않는다 — 진한 글자색으로 받는다.
-            brandIcon.SvgImage = AppImages.BrandSignature(AppTheme.SidebarText);
+            // 로고는 원본 색을 그대로 쓴다 — 스우시(파랑)·심벌(초록)에 검정 워드마크.
+            // 사이드바가 밝아졌으므로 흰색으로 빼거나 다른 색으로 물들이지 않는다.
+            brandIcon.SvgImage = AppImages.BrandSignature(Color.Black);
             brandIcon.Bounds = new Rectangle(22, 14, 196, 46);
         }
 
