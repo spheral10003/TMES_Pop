@@ -1,4 +1,5 @@
 using System.Windows.Forms;
+using System.Collections.Generic;
 using SEOJIN_MEIS.Client.Common.Logging;
 
 namespace SEOJIN_MEIS.Client.Forms.Common
@@ -43,11 +44,59 @@ namespace SEOJIN_MEIS.Client.Forms.Common
 
             var safeOwner = LiveOwner(owner);
 
-            using (var form = new AppMessageForm())
+            // 조회·처리 중이면 화면에 대기 표시가 떠 있다. 그대로 두면
+            // "조회 결과가 없습니다" 같은 안내 뒤에서 계속 돌아가 아직 처리 중인 것처럼 보인다.
+            // 안내를 띄우는 동안만 감췄다가 되돌린다(작업이 끝났으면 곧 사라진다).
+            var hiddenVeils = HideBusyVeils(safeOwner);
+            try
             {
-                form.Initialize(message, title, kind, buttons);
-                form.CenterOn(safeOwner);
-                return form.ShowDialog(safeOwner);
+                using (var form = new AppMessageForm())
+                {
+                    form.Initialize(message, title, kind, buttons);
+                    form.CenterOn(safeOwner);
+                    return form.ShowDialog(safeOwner);
+                }
+            }
+            finally
+            {
+                foreach (var veil in hiddenVeils)
+                {
+                    if (!veil.IsDisposed)
+                        veil.Visible = true;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 소유자가 속한 창 전체에서 대기 표시 덮개를 찾아 감춘다(되돌릴 수 있게 목록을 돌려준다).
+        ///
+        /// 소유자 자신이 아니라 <b>창 전체</b>를 뒤지는 이유: 대기 표시는 조회를 시작한 화면(탭)에 붙는데,
+        /// 안내 창의 소유자는 그 화면일 수도, 그 안의 팝업일 수도 있어 어느 쪽이든 걸리게 하려는 것이다.
+        /// </summary>
+        private static List<Control> HideBusyVeils(IWin32Window owner)
+        {
+            var hidden = new List<Control>();
+
+            var root = (owner as Control)?.FindForm();
+            if (root == null)
+                return hidden;
+
+            CollectVisibleVeils(root, hidden);
+
+            foreach (var veil in hidden)
+                veil.Visible = false;
+
+            return hidden;
+        }
+
+        private static void CollectVisibleVeils(Control parent, List<Control> found)
+        {
+            foreach (Control child in parent.Controls)
+            {
+                if (child is BusyOverlay.BusyVeil && child.Visible)
+                    found.Add(child);
+                else
+                    CollectVisibleVeils(child, found);
             }
         }
 

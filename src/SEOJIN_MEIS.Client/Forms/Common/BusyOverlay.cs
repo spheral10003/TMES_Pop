@@ -25,8 +25,16 @@ namespace SEOJIN_MEIS.Client.Forms.Common
     /// </summary>
     internal sealed class BusyOverlay : IDisposable
     {
+        /// <summary>
+        /// 덮개 패널. <b>타입을 따로 두는 이유</b>는 화면 트리에서 이것만 골라내기 위해서다 —
+        /// <see cref="AppMessageBox"/>가 안내 창을 띄우기 전에 이걸 찾아 잠시 감춘다.
+        /// </summary>
+        internal sealed class BusyVeil : Panel
+        {
+        }
+
         private readonly Control _owner;
-        private readonly Panel _veil;
+        private readonly BusyVeil _veil;
         private readonly BusyIndicator _indicator;
         private readonly CancellationTokenSource _cancellation;
         private bool _disposed;
@@ -48,7 +56,7 @@ namespace SEOJIN_MEIS.Client.Forms.Common
                 _cancellation = new CancellationTokenSource();
 
             // 덮개: 화면 전체를 채워 입력을 막고, 아래 내용이 비치도록 반투명으로 둔다.
-            _veil = new Panel();
+            _veil = new BusyVeil();
             _veil.Dock = DockStyle.Fill;
             _veil.BackColor = Color.FromArgb(90, AppTheme.Surface);
 
@@ -56,11 +64,19 @@ namespace SEOJIN_MEIS.Client.Forms.Common
             _indicator.Cancelable = cancelable;
             _indicator.CancelRequested += (s, e) => Cancel();
 
+            // Anchor를 None으로 두면 부모가 커지거나 줄어도 WinForms가 가운데 비율을 유지해 준다.
+            // 그래도 처음 한 번은 직접 맞춰야 하고, 도킹이 늦게 반영되는 경우가 있어 Resize에서도 다시 맞춘다.
+            _indicator.Anchor = AnchorStyles.None;
+
             _veil.Controls.Add(_indicator);
             _veil.Resize += (s, e) => CenterIndicator();
 
             owner.Controls.Add(_veil);
             _veil.BringToFront();
+
+            // Dock=Fill이 실제 크기로 반영된 뒤에 가운데를 계산해야 한다.
+            // Add 직후에는 아직 기본 크기(200x100)인 경우가 있어, 레이아웃을 강제로 끝내고 잰다.
+            _veil.PerformLayout();
             CenterIndicator();
 
             _indicator.StartAnimation();
@@ -82,11 +98,41 @@ namespace SEOJIN_MEIS.Client.Forms.Common
             return new BusyOverlay(owner, cancelable);
         }
 
+        /// <summary>
+        /// 덮개의 <b>보이는 영역</b> 한가운데에 상자를 놓는다.
+        /// 화면이 스크롤되는 경우 <c>Width/Height</c>는 내용 전체 크기라 그것으로 계산하면
+        /// 상자가 보이는 범위 아래로 내려간다 — 그래서 실제로 보이는 <c>ClientSize</c>를 기준으로 삼는다.
+        /// </summary>
         private void CenterIndicator()
         {
+            var area = _veil.ClientSize;
+
             _indicator.Location = new Point(
-                Math.Max(0, (_veil.Width - _indicator.Width) / 2),
-                Math.Max(0, (_veil.Height - _indicator.Height) / 2));
+                Math.Max(0, (area.Width - _indicator.Width) / 2),
+                Math.Max(0, (area.Height - _indicator.Height) / 2));
+        }
+
+        /// <summary>
+        /// 안내 창을 띄우는 동안 잠시 감춘다.
+        /// 대기 표시가 남아 있는 채로 "조회 결과가 없습니다" 같은 창이 뜨면 아직 처리 중인 것처럼 보인다.
+        /// </summary>
+        internal void SetVisible(bool visible)
+        {
+            if (_disposed || _veil.IsDisposed)
+                return;
+
+            _veil.Visible = visible;
+
+            // 다시 보일 때는 애니메이션도 함께 살린다(감춰 둔 동안 타이머를 돌릴 이유가 없다).
+            if (visible)
+            {
+                _veil.BringToFront();
+                _indicator.StartAnimation();
+            }
+            else
+            {
+                _indicator.StopAnimation();
+            }
         }
 
         private void Cancel()

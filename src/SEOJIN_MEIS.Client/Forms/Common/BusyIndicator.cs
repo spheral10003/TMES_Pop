@@ -19,14 +19,14 @@ namespace SEOJIN_MEIS.Client.Forms.Common
     /// </summary>
     internal sealed class BusyIndicator : Control
     {
-        /// <summary>상자 크기. 첨부 디자인 비율(가로로 긴 직사각형)에 맞춘 값이다.</summary>
-        public const int BoxWidth = 260;
-        public const int BoxHeight = 84;
+        /// <summary>상자 크기. 첨부 디자인 비율(가로로 긴 직사각형)을 유지하면서 한 단계 키운 값이다.</summary>
+        public const int BoxWidth = 320;
+        public const int BoxHeight = 108;
 
         private const int DotCount = 8;
-        private const int SpinnerSize = 34;
-        private const int SpinnerLeft = 18;
-        private const int TextLeft = SpinnerLeft + SpinnerSize + 14;
+        private const int SpinnerSize = 46;
+        private const int SpinnerLeft = 24;
+        private const int TextLeft = SpinnerLeft + SpinnerSize + 18;
 
         /// <summary>점이 한 칸 도는 간격(ms). 8칸이므로 한 바퀴는 약 1초다.</summary>
         private const int TickIntervalMs = 125;
@@ -130,12 +130,12 @@ namespace SEOJIN_MEIS.Client.Forms.Common
 
         private void DrawTexts(Graphics g)
         {
-            var titleBounds = new Rectangle(TextLeft, 20, Width - TextLeft - 12, 20);
-            TextRenderer.DrawText(g, Strings.Common_PleaseWait, AppTheme.BodyBoldFont, titleBounds,
+            var titleBounds = new Rectangle(TextLeft, 28, Width - TextLeft - 14, 22);
+            TextRenderer.DrawText(g, Strings.Common_PleaseWait, AppTheme.TitleFont, titleBounds,
                 AppTheme.TextPrimary, TextFormatFlags.Left | TextFormatFlags.NoPrefix);
 
-            var messageBounds = new Rectangle(TextLeft, 42, Width - TextLeft - 12, 18);
-            TextRenderer.DrawText(g, Strings.Common_Loading, AppTheme.SmallFont, messageBounds,
+            var messageBounds = new Rectangle(TextLeft, 54, Width - TextLeft - 14, 20);
+            TextRenderer.DrawText(g, Strings.Common_Loading, AppTheme.BodyFont, messageBounds,
                 AppTheme.TextMuted, TextFormatFlags.Left | TextFormatFlags.NoPrefix);
         }
 
