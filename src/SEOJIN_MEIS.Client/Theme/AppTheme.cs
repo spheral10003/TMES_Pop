@@ -30,14 +30,17 @@ namespace SEOJIN_MEIS.Client.Theme
     /// </summary>
     public static class AppTheme
     {
-        // ── 사이드바(다크 인디고) : 라이트/다크 모드와 무관하게 항상 진한 남보라 톤을 유지한다 ──
-        public static readonly Color SidebarTop = Color.FromArgb(43, 38, 118);      // #2B2676
-        public static readonly Color SidebarBottom = Color.FromArgb(62, 46, 152);   // #3E2E98
-        public static readonly Color SidebarBrand = Color.FromArgb(33, 29, 92);     // #211D5C
-        public static readonly Color SidebarText = Color.FromArgb(226, 224, 247);   // #E2E0F7
-        public static readonly Color SidebarTextMuted = Color.FromArgb(178, 173, 224);
-        public static readonly Color SidebarHover = Color.FromArgb(78, 68, 175);
-        public static readonly Color SidebarSelected = Color.FromArgb(108, 99, 224); // #6C63E0
+        // ── 사이드바(파스텔 라벤더) : 라이트/다크 모드와 무관하게 같은 톤을 유지한다 ──
+        //
+        // 예전에는 짙은 남보라였다. 파스텔로 바꾸면 <b>글자와 로고를 함께 어둡게</b> 해야 한다 —
+        // 흰 글자/흰 로고를 그대로 두면 옅은 바탕에서 아예 보이지 않는다.
+        public static readonly Color SidebarTop = Color.FromArgb(245, 243, 255);    // #F5F3FF
+        public static readonly Color SidebarBottom = Color.FromArgb(233, 229, 253); // #E9E5FD
+        public static readonly Color SidebarBrand = Color.FromArgb(238, 235, 254);  // #EEEBFE
+        public static readonly Color SidebarText = Color.FromArgb(49, 43, 96);      // #312B60
+        public static readonly Color SidebarTextMuted = Color.FromArgb(108, 101, 158);
+        public static readonly Color SidebarHover = Color.FromArgb(224, 218, 251);
+        public static readonly Color SidebarSelected = Color.FromArgb(199, 191, 247); // #C7BFF7
 
         // ── 포인트 컬러 ──
         public static readonly Color Indigo = Color.FromArgb(79, 70, 229);   // #4F46E5
@@ -223,7 +226,9 @@ namespace SEOJIN_MEIS.Client.Theme
         public static void MenuElementSelected(AccordionControlElement element, bool selected)
         {
             var back = selected ? SidebarSelected : SidebarLeafBack;
-            var fore = selected ? Color.White : SidebarTextMuted;
+
+            // 파스텔 바탕이라 선택 항목도 흰 글자가 아니라 진한 글자로 둔다(흰 글자는 옅은 배경에서 안 읽힌다).
+            var fore = selected ? SidebarText : SidebarTextMuted;
             Paint(element.Appearance.Normal, back, fore, selected ? BodyBoldFont : BodyFont);
         }
 

@@ -414,26 +414,35 @@ namespace SEOJIN_MEIS.Client.Forms
         {
             var right = panelTop.Width - 16;
 
-            btnLogout.Top = 11;
+            // 좌측 묶음도 같은 기준으로 세로 가운데에 둔다.
+            btnMenuToggle.Top = CenterTop(btnMenuToggle);
+            lblBreadcrumb.Top = CenterTop(lblBreadcrumb);
+
+            // 세로 위치는 좌표를 박지 않고 <b>바 높이에서 계산</b>한다 —
+            // 예전에는 11/15/21 같은 값이 박혀 있어 바 높이를 줄이자 요소들이 아래로 삐져나왔다.
+            btnLogout.Top = CenterTop(btnLogout);
             btnLogout.Left = right - btnLogout.Width;
 
-            btnUser.Top = 11;
+            btnUser.Top = CenterTop(btnUser);
             btnUser.Left = btnLogout.Left - 4 - btnUser.Width;
 
-            lblWelcome.Top = 21;
+            lblWelcome.Top = CenterTop(lblWelcome);
             lblWelcome.Left = btnUser.Left - 10 - lblWelcome.Width;
 
-            btnAlerts.Top = 11;
+            btnAlerts.Top = CenterTop(btnAlerts);
             btnAlerts.Left = lblWelcome.Left - 14 - btnAlerts.Width;
 
             lblAlertBadge.Top = btnAlerts.Top - 1;
             lblAlertBadge.Left = btnAlerts.Right - 13;
 
-            cboLanguage.Top = 15;
+            cboLanguage.Top = CenterTop(cboLanguage);
             cboLanguage.Left = btnAlerts.Left - 12 - cboLanguage.Width;
 
             CenterSessionTime();
         }
+
+        /// <summary>상단 바 높이 기준으로 컨트롤을 세로 가운데에 놓을 Y를 구한다.</summary>
+        private int CenterTop(Control control) => Math.Max(0, (panelTop.Height - control.Height) / 2);
 
         /// <summary>
         /// 남은 시간을 상단 바 가로 가운데에 놓는다.
@@ -442,7 +451,7 @@ namespace SEOJIN_MEIS.Client.Forms
         /// </summary>
         private void CenterSessionTime()
         {
-            lblSessionTime.Top = 21;
+            lblSessionTime.Top = CenterTop(lblSessionTime);
 
             // 기본은 상단 바 한가운데. 다만 창이 좁으면 좌측 브레드크럼이나 우측 묶음과 겹치므로
             // 두 이웃 사이 구간 안으로 가둔다(글자가 겹쳐 뭉개지는 것보다 조금 치우치는 편이 낫다).
@@ -469,7 +478,8 @@ namespace SEOJIN_MEIS.Client.Forms
                 return;
             }
 
-            brandIcon.SvgImage = AppImages.BrandSignature(Color.White);
+            // 사이드바가 파스텔이라 워드마크를 흰색으로 빼면 보이지 않는다 — 진한 글자색으로 받는다.
+            brandIcon.SvgImage = AppImages.BrandSignature(AppTheme.SidebarText);
             brandIcon.Bounds = new Rectangle(22, 14, 196, 46);
         }
 

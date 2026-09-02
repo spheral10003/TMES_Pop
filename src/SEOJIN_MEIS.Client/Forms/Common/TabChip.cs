@@ -19,8 +19,8 @@ namespace SEOJIN_MEIS.Client.Forms.Common
     /// </summary>
     public class TabChip : Control
     {
-        /// <summary>탭 높이. 스트립 높이(44)에서 위 여백을 뺀 값과 맞춘다.</summary>
-        public const int TabHeight = 32;
+        /// <summary>탭 높이. 스트립 높이(32)에서 아래 여백을 뺀 값과 맞춘다.</summary>
+        public const int TabHeight = 24;
 
         private const int CornerRadius = 4;
         private const int TextLeftPadding = 14;

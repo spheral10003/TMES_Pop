@@ -152,14 +152,14 @@ namespace SEOJIN_MEIS.Client.Forms
             this.panelTop.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelTop.Location = new System.Drawing.Point(0, 0);
             this.panelTop.Name = "panelTop";
-            this.panelTop.Size = new System.Drawing.Size(1040, 56);
+            this.panelTop.Size = new System.Drawing.Size(1040, 40);
             this.panelTop.TabIndex = 0;
             //
             // btnMenuToggle
             //
             this.btnMenuToggle.Location = new System.Drawing.Point(12, 11);
             this.btnMenuToggle.Name = "btnMenuToggle";
-            this.btnMenuToggle.Size = new System.Drawing.Size(34, 34);
+            this.btnMenuToggle.Size = new System.Drawing.Size(28, 28);
             this.btnMenuToggle.TabIndex = 0;
             this.btnMenuToggle.Click += new System.EventHandler(this.btnMenuToggle_Click);
             //
@@ -243,7 +243,7 @@ namespace SEOJIN_MEIS.Client.Forms
             this.tabStrip.FlowDirection = System.Windows.Forms.FlowDirection.LeftToRight;
             this.tabStrip.Location = new System.Drawing.Point(0, 0);
             this.tabStrip.Name = "tabStrip";
-            this.tabStrip.Size = new System.Drawing.Size(1040, 44);
+            this.tabStrip.Size = new System.Drawing.Size(1040, 32);
             this.tabStrip.TabIndex = 0;
             this.tabStrip.WrapContents = false;
             //
