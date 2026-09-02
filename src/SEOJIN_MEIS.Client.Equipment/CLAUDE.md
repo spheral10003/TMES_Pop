@@ -49,6 +49,21 @@ App.config의 기본 예시 IP(`192.168.0.101/102`)는 실재하지 않는 더�
 항상 5초 후 `Faulted`가 된다. **정상 동작이다** — 버그로 착각해 재시도 로직을 넣지 말 것.
 당장 필요 없으면 `AutoConnect`를 `false`로 둔다.
 
+### 시간 초과로 버리는 접속 작업은 반드시 "관찰"할 것
+
+`ConnectAsync(...).Wait(ConnectTimeoutMs)`가 false를 돌려줘도 **그 Task는 죽지 않고 살아 있다.**
+이어서 `catch`에서 `_tcpClient.Close()`를 부르면, 살아 있던 작업의 `TcpClient.EndConnect`가
+없어진 소켓을 만져 `NullReferenceException`으로 끝난다.
+
+버린 작업이라 아무도 예외를 보지 않으므로, GC가 정리할 때
+`TaskScheduler.UnobservedTaskException`으로 올라와 전역 핸들러가 **ERROR로 로그에 남긴다.**
+설비가 꺼져 있으면 5초마다 커넥션 수만큼 반복돼 로그가 도배되고 진짜 오류가 묻힌다.
+
+그래서 `ObserveFaults(connectTask)`로 예외를 미리 관찰해 둔다.
+**접속 실패 처리와는 별개다** — 실패 자체는 이미 `catch`에서 `Faulted`로 처리하고 있고,
+이건 같은 실패를 두 번 보고하지 않게 막는 것이다.
+비슷하게 **기다리기를 포기하는 Task를 새로 만들 때는 같은 처리를 함께 넣을 것.**
+
 ## 5. 프레이밍과 예외
 
 - MBAP 코덱: `[Transaction Id(2)][Protocol Id(2)=0][Length(2)][Unit Id(1)][FC(1)][Data]`, big-endian.

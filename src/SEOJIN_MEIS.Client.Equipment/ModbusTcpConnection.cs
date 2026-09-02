@@ -1,6 +1,7 @@
 using System;
 using System.Net.Sockets;
 using System.Threading;
+using System.Threading.Tasks;
 using SEOJIN_MEIS.Client.Common.Logging;
 using SEOJIN_MEIS.Client.Equipment.Protocol;
 
@@ -103,6 +104,15 @@ namespace SEOJIN_MEIS.Client.Equipment
                 _tcpClient = new TcpClient();
                 _tcpClient.NoDelay = true; // 소량 프레임의 실시간성이 중요하므로 Nagle 지연을 끈다.
                 var connectTask = _tcpClient.ConnectAsync(Host, Port);
+
+                // 시간이 초과되면 기다리기를 그만둘 뿐, 이 작업은 살아서 접속을 계속 시도한다.
+                // 아래 catch에서 Close()로 소켓을 닫으면 그 작업의 EndConnect가 없어진 소켓을 만져
+                // NullReferenceException으로 끝나는데, 버린 작업이라 아무도 예외를 보지 않는다.
+                // 그러면 GC가 정리할 때 UnobservedTaskException으로 올라와 전역 핸들러가 ERROR로 남긴다
+                // (설비가 꺼져 있으면 5초마다 반복돼 로그가 도배되고 진짜 오류가 묻힌다).
+                // 그래서 예외를 여기서 미리 관찰만 해 둔다 — 접속 실패 자체는 아래에서 이미 처리한다.
+                ObserveFaults(connectTask);
+
                 if (!connectTask.Wait(ConnectTimeoutMs))
                     throw new TimeoutException($"{Host}:{Port} 접속 시간 초과({ConnectTimeoutMs}ms)");
 
@@ -124,6 +134,19 @@ namespace SEOJIN_MEIS.Client.Equipment
             }
 
             ReceiveLoop();
+        }
+
+        /// <summary>
+        /// 버릴 작업의 예외를 미리 관찰해 <see cref="TaskScheduler.UnobservedTaskException"/>으로 새어 나가지 않게 한다.
+        /// 예외를 삼키는 것이 아니라 <b>이미 처리한 실패를 두 번 보고하지 않게</b> 막는 것이다.
+        /// </summary>
+        private static void ObserveFaults(Task task)
+        {
+            task.ContinueWith(
+                t => { _ = t.Exception; },
+                CancellationToken.None,
+                TaskContinuationOptions.OnlyOnFaulted | TaskContinuationOptions.ExecuteSynchronously,
+                TaskScheduler.Default);
         }
 
         private void ReceiveLoop()
