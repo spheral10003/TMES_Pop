@@ -191,6 +191,9 @@
   <data name="Pop_SerialNotRequired" xml:space="preserve"><value>시리얼번호 검사 대상 자재가 아닙니다.</value></data>
   <data name="Pop_NoProcessList" xml:space="preserve"><value>이 작업지시의 공정 정보가 없습니다.</value></data>
   <data name="Pop_ProcessMoved" xml:space="preserve"><value>선택한 공정으로 이동했습니다.</value></data>
+  <data name="Pop_FirstProcess" xml:space="preserve"><value>공정 목록의 첫 번째 공정입니다.</value></data>
+  <data name="Pop_LastProcess" xml:space="preserve"><value>공정 목록의 마지막 공정입니다.</value></data>
+  <data name="Pop_ProcessNotInList" xml:space="preserve"><value>지금 보고 있는 공정을 공정 목록에서 찾을 수 없습니다. [공정 목록]에서 직접 선택하세요.</value></data>
   <data name="Pop_ConfirmStart" xml:space="preserve"><value>공정을 시작하시겠습니까?</value></data>
   <data name="Pop_ConfirmStop" xml:space="preserve"><value>공정을 중지하시겠습니까?</value></data>
   <data name="Pop_ConfirmSkip" xml:space="preserve"><value>이 공정을 생략하시겠습니까?</value></data>
@@ -244,9 +247,8 @@
   <data name="PopSerial_Duplicated" xml:space="preserve"><value>같은 시리얼번호가 중복 입력되었습니다.</value></data>
   <data name="PopSerial_Saved" xml:space="preserve"><value>시리얼번호를 저장했습니다.</value></data>
   <data name="PopTorque_Title" xml:space="preserve"><value>토크 결과값 입력</value></data>
-  <data name="PopTorque_Value" xml:space="preserve"><value>토크 결과값</value></data>
-  <data name="PopTorque_Range" xml:space="preserve"><value>허용 범위</value></data>
   <data name="PopTorque_Invalid" xml:space="preserve"><value>토크 결과값은 숫자로 입력하세요.</value></data>
+  <data name="Pop_TorqueRangeMissing" xml:space="preserve"><value>토크 하한값과 상한값이 있어야 중간값을 계산할 수 있습니다.</value></data>
   <data name="Pop_DrawingLoading" xml:space="preserve"><value>도면을 불러오는 중입니다...</value></data>
   <data name="Pop_DrawingNone" xml:space="preserve"><value>표시할 도면이 없습니다.</value></data>
   <data name="Pop_DrawingShareNotConfigured" xml:space="preserve"><value>도면 공유 폴더(SMB)가 설정되지 않았습니다. App.config의 DocumentShare.RootPath를 확인하세요.</value></data>

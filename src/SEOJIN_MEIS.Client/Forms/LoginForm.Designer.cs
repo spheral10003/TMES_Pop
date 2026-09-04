@@ -209,21 +209,36 @@ namespace SEOJIN_MEIS.Client.Forms
             // 
             // btnConnect
             // 
+            this.btnConnect.Accent = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
+            this.btnConnect.BackColor = System.Drawing.Color.Transparent;
+            this.btnConnect.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnConnect.DialogResult = System.Windows.Forms.DialogResult.None;
+            this.btnConnect.Font = new System.Drawing.Font("맑은 고딕", 9.5F);
+            this.btnConnect.Icon = null;
             this.btnConnect.Location = new System.Drawing.Point(368, 22);
             this.btnConnect.Name = "btnConnect";
+            this.btnConnect.Selected = false;
             this.btnConnect.Size = new System.Drawing.Size(130, 40);
             this.btnConnect.TabIndex = 1;
             this.btnConnect.Text = "접속";
+            this.btnConnect.TextAfterIcon = false;
             this.btnConnect.Click += new System.EventHandler(this.btnConnect_Click);
             // 
             // btnClose
             // 
+            this.btnClose.Accent = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
+            this.btnClose.BackColor = System.Drawing.Color.Transparent;
+            this.btnClose.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnClose.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.btnClose.Font = new System.Drawing.Font("맑은 고딕", 9.5F);
+            this.btnClose.Icon = null;
             this.btnClose.Location = new System.Drawing.Point(222, 22);
             this.btnClose.Name = "btnClose";
+            this.btnClose.Selected = false;
             this.btnClose.Size = new System.Drawing.Size(130, 40);
             this.btnClose.TabIndex = 2;
             this.btnClose.Text = "닫기";
+            this.btnClose.TextAfterIcon = false;
             this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
             // 
             // LoginForm

@@ -13,14 +13,124 @@ namespace SEOJIN_MEIS.Client.Mock
     /// </summary>
     public static class MockPopData
     {
+        // ─────────────────────────────────────────────────────────────────────────
+        //  공정 진행 상태 (목업 전용)
+        //
+        //  실제 운영에서는 상태 전이도 시간 집계도 전부 서버가 한다.
+        //  목업은 서버가 없으므로, 화면 흐름(시작 → 중지 → 재시작 → 생략)을 눈으로 확인할 수 있도록
+        //  공정별 상태를 프로세스 메모리에만 들고 있는다. 앱을 껐다 켜면 다시 [작업 대기]로 돌아간다.
+        // ─────────────────────────────────────────────────────────────────────────
+
+        /// <summary>진행 상태 문구 — 화면 하단 띠(<c>lblProgressState</c>)에 그대로 찍힌다.</summary>
+        public const string StateWaiting = "작업 대기";
+        public const string StateRunning = "공정 진행중";
+        public const string StateStopped = "공정 중지";
+        public const string StateSkipped = "공정 생략";
+
+        /// <summary>공정 하나의 진행 상태와 시간 누적치.</summary>
+        private class ProcessState
+        {
+            public string ProgressState = StateWaiting;
+            public DateTime? StartedAt;
+            public DateTime? EndedAt;
+
+            /// <summary>마지막 상태 전이 시각 — 여기서 지금까지 흐른 시간을 가동/비가동에 나눠 담는다.</summary>
+            public DateTime? ChangedAt;
+
+            public TimeSpan Run;
+            public TimeSpan Idle;
+        }
+
+        private static readonly Dictionary<string, ProcessState> States =
+            new Dictionary<string, ProcessState>(StringComparer.OrdinalIgnoreCase);
+
+        /// <summary>공정 하나를 가리키는 키 문자열(작업지시/시리얼/라우팅그룹/라우팅공정/페이지공정).</summary>
+        private static string StateKey(PopProcessKey key) =>
+            string.Join("|", key?.WorkOrderNo, key?.SerialNo, key?.RoutingGroup, key?.RoutingOperation, key?.PageOperation);
+
+        private static ProcessState StateOf(PopProcessKey key)
+        {
+            var id = StateKey(key);
+            ProcessState state;
+            if (!States.TryGetValue(id, out state))
+            {
+                state = new ProcessState();
+                States[id] = state;
+            }
+
+            return state;
+        }
+
+        /// <summary>
+        /// 상태를 바꾸면서, 직전 상태로 머문 시간을 가동시간/비가동시간에 나눠 담는다.
+        /// (진행중이었으면 가동, 중지였으면 비가동. 아직 시작 전이면 어느 쪽에도 넣지 않는다.)
+        /// </summary>
+        private static void Accumulate(ProcessState state, DateTime now)
+        {
+            if (state.ChangedAt == null)
+                return;
+
+            var elapsed = now - state.ChangedAt.Value;
+            if (elapsed < TimeSpan.Zero)
+                elapsed = TimeSpan.Zero;
+
+            if (state.ProgressState == StateRunning)
+                state.Run += elapsed;
+            else if (state.ProgressState == StateStopped)
+                state.Idle += elapsed;
+        }
+
+        /// <summary>
+        /// [공정 시작] · [공정 중지] · [공정 생략]을 목업 상태에 반영하고, 바뀐 공정 정보를 돌려준다.
+        /// 전이 가능 여부를 따지지는 않는다 — 그 판정은 서버 몫이고, 목업은 화면 확인용이다.
+        /// </summary>
+        public static PopProcessInfoDto ApplyProcessAction(PopProcessKey key, string nextState)
+        {
+            var state = StateOf(key);
+            var now = DateTime.Now;
+
+            Accumulate(state, now);
+
+            if (nextState == StateRunning)
+            {
+                // 생략/중지 뒤에 다시 시작할 수 있다. 첫 시작에만 시작시각을 남긴다.
+                if (state.StartedAt == null)
+                    state.StartedAt = now;
+                state.EndedAt = null;
+            }
+            else if (nextState == StateSkipped)
+            {
+                state.EndedAt = now;
+            }
+
+            state.ProgressState = nextState;
+            state.ChangedAt = now;
+
+            return GetProcessInfo(key);
+        }
+
         /// <summary>
         /// &lt;진행 중 공정 정보&gt; 목업.
         /// 화면에서 넘어온 키(작업지시/시리얼/라우팅/페이지 공정)를 그대로 되돌려 주고,
-        /// 시간 값만 "4분 전에 시작해 계속 가동 중"인 상태로 만들어 준다.
+        /// 상태·시간은 <see cref="ApplyProcessAction"/>으로 쌓아 온 값에서 만든다.
         /// </summary>
         public static PopProcessInfoDto GetProcessInfo(PopProcessKey key)
         {
-            var startedAt = DateTime.Now.AddMinutes(-4);
+            var state = StateOf(key);
+            var now = DateTime.Now;
+
+            // 마지막 전이 이후 흐른 시간까지 더해서 보여 준다(화면을 열어 둔 채로도 시간이 흐르도록).
+            var run = state.Run;
+            var idle = state.Idle;
+            if (state.ChangedAt != null)
+            {
+                var elapsed = now - state.ChangedAt.Value;
+                if (elapsed > TimeSpan.Zero)
+                {
+                    if (state.ProgressState == StateRunning) run += elapsed;
+                    else if (state.ProgressState == StateStopped) idle += elapsed;
+                }
+            }
 
             var info = new PopProcessInfoDto
             {
@@ -30,12 +140,12 @@ namespace SEOJIN_MEIS.Client.Mock
                 RoutingGroup = key?.RoutingGroup,
                 RoutingOperation = key?.RoutingOperation,
                 PageOperation = key?.PageOperation,
-                PageStartTime = startedAt,
-                PageEndTime = null,
-                RunTime = TimeSpan.FromMinutes(4),
-                IdleTime = TimeSpan.Zero,
-                WorkTime = TimeSpan.FromMinutes(4),
-                ProgressState = "공정 진행중",
+                PageStartTime = state.StartedAt,
+                PageEndTime = state.EndedAt,
+                RunTime = run,
+                IdleTime = idle,
+                WorkTime = run + idle,
+                ProgressState = state.ProgressState,
 
                 // 서버가 내려줄 도면 경로 자리. 목업에서도 공유 폴더 루트만 설정하면
                 // 실제 SMB 읽기 경로를 그대로 태워 볼 수 있도록 샘플 파일명을 넣어 둔다.

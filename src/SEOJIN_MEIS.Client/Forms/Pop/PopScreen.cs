@@ -33,6 +33,8 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
     ///
     /// 구성:
     ///  - 상단  : 공정 제어 버튼 7개(이전/다음/생략/중지/시작/공정 목록/관리자 알람) + 작업자 · 현재시각
+    ///            · 시작/중지/생략 : 서버에 상태 전이를 요청하고, 돌아온 진행 상태를 우측 카드와 하단 띠에 반영한다.
+    ///            · 이전/다음      : [공정 목록]과 같은 순서로 옆 공정으로 옮긴다(상태 전이가 아니라 화면 이동).
     ///  - 좌측  : 작업 표준/도면 표시 영역(연결할 뷰어가 정해지기 전까지는 자리표시자)
     ///  - 우측  : 진행 중 공정 정보 + 워크스테이션 띠 + 공정 진행 상태 띠
     ///  - 하단  : 탭 4개 — 투입자재 / BOM 스팩 / 검사 스팩 / 연결 장비
@@ -40,7 +42,8 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
     /// 탭별 동작:
     ///  1) 투입자재  : "시리얼번호 입력상태" 셀 클릭 → &lt;투입자재 정보 입력&gt; 팝업에서 시리얼번호 입력
     ///  2) BOM 스팩  : 기준정보의 토크 스펙을 표시하고, 연결 장비에서 올라온 값을 토크 결과값에 채운다.
-    ///                 [수동 렌치]를 켜면 "결과값 입력" 컬럼이 나타나 작업자가 직접 입력할 수 있다.
+    ///                 "토크 결과값" 칸은 언제든 직접 고쳐 쓸 수 있고(숫자만 받는다),
+    ///                 [수동 렌치]를 켜면 "결과값 입력" 컬럼의 [입력]으로 하한~상한 중간값을 한 번에 채울 수 있다.
     ///  3) 검사 스팩 : 기준정보의 검사 항목을 표시하고 결과상태/결과값을 직접 입력한다.
     ///  4) 연결 장비 : 현재 워크스테이션에 물린 장비와 Modbus 연결 상태를 실시간으로 보여 준다.
     ///
@@ -51,6 +54,12 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
     {
         /// <summary>[BOM 스팩] 탭의 "결과값 입력" 컬럼(데이터에 없는 화면 전용 컬럼)의 필드명.</summary>
         private const string ResultInputField = "__ResultInput";
+
+        /// <summary>[BOM 스팩] 탭의 "토크 결과값" 컬럼 필드명(<see cref="PopBomSpecDto.TorqueResult"/>).</summary>
+        private const string TorqueResultField = "TorqueResult";
+
+        /// <summary>토크 결과값을 다루는 소수 자릿수 — 이 자리에서 올림해 표시하고 저장한다.</summary>
+        private const int TorqueDecimals = 2;
 
         /// <summary>
         /// 워크스테이션 / 공정 진행 상태 띠 하나의 높이.
@@ -75,6 +84,7 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
         private List<PopEquipmentDto> _equipments = new List<PopEquipmentDto>();
 
         private RepositoryItemButtonEdit _resultInputEditor;
+        private RepositoryItemTextEdit _torqueResultEditor;
         private RepositoryItemComboBox _resultStateEditor;
         private RepositoryItemTextEdit _resultValueEditor;
 
@@ -112,6 +122,9 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
             _context = context;
             _entry = entry;
             _key = BuildKey(entry);
+
+            // 작업지시가 바뀌면 공정 목록도 다른 것이라, 다음 이동 때 새로 읽게 비워 둔다.
+            _processes = new List<RoutingProcessDto>();
 
             ApplyTexts();
             ApplyTheme();
@@ -218,6 +231,7 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
 
             AppTheme.Banner(lblWorkstation, AppTheme.Amber, BannerHeight);
             AppTheme.Banner(lblProgressState, AppTheme.Violet, BannerHeight);
+            ApplyProgressState(lblProgressState.Text);   // 테마를 다시 입혀도 상태 색이 보라로 되돌아가지 않도록
 
             AppTheme.CheckBox(chkManualWrench);
 
@@ -426,8 +440,30 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
                 workstation = _context?.CurrentUser?.Workstation;
 
             lblWorkstation.Text = workstation;
-            lblProgressState.Text = info.ProgressState;
+            ApplyProgressState(info.ProgressState);
         }
+
+        /// <summary>
+        /// 하단 진행 상태 띠를 서버가 준 문구로 갱신하고, 멀리서도 구분되게 색을 함께 바꾼다.
+        /// 상태 <b>판정</b>은 서버 몫이고 여기서는 받은 문구를 색으로 옮기기만 한다 —
+        /// 모르는 문구가 오면 기본색(보라)으로 두고 글자만 보여 준다.
+        /// </summary>
+        private void ApplyProgressState(string progressState)
+        {
+            lblProgressState.Text = progressState;
+
+            Color accent;
+            if (Contains(progressState, "진행")) accent = AppTheme.Emerald;
+            else if (Contains(progressState, "중지")) accent = AppTheme.Rose;
+            else if (Contains(progressState, "생략")) accent = AppTheme.Amber;
+            else if (Contains(progressState, "대기")) accent = AppTheme.Slate;
+            else accent = AppTheme.Violet;
+
+            lblProgressState.Appearance.BackColor = accent;
+        }
+
+        private static bool Contains(string text, string keyword) =>
+            !string.IsNullOrEmpty(text) && text.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0;
 
         private async Task<PopProcessInfoDto> FetchProcessInfoAsync()
         {
@@ -533,7 +569,8 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
 
         /// <summary>
         /// [BOM 스팩] 탭. 마지막의 "결과값 입력" 컬럼은 데이터에 없는 화면 전용 컬럼이며,
-        /// 수동 렌치를 켰을 때만 보인다([입력] 버튼 → &lt;토크 결과값 입력&gt; 팝업).
+        /// 수동 렌치를 켰을 때만 보인다([입력] 버튼 → 하한~상한 중간값을 그 줄에 채운다).
+        /// "토크 결과값" 컬럼은 작업자가 직접 고쳐 쓸 수 있다.
         /// </summary>
         private void ConfigureBomSpecGrid()
         {
@@ -562,10 +599,37 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
             // 값이 없는 토크 칸은 빈칸 대신 "-"로 보여 준다(목업과 같은 표기).
             gridViewBomSpec.CustomColumnDisplayText += Numeric_CustomColumnDisplayText;
 
+            EnableTorqueResultEditing();
+
             foreach (DevExpress.XtraGrid.Columns.GridColumn column in gridViewBomSpec.Columns)
-                column.OptionsColumn.AllowEdit = column.FieldName == ResultInputField;
+                column.OptionsColumn.AllowEdit =
+                    column.FieldName == ResultInputField || column.FieldName == TorqueResultField;
 
             SetResultInputColumnVisible(false);
+        }
+
+        /// <summary>
+        /// "토크 결과값" 칸을 작업자가 직접 고쳐 쓸 수 있게 한다.
+        ///
+        /// 숫자 검사는 <see cref="GridViewBomSpec_ValidatingEditor"/>에서 하고,
+        /// 마스크로 미리 막지는 않는다 — 붙여넣기·IME 같은 경로까지 한 곳에서 걸러야
+        /// "무엇이 왜 거절됐는지"를 한 가지 문구로 안내할 수 있기 때문이다.
+        /// </summary>
+        private void EnableTorqueResultEditing()
+        {
+            if (_torqueResultEditor == null)
+            {
+                _torqueResultEditor = new RepositoryItemTextEdit();
+                gridBomSpec.RepositoryItems.Add(_torqueResultEditor);
+            }
+
+            var column = gridViewBomSpec.Columns.ColumnByFieldName(TorqueResultField);
+            if (column != null)
+                column.ColumnEdit = _torqueResultEditor;
+
+            gridViewBomSpec.ValidatingEditor += GridViewBomSpec_ValidatingEditor;
+            gridViewBomSpec.InvalidValueException += GridViewBomSpec_InvalidValueException;
+            gridViewBomSpec.CellValueChanged += GridViewBomSpec_CellValueChanged;
         }
 
         /// <summary>"결과값 입력" 컬럼과 [입력] 버튼 에디터를 준비한다(이미 있으면 재사용).</summary>
@@ -673,11 +737,37 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
             }
         }
 
-        /// <summary>값이 비어 있는 숫자 칸은 "-"로 표시한다(목업 표기와 동일).</summary>
+        /// <summary>
+        /// 값이 비어 있는 숫자 칸은 "-"로 표시한다(목업 표기와 동일).
+        /// 토크 결과값만은 소수 둘째 자리까지 올려서 보여 준다 —
+        /// 설비에서 올라온 원본 값은 그대로 두고 <b>표기만</b> 맞추는 것이라,
+        /// 서버로 올라가는 측정값은 손대지 않는다(작업자가 직접 넣은 값은 입력 시점에 이미 올림돼 있다).
+        /// </summary>
         private void Numeric_CustomColumnDisplayText(object sender, CustomColumnDisplayTextEventArgs e)
         {
-            if (e.Value == null && e.Column.FieldName != ResultInputField)
-                e.DisplayText = "-";
+            if (e.Value == null)
+            {
+                if (e.Column.FieldName != ResultInputField)
+                    e.DisplayText = "-";
+                return;
+            }
+
+            if (e.Column.FieldName == TorqueResultField && e.Value is decimal torque)
+                e.DisplayText = CeilTorque(torque).ToString("0.00", CultureInfo.CurrentCulture);
+        }
+
+        /// <summary>
+        /// 토크 값을 소수 둘째 자리에서 <b>올림</b>한다(4.561 → 4.57, 2.0 → 2.00).
+        /// 판정이 아니라 표기·입력 자릿수를 맞추기 위한 것으로, 합·불 판정은 서버가 원본 값으로 한다.
+        /// </summary>
+        private static decimal CeilTorque(decimal value)
+        {
+            var scale = 1m;
+            for (var i = 0; i < TorqueDecimals; i++)
+                scale *= 10m;
+
+            // 음수도 "0에서 먼 쪽"이 아니라 수직선 위쪽으로 올린다(Math.Ceiling과 같은 방향).
+            return Math.Ceiling(value * scale) / scale;
         }
 
         /// <summary>연결 실패/사용불가 상태는 붉은 글씨로 눈에 띄게 한다(상태 표시일 뿐 판정은 아니다).</summary>
@@ -833,7 +923,14 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
                 column.VisibleIndex = gridViewBomSpec.VisibleColumns.Count;
         }
 
-        /// <summary>[입력] 버튼 → &lt;토크 결과값 입력&gt; 팝업에서 받은 값을 그 줄의 토크 결과값에 넣는다.</summary>
+        /// <summary>
+        /// [입력] 버튼 → 그 줄의 토크 하한값과 상한값의 중간값을 토크 결과값에 바로 채운다.
+        ///
+        /// 예전에는 &lt;토크 결과값 입력&gt; 팝업을 띄웠는데, 수동 렌치로 조립할 때는
+        /// 어차피 규격 한가운데를 목표로 조이므로 창을 띄우고 숫자를 다시 치는 과정이 군더더기였다.
+        /// 여기서 내는 값은 <b>입력 편의를 위한 기본값</b>일 뿐이고(합·불 판정은 서버 몫),
+        /// 다르게 넣어야 하면 "토크 결과값" 칸을 눌러 직접 고쳐 쓰면 된다.
+        /// </summary>
         private void ResultInput_ButtonClick(object sender, ButtonPressedEventArgs e)
         {
             if (!chkManualWrench.Checked)
@@ -846,19 +943,86 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
             if (spec == null)
                 return;
 
-            using (var form = new TorqueInputForm())
+            if (spec.TorqueLower == null || spec.TorqueUpper == null)
             {
-                form.Initialize(spec);
-                form.CenterOn(this);
-                if (form.ShowDialog(this) != DialogResult.OK)
-                    return;
-
-                spec.TorqueResult = form.Value;
-                spec.IsManualInput = true;
+                AppMessageBox.Info(this, Strings.Pop_TorqueRangeMissing, Strings.PopTorque_Title);
+                return;
             }
 
+            spec.TorqueResult = CeilTorque((spec.TorqueLower.Value + spec.TorqueUpper.Value) / 2m);
+            spec.IsManualInput = true;
+
             gridViewBomSpec.RefreshData();
-            AppLog.Info($"[POP] 수동 렌치 입력 - {spec.BomSpecName}/{spec.InputPosition} = {spec.TorqueResult}");
+            AppLog.Info($"[POP] 수동 렌치 중간값 입력 - {spec.BomSpecName}/{spec.InputPosition} = {spec.TorqueResult} " +
+                        $"(하한 {spec.TorqueLower} ~ 상한 {spec.TorqueUpper})");
+        }
+
+        /// <summary>
+        /// "토크 결과값" 칸에 들어온 값이 실수인지 확인하고, 통과하면 소수 둘째 자리에서 올려 저장한다.
+        /// 빈칸(또는 "-")은 "아직 측정하지 않음"(null)으로 되돌린다 — 잘못 넣은 값을 지울 수 있어야 한다.
+        /// </summary>
+        private void GridViewBomSpec_ValidatingEditor(object sender, BaseContainerValidateEditorEventArgs e)
+        {
+            if (gridViewBomSpec.FocusedColumn?.FieldName != TorqueResultField)
+                return;
+
+            var text = Convert.ToString(e.Value, CultureInfo.CurrentCulture)?.Trim();
+
+            if (string.IsNullOrEmpty(text) || text == "-")
+            {
+                e.Value = null;
+                return;
+            }
+
+            // double 로 받아 보고 나서 decimal 로 옮긴다 — 화면 입력은 실수 표기(1e3 · 소수점)를 모두 허용하되,
+            // 저장 값은 자릿수 오차가 없는 decimal 로 유지하기 위함이다(DTO 타입도 decimal?).
+            if (!double.TryParse(text, NumberStyles.Float, CultureInfo.CurrentCulture, out var parsed)
+                || double.IsNaN(parsed) || double.IsInfinity(parsed))
+            {
+                e.Valid = false;
+                e.ErrorText = Strings.PopTorque_Invalid;
+                return;
+            }
+
+            try
+            {
+                e.Value = CeilTorque((decimal)parsed);
+            }
+            catch (OverflowException)
+            {
+                // decimal 범위를 넘는 값(1e30 등) — 토크 값으로 의미가 없으므로 숫자 오류와 같이 다룬다.
+                e.Valid = false;
+                e.ErrorText = Strings.PopTorque_Invalid;
+            }
+        }
+
+        /// <summary>
+        /// 값 변환에 실패했을 때 DevExpress 기본 오류 창 대신 셀 안의 오류 표시로 알린다
+        /// (창을 띄우면 작업자가 확인을 누를 때까지 다음 줄로 넘어가지 못한다).
+        /// </summary>
+        private void GridViewBomSpec_InvalidValueException(object sender, InvalidValueExceptionEventArgs e)
+        {
+            if (gridViewBomSpec.FocusedColumn?.FieldName != TorqueResultField)
+                return;
+
+            e.ExceptionMode = ExceptionMode.DisplayError;
+            e.ErrorText = Strings.PopTorque_Invalid;
+        }
+
+        /// <summary>
+        /// 작업자가 직접 고친 줄은 수동 입력으로 표시한다 — 서버가 입력 경로(설비/사람)를 구분해 저장한다.
+        /// </summary>
+        private void GridViewBomSpec_CellValueChanged(object sender, CellValueChangedEventArgs e)
+        {
+            if (e.Column.FieldName != TorqueResultField)
+                return;
+
+            var spec = gridViewBomSpec.GetRow(e.RowHandle) as PopBomSpecDto;
+            if (spec == null)
+                return;
+
+            spec.IsManualInput = true;
+            AppLog.Info($"[POP] 토크 결과값 직접 입력 - {spec.BomSpecName}/{spec.InputPosition} = {spec.TorqueResult}");
         }
 
         /// <summary>
@@ -1036,26 +1200,30 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
         // ─────────────────────────────────────────────────────────────────────────
 
         private async void tileStartProcess_ItemClick(object sender, TileItemEventArgs e) =>
-            await RequestProcessActionAsync(PopProcessAction.Start, Strings.Pop_ConfirmStart);
+            await RequestProcessActionAsync(PopProcessAction.Start, Strings.Pop_ConfirmStart, MockPopData.StateRunning);
 
         private async void tileStopProcess_ItemClick(object sender, TileItemEventArgs e) =>
-            await RequestProcessActionAsync(PopProcessAction.Stop, Strings.Pop_ConfirmStop);
+            await RequestProcessActionAsync(PopProcessAction.Stop, Strings.Pop_ConfirmStop, MockPopData.StateStopped);
 
         private async void tileSkipProcess_ItemClick(object sender, TileItemEventArgs e) =>
-            await RequestProcessActionAsync(PopProcessAction.Skip, Strings.Pop_ConfirmSkip);
+            await RequestProcessActionAsync(PopProcessAction.Skip, Strings.Pop_ConfirmSkip, MockPopData.StateSkipped);
 
         private async void tilePrevProcess_ItemClick(object sender, TileItemEventArgs e) =>
-            await RequestProcessActionAsync(PopProcessAction.Previous, Strings.Pop_ConfirmPrevious);
+            await MoveByProcessListAsync(-1, Strings.Pop_ConfirmPrevious, Strings.Pop_FirstProcess);
 
         private async void tileNextProcess_ItemClick(object sender, TileItemEventArgs e) =>
-            await RequestProcessActionAsync(PopProcessAction.Next, Strings.Pop_ConfirmNext);
+            await MoveByProcessListAsync(+1, Strings.Pop_ConfirmNext, Strings.Pop_LastProcess);
 
         /// <summary>
-        /// 공정 상태 전이를 서버에 요청한다. 전이 가능 여부는 서버가 판단하고,
-        /// 클라이언트는 응답으로 받은 &lt;진행 중 공정 정보&gt;로 화면을 다시 그린다.
-        /// 목업 모드에서는 서버 대신 화면만 다시 읽어 흐름을 확인할 수 있게 한다.
+        /// 공정 상태 전이([공정 시작] · [공정 중지] · [공정 생략])를 서버에 요청한다.
+        /// 전이 가능 여부와 시간 집계는 서버가 판단하고, 클라이언트는 응답으로 받은
+        /// &lt;진행 중 공정 정보&gt;를 그대로 다시 그린다.
         /// </summary>
-        private async Task RequestProcessActionAsync(PopProcessAction action, string confirmMessage)
+        /// <param name="mockState">
+        /// 목업 모드에서 옮겨 갈 상태. 서버가 없으니 <see cref="MockPopData"/>가 대신 상태를 기억해
+        /// 화면 흐름(시작 → 중지 → 재시작 → 생략)을 그대로 확인할 수 있게 한다.
+        /// </param>
+        private async Task RequestProcessActionAsync(PopProcessAction action, string confirmMessage, string mockState)
         {
             if (_key == null)
             {
@@ -1070,20 +1238,17 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
             {
                 if (UseMock)
                 {
-                    AppLog.Info($"[POP] (목업) 공정 상태 전이 요청 - {action}");
-                    await LoadAllAsync();
-                    return;
+                    await Task.Yield();
+                    _info = MockPopData.ApplyProcessAction(_key, mockState);
+                    AppLog.Info($"[POP] (목업) 공정 상태 전이 - {action} → {_info.ProgressState}");
                 }
-
-                _info = await _context.ApiClients.PopApiClient.ChangeProcessStateAsync(_key, action);
-                BindProcessInfo();
-
-                // 이전/다음 공정으로 옮겨 갔다면 하단 탭 내용도 그 공정 것으로 바뀌어야 한다.
-                if (action == PopProcessAction.Previous || action == PopProcessAction.Next)
+                else
                 {
-                    ApplyKeyFromInfo();
-                    await LoadAllAsync();
+                    _info = await _context.ApiClients.PopApiClient.ChangeProcessStateAsync(_key, action);
+                    AppLog.Info($"[POP] 공정 상태 전이 - {action} → {_info?.ProgressState}");
                 }
+
+                BindProcessInfo();
             }
             catch (ApiException ex)
             {
@@ -1091,15 +1256,113 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
             }
         }
 
-        /// <summary>서버가 돌려준 공정 정보로 조회 키를 갱신한다(이전/다음 공정 이동 후).</summary>
-        private void ApplyKeyFromInfo()
+        // ─────────────────────────────────────────────────────────────────────────
+        //  공정 이동 (이전 / 다음 / 공정 목록)
+        // ─────────────────────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// [공정 목록]에 뜨는 라우팅 공정들. [이전 공정] · [다음 공정]도 <b>이 순서</b>를 따라 움직이므로
+        /// 목록과 버튼이 서로 다른 곳으로 가는 일이 없다.
+        /// </summary>
+        private List<RoutingProcessDto> _processes = new List<RoutingProcessDto>();
+
+        /// <summary>
+        /// [이전 공정] / [다음 공정] — 공정 목록에서 지금 공정의 <paramref name="offset"/>칸 옆으로 옮긴다.
+        /// 목록의 끝이면 <paramref name="edgeMessage"/>로 알리고 아무것도 하지 않는다.
+        ///
+        /// 이동은 상태 전이가 아니라 <b>보고 있는 공정을 바꾸는 것</b>이라,
+        /// [공정 목록]에서 골라 옮기는 것과 똑같이 조회 키만 바꾸고 화면을 다시 읽는다.
+        /// </summary>
+        private async Task MoveByProcessListAsync(int offset, string confirmMessage, string edgeMessage)
         {
-            if (_info == null)
+            if (_key == null)
+            {
+                AppMessageBox.Warn(this, Strings.Pop_NoTargetProcess, Strings.Pop_Title);
+                return;
+            }
+
+            if (!await EnsureProcessesAsync())
                 return;
 
-            _key.RoutingGroup = _info.RoutingGroup;
-            _key.RoutingOperation = _info.RoutingOperation;
-            _key.PageOperation = _info.PageOperation;
+            var current = CurrentProcessIndex();
+            if (current < 0)
+            {
+                // 목록에 없는 공정을 보고 있다 — 어디가 "옆"인지 정할 수 없으므로 목록에서 직접 고르게 한다.
+                AppMessageBox.Info(this, Strings.Pop_ProcessNotInList, Strings.Pop_Title);
+                return;
+            }
+
+            var target = current + offset;
+            if (target < 0 || target >= _processes.Count)
+            {
+                AppMessageBox.Info(this, edgeMessage, Strings.Pop_Title);
+                return;
+            }
+
+            if (!AppMessageBox.Confirm(this, confirmMessage, Strings.Pop_Title))
+                return;
+
+            await MoveToProcessAsync(_processes[target]);
+        }
+
+        /// <summary>공정 목록에서 지금 보고 있는 공정의 위치. 없으면 -1.</summary>
+        private int CurrentProcessIndex()
+        {
+            return _processes.FindIndex(process =>
+                Same(process.RoutingGroup, _key.RoutingGroup)
+                && Same(process.RoutingOperation, _key.RoutingOperation)
+                && Same(process.PageOperation, _key.PageOperation));
+        }
+
+        private static bool Same(string left, string right) =>
+            string.Equals(left, right, StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>고른 공정으로 조회 키를 옮기고 화면 전체(공정 정보 + 탭 4개 + 도면)를 다시 읽는다.</summary>
+        private async Task MoveToProcessAsync(RoutingProcessDto process)
+        {
+            _key.RoutingGroup = process.RoutingGroup;
+            _key.RoutingOperation = process.RoutingOperation;
+            _key.PageOperation = process.PageOperation;
+
+            AppLog.Step($"[POP] 공정 이동 - {_key.RoutingOperation}/{_key.PageOperation}");
+            await LoadAllAsync();
+        }
+
+        /// <summary>
+        /// 공정 목록을 확보한다(이미 읽어 뒀으면 그대로 쓴다).
+        /// 조회에 실패하거나 목록이 비면 사유를 알리고 false를 돌려준다.
+        /// </summary>
+        private async Task<bool> EnsureProcessesAsync()
+        {
+            if (_processes.Count > 0)
+                return true;
+
+            try
+            {
+                tilePrevProcess.Enabled = false;
+                tileNextProcess.Enabled = false;
+                tileProcessList.Enabled = false;
+                _processes = await FetchRoutingProcessesAsync();
+            }
+            catch (ApiException ex)
+            {
+                AppMessageBox.Warn(this, ex.Message, Strings.WorkEntryConfirm_Title);
+                return false;
+            }
+            finally
+            {
+                tilePrevProcess.Enabled = true;
+                tileNextProcess.Enabled = true;
+                tileProcessList.Enabled = true;
+            }
+
+            if (_processes.Count == 0)
+            {
+                AppMessageBox.Warn(this, Strings.Pop_NoProcessList, Strings.WorkEntryConfirm_Title);
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -1114,32 +1377,13 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
                 return;
             }
 
-            List<RoutingProcessDto> processes;
-            try
-            {
-                tileProcessList.Enabled = false;
-                processes = await FetchRoutingProcessesAsync();
-            }
-            catch (ApiException ex)
-            {
-                AppMessageBox.Warn(this, ex.Message, Strings.WorkEntryConfirm_Title);
+            if (!await EnsureProcessesAsync())
                 return;
-            }
-            finally
-            {
-                tileProcessList.Enabled = true;
-            }
-
-            if (processes.Count == 0)
-            {
-                AppMessageBox.Warn(this, Strings.Pop_NoProcessList, Strings.WorkEntryConfirm_Title);
-                return;
-            }
 
             RoutingProcessDto selected;
             using (var confirm = new WorkEntryConfirmForm())
             {
-                confirm.Initialize(ResolveWorkOrder(), processes);
+                confirm.Initialize(ResolveWorkOrder(), _processes);
                 confirm.CenterOn(this);
                 if (confirm.ShowDialog(this) != DialogResult.OK)
                     return;
@@ -1150,11 +1394,7 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
             if (selected == null)
                 return;
 
-            _key.RoutingGroup = selected.RoutingGroup;
-            _key.RoutingOperation = selected.RoutingOperation;
-            _key.PageOperation = selected.PageOperation;
-
-            await LoadAllAsync();
+            await MoveToProcessAsync(selected);
             AppMessageBox.Info(this, Strings.Pop_ProcessMoved, Strings.Pop_Title);
         }
 

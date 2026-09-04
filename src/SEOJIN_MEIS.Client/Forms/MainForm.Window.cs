@@ -15,7 +15,7 @@ namespace SEOJIN_MEIS.Client.Forms
     /// 제목 줄을 되살리면 화면 높이를 다시 잡아먹으므로, 대신 상단 바가 제목 줄 역할을 하게 만든다.
     ///
     ///   · 최소화 / 최대화 버튼 : 상단 바 우측 끝(<c>btnMinimize</c> · <c>btnMaximize</c>)
-    ///   · 창 이동             : 상단 바 빈 곳을 눌러 끌기(최대화 상태면 자동으로 이전 크기로 돌아간다)
+    ///   · 창 이동             : 상단 바 빈 곳을 눌러 끌기(최대화 상태에서는 움직이지 않는다)
     ///   · 최대화 토글         : 상단 바 더블 클릭
     ///   · 크기 조절           : 창 가장자리 4px 띠를 끌기(Padding으로 드러낸 폼 표면)
     /// </summary>
@@ -87,29 +87,81 @@ namespace SEOJIN_MEIS.Client.Forms
                 ApplyWindowStatePresentation();
         }
 
-        /// <summary>해당 컨트롤을 누른 채 끌면 창이 따라 움직이도록 한다.</summary>
+        /// <summary>해당 컨트롤을 누른 채 끌면 창이 따라 움직이고, 더블 클릭하면 최대화가 토글되도록 한다.</summary>
         private void EnableWindowDrag(Control control)
         {
             control.MouseDown += TitleArea_MouseDown;
-            control.DoubleClick += TitleArea_DoubleClick;
+            control.MouseMove += TitleArea_MouseMove;
+            control.MouseUp += TitleArea_MouseUp;
         }
 
+        /// <summary>왼쪽 버튼을 누른 지점(화면 좌표). 아직 끌기로 볼지 판단하지 않은 상태다.</summary>
+        private Point _titleDragOrigin;
+
+        /// <summary>왼쪽 버튼을 누르고 있으나, 끌기 문턱을 아직 넘지 않아 창 이동을 시작하지 않은 상태.</summary>
+        private bool _titleDragArmed;
+
+        /// <summary>
+        /// 누르는 순간에는 이동도 복원도 하지 않는다 — 끌기인지 클릭인지는 <see cref="TitleArea_MouseMove"/>가 정한다.
+        /// (예전에는 여기서 바로 복원하고 OS 이동 루프에 들어갔다. 그래서 상단 바를 한 번 누르기만 해도
+        ///  최대화가 풀려 창이 작아졌고, 이동 루프가 두 번째 클릭을 삼켜 더블 클릭이 아예 먹지 않았다.)
+        /// </summary>
         private void TitleArea_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button != MouseButtons.Left)
                 return;
 
-            // 최대화 상태에서 끌면 윈도우 기본 동작과 같게 "이전 크기로 돌아가면서" 커서를 따라오게 한다.
-            // 그냥 복원만 하면 창이 커서에서 멀리 떨어진 곳에 나타나 놓친 것처럼 보인다.
+            // 더블 클릭의 두 번째 누름은 Clicks == 2 로 들어온다.
+            // DoubleClick 이벤트 대신 이 값을 보는 이유는 두 가지다 —
+            // 컨트롤이 StandardDoubleClick 스타일을 껐는지에 상관없이 잡히고,
+            // 윈도우 제목 줄과 똑같이 "누르는 순간" 반응해 굼떠 보이지 않는다.
+            if (e.Clicks >= 2)
+            {
+                _titleDragArmed = false;   // 버튼을 놓기 전 미세한 움직임에 창이 딸려 오지 않게 한다
+                ToggleMaximize();
+                return;
+            }
+
+            _titleDragArmed = true;
+            _titleDragOrigin = Control.MousePosition;
+        }
+
+        /// <summary>
+        /// 누른 지점에서 시스템 끌기 기준(<see cref="SystemInformation.DragSize"/>)만큼 벗어난 뒤에야 창 이동을 시작한다.
+        /// 손 떨림이나 터치 화면의 미세한 흔들림을 끌기로 오인하지 않기 위한 문턱이다.
+        /// </summary>
+        private void TitleArea_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (!_titleDragArmed)
+                return;
+
+            if ((e.Button & MouseButtons.Left) == 0)
+            {
+                _titleDragArmed = false;
+                return;
+            }
+
+            // 최대화 상태에서는 끌어도 움직이지 않는다 — 크기를 되돌리는 길은 더블 클릭과 최대화 버튼뿐이다.
+            // 윈도우 기본 동작(끌면 복원되며 커서를 따라옴)은 스치기만 해도 창이 작아져,
+            // 항상 최대화로 쓰는 POP 단말에서는 오작동으로만 느껴졌다.
             if (WindowState == FormWindowState.Maximized)
-                RestoreUnderCursor();
+                return;
+
+            var cursor = Control.MousePosition;
+            var slop = SystemInformation.DragSize;
+
+            if (Math.Abs(cursor.X - _titleDragOrigin.X) < slop.Width &&
+                Math.Abs(cursor.Y - _titleDragOrigin.Y) < slop.Height)
+                return;
+
+            _titleDragArmed = false;
 
             // 이동은 OS에 맡긴다 — 화면 가장자리 스냅·다중 모니터 처리가 그대로 따라온다.
             ReleaseCapture();
             SendMessage(Handle, WM_NCLBUTTONDOWN, (IntPtr)HTCAPTION, IntPtr.Zero);
         }
 
-        private void TitleArea_DoubleClick(object sender, EventArgs e) => ToggleMaximize();
+        private void TitleArea_MouseUp(object sender, MouseEventArgs e) => _titleDragArmed = false;
 
         private void btnMinimize_Click(object sender, EventArgs e) => WindowState = FormWindowState.Minimized;
 
@@ -130,21 +182,6 @@ namespace SEOJIN_MEIS.Client.Forms
             }
 
             ApplyWindowStatePresentation();
-        }
-
-        /// <summary>
-        /// 최대화 → 보통 크기로 돌리면서, 커서가 상단 바에서 잡고 있던 위치를 그대로 유지한다.
-        /// (가로는 창 폭 대비 비율, 세로는 창 위쪽부터의 거리를 보존한다.)
-        /// </summary>
-        private void RestoreUnderCursor()
-        {
-            var cursor = Control.MousePosition;
-            var ratioX = Width > 0 ? (cursor.X - Left) / (double)Width : 0.5;
-            var offsetY = cursor.Y - Top;
-
-            RestoreToNormal();
-
-            Location = new Point((int)(cursor.X - Width * ratioX), cursor.Y - offsetY);
         }
 
         private bool _normalBoundsInitialized;

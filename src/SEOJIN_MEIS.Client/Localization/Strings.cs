@@ -185,6 +185,9 @@ namespace SEOJIN_MEIS.Client.Localization
         public static string Pop_SerialNotRequired => Get(nameof(Pop_SerialNotRequired));
         public static string Pop_NoProcessList => Get(nameof(Pop_NoProcessList));
         public static string Pop_ProcessMoved => Get(nameof(Pop_ProcessMoved));
+        public static string Pop_FirstProcess => Get(nameof(Pop_FirstProcess));
+        public static string Pop_LastProcess => Get(nameof(Pop_LastProcess));
+        public static string Pop_ProcessNotInList => Get(nameof(Pop_ProcessNotInList));
         public static string Pop_ConfirmStart => Get(nameof(Pop_ConfirmStart));
         public static string Pop_ConfirmStop => Get(nameof(Pop_ConfirmStop));
         public static string Pop_ConfirmSkip => Get(nameof(Pop_ConfirmSkip));
@@ -238,9 +241,8 @@ namespace SEOJIN_MEIS.Client.Localization
         public static string PopSerial_Duplicated => Get(nameof(PopSerial_Duplicated));
         public static string PopSerial_Saved => Get(nameof(PopSerial_Saved));
         public static string PopTorque_Title => Get(nameof(PopTorque_Title));
-        public static string PopTorque_Value => Get(nameof(PopTorque_Value));
-        public static string PopTorque_Range => Get(nameof(PopTorque_Range));
         public static string PopTorque_Invalid => Get(nameof(PopTorque_Invalid));
+        public static string Pop_TorqueRangeMissing => Get(nameof(Pop_TorqueRangeMissing));
         public static string Pop_DrawingLoading => Get(nameof(Pop_DrawingLoading));
         public static string Pop_DrawingNone => Get(nameof(Pop_DrawingNone));
         public static string Pop_DrawingShareNotConfigured => Get(nameof(Pop_DrawingShareNotConfigured));

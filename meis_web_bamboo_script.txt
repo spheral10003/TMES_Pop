@@ -1,0 +1,32 @@
+set -euo pipefail
+
+# nvm 로드(설치는 1회만 필요)
+export NVM_DIR="$HOME/.nvm"
+if [ -s "$NVM_DIR/nvm.sh" ]; then . "$NVM_DIR/nvm.sh"; fi
+nvm use --silent 16.20.2 >/dev/null 2>&1 || {
+  echo "[INFO] Installing Node 16.20.2"
+  curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+  . "$NVM_DIR/nvm.sh"
+  nvm install 16.20.2
+  nvm use 16.20.2
+}
+echo "[INFO] Node: $(node -v), npm: $(npm -v)"
+
+# npm 캐시(재빌드 가속)
+NPM_CACHE="/sjapp/atlassian/bamboo/.npm-cache"
+mkdir -p "$NPM_CACHE"
+npm config set cache "$NPM_CACHE" --location=project
+
+# noisy 줄이기
+export BROWSERSLIST_IGNORE_OLD_DATA=1
+
+npm ci --no-audit --fund=false --progress=false
+
+# ✅ 개발 서버 배포: .env.development 사용
+# package.json의 'build.dev' / 'generate.dev' 스크립트를 그대로 사용하되,
+# generate에만 추가 인자 '--no-build' 를 전달해 재빌드 방지
+npm run build.dev
+npm run generate.dev -- --no-build
+
+echo "[INFO] Build OK. dist size:"
+du -sh dist || true

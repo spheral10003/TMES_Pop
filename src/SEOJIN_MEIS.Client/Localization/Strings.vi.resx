@@ -182,6 +182,9 @@
   <data name="Pop_SerialNotRequired" xml:space="preserve"><value>Vật tư này không yêu cầu số sê-ri.</value></data>
   <data name="Pop_NoProcessList" xml:space="preserve"><value>Không có thông tin công đoạn cho lệnh sản xuất này.</value></data>
   <data name="Pop_ProcessMoved" xml:space="preserve"><value>Đã chuyển đến công đoạn đã chọn.</value></data>
+  <data name="Pop_FirstProcess" xml:space="preserve"><value>Đây là công đoạn đầu tiên trong danh sách.</value></data>
+  <data name="Pop_LastProcess" xml:space="preserve"><value>Đây là công đoạn cuối cùng trong danh sách.</value></data>
+  <data name="Pop_ProcessNotInList" xml:space="preserve"><value>Không tìm thấy công đoạn hiện tại trong danh sách. Hãy chọn từ [Danh sách công đoạn].</value></data>
   <data name="Pop_ConfirmStart" xml:space="preserve"><value>Bắt đầu công đoạn này?</value></data>
   <data name="Pop_ConfirmStop" xml:space="preserve"><value>Dừng công đoạn này?</value></data>
   <data name="Pop_ConfirmSkip" xml:space="preserve"><value>Bỏ qua công đoạn này?</value></data>
@@ -235,9 +238,8 @@
   <data name="PopSerial_Duplicated" xml:space="preserve"><value>Cùng một số sê-ri được nhập nhiều lần.</value></data>
   <data name="PopSerial_Saved" xml:space="preserve"><value>Đã lưu số sê-ri.</value></data>
   <data name="PopTorque_Title" xml:space="preserve"><value>Nhập kết quả lực siết</value></data>
-  <data name="PopTorque_Value" xml:space="preserve"><value>Kết quả lực siết</value></data>
-  <data name="PopTorque_Range" xml:space="preserve"><value>Phạm vi cho phép</value></data>
   <data name="PopTorque_Invalid" xml:space="preserve"><value>Hãy nhập kết quả lực siết bằng số.</value></data>
+  <data name="Pop_TorqueRangeMissing" xml:space="preserve"><value>Cần có giới hạn dưới và giới hạn trên của lực siết để tính giá trị trung bình.</value></data>
   <data name="Pop_DrawingLoading" xml:space="preserve"><value>Đang tải bản vẽ...</value></data>
   <data name="Pop_DrawingNone" xml:space="preserve"><value>Không có bản vẽ để hiển thị.</value></data>
   <data name="Pop_DrawingShareNotConfigured" xml:space="preserve"><value>Thư mục chia sẻ bản vẽ (SMB) chưa được cấu hình. Hãy kiểm tra DocumentShare.RootPath trong App.config.</value></data>
