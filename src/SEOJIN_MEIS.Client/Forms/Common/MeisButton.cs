@@ -1,63 +1,49 @@
 using System;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Windows.Forms;
-using DevExpress.Utils.Svg;
+using DevExpress.LookAndFeel;
+using DevExpress.Utils;
+using DevExpress.XtraEditors;
+using DevExpress.XtraEditors.Controls;
 using SEOJIN_MEIS.Client.Theme;
 
 namespace SEOJIN_MEIS.Client.Forms.Common
 {
     /// <summary>
-    /// 공통 버튼 — <b>흰 바탕 + 얇은 회색 테두리 + 좌측 아이콘 + 진한 글자</b>.
+    /// 공통 버튼 — <b>옅은 회색 바탕 + 또렷한 테두리 + 좌측 아이콘 + 진한 글자</b>.
+    /// 흰 카드 위에 놓였을 때 바탕끼리 겹쳐 보이지 않도록 카드보다 한 톤 낮게 칠한다(<see cref="AppTheme.ButtonQuietBack"/>).
     ///
-    /// DevExpress <c>SimpleButton</c>을 테마로 칠하는 대신 직접 그리는 이유:
-    /// SimpleButton은 스킨이 배경·테두리·눌림 효과를 함께 그려서, Appearance로 색만 바꿔도
-    /// 시안과 미묘하게 어긋난다(모서리를 Region으로 깎으면 가장자리가 거칠어지는 문제도 있다).
-    /// 여기서는 배경·테두리·아이콘·글자를 전부 직접 그리므로 어느 테마에서도 모양이 같다.
+    /// DevExpress <see cref="SimpleButton"/>을 상속하고, 색은 <see cref="AppTheme.QuietButton"/>과 같은 방식으로
+    /// Appearance에 직접 지정한다. 스킨이 배경·테두리를 대신 그려 색이 무시되는 것은
+    /// <c>LookAndFeel.Style = Flat</c> + <c>PaintStyle = Light</c>로 막는다(카드 패널에서 쓰는 수법과 같다).
+    ///
+    /// 직접 그리지 않고 SimpleButton에 얹은 덕에 hover/press 상태, 대화상자 Enter/Esc(<c>IButtonControl</c>),
+    /// 툴팁·DPI 스케일링을 DevExpress가 처리한다.
     ///
     /// 아이콘은 <see cref="AppIcons"/>의 SVG 템플릿 문자열을 <see cref="Icon"/>에 넣는다
     /// (예: <c>AppIcons.Search</c>). 넣지 않으면 글자만 가운데에 그린다.
     /// </summary>
-    public class MeisButton : Control, IButtonControl
+    public class MeisButton : SimpleButton
     {
         private const int CornerRadius = 2;
         private const int IconSize = 16;
-        private const int IconLeft = 14;
 
         /// <summary>아이콘과 글자 사이 간격.</summary>
         private const int IconTextGap = 10;
 
-        /// <summary>아이콘+글자 덩어리 양옆에 두는 여백.</summary>
-        private const int ContentPadding = 6;
-
-        /// <summary>
-        /// 폭이 빠듯할 때 쓰는 간격·여백. 글자를 …로 자르기 전에 여기까지 줄여서 버텨 본다
-        /// (언어를 바꾸면 같은 버튼에 더 긴 문구가 들어온다 — 예: "조회" → "Tra cứu").
-        /// 이 값 밑으로는 내려가지 않으므로 아이콘과 글자가 붙어 보이는 일은 없다.
-        /// </summary>
-        private const int TightIconTextGap = 4;
-        private const int TightContentPadding = 2;
+        /// <summary><see cref="TextAfterIcon"/>일 때 아이콘을 두는 왼쪽 여백.</summary>
+        private const int IconLeft = 14;
 
         private string _icon;
-        private SvgImage _iconImage;
-        private Color _iconColor;
-        private bool _hover;
-        private bool _pressed;
+        private bool _textAfterIcon;
         private bool _selected;
         private Color _accent = AppTheme.Indigo;
 
         public MeisButton()
         {
-            SetStyle(ControlStyles.AllPaintingInWmPaint
-                     | ControlStyles.UserPaint
-                     | ControlStyles.OptimizedDoubleBuffer
-                     | ControlStyles.ResizeRedraw
-                     | ControlStyles.SupportsTransparentBackColor, true);
-
             Size = new Size(120, 34);
             Cursor = Cursors.Hand;
-            BackColor = Color.Transparent;
-            Font = AppTheme.BodyFont;
+            ApplyTheme();
         }
 
         /// <summary>좌측 아이콘(<see cref="AppIcons"/>의 SVG 템플릿). 비우면 글자만 그린다.</summary>
@@ -70,13 +56,23 @@ namespace SEOJIN_MEIS.Client.Forms.Common
                     return;
 
                 _icon = value;
-                _iconImage = null;   // 색과 함께 다시 만든다
-                Invalidate();
+                ApplyIcon();
             }
         }
 
-        /// <summary>글자가 있는 자리를 아이콘 오른쪽부터로 볼지(false면 버튼 전체 기준으로 가운데 정렬).</summary>
-        public bool TextAfterIcon { get; set; }
+        /// <summary>글자가 있는 자리를 아이콘 오른쪽부터로 볼지(false면 아이콘+글자 덩어리를 가운데 정렬).</summary>
+        public bool TextAfterIcon
+        {
+            get => _textAfterIcon;
+            set
+            {
+                if (_textAfterIcon == value)
+                    return;
+
+                _textAfterIcon = value;
+                ApplyContentLayout();
+            }
+        }
 
         /// <summary>
         /// 선택된 상태로 그릴지(탭처럼 여럿 중 하나가 켜져 있는 경우).
@@ -85,247 +81,148 @@ namespace SEOJIN_MEIS.Client.Forms.Common
         public bool Selected
         {
             get => _selected;
-            set { _selected = value; _iconImage = null; Invalidate(); }
+            set
+            {
+                if (_selected == value)
+                    return;
+
+                _selected = value;
+                ApplyColors();
+            }
         }
 
         /// <summary>선택 상태에서 쓰는 색. 평상시 모양은 이 값과 무관하게 중립 톤이다.</summary>
         public Color Accent
         {
             get => _accent;
-            set { _accent = value; _iconImage = null; Invalidate(); }
-        }
+            set
+            {
+                if (_accent == value)
+                    return;
 
-        public override string Text
-        {
-            get => base.Text;
-            set { base.Text = value; Invalidate(); }
-        }
-
-        // ── IButtonControl ─────────────────────────────────────────────────────
-        // 팝업들이 AcceptButton/CancelButton과 DialogResult를 쓴다.
-        // 이걸 구현하지 않으면 <b>대화상자에서 Enter/Esc가 먹지 않는다</b> — 현장에서 자주 쓰는 조작이라
-        // 단순한 모양 교체로 끝낼 수 없는 부분이다.
-
-        /// <summary>이 버튼을 누르면 대화상자가 돌려줄 결과. 팝업의 [확인]/[닫기]가 쓴다.</summary>
-        public DialogResult DialogResult { get; set; } = DialogResult.None;
-
-        /// <summary>기본 버튼(Enter로 눌리는 버튼)으로 지정될 때 호출된다. 표시는 바꾸지 않는다.</summary>
-        public void NotifyDefault(bool value)
-        {
-        }
-
-        /// <summary>클릭한 것과 같게 동작시킨다(Enter/Esc가 이 경로로 들어온다).</summary>
-        public void PerformClick()
-        {
-            if (!Enabled)
-                return;
-
-            OnClick(EventArgs.Empty);
-        }
-
-        protected override void OnPaint(PaintEventArgs e)
-        {
-            var g = e.Graphics;
-            g.SmoothingMode = SmoothingMode.AntiAlias;
-            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
-
-            var back = ResolveBackColor();
-            var border = ResolveBorderColor();
-            var fore = ResolveForeColor();
-
-            DrawSurface(g, back, border);
-            DrawContent(g, fore);
+                _accent = value;
+                ApplyColors();
+            }
         }
 
         /// <summary>
-        /// 아이콘과 글자를 놓는다.
-        ///
-        /// 가운데 정렬(<see cref="TextAfterIcon"/>가 false)일 때는 <b>아이콘과 글자를 한 덩어리로 보고</b>
-        /// 그 덩어리를 버튼 가운데에 둔다. 예전에는 아이콘을 왼쪽 14px에 고정해 놓고 글자만 버튼 전체
-        /// 기준으로 가운데 정렬해서, 폭이 빠듯한 버튼(104px에 "새로고침")에서는 글자가 아이콘에 딱 붙어
-        /// "Q새로고침"처럼 보였다. 이제는 폭·언어와 무관하게 <see cref="IconTextGap"/>만큼 벌어진다.
+        /// 색·아이콘·배치를 현재 테마로 다시 입힌다.
+        /// Appearance에 색을 <b>박아 두는</b> 방식이라 테마를 바꾸면 화면이 이 메서드를 다시 불러 줘야 한다
+        /// (직접 그리던 시절에는 Invalidate만으로 따라왔다).
         /// </summary>
-        private void DrawContent(Graphics g, Color fore)
+        public void ApplyTheme()
         {
-            var text = Text ?? string.Empty;
-            var textWidth = text.Length == 0 ? 0 : TextRenderer.MeasureText(text, Font).Width;
+            // 스킨이 배경·테두리를 대신 그리면 아래 Appearance 색이 무시된다 — Flat + Light로 막는다.
+            LookAndFeel.UseDefaultLookAndFeel = false;
+            LookAndFeel.Style = LookAndFeelStyle.Flat;
+            PaintStyle = PaintStyles.Light;
 
-            if (string.IsNullOrEmpty(_icon))
-            {
-                // 아이콘이 없으면 예전 그대로 — 가운데 정렬이거나, 왼쪽부터 채운다.
-                DrawText(g, fore, 0, Width - (TextAfterIcon ? IconLeft : 0), centered: !TextAfterIcon);
-                return;
-            }
+            // ButtonStyle은 건드리지 않는다 — PaintStyle=Light가 Appearance.BorderColor로 테두리를 그려 준다.
+            // (Simple로 바꾸면 PaintStyle=Default일 때 진한 남색 테두리가 따로 그려진다.)
 
-            var gap = IconTextGap;
-            var padding = ContentPadding;
+            // 점선 포커스 사각형은 끈다. 다만 포커스를 가진 버튼의 <b>바깥 테두리는 글자색으로</b> 그려지는데
+            // (DevExpress 기본 동작, ShowFocusRectangle과 무관하다) 이건 그대로 둔다 —
+            // 직접 그리던 시절에는 포커스가 눈에 보이지 않아 키보드로 조작할 때 어디에 있는지 알 수 없었다.
+            ShowFocusRectangle = DefaultBoolean.False;
 
-            if (IconSize + gap + textWidth + padding * 2 > Width)
-            {
-                gap = TightIconTextGap;
-                padding = TightContentPadding;
-            }
-
-            var content = IconSize + (textWidth > 0 ? gap + textWidth : 0);
-
-            var iconLeft = TextAfterIcon
-                ? IconLeft
-                : Math.Max(padding, (Width - content) / 2);
-
-            DrawIcon(g, fore, iconLeft);
-
-            if (textWidth == 0)
-                return;
-
-            var textLeft = iconLeft + IconSize + gap;
-            DrawText(g, fore, textLeft, Width - textLeft - padding, centered: false);
-        }
-
-        private Color ResolveBackColor()
-        {
-            if (!Enabled)
-                return AppTheme.Card;
-
-            if (_pressed)
-                return AppTheme.ButtonQuietPressed;
-
-            // 선택된 탭은 포인트 색을 아주 옅게 깐 칩으로 — 글자는 그대로 읽혀야 하므로 진하게 깔지 않는다.
-            if (_selected)
-                return AppTheme.Blend(_accent, AppTheme.Card, 0.18f);
-
-            return _hover ? AppTheme.GridRowAlt : AppTheme.Card;
-        }
-
-        private Color ResolveBorderColor()
-        {
-            if (!Enabled)
-                return AppTheme.ButtonDisabledBack;
-
-            if (_selected)
-                return _accent;
-
-            // 올려놓거나 누르면 테두리만 한 톤 진해진다 — 시안처럼 색을 쓰지 않는다.
-            return _hover || _pressed ? AppTheme.TextMuted : AppTheme.CardBorder;
+            ApplyColors();
+            ApplyIcon();
         }
 
         /// <summary>
-        /// 글자·아이콘 색. 선택 상태여도 진한 글자를 그대로 둔다 —
+        /// 상태별 색. 선택 상태여도 글자는 진하게 둔다 —
         /// 바탕 칩이 이미 상태를 말해 주므로 글자까지 물들이면 오히려 읽기 나빠진다.
         /// </summary>
-        private Color ResolveForeColor() =>
-            Enabled ? AppTheme.TextPrimary : AppTheme.ButtonDisabledFore;
-
-        private void DrawSurface(Graphics g, Color back, Color border)
+        private void ApplyColors()
         {
-            // 부모 배경이 비쳐야 모서리 바깥이 깔끔하다.
-            g.Clear(Parent?.BackColor ?? AppTheme.Surface);
+            var fore = AppTheme.TextPrimary;
 
-            var bounds = new Rectangle(0, 0, Width - 1, Height - 1);
-            using (var path = RoundedPath(bounds, CornerRadius))
-            using (var fill = new SolidBrush(back))
-            using (var pen = new Pen(border))
+            // 선택된 탭은 포인트 색을 아주 옅게 깐 칩으로 — 글자가 그대로 읽혀야 하므로 진하게 깔지 않는다.
+            var selectedBack = AppTheme.Blend(_accent, AppTheme.Card, 0.18f);
+            var border = _selected ? _accent : AppTheme.ButtonQuietBorder;
+
+            // 올려놓거나 누르면 테두리만 한 톤 진해진다 — 시안처럼 색을 쓰지 않는다.
+            var hotBorder = _selected ? _accent : AppTheme.TextMuted;
+
+            PaintState(Appearance, _selected ? selectedBack : AppTheme.ButtonQuietBack, fore, border);
+            PaintState(AppearanceHovered, _selected ? selectedBack : AppTheme.ButtonQuietHover, fore, hotBorder);
+            PaintState(AppearancePressed, AppTheme.ButtonQuietPressed, fore, hotBorder);
+            PaintState(AppearanceDisabled, AppTheme.ButtonDisabledBack, AppTheme.ButtonDisabledFore, AppTheme.ButtonDisabledBack);
+        }
+
+        private static void PaintState(AppearanceObject appearance, Color back, Color fore, Color border)
+        {
+            appearance.BackColor = back;
+            appearance.ForeColor = fore;
+            appearance.BorderColor = border;
+            appearance.Font = AppTheme.BodyFont;
+            appearance.Options.UseBackColor = true;
+            appearance.Options.UseForeColor = true;
+            appearance.Options.UseBorderColor = true;
+            appearance.Options.UseFont = true;
+        }
+
+        private void ApplyIcon()
+        {
+            if (string.IsNullOrEmpty(_icon))
             {
-                g.FillPath(fill, path);
-                g.DrawPath(pen, path);
-            }
-        }
-
-        private void DrawIcon(Graphics g, Color color, int left)
-        {
-            // 색이 바뀌면(비활성 등) 다시 만든다 — SVG 템플릿에 색을 끼워 넣는 방식이라 캐시가 색에 묶인다.
-            if (_iconImage == null || _iconColor != color)
-            {
-                _iconImage = AppIcons.Get(_icon, color);
-                _iconColor = color;
+                ImageOptions.SvgImage = null;
+                ApplyContentLayout();
+                return;
             }
 
-            var top = (Height - IconSize) / 2;
-            using (var image = _iconImage.Render(new Size(IconSize, IconSize), null))
-                g.DrawImage(image, new Rectangle(left, top, IconSize, IconSize));
-        }
+            // 비활성이면 아이콘도 흐려져야 한다 — 색을 SVG에 끼워 넣는 방식이라 상태마다 다시 받아 온다.
+            ImageOptions.SvgImage = AppIcons.Get(_icon, Enabled ? AppTheme.TextPrimary : AppTheme.ButtonDisabledFore);
+            ImageOptions.SvgImageSize = new Size(IconSize, IconSize);
 
-        private void DrawText(Graphics g, Color color, int left, int width, bool centered)
-        {
-            if (string.IsNullOrEmpty(Text) || width <= 0)
-                return;
+            // 스킨 팔레트가 아이콘 색을 다시 칠하지 못하게 막는다(AppIcons가 이미 색을 박아 넣었다).
+            ImageOptions.SvgImageColorizationMode = SvgImageColorizationMode.None;
 
-            var flags = TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix
-                        | (centered ? TextFormatFlags.HorizontalCenter : TextFormatFlags.Left);
-
-            TextRenderer.DrawText(g, Text, Font, new Rectangle(left, 0, width, Height), color, flags);
-        }
-
-        private static GraphicsPath RoundedPath(Rectangle bounds, int radius)
-        {
-            var path = new GraphicsPath();
-            var d = radius * 2;
-
-            path.AddArc(bounds.Left, bounds.Top, d, d, 180, 90);
-            path.AddArc(bounds.Right - d, bounds.Top, d, d, 270, 90);
-            path.AddArc(bounds.Right - d, bounds.Bottom - d, d, d, 0, 90);
-            path.AddArc(bounds.Left, bounds.Bottom - d, d, d, 90, 90);
-            path.CloseFigure();
-            return path;
-        }
-
-        protected override void OnMouseEnter(EventArgs e)
-        {
-            base.OnMouseEnter(e);
-            _hover = true;
-            Invalidate();
-        }
-
-        protected override void OnMouseLeave(EventArgs e)
-        {
-            base.OnMouseLeave(e);
-            _hover = false;
-            _pressed = false;
-            Invalidate();
-        }
-
-        protected override void OnMouseDown(MouseEventArgs e)
-        {
-            base.OnMouseDown(e);
-
-            if (e.Button != MouseButtons.Left)
-                return;
-
-            _pressed = true;
-            Invalidate();
-        }
-
-        protected override void OnMouseUp(MouseEventArgs e)
-        {
-            base.OnMouseUp(e);
-            _pressed = false;
-            Invalidate();
+            ApplyContentLayout();
         }
 
         /// <summary>
-        /// <see cref="DialogResult"/>가 지정돼 있으면 누를 때 대화상자 결과를 세운다.
-        /// WinForms의 Button이 하는 일을 그대로 옮긴 것으로, 이게 없으면
-        /// <c>btnClose.DialogResult = Cancel</c> 같은 지정이 아무 일도 하지 않는다.
+        /// 아이콘과 글자를 놓는 방식.
+        ///
+        /// 기본값은 <see cref="ImageAlignToText.LeftCenter"/> — DevExpress가 <b>아이콘과 글자를 한 덩어리로 보고</b>
+        /// 그 덩어리를 버튼 가운데에 둔다. 아이콘을 왼쪽에 고정해 놓고 글자만 버튼 전체 기준으로 가운데 정렬하면
+        /// 폭이 빠듯한 버튼(104px에 "새로고침")에서 글자가 아이콘에 딱 붙어 "Q새로고침"처럼 보인다.
+        /// 덩어리로 묶어 두면 폭·언어와 무관하게 <see cref="IconTextGap"/>만큼 벌어진다
+        /// (언어를 바꾸면 같은 버튼에 더 긴 문구가 들어온다 — 예: "조회" → "Tra cứu").
         /// </summary>
-        protected override void OnClick(EventArgs e)
+        private void ApplyContentLayout()
         {
-            base.OnClick(e);
+            ImageOptions.ImageToTextIndent = IconTextGap;
+            Appearance.Options.UseTextOptions = true;
 
-            if (DialogResult == DialogResult.None)
+            if (_textAfterIcon)
+            {
+                ImageOptions.ImageToTextAlignment = ImageAlignToText.None;
+                ImageOptions.Location = ImageLocation.MiddleLeft;
+                Appearance.TextOptions.HAlignment = HorzAlignment.Near;
+                Padding = new Padding(IconLeft, 0, 0, 0);
                 return;
+            }
 
-            var form = FindForm();
-            if (form != null)
-                form.DialogResult = DialogResult;
+            ImageOptions.ImageToTextAlignment = ImageAlignToText.LeftCenter;
+            Appearance.TextOptions.HAlignment = HorzAlignment.Center;
+            Padding = Padding.Empty;
+        }
+
+        protected override void OnSizeChanged(EventArgs e)
+        {
+            base.OnSizeChanged(e);
+
+            // 폭이 바뀌는 화면이 있어 매번 다시 깎는다 — 한 번만 잘라 두면 잘린 자국이 남는다.
+            AppTheme.RoundCorners(this, CornerRadius);
         }
 
         protected override void OnEnabledChanged(EventArgs e)
         {
             base.OnEnabledChanged(e);
 
-            // 비활성이면 아이콘 색도 흐려져야 하므로 다음 그리기에서 다시 만들게 한다.
-            _iconImage = null;
+            ApplyIcon();
             Cursor = Enabled ? Cursors.Hand : Cursors.Default;
-            Invalidate();
         }
     }
 }

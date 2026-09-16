@@ -65,8 +65,23 @@ namespace SEOJIN_MEIS.Client.Theme
         public static Color ButtonDisabledBack => IsDarkMode ? Color.FromArgb(52, 51, 78) : Color.FromArgb(245, 245, 245);
         public static Color ButtonDisabledFore => IsDarkMode ? Color.FromArgb(110, 108, 140) : Color.FromArgb(191, 191, 191);
 
-        /// <summary>테두리만 있는 버튼(시안의 Normal)이 눌렸을 때 채우는 색.</summary>
-        public static Color ButtonQuietPressed => IsDarkMode ? Color.FromArgb(58, 56, 90) : Color.FromArgb(232, 234, 240);
+        /// <summary>
+        /// 테두리만 있는 버튼(시안의 Normal)의 바탕·테두리.
+        ///
+        /// 이 버튼은 대부분 <b>흰 카드 위</b>에 놓인다. 바탕을 카드와 같은 흰색으로 두면 경계가 테두리 한 줄뿐이라
+        /// 현장 조명에서 버튼인지 알아보기 어렵다 — 한 톤 낮춘 회색 바탕에 또렷한 테두리를 둘러
+        /// "누를 수 있는 것"임을 바탕색만으로도 알 수 있게 한다.
+        /// </summary>
+        public static Color ButtonQuietBack => IsDarkMode ? Color.FromArgb(48, 47, 74) : Color.FromArgb(237, 240, 246);
+
+        /// <summary>위 버튼의 테두리 — 바탕보다 두 톤 진해야 카드 경계선과 구별된다.</summary>
+        public static Color ButtonQuietBorder => IsDarkMode ? Color.FromArgb(78, 76, 118) : Color.FromArgb(185, 193, 212);
+
+        /// <summary>위 버튼에 마우스를 올렸을 때.</summary>
+        public static Color ButtonQuietHover => IsDarkMode ? Color.FromArgb(58, 56, 90) : Color.FromArgb(226, 231, 241);
+
+        /// <summary>위 버튼을 눌렀을 때 — hover보다 한 톤 더 진해야 눌린 것이 보인다.</summary>
+        public static Color ButtonQuietPressed => IsDarkMode ? Color.FromArgb(68, 66, 104) : Color.FromArgb(212, 219, 233);
 
         // ── 내보내기 문서(엑셀) 색 ──
         // 화면 색과 달리 다크 모드를 따라가면 안 된다 — 어두운 테마로 쓰던 중에 내보냈다고
