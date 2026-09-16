@@ -4,6 +4,7 @@ using DevExpress.XtraEditors;
 using SEOJIN_MEIS.Client.ApiClient;
 using SEOJIN_MEIS.Client.Common.Logging;
 using SEOJIN_MEIS.Client.Composition;
+using SEOJIN_MEIS.Client.Forms.Common;
 using SEOJIN_MEIS.Client.Localization;
 using SEOJIN_MEIS.Client.Theme;
 
@@ -52,6 +53,7 @@ namespace SEOJIN_MEIS.Client.Forms
         private void ApplyTheme()
         {
             AppTheme.Sidebar(headerPanel);
+            DialogChrome.Apply(this, headerPanel);
             AppTheme.Avatar(lblAvatar, GetInitial(), 52);
             lblAvatar.Appearance.Font = AppTheme.TitleFont;
 

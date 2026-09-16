@@ -182,7 +182,31 @@ public void CenterOn(IWin32Window owner)
 - 팝업이 더 늘어나면 공통 헬퍼로 뽑는 편이 낫다. 지금은 **복제가 현재 관례**이므로
   새 팝업도 이 메서드를 포함시킨다.
 
-### 4. 사용자에게 알림을 띄울 때
+### 4. 창틀 — 제목 줄은 헤더가 대신한다
+
+팝업은 Windows 제목 줄을 쓰지 않는다. `Initialize()` 끝에서 `DialogChrome.Apply(this, headerPanel)`를
+부르면 제목 줄이 사라지고, 화면 안의 색 띠 헤더가 그 역할을 이어받는다.
+
+```csharp
+AppTheme.DialogHeader(headerPanel, AppTheme.Indigo);
+DialogChrome.Apply(this, headerPanel);   // 제목 줄 제거 + 헤더를 끌어 창 이동
+```
+
+제목 줄을 걷어낸 이유는 두 가지다.
+
+1. **제목이 두 번 나왔다.** `Text`와 헤더의 `lblTitle`에 같은 문구가 들어가, 제목 줄과 색 띠가
+   위아래로 겹쳐 **창이 두 번 뜬 것처럼** 보였다.
+2. **모달 중에 창이 흔들렸다.** 팝업이 떠 있을 때 뒤쪽 화면을 누르면 Windows가 제목 줄을 흔들어
+   알린다(표준 동작). 전체 화면 POP에서는 고장처럼 읽힌다 — 흔들 제목 줄이 없으면 일어나지 않는다.
+
+- 닫기는 각 팝업의 **[닫기] 버튼과 Esc**(`CancelButton`)가 맡는다.
+  버튼이 하나뿐인 공용 메시지 창만 헤더 안의 X를 쓴다(`AppMessagePanel.ShowCloseButton`).
+- 창 이동은 헤더와 그 안의 아이콘·제목 라벨을 끌면 된다. 좌표를 직접 계산하지 않고
+  `WM_NCLBUTTONDOWN`으로 OS에 맡기므로 제목 줄을 잡고 끌 때와 동작이 같다.
+- `Text`는 그대로 둔다 — 화면에는 안 보이지만 접근성·작업 표시줄이 쓴다.
+
+### 5. 사용자에게 알림을 띄울 때
+
 
 **`MessageBox` / `XtraMessageBox`를 직접 부르지 말 것**(루트 [CLAUDE.md](CLAUDE.md) 공통 규약).
 `AppMessageBox`만 쓴다. 그 안에서 `AppMessageForm`이 뜬다.

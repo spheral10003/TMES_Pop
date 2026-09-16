@@ -91,6 +91,7 @@ namespace SEOJIN_MEIS.Client.Forms.Notification
         private void ApplyTheme()
         {
             AppTheme.DialogHeader(headerPanel, AppTheme.Indigo);
+            DialogChrome.Apply(this, headerPanel);
             AppTheme.DialogHeaderTitle(lblTitle);
 
             headerIcon.SvgImage = AppIcons.Get(AppIcons.Bell, Color.White);

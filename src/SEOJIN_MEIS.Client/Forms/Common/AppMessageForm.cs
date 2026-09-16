@@ -39,14 +39,18 @@ namespace SEOJIN_MEIS.Client.Forms.Common
             borderPanel.Controls.Add(_panel);
             _panel.Initialize(message, title, kind, buttons);
 
-            // 창 제목줄에 이미 닫기(X)가 있으므로 헤더 안의 X는 감춘다(사용자 정보 팝업과 동일한 구성).
-            _panel.ShowCloseButton = false;
+            // 창 제목줄이 없으므로(DialogChrome) 헤더 안의 X가 유일한 닫기 수단이다.
+            _panel.ShowCloseButton = true;
 
             // 창 제목은 헤더와 같은 문구를 쓴다(제목을 안 주면 성격별 기본 제목이 들어간다).
             Text = _panel.Title;
 
             // 메시지 줄 수에 맞춰 창 높이를 잡는다(폭은 고정).
             ClientSize = new Size(DefaultWidth, AppMessagePanel.MeasureHeight(message, DefaultWidth));
+
+            // 제목 줄을 걷어낸다 — 헤더와 제목이 겹쳐 보이던 문제와, 모달 중 뒤를 클릭하면
+            // Windows가 제목 줄을 흔들던 문제가 함께 사라진다.
+            DialogChrome.Apply(this, _panel.Header);
 
             _panel.ResultSelected += Panel_ResultSelected;
             KeyDown += (s, e) => _panel.HandleKey(e.KeyCode);

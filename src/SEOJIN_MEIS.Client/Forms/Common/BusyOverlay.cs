@@ -31,6 +31,12 @@ namespace SEOJIN_MEIS.Client.Forms.Common
         /// </summary>
         internal sealed class BusyVeil : Panel
         {
+            public BusyVeil()
+            {
+                // 덮개 위에 얹힌 대기 상자가 다시 그려질 때 바탕이 한 번 지워졌다
+                // 다시 칠해지는 게 그대로 보이면 깜빡임으로 읽힌다.
+                DoubleBuffered = true;
+            }
         }
 
         private readonly Control _owner;
@@ -55,10 +61,16 @@ namespace SEOJIN_MEIS.Client.Forms.Common
             if (cancelable)
                 _cancellation = new CancellationTokenSource();
 
-            // 덮개: 화면 전체를 채워 입력을 막고, 아래 내용이 비치도록 반투명으로 둔다.
+            // 덮개: 화면 전체를 채워 입력을 막는다.
+            //
+            // 예전에는 알파 90짜리 반투명 색을 썼다. WinForms의 투명 배경은 형제 컨트롤이 아니라
+            // <b>부모 배경만</b> 비치므로(PaintTransparentBackground) 보이던 결과는 어차피
+            // "부모 배경색에 Surface를 35% 섞은 불투명 색"이었고, 대신 덮개를 다시 그릴 때마다
+            // 부모 배경을 덮개 영역에 재합성하는 비용을 치렀다 — 조회 중 화면이 깜빡이던 주된 원인이다.
+            // 같은 색을 미리 섞어 불투명으로 깔면 모양은 그대로면서 그 재합성이 사라진다.
             _veil = new BusyVeil();
             _veil.Dock = DockStyle.Fill;
-            _veil.BackColor = Color.FromArgb(90, AppTheme.Surface);
+            _veil.BackColor = AppTheme.Blend(AppTheme.Surface, OpaqueBackColorOf(owner), 90f / 255f);
 
             _indicator = new BusyIndicator();
             _indicator.Cancelable = cancelable;
@@ -71,8 +83,18 @@ namespace SEOJIN_MEIS.Client.Forms.Common
             _veil.Controls.Add(_indicator);
             _veil.Resize += (s, e) => CenterIndicator();
 
-            owner.Controls.Add(_veil);
-            _veil.BringToFront();
+            // 덮개를 넣고 빼는 동안 부모가 도킹 레이아웃을 여러 번 돌리지 않게 묶는다
+            // (형제 컨트롤까지 다시 배치되면서 화면 전체가 한 번 더 그려진다).
+            owner.SuspendLayout();
+            try
+            {
+                owner.Controls.Add(_veil);
+                _veil.BringToFront();
+            }
+            finally
+            {
+                owner.ResumeLayout(true);
+            }
 
             // Dock=Fill이 실제 크기로 반영된 뒤에 가운데를 계산해야 한다.
             // Add 직후에는 아직 기본 크기(200x100)인 경우가 있어, 레이아웃을 강제로 끝내고 잰다.
@@ -110,6 +132,21 @@ namespace SEOJIN_MEIS.Client.Forms.Common
             _indicator.Location = new Point(
                 Math.Max(0, (area.Width - _indicator.Width) / 2),
                 Math.Max(0, (area.Height - _indicator.Height) / 2));
+        }
+
+        /// <summary>
+        /// 덮개 색을 미리 섞기 위한 <b>불투명한</b> 바탕색.
+        /// 화면이 자기 배경을 투명으로 두는 경우가 있어, 불투명한 조상이 나올 때까지 거슬러 올라간다.
+        /// </summary>
+        private static Color OpaqueBackColorOf(Control control)
+        {
+            for (var c = control; c != null; c = c.Parent)
+            {
+                if (c.BackColor.A == 255)
+                    return c.BackColor;
+            }
+
+            return AppTheme.Surface;
         }
 
         /// <summary>
@@ -159,7 +196,17 @@ namespace SEOJIN_MEIS.Client.Forms.Common
 
             // 화면이 이미 닫혔을 수 있다(조회 중 탭/팝업을 닫는 경우) — 그때는 정리할 것도 없다.
             if (!_owner.IsDisposed)
-                _owner.Controls.Remove(_veil);
+            {
+                _owner.SuspendLayout();
+                try
+                {
+                    _owner.Controls.Remove(_veil);
+                }
+                finally
+                {
+                    _owner.ResumeLayout(true);
+                }
+            }
 
             _veil.Dispose();       // 자식(_indicator)도 함께 정리된다
             _cancellation?.Dispose();

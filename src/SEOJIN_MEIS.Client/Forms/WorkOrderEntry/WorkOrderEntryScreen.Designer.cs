@@ -62,20 +62,36 @@ namespace SEOJIN_MEIS.Client.Forms.WorkOrderEntry
             // 
             // btnSearch
             // 
+            this.btnSearch.Accent = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
+            this.btnSearch.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnSearch.Icon = null;
             this.btnSearch.Location = new System.Drawing.Point(20, 26);
+            this.btnSearch.LookAndFeel.Style = DevExpress.LookAndFeel.LookAndFeelStyle.Flat;
             this.btnSearch.Name = "btnSearch";
+            this.btnSearch.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
+            this.btnSearch.Selected = false;
+            this.btnSearch.ShowFocusRectangle = DevExpress.Utils.DefaultBoolean.False;
             this.btnSearch.Size = new System.Drawing.Size(104, 36);
             this.btnSearch.TabIndex = 0;
             this.btnSearch.Text = "조회";
+            this.btnSearch.TextAfterIcon = false;
             this.btnSearch.Click += new System.EventHandler(this.btnSearch_Click);
             // 
             // btnWork
             // 
+            this.btnWork.Accent = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
+            this.btnWork.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnWork.Icon = null;
             this.btnWork.Location = new System.Drawing.Point(132, 26);
+            this.btnWork.LookAndFeel.Style = DevExpress.LookAndFeel.LookAndFeelStyle.Flat;
             this.btnWork.Name = "btnWork";
+            this.btnWork.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
+            this.btnWork.Selected = false;
+            this.btnWork.ShowFocusRectangle = DevExpress.Utils.DefaultBoolean.False;
             this.btnWork.Size = new System.Drawing.Size(104, 36);
             this.btnWork.TabIndex = 1;
             this.btnWork.Text = "작업";
+            this.btnWork.TextAfterIcon = false;
             this.btnWork.Click += new System.EventHandler(this.btnWork_Click);
             // 
             // lblWorkOrderNo
@@ -140,6 +156,7 @@ namespace SEOJIN_MEIS.Client.Forms.WorkOrderEntry
             // 
             // gridView
             // 
+            this.gridView.Accent = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
             this.gridView.GridControl = this.grid;
             this.gridView.Name = "gridView";
             this.gridView.OptionsBehavior.Editable = false;

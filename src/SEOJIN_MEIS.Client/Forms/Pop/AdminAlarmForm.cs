@@ -74,6 +74,7 @@ namespace SEOJIN_MEIS.Client.Forms.Pop
         private void ApplyTheme()
         {
             AppTheme.DialogHeader(headerPanel, AppTheme.Amber);
+            DialogChrome.Apply(this, headerPanel);
             AppTheme.DialogHeaderTitle(lblTitle);
             AppTheme.ContentSurface(bodyPanel);
             AppTheme.ContentSurface(footerPanel);

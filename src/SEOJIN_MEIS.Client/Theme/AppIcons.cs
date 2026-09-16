@@ -81,6 +81,13 @@ namespace SEOJIN_MEIS.Client.Theme
         /// <summary>메뉴 하위 항목 표시용 점.</summary>
         public const string Dot = "<circle cx=\"12\" cy=\"12\" r=\"3.2\" fill=\"{0}\"/>";
 
+        /// <summary>
+        /// 대기 스피너의 점 하나 — <b>상자를 꽉 채우는 원</b>이라 렌더 크기가 곧 점 크기가 된다.
+        /// <see cref="Dot"/>은 둘레에 여백이 넓어(지름이 상자의 27%) 그대로 쓰면
+        /// 점 크기에 맞춘 이미지가 너무 커져 스피너의 점 간격이 어긋난다.
+        /// </summary>
+        public const string SpinnerDot = "<circle cx=\"12\" cy=\"12\" r=\"11\" fill=\"{0}\"/>";
+
         /// <summary>제품 로고 자리(둥근 사각형 + 링).</summary>
         public const string Brand = "<rect x=\"2.5\" y=\"2.5\" width=\"19\" height=\"19\" rx=\"5.5\" fill=\"{0}\"/><circle cx=\"12\" cy=\"12\" r=\"5.4\" stroke=\"#FFFFFF\" stroke-width=\"1.8\" opacity=\"0.92\"/><circle cx=\"12\" cy=\"12\" r=\"1.9\" fill=\"#FFFFFF\"/>";
 

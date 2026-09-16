@@ -65,6 +65,7 @@ namespace SEOJIN_MEIS.Client.Forms.WorkStatus
         private void ApplyTheme()
         {
             AppTheme.DialogHeader(headerPanel, AppTheme.Cyan);
+            DialogChrome.Apply(this, headerPanel);
             AppTheme.DialogHeaderTitle(lblTitle);
             AppTheme.ContentSurface(bodyPanel);
             AppTheme.ContentSurface(footerPanel);

@@ -316,6 +316,12 @@ namespace SEOJIN_MEIS.Client.Theme
             button.ImageOptions.SvgImage = AppIcons.Get(icon, color);
             button.ImageOptions.SvgImageSize = new Size(size, size);
             button.ImageOptions.SvgImageColorizationMode = SvgImageColorizationMode.None;
+            // 배경도 테두리도 없어야 하는데, PaintStyle=Light는 테두리를 <b>항상 한 줄</b> 그린다.
+            // BorderColor를 Transparent로 줘도 기본 3D 테두리로 떨어져 색 띠 헤더 위에서 틀처럼 보인다 —
+            // 실측으로 NoBorder가 실제 먹는 조합이 Default + NoBorder였다.
+            button.PaintStyle = PaintStyles.Default;
+            button.ButtonStyle = BorderStyles.NoBorder;
+
             button.Appearance.BackColor = Color.Transparent;
             button.Appearance.BorderColor = Color.Transparent;
             button.AppearanceHovered.BackColor = IsDarkMode ? Color.FromArgb(58, 56, 92) : Color.FromArgb(238, 240, 250);
@@ -334,6 +340,12 @@ namespace SEOJIN_MEIS.Client.Theme
             button.Text = string.Empty;
             button.ImageOptions.SvgImage = null;
             button.ImageOptions.Image = AppImages.Icon(imageResource, size, color);
+            // 배경도 테두리도 없어야 하는데, PaintStyle=Light는 테두리를 <b>항상 한 줄</b> 그린다.
+            // BorderColor를 Transparent로 줘도 기본 3D 테두리로 떨어져 색 띠 헤더 위에서 틀처럼 보인다 —
+            // 실측으로 NoBorder가 실제 먹는 조합이 Default + NoBorder였다.
+            button.PaintStyle = PaintStyles.Default;
+            button.ButtonStyle = BorderStyles.NoBorder;
+
             button.Appearance.BackColor = Color.Transparent;
             button.Appearance.BorderColor = Color.Transparent;
             button.AppearanceHovered.BackColor = IsDarkMode ? Color.FromArgb(58, 56, 92) : Color.FromArgb(238, 240, 250);

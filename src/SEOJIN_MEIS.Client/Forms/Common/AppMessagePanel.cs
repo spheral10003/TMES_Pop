@@ -45,6 +45,9 @@ namespace SEOJIN_MEIS.Client.Forms.Common
             set { btnClose.Visible = value; }
         }
 
+        /// <summary>창틀을 없앤 호스트 폼(<see cref="AppMessageForm"/>)이 제목 줄 대신 끌 수 있도록 내어 준다.</summary>
+        internal Control Header => headerPanel;
+
         public AppMessagePanel()
         {
             InitializeComponent();
