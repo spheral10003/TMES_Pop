@@ -1,0 +1,936 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Login_Title" xml:space="preserve">
+    <value>Đăng nhập TMES POP</value>
+  </data>
+  <data name="Login_UserInfoGroup" xml:space="preserve">
+    <value>Thông tin kết nối</value>
+  </data>
+  <data name="Login_Server" xml:space="preserve">
+    <value>Máy chủ</value>
+  </data>
+  <data name="Login_UserId" xml:space="preserve">
+    <value>Tài khoản</value>
+  </data>
+  <data name="Login_Password" xml:space="preserve">
+    <value>Mật khẩu</value>
+  </data>
+  <data name="Login_Workstation" xml:space="preserve">
+    <value>Máy trạm</value>
+  </data>
+  <data name="Login_Connect" xml:space="preserve">
+    <value>Kết nối</value>
+  </data>
+  <data name="Login_Close" xml:space="preserve">
+    <value>Đóng</value>
+  </data>
+  <data name="Login_ValidationMessage" xml:space="preserve">
+    <value>Vui lòng nhập tài khoản và mật khẩu.</value>
+  </data>
+  <data name="Login_FailedMessage" xml:space="preserve">
+    <value>Tài khoản hoặc mật khẩu không đúng.</value>
+  </data>
+  <data name="Login_ConnectionErrorMessage" xml:space="preserve">
+    <value>Không thể kết nối đến máy chủ</value>
+  </data>
+  <data name="Login_RememberId" xml:space="preserve">
+    <value>Lưu tài khoản</value>
+  </data>
+  <data name="MainForm_Title" xml:space="preserve">
+    <value>Hệ thống MEIS POP</value>
+  </data>
+  <data name="MainForm_VersionFormat" xml:space="preserve">
+    <value>Ver. {0}</value>
+  </data>
+  <data name="MainForm_Welcome" xml:space="preserve">
+    <value>Chào mừng {0}.</value>
+  </data>
+  <data name="MainForm_SessionRemainingHint" xml:space="preserve">
+    <value>Thời gian còn lại trước khi tự động đăng xuất</value>
+  </data>
+  <data name="MainForm_SessionExpired" xml:space="preserve">
+    <value>Phiên làm việc đã hết hạn. Bạn sẽ được đăng xuất.</value>
+  </data>
+  <data name="MainForm_LanguageHint" xml:space="preserve">
+    <value>Ngôn ngữ hiển thị</value>
+  </data>
+  <data name="MainForm_Minimize" xml:space="preserve">
+    <value>Thu nhỏ</value>
+  </data>
+  <data name="MainForm_Maximize" xml:space="preserve">
+    <value>Phóng to</value>
+  </data>
+  <data name="MainForm_Restore" xml:space="preserve">
+    <value>Khôi phục</value>
+  </data>
+  <data name="MainForm_LogoutConfirm" xml:space="preserve">
+    <value>Đăng xuất sẽ đóng toàn bộ màn hình đang mở. Bạn có muốn đăng xuất?</value>
+  </data>
+  <data name="MainForm_WelcomeHint" xml:space="preserve">
+    <value>Chọn một màn hình từ menu bên trái, màn hình sẽ mở thành thẻ ở phía trên.</value>
+  </data>
+  <data name="MainForm_TileServer" xml:space="preserve">
+    <value>Máy chủ</value>
+  </data>
+  <data name="MainForm_TileWorkstation" xml:space="preserve">
+    <value>Máy trạm</value>
+  </data>
+  <data name="MainForm_TileEquipment" xml:space="preserve">
+    <value>Thiết bị đã đăng ký</value>
+  </data>
+  <data name="MainForm_TileUser" xml:space="preserve">
+    <value>Người dùng đăng nhập</value>
+  </data>
+  <data name="MainForm_EquipmentCount" xml:space="preserve">
+    <value>{0} thiết bị</value>
+  </data>
+  <data name="MainForm_NoAlerts" xml:space="preserve">
+    <value>Không có thông báo mới.</value>
+  </data>
+  <data name="Menu_MEIS" xml:space="preserve">
+    <value>MEIS</value>
+  </data>
+  <data name="Menu_WorkManagement" xml:space="preserve">
+    <value>Quản lý công việc</value>
+  </data>
+  <data name="Menu_POP" xml:space="preserve">
+    <value>POP</value>
+  </data>
+  <data name="Menu_WorkStatusInquiry" xml:space="preserve">
+    <value>Tra cứu tình trạng công việc</value>
+  </data>
+  <data name="Menu_ProductionStatusInquiry" xml:space="preserve">
+    <value>Tra cứu tình trạng sản xuất</value>
+  </data>
+  <data name="Menu_WorkIntegratedOverview" xml:space="preserve">
+    <value>Tổng hợp công việc</value>
+  </data>
+  <data name="Menu_WorkIntegratedStatusInquiry" xml:space="preserve">
+    <value>Tra cứu tổng hợp công việc</value>
+  </data>
+  <data name="Common_Connect" xml:space="preserve">
+    <value>Kết nối</value>
+  </data>
+  <data name="Common_Disconnect" xml:space="preserve">
+    <value>Ngắt kết nối</value>
+  </data>
+  <data name="Common_Refresh" xml:space="preserve">
+    <value>Làm mới</value>
+  </data>
+  <data name="Common_Logout" xml:space="preserve">
+    <value>Đăng xuất</value>
+  </data>
+  <data name="Common_Close" xml:space="preserve">
+    <value>Đóng</value>
+  </data>
+  <data name="Common_Confirm" xml:space="preserve">
+    <value>Đồng ý</value>
+  </data>
+  <data name="Common_Cancel" xml:space="preserve">
+    <value>Hủy</value>
+  </data>
+  <data name="Common_PleaseWait" xml:space="preserve">
+    <value>Vui lòng đợi</value>
+  </data>
+  <data name="Common_Loading" xml:space="preserve">
+    <value>Đang xử lý...</value>
+  </data>
+  <data name="Common_Notice" xml:space="preserve">
+    <value>Thông báo</value>
+  </data>
+  <data name="Common_UnexpectedError" xml:space="preserve">
+    <value>Đã xảy ra lỗi. Chỉ tác vụ này bị hủy - bạn có thể tiếp tục làm việc.</value>
+  </data>
+  <data name="Message_TitleInfo" xml:space="preserve">
+    <value>Thông tin</value>
+  </data>
+  <data name="Message_TitleQuestion" xml:space="preserve">
+    <value>Xác nhận</value>
+  </data>
+  <data name="Message_TitleSuccess" xml:space="preserve">
+    <value>Hoàn tất</value>
+  </data>
+  <data name="Message_TitleWarning" xml:space="preserve">
+    <value>Cảnh báo</value>
+  </data>
+  <data name="Message_TitleError" xml:space="preserve">
+    <value>Lỗi</value>
+  </data>
+  <data name="Pop_Title" xml:space="preserve">
+    <value>POP</value>
+  </data>
+  <data name="Pop_Collapse" xml:space="preserve">
+    <value>Thu gọn</value>
+  </data>
+  <data name="Pop_Expand" xml:space="preserve">
+    <value>Mở rộng</value>
+  </data>
+  <data name="Pop_ToggleInfo" xml:space="preserve">
+    <value>Thông tin công đoạn</value>
+  </data>
+  <data name="Pop_ToggleTabs" xml:space="preserve">
+    <value>Chi tiết</value>
+  </data>
+  <data name="Pop_EquipmentStatus" xml:space="preserve">
+    <value>Trạng thái thiết bị</value>
+  </data>
+  <data name="Pop_Start" xml:space="preserve">
+    <value>Bắt đầu</value>
+  </data>
+  <data name="Pop_Stop" xml:space="preserve">
+    <value>Dừng</value>
+  </data>
+  <data name="Pop_Reset" xml:space="preserve">
+    <value>Đặt lại</value>
+  </data>
+  <data name="Pop_WorkOrderList" xml:space="preserve">
+    <value>Danh sách lệnh sản xuất</value>
+  </data>
+  <data name="Pop_EquipmentLog" xml:space="preserve">
+    <value>Log truyền thông thiết bị (Modbus-TCP)</value>
+  </data>
+  <data name="ProductionStatus_Title" xml:space="preserve">
+    <value>Tra cứu tình trạng sản xuất</value>
+  </data>
+  <data name="ProductionStatus_StandardDate" xml:space="preserve">
+    <value>Ngày chuẩn</value>
+  </data>
+  <data name="ProductionStatus_FilterTitle" xml:space="preserve">
+    <value>Điều kiện tra cứu</value>
+  </data>
+  <data name="WorkIntegratedStatus_Title" xml:space="preserve">
+    <value>Tra cứu tổng hợp công việc</value>
+  </data>
+  <data name="UserProfile_Title" xml:space="preserve">
+    <value>Thông tin người dùng</value>
+  </data>
+  <data name="UserProfile_EmployeeNo" xml:space="preserve">
+    <value>Mã nhân viên</value>
+  </data>
+  <data name="UserProfile_UserName" xml:space="preserve">
+    <value>Tên</value>
+  </data>
+  <data name="UserProfile_Phone" xml:space="preserve">
+    <value>Điện thoại</value>
+  </data>
+  <data name="UserProfile_Department" xml:space="preserve">
+    <value>Bộ phận</value>
+  </data>
+  <data name="UserProfile_Workstation" xml:space="preserve">
+    <value>Máy trạm</value>
+  </data>
+  <data name="UserProfile_Loading" xml:space="preserve">
+    <value>Đang tải...</value>
+  </data>
+  <data name="UserProfile_LoadFailed" xml:space="preserve">
+    <value>Không tải được thông tin người dùng.</value>
+  </data>
+  <data name="WorkEntry_Title" xml:space="preserve">
+    <value>Tra cứu lệnh sản xuất</value>
+  </data>
+  <data name="WorkEntry_Search" xml:space="preserve">
+    <value>Tra cứu</value>
+  </data>
+  <data name="WorkEntry_Work" xml:space="preserve">
+    <value>Bắt đầu làm việc</value>
+  </data>
+  <data name="WorkEntry_WorkOrderNo" xml:space="preserve">
+    <value>Số lệnh sản xuất</value>
+  </data>
+  <data name="WorkEntry_SerialNo" xml:space="preserve">
+    <value>Số sê-ri</value>
+  </data>
+  <data name="WorkEntry_ListTitle" xml:space="preserve">
+    <value>Thông tin lệnh sản xuất</value>
+  </data>
+  <data name="WorkEntry_ConditionRequired" xml:space="preserve">
+    <value>Hãy nhập số lệnh sản xuất hoặc số sê-ri.</value>
+  </data>
+  <data name="WorkEntry_SelectWorkOrder" xml:space="preserve">
+    <value>Hãy chọn lệnh sản xuất cần bắt đầu từ danh sách.</value>
+  </data>
+  <data name="WorkEntry_NoResult" xml:space="preserve">
+    <value>Không có kết quả.</value>
+  </data>
+  <data name="WorkEntry_NoRouting" xml:space="preserve">
+    <value>Lệnh sản xuất đã chọn không có thông tin quy trình.</value>
+  </data>
+  <data name="WorkEntryConfirm_Title" xml:space="preserve">
+    <value>Xác nhận vào công việc</value>
+  </data>
+  <data name="WorkEntryConfirm_ListTitle" xml:space="preserve">
+    <value>Danh sách công đoạn</value>
+  </data>
+  <data name="WorkEntryConfirm_Move" xml:space="preserve">
+    <value>Chuyển</value>
+  </data>
+  <data name="WorkEntryConfirm_SelectProcess" xml:space="preserve">
+    <value>Hãy chọn công đoạn trang cần chuyển đến.</value>
+  </data>
+  <data name="Col_No" xml:space="preserve">
+    <value>STT</value>
+  </data>
+  <data name="Col_WorkOrderNo" xml:space="preserve">
+    <value>Số lệnh sản xuất</value>
+  </data>
+  <data name="Col_ItemCode" xml:space="preserve">
+    <value>Mã sản phẩm</value>
+  </data>
+  <data name="Col_SerialNo" xml:space="preserve">
+    <value>Số sê-ri</value>
+  </data>
+  <data name="Col_OrderQty" xml:space="preserve">
+    <value>SL lệnh</value>
+  </data>
+  <data name="Col_SalesOrderNo" xml:space="preserve">
+    <value>Số đơn hàng</value>
+  </data>
+  <data name="Col_CustomerPoNo" xml:space="preserve">
+    <value>Số PO khách hàng</value>
+  </data>
+  <data name="Col_Fcid" xml:space="preserve">
+    <value>FCID</value>
+  </data>
+  <data name="Col_PlanStartDate" xml:space="preserve">
+    <value>Bắt đầu kế hoạch</value>
+  </data>
+  <data name="Col_PlanEndDate" xml:space="preserve">
+    <value>Kết thúc kế hoạch</value>
+  </data>
+  <data name="Col_ActualStartDate" xml:space="preserve">
+    <value>Bắt đầu thực tế</value>
+  </data>
+  <data name="Col_ActualEndDate" xml:space="preserve">
+    <value>Kết thúc thực tế</value>
+  </data>
+  <data name="Col_StatusName" xml:space="preserve">
+    <value>Trạng thái</value>
+  </data>
+  <data name="Col_Remark" xml:space="preserve">
+    <value>Ghi chú</value>
+  </data>
+  <data name="Col_RoutingGroup" xml:space="preserve">
+    <value>Nhóm quy trình</value>
+  </data>
+  <data name="Col_RoutingOperation" xml:space="preserve">
+    <value>Công đoạn quy trình</value>
+  </data>
+  <data name="Col_PageOperation" xml:space="preserve">
+    <value>Công đoạn trang</value>
+  </data>
+  <data name="Col_ProgressState" xml:space="preserve">
+    <value>Tiến độ</value>
+  </data>
+  <data name="Pop_EntryTarget" xml:space="preserve">
+    <value>Đối tượng làm việc</value>
+  </data>
+  <data name="Common_Search" xml:space="preserve">
+    <value>Tra cứu</value>
+  </data>
+  <data name="Col_CorpCode" xml:space="preserve">
+    <value>Mã công ty</value>
+  </data>
+  <data name="Col_FormCode" xml:space="preserve">
+    <value>Mã biểu mẫu</value>
+  </data>
+  <data name="Notification_Title" xml:space="preserve">
+    <value>Thông báo</value>
+  </data>
+  <data name="Notification_UserName" xml:space="preserve">
+    <value>Tên người dùng</value>
+  </data>
+  <data name="Notification_Subject" xml:space="preserve">
+    <value>Tiêu đề</value>
+  </data>
+  <data name="Notification_ReadState" xml:space="preserve">
+    <value>Đã đọc</value>
+  </data>
+  <data name="Notification_ReadStateAll" xml:space="preserve">
+    <value>Tất cả</value>
+  </data>
+  <data name="Notification_ReadStateRead" xml:space="preserve">
+    <value>Đã đọc</value>
+  </data>
+  <data name="Notification_ReadStateUnread" xml:space="preserve">
+    <value>Chưa đọc</value>
+  </data>
+  <data name="Notification_ListTitle" xml:space="preserve">
+    <value>Thông báo</value>
+  </data>
+  <data name="Notification_MarkRead" xml:space="preserve">
+    <value>Đánh dấu đã đọc</value>
+  </data>
+  <data name="Notification_SenderId" xml:space="preserve">
+    <value>ID người gửi</value>
+  </data>
+  <data name="Notification_Content" xml:space="preserve">
+    <value>Nội dung</value>
+  </data>
+  <data name="Notification_SentAt" xml:space="preserve">
+    <value>Thời điểm gửi</value>
+  </data>
+  <data name="Notification_SelectRow" xml:space="preserve">
+    <value>Hãy chọn thông báo cần đánh dấu đã đọc.</value>
+  </data>
+  <data name="Notification_AlreadyRead" xml:space="preserve">
+    <value>Thông báo đã chọn đã được đọc.</value>
+  </data>
+  <data name="Pop_PrevProcess" xml:space="preserve">
+    <value>Trước</value>
+  </data>
+  <data name="Pop_NextProcess" xml:space="preserve">
+    <value>Sau</value>
+  </data>
+  <data name="Pop_SkipProcess" xml:space="preserve">
+    <value>Bỏ qua</value>
+  </data>
+  <data name="Pop_StopProcess" xml:space="preserve">
+    <value>Dừng</value>
+  </data>
+  <data name="Pop_StartProcess" xml:space="preserve">
+    <value>Bắt đầu</value>
+  </data>
+  <data name="Pop_ProcessList" xml:space="preserve">
+    <value>Công đoạn</value>
+  </data>
+  <data name="Pop_AdminAlarm" xml:space="preserve">
+    <value>Gọi quản lý</value>
+  </data>
+  <data name="Pop_Worker" xml:space="preserve">
+    <value>Người thực hiện</value>
+  </data>
+  <data name="Pop_CurrentTime" xml:space="preserve">
+    <value>Thời gian hiện tại</value>
+  </data>
+  <data name="Pop_ProcessInfoTitle" xml:space="preserve">
+    <value>Công đoạn đang chạy</value>
+  </data>
+  <data name="Pop_WorkOrderNo" xml:space="preserve">
+    <value>Số lệnh sản xuất</value>
+  </data>
+  <data name="Pop_ItemCode" xml:space="preserve">
+    <value>Mã sản phẩm</value>
+  </data>
+  <data name="Pop_ProductSerialNo" xml:space="preserve">
+    <value>Số sê-ri sản phẩm</value>
+  </data>
+  <data name="Pop_RoutingGroup" xml:space="preserve">
+    <value>Nhóm quy trình</value>
+  </data>
+  <data name="Pop_RoutingOperation" xml:space="preserve">
+    <value>Công đoạn quy trình</value>
+  </data>
+  <data name="Pop_PageOperation" xml:space="preserve">
+    <value>Công đoạn trang</value>
+  </data>
+  <data name="Pop_PageStartTime" xml:space="preserve">
+    <value>Thời gian bắt đầu</value>
+  </data>
+  <data name="Pop_PageEndTime" xml:space="preserve">
+    <value>Thời gian kết thúc</value>
+  </data>
+  <data name="Pop_PageRunTime" xml:space="preserve">
+    <value>Thời gian chạy</value>
+  </data>
+  <data name="Pop_PageIdleTime" xml:space="preserve">
+    <value>Thời gian chờ</value>
+  </data>
+  <data name="Pop_PageWorkTime" xml:space="preserve">
+    <value>Thời gian làm việc</value>
+  </data>
+  <data name="Pop_Drawing" xml:space="preserve">
+    <value>Hướng dẫn công việc</value>
+  </data>
+  <data name="Pop_TabMaterial" xml:space="preserve">
+    <value>Vật tư</value>
+  </data>
+  <data name="Pop_TabBomSpec" xml:space="preserve">
+    <value>Tiêu chuẩn BOM</value>
+  </data>
+  <data name="Pop_TabInspection" xml:space="preserve">
+    <value>Tiêu chuẩn kiểm tra</value>
+  </data>
+  <data name="Pop_TabEquipment" xml:space="preserve">
+    <value>Thiết bị</value>
+  </data>
+  <data name="Pop_ManualWrench" xml:space="preserve">
+    <value>Cờ lê thủ công</value>
+  </data>
+  <data name="Pop_ResultInputColumn" xml:space="preserve">
+    <value>Nhập kết quả</value>
+  </data>
+  <data name="Pop_InputButton" xml:space="preserve">
+    <value>Nhập</value>
+  </data>
+  <data name="Pop_SaveResult" xml:space="preserve">
+    <value>Lưu kết quả</value>
+  </data>
+  <data name="Pop_SavedResult" xml:space="preserve">
+    <value>Đã lưu kết quả.</value>
+  </data>
+  <data name="Pop_SerialNotRequired" xml:space="preserve">
+    <value>Vật tư này không yêu cầu số sê-ri.</value>
+  </data>
+  <data name="Pop_NoProcessList" xml:space="preserve">
+    <value>Không có thông tin công đoạn cho lệnh sản xuất này.</value>
+  </data>
+  <data name="Pop_ProcessMoved" xml:space="preserve">
+    <value>Đã chuyển đến công đoạn đã chọn.</value>
+  </data>
+  <data name="Pop_FirstProcess" xml:space="preserve">
+    <value>Đây là công đoạn đầu tiên trong danh sách.</value>
+  </data>
+  <data name="Pop_LastProcess" xml:space="preserve">
+    <value>Đây là công đoạn cuối cùng trong danh sách.</value>
+  </data>
+  <data name="Pop_ProcessNotInList" xml:space="preserve">
+    <value>Không tìm thấy công đoạn hiện tại trong danh sách. Hãy chọn từ [Danh sách công đoạn].</value>
+  </data>
+  <data name="Pop_ConfirmStart" xml:space="preserve">
+    <value>Bắt đầu công đoạn này?</value>
+  </data>
+  <data name="Pop_ConfirmStop" xml:space="preserve">
+    <value>Dừng công đoạn này?</value>
+  </data>
+  <data name="Pop_ConfirmSkip" xml:space="preserve">
+    <value>Bỏ qua công đoạn này?</value>
+  </data>
+  <data name="Pop_ConfirmPrevious" xml:space="preserve">
+    <value>Chuyển đến công đoạn trước?</value>
+  </data>
+  <data name="Pop_ConfirmNext" xml:space="preserve">
+    <value>Chuyển đến công đoạn sau?</value>
+  </data>
+  <data name="Pop_AdminAlarmSent" xml:space="preserve">
+    <value>Đã gửi cảnh báo đến người quản lý.</value>
+  </data>
+  <data name="Pop_ManualWrenchOnly" xml:space="preserve">
+    <value>Hãy bật Cờ lê thủ công để nhập kết quả trực tiếp.</value>
+  </data>
+  <data name="Pop_NoTargetProcess" xml:space="preserve">
+    <value>Chưa chọn đối tượng làm việc. Hãy chọn lệnh sản xuất ở màn hình vào việc.</value>
+  </data>
+  <data name="Pop_TorqueNoPendingRow" xml:space="preserve">
+    <value>Không có dòng tiêu chuẩn BOM nào đang chờ kết quả.</value>
+  </data>
+  <data name="Pop_ResultPass" xml:space="preserve">
+    <value>Đạt</value>
+  </data>
+  <data name="Pop_ResultFail" xml:space="preserve">
+    <value>Không đạt</value>
+  </data>
+  <data name="Pop_CommConnected" xml:space="preserve">
+    <value>Đã kết nối</value>
+  </data>
+  <data name="Pop_CommFailed" xml:space="preserve">
+    <value>Thất bại</value>
+  </data>
+  <data name="Pop_CommConnecting" xml:space="preserve">
+    <value>Đang kết nối</value>
+  </data>
+  <data name="Pop_CommUnused" xml:space="preserve">
+    <value>Không sử dụng</value>
+  </data>
+  <data name="Pop_EquipmentUsable" xml:space="preserve">
+    <value>Sẵn sàng</value>
+  </data>
+  <data name="Pop_EquipmentUnusable" xml:space="preserve">
+    <value>Không sẵn sàng</value>
+  </data>
+  <data name="Col_MaterialCode" xml:space="preserve">
+    <value>Mã vật tư</value>
+  </data>
+  <data name="Col_InputQty" xml:space="preserve">
+    <value>Số lượng</value>
+  </data>
+  <data name="Col_InputUnit" xml:space="preserve">
+    <value>Đơn vị</value>
+  </data>
+  <data name="Col_InputPosition" xml:space="preserve">
+    <value>Vị trí</value>
+  </data>
+  <data name="Col_SerialCheck" xml:space="preserve">
+    <value>Kiểm tra sê-ri</value>
+  </data>
+  <data name="Col_SerialInputState" xml:space="preserve">
+    <value>Trạng thái nhập sê-ri</value>
+  </data>
+  <data name="Col_BomSpecName" xml:space="preserve">
+    <value>Tiêu chuẩn BOM</value>
+  </data>
+  <data name="Col_SpecType" xml:space="preserve">
+    <value>Loại</value>
+  </data>
+  <data name="Col_TorqueLower" xml:space="preserve">
+    <value>Lực siết min</value>
+  </data>
+  <data name="Col_TorqueUpper" xml:space="preserve">
+    <value>Lực siết max</value>
+  </data>
+  <data name="Col_TorqueUnit" xml:space="preserve">
+    <value>Đơn vị lực siết</value>
+  </data>
+  <data name="Col_TorqueResult" xml:space="preserve">
+    <value>Kết quả lực siết</value>
+  </data>
+  <data name="Col_InspectionSpecName" xml:space="preserve">
+    <value>Tiêu chuẩn kiểm tra</value>
+  </data>
+  <data name="Col_InspectionRemark" xml:space="preserve">
+    <value>Ghi chú</value>
+  </data>
+  <data name="Col_InspectionMethod" xml:space="preserve">
+    <value>Phương pháp</value>
+  </data>
+  <data name="Col_ResultState" xml:space="preserve">
+    <value>Kết quả</value>
+  </data>
+  <data name="Col_ResultValue" xml:space="preserve">
+    <value>Giá trị</value>
+  </data>
+  <data name="Col_EquipmentCode" xml:space="preserve">
+    <value>Mã thiết bị</value>
+  </data>
+  <data name="Col_EquipmentName" xml:space="preserve">
+    <value>Tên thiết bị</value>
+  </data>
+  <data name="Col_EquipmentRemark" xml:space="preserve">
+    <value>Ghi chú</value>
+  </data>
+  <data name="Col_EquipmentType" xml:space="preserve">
+    <value>Loại thiết bị</value>
+  </data>
+  <data name="Col_CommunicationState" xml:space="preserve">
+    <value>Trạng thái truyền thông</value>
+  </data>
+  <data name="Col_EquipmentState" xml:space="preserve">
+    <value>Trạng thái thiết bị</value>
+  </data>
+  <data name="Col_RangeLower" xml:space="preserve">
+    <value>Giới hạn dưới</value>
+  </data>
+  <data name="Col_RangeUpper" xml:space="preserve">
+    <value>Giới hạn trên</value>
+  </data>
+  <data name="Col_SerialNumber" xml:space="preserve">
+    <value>Số sê-ri</value>
+  </data>
+  <data name="PopSerial_Title" xml:space="preserve">
+    <value>Nhập sê-ri vật tư</value>
+  </data>
+  <data name="PopSerial_MaterialCode" xml:space="preserve">
+    <value>Mã vật tư</value>
+  </data>
+  <data name="PopSerial_Qty" xml:space="preserve">
+    <value>Số lượng</value>
+  </data>
+  <data name="PopSerial_ItemCode" xml:space="preserve">
+    <value>Mã sản phẩm</value>
+  </data>
+  <data name="PopSerial_ListTitle" xml:space="preserve">
+    <value>Số sê-ri</value>
+  </data>
+  <data name="PopSerial_Save" xml:space="preserve">
+    <value>Lưu</value>
+  </data>
+  <data name="PopSerial_Incomplete" xml:space="preserve">
+    <value>Hãy nhập số sê-ri cho từng đơn vị.</value>
+  </data>
+  <data name="PopSerial_Duplicated" xml:space="preserve">
+    <value>Cùng một số sê-ri được nhập nhiều lần.</value>
+  </data>
+  <data name="PopSerial_Saved" xml:space="preserve">
+    <value>Đã lưu số sê-ri.</value>
+  </data>
+  <data name="PopTorque_Title" xml:space="preserve">
+    <value>Nhập kết quả lực siết</value>
+  </data>
+  <data name="PopTorque_Invalid" xml:space="preserve">
+    <value>Hãy nhập kết quả lực siết bằng số.</value>
+  </data>
+  <data name="Pop_TorqueRangeMissing" xml:space="preserve">
+    <value>Cần có giới hạn dưới và giới hạn trên của lực siết để tính giá trị trung bình.</value>
+  </data>
+  <data name="Pop_DrawingLoading" xml:space="preserve">
+    <value>Đang tải bản vẽ...</value>
+  </data>
+  <data name="Pop_DrawingNone" xml:space="preserve">
+    <value>Không có bản vẽ để hiển thị.</value>
+  </data>
+  <data name="Pop_DrawingShareNotConfigured" xml:space="preserve">
+    <value>Thư mục chia sẻ bản vẽ (SMB) chưa được cấu hình. Hãy kiểm tra DocumentShare.RootPath trong App.config.</value>
+  </data>
+  <data name="Pop_DrawingLoadFailed" xml:space="preserve">
+    <value>Không tải được bản vẽ.</value>
+  </data>
+  <data name="Common_All" xml:space="preserve">
+    <value>Tất cả</value>
+  </data>
+  <data name="Menu_WorkStatusSearch" xml:space="preserve">
+    <value>Tình trạng công việc</value>
+  </data>
+  <data name="WorkStatus_Title" xml:space="preserve">
+    <value>Tình trạng công việc</value>
+  </data>
+  <data name="WorkStatus_OrderDate" xml:space="preserve">
+    <value>Ngày lệnh</value>
+  </data>
+  <data name="WorkStatus_Item" xml:space="preserve">
+    <value>Sản phẩm</value>
+  </data>
+  <data name="WorkStatus_OrderListTitle" xml:space="preserve">
+    <value>Thông tin lệnh sản xuất</value>
+  </data>
+  <data name="WorkStatus_ProgressTitle" xml:space="preserve">
+    <value>Tiến độ công việc</value>
+  </data>
+  <data name="WorkStatus_DateRequired" xml:space="preserve">
+    <value>Hãy nhập khoảng ngày lệnh.</value>
+  </data>
+  <data name="WorkStatus_DateReversed" xml:space="preserve">
+    <value>Ngày bắt đầu muộn hơn ngày kết thúc.</value>
+  </data>
+  <data name="WorkStatus_StatusWaiting" xml:space="preserve">
+    <value>Chờ</value>
+  </data>
+  <data name="WorkStatus_StatusRunning" xml:space="preserve">
+    <value>Đang thực hiện</value>
+  </data>
+  <data name="WorkStatus_StatusDone" xml:space="preserve">
+    <value>Hoàn tất</value>
+  </data>
+  <data name="WorkStatus_StatusHold" xml:space="preserve">
+    <value>Tạm giữ</value>
+  </data>
+  <data name="Col_PageOperationName" xml:space="preserve">
+    <value>Công đoạn trang</value>
+  </data>
+  <data name="Col_SpecName" xml:space="preserve">
+    <value>Tiêu chuẩn</value>
+  </data>
+  <data name="Col_SpecTypeName" xml:space="preserve">
+    <value>Loại tiêu chuẩn</value>
+  </data>
+  <data name="Col_SpecResultState" xml:space="preserve">
+    <value>Kết quả tiêu chuẩn</value>
+  </data>
+  <data name="Col_ItemName" xml:space="preserve">
+    <value>Tên sản phẩm</value>
+  </data>
+  <data name="Col_Specification" xml:space="preserve">
+    <value>Quy cách</value>
+  </data>
+  <data name="ItemPicker_Title" xml:space="preserve">
+    <value>Chọn sản phẩm</value>
+  </data>
+  <data name="ItemPicker_Keyword" xml:space="preserve">
+    <value>Mã / Tên sản phẩm</value>
+  </data>
+  <data name="ItemPicker_ListTitle" xml:space="preserve">
+    <value>Sản phẩm</value>
+  </data>
+  <data name="ItemPicker_Select" xml:space="preserve">
+    <value>Chọn</value>
+  </data>
+  <data name="ItemPicker_SelectItem" xml:space="preserve">
+    <value>Hãy chọn một sản phẩm.</value>
+  </data>
+  <data name="AdminAlarm_Title" xml:space="preserve">
+    <value>Cảnh báo cho quản lý</value>
+  </data>
+  <data name="AdminAlarm_Type" xml:space="preserve">
+    <value>Loại cảnh báo</value>
+  </data>
+  <data name="AdminAlarm_DetailTitle" xml:space="preserve">
+    <value>Chi tiết cảnh báo</value>
+  </data>
+  <data name="AdminAlarm_Target" xml:space="preserve">
+    <value>Mã đối tượng</value>
+  </data>
+  <data name="AdminAlarm_Send" xml:space="preserve">
+    <value>Gửi</value>
+  </data>
+  <data name="AdminAlarm_SelectType" xml:space="preserve">
+    <value>Hãy chọn loại cảnh báo.</value>
+  </data>
+  <data name="AdminAlarm_SelectTarget" xml:space="preserve">
+    <value>Hãy chọn đối tượng cảnh báo.</value>
+  </data>
+  <data name="AdminAlarm_NoTypes" xml:space="preserve">
+    <value>Chưa có loại cảnh báo nào được đăng ký.</value>
+  </data>
+  <data name="Col_Unit" xml:space="preserve">
+    <value>Đơn vị</value>
+  </data>
+  <data name="WorkIntegrated_OverviewTitle" xml:space="preserve">
+    <value>Tổng quan công việc</value>
+  </data>
+  <data name="WorkIntegrated_ExcelExport" xml:space="preserve">
+    <value>Xuất Excel</value>
+  </data>
+  <data name="WorkIntegrated_SerialRequired" xml:space="preserve">
+    <value>Hãy nhập số sê-ri sản phẩm.</value>
+  </data>
+  <data name="WorkIntegrated_ExportEmpty" xml:space="preserve">
+    <value>Không có dữ liệu để xuất.</value>
+  </data>
+  <data name="WorkIntegrated_ExportDone" xml:space="preserve">
+    <value>Đã lưu vào tệp Excel.</value>
+  </data>
+  <data name="WorkIntegrated_ExportFailed" xml:space="preserve">
+    <value>Không lưu được tệp Excel.</value>
+  </data>
+  <data name="Col_NodeCode" xml:space="preserve">
+    <value>Mã sản phẩm</value>
+  </data>
+  <data name="Col_NodeDescription" xml:space="preserve">
+    <value>Mô tả</value>
+  </data>
+  <data name="Col_TorqueTarget" xml:space="preserve">
+    <value>Lực siết mục tiêu</value>
+  </data>
+  <data name="Col_TorqueMax" xml:space="preserve">
+    <value>Lực siết max</value>
+  </data>
+  <data name="Col_AngleTarget" xml:space="preserve">
+    <value>Góc mục tiêu</value>
+  </data>
+  <data name="Col_AngleLower" xml:space="preserve">
+    <value>Góc min</value>
+  </data>
+  <data name="Col_AngleUpper" xml:space="preserve">
+    <value>Góc max</value>
+  </data>
+  <data name="Col_AngleResult" xml:space="preserve">
+    <value>Kết quả góc</value>
+  </data>
+  <data name="Col_AngleUnit" xml:space="preserve">
+    <value>Đơn vị đo góc</value>
+  </data>
+  <data name="Pop_RestartProcess" xml:space="preserve">
+    <value>Khởi động lại</value>
+  </data>
+  <data name="Pop_EndProcess" xml:space="preserve">
+    <value>Hoàn thành</value>
+  </data>
+  <data name="Col_WorkQty" xml:space="preserve">
+    <value>Work Qty</value>
+  </data>
+</root>

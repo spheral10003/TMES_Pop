@@ -1,0 +1,151 @@
+﻿using DevExpress.XtraGrid.Views.Grid;
+using SEOJIN_TMES.Client.ApiClient;
+using SEOJIN_TMES.Client.Common.Languages;
+using SEOJIN_TMES.Client.Common.Models;
+using SEOJIN_TMES.Client.Forms.Common;
+using SEOJIN_TMES.Client.Mock;
+using SEOJIN_TMES.Client.Theme;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace SEOJIN_TMES.Client.Forms.Pop
+{
+    public partial class PopScreen
+    {
+        private List<PopInputMaterialDto> _materials = new List<PopInputMaterialDto>();
+
+        public void MaterialInit()
+        {
+            AppTheme.Grid(gridMaterial, gridViewMaterial, AppTheme.Emerald);
+
+            ConfigureMaterialGrid();
+            LoadMaterialAsync();
+        }
+
+        private async Task LoadMaterialAsync()
+        {
+            try
+            {
+                _materials = await FetchMaterialsAsync();
+                gridMaterial.DataSource = _materials;
+            }
+            catch (ApiException ex)
+            {
+                AppMessageBox.Warn(this, ex.Message, Language.Pop_Title);
+                return;
+            }
+        }
+
+
+
+        private async Task<List<PopInputMaterialDto>> FetchMaterialsAsync()
+        {
+            if (UseMock)
+            {
+                await Task.Yield();
+                return MockPopData.GetInputMaterials(_key);
+            }
+
+            return await _appSet.ApiClients.PopApiClient.GetInputMaterialsAsync(_key)
+                   ?? new List<PopInputMaterialDto>();
+        }
+
+        private void ConfigureMaterialGrid()
+        {
+            // PopInputMaterialDto.SerialNumbers(컬렉션 속성)를 그리드가 마스터-디테일로 오인해
+            // 행 왼쪽에 [+] 펼침 버튼을 만든다. 이 화면에는 하위 목록이 없으므로 꺼 둔다.
+            gridViewMaterial.OptionsDetail.EnableMasterViewMode = false;
+
+            gridMaterial.DataSource = new List<PopInputMaterialDto>();
+            GridColumns.Apply(gridViewMaterial, Language.Col_No,
+                GridColumns.Text("MaterialCode", Language.Col_MaterialCode, 200),
+                GridColumns.Number("InputQty", Language.Col_InputQty, 110),
+                GridColumns.Text("InputUnit", Language.Col_InputUnit, 100),
+                GridColumns.Text("InputPosition", Language.Col_InputPosition, 110),
+                GridColumns.Text("SerialCheckText", Language.Col_SerialCheck, 170),
+                GridColumns.Text("SerialInputStateText", Language.Col_SerialInputState, 180));
+
+            gridViewMaterial.OptionsView.ColumnAutoWidth = true;
+
+            // 클릭할 수 있는 셀임을 알 수 있게 손가락 커서로 바꾼다.
+            var stateColumn = gridViewMaterial.Columns.ColumnByFieldName("SerialInputStateText");
+            if (stateColumn != null)
+                stateColumn.OptionsColumn.AllowFocus = true;
+        }
+
+
+        // ─────────────────────────────────────────────────────────────────────────
+        //  탭 1 — 투입자재 시리얼번호 입력
+        // ─────────────────────────────────────────────────────────────────────────
+
+        /// <summary>"시리얼번호 입력상태" 칸을 클릭하면 &lt;투입자재 정보 입력&gt; 팝업을 연다.</summary>
+        private async void GridViewMaterial_RowCellClick(object sender, RowCellClickEventArgs e)
+        {
+            if (e.Column == null || e.Column.FieldName != "SerialInputStateText")
+                return;
+
+            var material = gridViewMaterial.GetRow(e.RowHandle) as PopInputMaterialDto;
+            if (material == null)
+                return;
+
+            if (!material.SerialCheckRequired)
+            {
+                AppMessageBox.Info(this, Language.Pop_SerialNotRequired, Language.PopSerial_Title);
+                return;
+            }
+
+            List<string> serials;
+            using (var form = new MaterialSerialForm())
+            {
+                form.Initialize(material);
+                form.CenterOn(this);
+                if (form.ShowDialog(this) != DialogResult.OK)
+                    return;
+
+                serials = form.SerialNumbers;
+            }
+
+            material.SerialNumbers = serials;
+            gridViewMaterial.RefreshData();
+
+            await SaveMaterialSerialsAsync(material);
+        }
+
+        private async Task SaveMaterialSerialsAsync(PopInputMaterialDto material)
+        {
+            try
+            {
+                if (!UseMock)
+                {
+                    var request = new PopMaterialSerialSaveRequest
+                    {
+                        WorkOrderNo = _key.WorkOrderNo,
+                        SerialNo = _key.SerialNo,
+                        RoutingGroup = _key.RoutingGroup,
+                        RoutingOperation = _key.RoutingOperation,
+                        PageOperation = _key.PageOperation,
+                        MaterialCode = material.MaterialCode,
+                        SerialNumbers = material.SerialNumbers
+                    };
+
+                    await _appSet.ApiClients.PopApiClient.SaveMaterialSerialsAsync(request);
+                }
+
+                AppMessageBox.Success(this, Language.PopSerial_Saved, Language.PopSerial_Title);
+            }
+            catch (ApiException ex)
+            {
+                AppMessageBox.Warn(this, ex.Message, Language.PopSerial_Title);
+            }
+        }
+
+
+
+
+
+    }
+}

@@ -1,0 +1,60 @@
+﻿using Newtonsoft.Json;
+using SEOJIN_TMES.Client.Equipment.Management;
+using SEOJIN_TMES.Client.Equipment.Nutrunner;
+using System.Collections.Generic;
+using System.Configuration;
+
+namespace SEOJIN_TMES.Client.Core
+{
+    public class Devices
+    {
+
+        private INutrunnerManager _manager;
+        
+        public INutrunnerManager Manager { get => _manager;}
+
+        public Devices()
+        {
+            Init();
+        }
+
+        public void Init()
+        {    
+            _manager = new NutrunnerManager();
+
+            List<NutrunnerInfo> info;
+
+            var equipmentsJson = ConfigurationManager.AppSettings["Equipments"];
+            info = JsonConvert.DeserializeObject<List<NutrunnerInfo>>(equipmentsJson)
+                                   ?? new List<NutrunnerInfo>();
+
+            foreach (var nutrunner in info)
+            {
+                _manager.Add(nutrunner);
+            }
+        }
+
+        public void Save()
+        {
+            List<NutrunnerInfo> info = new List<NutrunnerInfo>();
+            for (int i=0; i < _manager.Count; i++)
+            {
+                info.Add(_manager[i].Info);
+            }
+
+
+            var infoJson = JsonConvert.SerializeObject(info, Formatting.None);
+
+            Configuration config =
+            ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+
+
+            config.AppSettings.Settings["Equipments"].Value = infoJson;
+            config.Save(ConfigurationSaveMode.Modified);
+
+            // 캐시된 값 갱신 (이거 없으면 읽을 때 옛날 값 나옴)
+            ConfigurationManager.RefreshSection("appSettings");
+
+        }
+    }
+}

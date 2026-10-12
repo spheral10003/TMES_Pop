@@ -2,7 +2,7 @@
 
 > 이 문서는 **화면을 무엇으로 만들고 어떻게 띄우는지**만 다룬다.
 > 디자이너·테마·다국어 등 화면 코드를 쓸 때의 규칙은
-> [src/SEOJIN_MEIS.Client/CLAUDE.md](src/SEOJIN_MEIS.Client/CLAUDE.md)에 있다.
+> [src/SEOJIN_TMES.Client/CLAUDE.md](src/SEOJIN_TMES.Client/CLAUDE.md)에 있다.
 > 각 화면이 업무적으로 무엇을 하는지는 [README.md](README.md)에 있다.
 
 ---
@@ -61,14 +61,14 @@ public partial class ProductionStatusScreen : XtraUserControl, IThemedScreen
 }
 ```
 
-- `IThemedScreen`([Theme/IThemedScreen.cs](src/SEOJIN_MEIS.Client/Theme/IThemedScreen.cs))은 **필수**다.
+- `IThemedScreen`([Theme/IThemedScreen.cs](src/SEOJIN_TMES.Client/Theme/IThemedScreen.cs))은 **필수**다.
   구현하지 않으면 테마를 바꿨을 때 그 화면만 옛 색으로 남는다.
 - 생성자에 매개변수를 두지 않는 이유와 `Initialize(context)` 패턴은
-  [CLAUDE.md 2번](src/SEOJIN_MEIS.Client/CLAUDE.md) 참고.
+  [CLAUDE.md 2번](src/SEOJIN_TMES.Client/CLAUDE.md) 참고.
 
 ### 2. 메뉴 등록
 
-[Menu/MenuCatalog.cs](src/SEOJIN_MEIS.Client/Menu/MenuCatalog.cs)에 리프 노드로 등록한다.
+[Menu/MenuCatalog.cs](src/SEOJIN_TMES.Client/Menu/MenuCatalog.cs)에 리프 노드로 등록한다.
 **팩토리 안에서 `Initialize(ctx)`까지 호출해 완성된 화면을 돌려준다.**
 
 ```csharp
@@ -86,7 +86,7 @@ var productionStatus = new MenuNode("ProductionStatusInquiry", () => Strings.Men
 
 ### 3. 탭이 열리는 흐름
 
-`MainForm.OpenOrFocusTab`([Forms/MainForm.cs:639](src/SEOJIN_MEIS.Client/Forms/MainForm.cs:639))이 하는 일:
+`MainForm.OpenOrFocusTab`([Forms/MainForm.cs:639](src/SEOJIN_TMES.Client/Forms/MainForm.cs:639))이 하는 일:
 
 ```
 메뉴 클릭
@@ -104,7 +104,7 @@ var productionStatus = new MenuNode("ProductionStatusInquiry", () => Strings.Men
 ### 4. 같은 탭에서 다른 화면으로 넘어가기
 
 새 탭을 열지 않고 탭 내용만 바꾸려면 `INavigatingScreen`을 구현한다
-([Forms/Common/INavigatingScreen.cs](src/SEOJIN_MEIS.Client/Forms/Common/INavigatingScreen.cs)).
+([Forms/Common/INavigatingScreen.cs](src/SEOJIN_TMES.Client/Forms/Common/INavigatingScreen.cs)).
 
 ```csharp
 public event EventHandler<ScreenNavigationEventArgs> NavigateRequested;
@@ -229,7 +229,7 @@ if (IsDisposed || Disposing) return;   // 사용자가 이미 닫았다
 grid.DataSource = result;
 ```
 
-자세한 배경과 사례는 [CLAUDE.md 6번](src/SEOJIN_MEIS.Client/CLAUDE.md) 참고.
+자세한 배경과 사례는 [CLAUDE.md 6번](src/SEOJIN_TMES.Client/CLAUDE.md) 참고.
 
 ---
 
@@ -255,5 +255,5 @@ grid.DataSource = result;
 - [ ] `await`를 쓴다면 `IsDisposed` 확인
 
 표준형으로 삼을 화면:
-[Forms/ProductionStatus/ProductionStatusScreen.cs](src/SEOJIN_MEIS.Client/Forms/ProductionStatus/ProductionStatusScreen.cs)
+[Forms/ProductionStatus/ProductionStatusScreen.cs](src/SEOJIN_TMES.Client/Forms/ProductionStatus/ProductionStatusScreen.cs)
 (조회 조건 카드 + 결과 그리드 카드 — 가장 단순한 조회 화면).

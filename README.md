@@ -1,19 +1,19 @@
-# SEOJIN_MEIS.Client — MES POP 클라이언트
+# SEOJIN_TMES.Client — MES POP 클라이언트
 
 WinForms(.NET Framework 4.7.2) + DevExpress 26.1 기반 MES POP 클라이언트 스캐폴딩.
 서버와는 REST API(Token 인증)로만 통신하며, 업무 로직(수량 계산/판정/집계 등)은 전부 서버에 있고
 클라이언트는 화면 표시·입력 전달·설비 Modbus-TCP 통신만 담당한다.
 
 > **이 문서는 시스템 설명서다.** 코드를 고칠 때 지켜야 할 **규칙**은 `CLAUDE.md`에 따로 모아 두었다:
-> [루트](CLAUDE.md) · [SEOJIN_MEIS.Client](src/SEOJIN_MEIS.Client/CLAUDE.md) · [Common](src/SEOJIN_MEIS.Client.Common/CLAUDE.md) ·
-> [ApiClient](src/SEOJIN_MEIS.Client.ApiClient/CLAUDE.md) · [Equipment](src/SEOJIN_MEIS.Client.Equipment/CLAUDE.md)
+> [루트](CLAUDE.md) · [SEOJIN_TMES.Client](src/SEOJIN_TMES.Client/CLAUDE.md) · [Common](src/SEOJIN_TMES.Client.Common/CLAUDE.md) ·
+> [ApiClient](src/SEOJIN_TMES.Client.ApiClient/CLAUDE.md) · [Equipment](src/SEOJIN_TMES.Client.Equipment/CLAUDE.md)
 >
 > 빌드 방법(`dotnet build`가 실패하는 이유와 우회 방법)도 [루트 CLAUDE.md](CLAUDE.md#빌드)에 있다.
 
 ## 빌드 확인 상태 (2026-08-24 기준, 이 개발 PC)
 
-- `SEOJIN_MEIS.Client.Common` / `SEOJIN_MEIS.Client.ApiClient` / `SEOJIN_MEIS.Client.Equipment` : `dotnet build`로 **정상 빌드 확인**.
-- `SEOJIN_MEIS.Client` (WinForms, DevExpress) : **Visual Studio(또는 VS에 포함된 MSBuild.exe)로 정상 빌드 확인**.
+- `SEOJIN_TMES.Client.Common` / `SEOJIN_TMES.Client.ApiClient` / `SEOJIN_TMES.Client.Equipment` : `dotnet build`로 **정상 빌드 확인**.
+- `SEOJIN_TMES.Client` (WinForms, DevExpress) : **Visual Studio(또는 VS에 포함된 MSBuild.exe)로 정상 빌드 확인**.
   ClickOnce 매니페스트를 만들기 때문에 `dotnet build`로는 빌드되지 않는다 → [빌드 방법](CLAUDE.md#빌드)
 - 이 PC에는 DevExpress 26.1이 설치되어 있지만 **Tab & Navigation(XtraTab), Splash Screen 모듈은 빠져 있다.**
   그래서 메인 화면의 탭 영역은 우선 표준 WinForm 컨트롤로 만든 자체 탭 스트립으로 구현했다(`Forms/MainForm.cs`).
@@ -26,14 +26,14 @@ WinForms(.NET Framework 4.7.2) + DevExpress 26.1 기반 MES POP 클라이언트 
 각 폼은 **매개변수 없는 생성자** + 생성 직후 호출하는 **`Initialize(context)`** 구조를 갖는다.
 
 `InitializeComponent()`에 넣으면 VS 디자이너가 죽는 구문 목록과 그 이유, 새 화면 추가 절차는
-→ **[src/SEOJIN_MEIS.Client/CLAUDE.md](src/SEOJIN_MEIS.Client/CLAUDE.md)** (1~3번, 9번 항목)
+→ **[src/SEOJIN_TMES.Client/CLAUDE.md](src/SEOJIN_TMES.Client/CLAUDE.md)** (1~3번, 9번 항목)
 
 ## 솔루션 구조
 
 ```
-SEOJIN_MEIS.sln
+SEOJIN_TMES.sln
 src/
-  SEOJIN_MEIS.Client/            WinForms 실행 프로젝트 (DevExpress UI, ClickOnce 배포 대상)
+  SEOJIN_TMES.Client/            WinForms 실행 프로젝트 (DevExpress UI, ClickOnce 배포 대상)
     Forms/
       LoginForm.cs               로그인 (RestAPI Token 발급)
       MainForm.cs                메인 셸: 좌측 3-Depth 트리 메뉴 + 우측 화면 탭 영역
@@ -53,40 +53,40 @@ src/
     Program.cs                   진입점: 설정 로드 → API/설비 조립 → 로그인 → 메인화면
     App.config                   ApiBaseUrl, 설비(Host/Port) 목록 등 환경설정
 
-  SEOJIN_MEIS.Client.Common/     DTO, 설정 모델, 로깅 (서버·클라이언트 공용 계약)
+  SEOJIN_TMES.Client.Common/     DTO, 설정 모델, 로깅 (서버·클라이언트 공용 계약)
     Storage/                     도면 PDF 보관소(SMB 공유 폴더) 접근 — 자격증명 연결 + 파일 읽기
-  SEOJIN_MEIS.Client.ApiClient/  REST API 클라이언트 (Token 인증, 401 자동 재시도/재로그인 신호)
-  SEOJIN_MEIS.Client.Equipment/  설비 Modbus-TCP 통신 (표준 + Customized 이벤트 Connection, 각 소켓별 전용 수신 스레드)
+  SEOJIN_TMES.Client.ApiClient/  REST API 클라이언트 (Token 인증, 401 자동 재시도/재로그인 신호)
+  SEOJIN_TMES.Client.Equipment/  설비 Modbus-TCP 통신 (표준 + Customized 이벤트 Connection, 각 소켓별 전용 수신 스레드)
 ```
 
 ## 서버 통신 / 로그인 (요구사항 3, 5)
 
 - 모든 엔드포인트는 `ApiClientBase.ApiPrefix` 상수(`"api/v1.0/"`)를 접두사로 사용한다. **API 개정(Revision) 시 이 상수 한 곳만 바꾸면 전체에 반영**되므로, 각 클라이언트에 버전 문자열을 직접 적지 말 것.
-- `SEOJIN_MEIS.Client.ApiClient.AuthApiClient` : `GET api/v1.0/common/my-salt`, `POST api/v1.0/auth/login`, `POST api/v1.0/auth/refresh`
+- `SEOJIN_TMES.Client.ApiClient.AuthApiClient` : `GET api/v1.0/common/my-salt`, `POST api/v1.0/auth/login`, `POST api/v1.0/auth/refresh`
 - **로그인은 nonce 방식이라 두 번 호출한다.** 순서는 `AuthApiClient.LoginAsync` 안에서 이어지고, 화면은 평문 비밀번호만 넘긴다(평문은 서버로 나가지 않는다):
 
   | 순서 | 호출 | 내용 |
   | --- | --- | --- |
   | ① | `GET api/v1.0/common/my-salt` | 응답이 `{ "data": "31d5dd…" }` 형태로 한 겹 싸여 온다 → `SaltResponse.Data` |
-  | ② | 해시 계산 | `password = SHA256(평문 비밀번호 + salt)` (소문자 16진수 64자) — [PasswordHash.cs](src/SEOJIN_MEIS.Client.Common/Security/PasswordHash.cs) |
+  | ② | 해시 계산 | `password = SHA256(평문 비밀번호 + salt)` (소문자 16진수 64자) — [PasswordHash.cs](src/SEOJIN_TMES.Client.Common/Security/PasswordHash.cs) |
   | ③ | `POST api/v1.0/auth/login` | 바디 `{ "orgNo": "…", "password": "<해시>", "salt": "<①에서 받은 값>" }` |
 
   요청 필드명은 서버 스펙 그대로 나가야 하므로 `LoginRequest`에 `[JsonProperty]`로 고정했다(기본 직렬화는 PascalCase라 그냥 두면 `OrgNo`로 나간다).
   **해시 조합 순서가 서버와 다르면 인증이 안 통과한다** — 다르면 `PasswordHash.ForLogin` 한 줄(예: `Sha256Hex(salt + plainPassword)`)만 고치면 된다.
 - 응답 바디는 `AccessToken`/`RefreshToken` 두 필드만 받는다(`LoginModels.cs`).
   성공/실패는 **HTTP 상태코드로 판정**한다 — 2xx면 성공, 401이면 `LoginForm`이 "아이디 또는 비밀번호가 올바르지 않습니다"로 별도 처리, 그 외 상태코드는 코드번호와 함께 표시.
-- 로그인 응답에는 토큰만 있고 사용자명/부서 등 프로필 정보가 없다. 그래서 프로필은 별도 API(`SEOJIN_MEIS.Client.ApiClient.UserProfileApiClient` → `GET api/v1.0/users/me`, **경로는 가정값**)로 조회하며, 사용자 정보 팝업을 열 때 호출한다(아래 [사용자 정보 팝업](#사용자-정보-팝업) 참고). 조회 전 상단바에는 로그인 아이디만 표시되고, 조회 후에는 `이름 (아이디)`로 바뀐다.
+- 로그인 응답에는 토큰만 있고 사용자명/부서 등 프로필 정보가 없다. 그래서 프로필은 별도 API(`SEOJIN_TMES.Client.ApiClient.UserProfileApiClient` → `GET api/v1.0/users/me`, **경로는 가정값**)로 조회하며, 사용자 정보 팝업을 열 때 호출한다(아래 [사용자 정보 팝업](#사용자-정보-팝업) 참고). 조회 전 상단바에는 로그인 아이디만 표시되고, 조회 후에는 `이름 (아이디)`로 바뀐다.
 - 로그인 시 선택한 **접속서버/워크스테이션**은 로그인 API 인자에는 넣지 않지만, 화면 표시용으로 `UserSession.Server`/`UserSession.Workstation`에 담아둔다(팝업의 워크스테이션 항목이 이 값을 쓴다).
-- `SEOJIN_MEIS.Client.ApiClient.AuthTokenHandler` : 모든 인증 필요 호출에 `Authorization: Bearer` 자동 첨부, 401 시 RefreshToken으로 1회 재시도, 실패하면 `TokenProvider.SessionExpired` 이벤트 발행(재로그인 유도는 UI 계층에서 처리하도록 열어둠)
+- `SEOJIN_TMES.Client.ApiClient.AuthTokenHandler` : 모든 인증 필요 호출에 `Authorization: Bearer` 자동 첨부, 401 시 RefreshToken으로 1회 재시도, 실패하면 `TokenProvider.SessionExpired` 이벤트 발행(재로그인 유도는 UI 계층에서 처리하도록 열어둠)
 - 클라이언트는 토큰을 프로세스 메모리에만 보관(`ITokenProvider`)하고, 업무 판정 로직은 전혀 갖지 않는다 — 화면은 DTO를 그대로 표시/전송만 한다.
 - 로그인 화면(`LoginForm`)은 좌측 로고 자리(`PictureEdit`, 현재 빈 플레이스홀더) + 우측 "접속 사용자 정보" `GroupControl`(접속서버/아이디/비밀번호/워크스테이션/아이디 저장)로 구성. 접속서버·워크스테이션은 현재 UI 표시용 콤보일 뿐 로그인 API 인자에는 포함하지 않는다(TODO: 용도 확정 후 연결).
 - **아이디 저장**: 체크하면 로그인 **성공 시점에만** 아이디를 남긴다(실패한 아이디는 저장하지 않는다). 체크를 풀면 저장해 둔 값도 함께 지운다. **비밀번호는 어떤 경우에도 저장하지 않는다.**
-  저장 위치는 PC/계정 단위 설정이라 App.config가 아니라 `%APPDATA%\SEOJIN_MEIS.Client\user-preferences.json`([UserPreferences.cs](src/SEOJIN_MEIS.Client.Common/Configuration/UserPreferences.cs)).
+  저장 위치는 PC/계정 단위 설정이라 App.config가 아니라 `%APPDATA%\SEOJIN_TMES.Client\user-preferences.json`([UserPreferences.cs](src/SEOJIN_TMES.Client.Common/Configuration/UserPreferences.cs)).
   파일을 못 읽거나 못 써도 로그인은 그대로 진행된다(실패는 로그만 남긴다). 다음 실행 때 아이디가 채워져 있으면 커서는 비밀번호 칸으로 간다.
 
 ## 설비 통신 — Modbus-TCP (요구사항 6)
 
-장비 연결은 TCP/IP이고 그 위의 통신 규격은 **Modbus**다. `SEOJIN_MEIS.Client.Equipment` 프로젝트에
+장비 연결은 TCP/IP이고 그 위의 통신 규격은 **Modbus**다. `SEOJIN_TMES.Client.Equipment` 프로젝트에
 장비 스펙의 **두 가지 Connection을 모두** 구현했으며, 구조는 기존 요구("하나의 수신 지점 → 소켓별 멀티 스레드 클라이언트")를 유지한다.
 
 | 구분 | 포트 | 용도 |
@@ -114,7 +114,7 @@ src/
 현재는 그 값들을 `App.config`에 직접 적어 쓰고, `EventPort`는 스펙 기본 규칙대로 `Port + 1`을 자동 계산한다.
 
 설비 코드를 고칠 때 지켜야 할 규칙(두 커넥션 역할 분리, 이벤트가 올라오는 스레드, 레지스터 맵 위치,
-접속의 비동기 성질, 코덱 교체 지점) → **[src/SEOJIN_MEIS.Client.Equipment/CLAUDE.md](src/SEOJIN_MEIS.Client.Equipment/CLAUDE.md)**
+접속의 비동기 성질, 코덱 교체 지점) → **[src/SEOJIN_TMES.Client.Equipment/CLAUDE.md](src/SEOJIN_TMES.Client.Equipment/CLAUDE.md)**
 
 ## API 오류 처리 — 앱이 죽지 않고 안내 창만 띄운다
 
@@ -123,12 +123,12 @@ src/
 
 | 단계 | 위치 | 하는 일 |
 | --- | --- | --- |
-| 1. 통신 실패 변환 | [LoggingHandler.cs](src/SEOJIN_MEIS.Client.ApiClient/LoggingHandler.cs) | 연결 실패·DNS·SSL 등 응답을 못 받은 예외를 `ApiException`(`StatusCode=0`)으로 바꿔 올린다 |
-| 2. 타임아웃 판별 | [ApiClientBase.cs](src/SEOJIN_MEIS.Client.ApiClient/ApiClientBase.cs) | HttpClient는 타임아웃도 `TaskCanceledException`으로 던진다. **호출자가 준 원본 토큰**이 취소되지 않았으면 타임아웃으로 보고 `ApiException`으로 바꾼다(핸들러 안에서는 링크 토큰이라 구분 불가). 호출자가 실제로 취소한 경우는 오류가 아니므로 그대로 통과 |
-| 3. 마지막 방어선 | [GlobalErrorHandler.cs](src/SEOJIN_MEIS.Client/Composition/GlobalErrorHandler.cs) | `Application.ThreadException` / `AppDomain.UnhandledException`을 받아 공통 안내 창으로 바꾼다. `SetUnhandledExceptionMode(CatchException)`을 걸어 Debug 실행에서도 같은 경로를 타게 한다. fire-and-forget 작업 예외(`TaskScheduler.UnobservedTaskException`)는 창 없이 로그만 |
+| 1. 통신 실패 변환 | [LoggingHandler.cs](src/SEOJIN_TMES.Client.ApiClient/LoggingHandler.cs) | 연결 실패·DNS·SSL 등 응답을 못 받은 예외를 `ApiException`(`StatusCode=0`)으로 바꿔 올린다 |
+| 2. 타임아웃 판별 | [ApiClientBase.cs](src/SEOJIN_TMES.Client.ApiClient/ApiClientBase.cs) | HttpClient는 타임아웃도 `TaskCanceledException`으로 던진다. **호출자가 준 원본 토큰**이 취소되지 않았으면 타임아웃으로 보고 `ApiException`으로 바꾼다(핸들러 안에서는 링크 토큰이라 구분 불가). 호출자가 실제로 취소한 경우는 오류가 아니므로 그대로 통과 |
+| 3. 마지막 방어선 | [GlobalErrorHandler.cs](src/SEOJIN_TMES.Client/Composition/GlobalErrorHandler.cs) | `Application.ThreadException` / `AppDomain.UnhandledException`을 받아 공통 안내 창으로 바꾼다. `SetUnhandledExceptionMode(CatchException)`을 걸어 Debug 실행에서도 같은 경로를 타게 한다. fire-and-forget 작업 예외(`TaskScheduler.UnobservedTaskException`)는 창 없이 로그만 |
 
 이 구조를 유지하기 위해 API 클라이언트를 고칠 때 지켜야 할 규칙(`ApiPrefix` 한 곳, 예외를 삼키지 않기,
-401 재시도 범위, 바디 로깅 금지) → **[src/SEOJIN_MEIS.Client.ApiClient/CLAUDE.md](src/SEOJIN_MEIS.Client.ApiClient/CLAUDE.md)**
+401 재시도 범위, 바디 로깅 금지) → **[src/SEOJIN_TMES.Client.ApiClient/CLAUDE.md](src/SEOJIN_TMES.Client.ApiClient/CLAUDE.md)**
 
 1·2단계 덕분에 각 화면에 이미 있던 `catch (ApiException)` 이 그대로 동작해서, **안내 창을 닫고 계속 작업**할 수 있다.
 통신 실패인지 서버가 준 오류인지는 `ApiException.IsTransportFailure`로 구분한다(로그인 화면은 이 값으로 "서버에 연결할 수 없습니다" 안내를 따로 띄운다).
@@ -155,10 +155,10 @@ src/
 
 | 파일 | 역할 |
 | --- | --- |
-| [Forms/Notification/NotificationForm.cs](src/SEOJIN_MEIS.Client/Forms/Notification/NotificationForm.cs) | 조회조건 카드 + 좌측 목록 그리드([읽음]) + 우측 상세(읽기 전용) |
-| [SEOJIN_MEIS.Client.ApiClient/INotificationApiClient.cs](src/SEOJIN_MEIS.Client.ApiClient/INotificationApiClient.cs) | 개수 폴링 / 목록 조회 / 읽음 처리 |
-| [Models/NotificationDto.cs](src/SEOJIN_MEIS.Client.Common/Models/NotificationDto.cs) | 알림 한 건 + 읽음여부 조건 enum + 읽음 처리 요청 바디 |
-| [Models/ApiDataResponse.cs](src/SEOJIN_MEIS.Client.Common/Models/ApiDataResponse.cs) | 이 서버가 쓰는 `{ "data": ... }` 래퍼 (my-salt·알림 응답에 공통 사용) |
+| [Forms/Notification/NotificationForm.cs](src/SEOJIN_TMES.Client/Forms/Notification/NotificationForm.cs) | 조회조건 카드 + 좌측 목록 그리드([읽음]) + 우측 상세(읽기 전용) |
+| [SEOJIN_TMES.Client.ApiClient/INotificationApiClient.cs](src/SEOJIN_TMES.Client.ApiClient/INotificationApiClient.cs) | 개수 폴링 / 목록 조회 / 읽음 처리 |
+| [Models/NotificationDto.cs](src/SEOJIN_TMES.Client.Common/Models/NotificationDto.cs) | 알림 한 건 + 읽음여부 조건 enum + 읽음 처리 요청 바디 |
+| [Models/ApiDataResponse.cs](src/SEOJIN_TMES.Client.Common/Models/ApiDataResponse.cs) | 이 서버가 쓰는 `{ "data": ... }` 래퍼 (my-salt·알림 응답에 공통 사용) |
 
 **서버 API**(경로/응답 형태는 **가정값** — 실제 스펙 확정 후 조정):
 
@@ -207,11 +207,11 @@ POP 화면 (PopScreen) — 같은 탭의 내용만 바뀌고, 탭 제목은 "POP
 
 | 파일 | 역할 |
 | --- | --- |
-| [Forms/WorkOrderEntry/WorkOrderEntryScreen.cs](src/SEOJIN_MEIS.Client/Forms/WorkOrderEntry/WorkOrderEntryScreen.cs) | 조회 조건 카드([조회]/[작업] + 조건 2개) + 작업 지시 정보 그리드 |
-| [Forms/WorkOrderEntry/WorkEntryConfirmForm.cs](src/SEOJIN_MEIS.Client/Forms/WorkOrderEntry/WorkEntryConfirmForm.cs) | &lt;작업 진입 확인&gt; 모달. 결과는 `SelectedProcess`로 받는다 |
-| [Forms/WorkOrderEntry/WorkEntryContext.cs](src/SEOJIN_MEIS.Client/Forms/WorkOrderEntry/WorkEntryContext.cs) | 고른 작업 대상(작업지시 1건 + 페이지 공정 1건). POP 화면 상단에 `작업 대상 : {작업지시번호} / {시리얼번호} / {라우팅그룹-라우팅공정-페이지공정}`으로 표시된다 |
-| [Forms/Common/INavigatingScreen.cs](src/SEOJIN_MEIS.Client/Forms/Common/INavigatingScreen.cs) | "같은 탭에서 다른 화면으로 넘어가겠다"는 요청 계약. 화면이 탭을 직접 조작하지 않고 `NavigateRequested`만 올리면 `MainForm.SwapTabContent`가 내용과 탭 제목을 바꾼다 |
-| [Forms/Common/GridColumns.cs](src/SEOJIN_MEIS.Client/Forms/Common/GridColumns.cs) | 그리드 컬럼 구성(순서·헤더 문구·폭·정렬·일자 서식 + 순번 NO 컬럼). 헤더 문구는 리소스에서 오므로 언어 전환에도 그대로 따라간다 |
+| [Forms/WorkOrderEntry/WorkOrderEntryScreen.cs](src/SEOJIN_TMES.Client/Forms/WorkOrderEntry/WorkOrderEntryScreen.cs) | 조회 조건 카드([조회]/[작업] + 조건 2개) + 작업 지시 정보 그리드 |
+| [Forms/WorkOrderEntry/WorkEntryConfirmForm.cs](src/SEOJIN_TMES.Client/Forms/WorkOrderEntry/WorkEntryConfirmForm.cs) | &lt;작업 진입 확인&gt; 모달. 결과는 `SelectedProcess`로 받는다 |
+| [Forms/WorkOrderEntry/WorkEntryContext.cs](src/SEOJIN_TMES.Client/Forms/WorkOrderEntry/WorkEntryContext.cs) | 고른 작업 대상(작업지시 1건 + 페이지 공정 1건). POP 화면 상단에 `작업 대상 : {작업지시번호} / {시리얼번호} / {라우팅그룹-라우팅공정-페이지공정}`으로 표시된다 |
+| [Forms/Common/INavigatingScreen.cs](src/SEOJIN_TMES.Client/Forms/Common/INavigatingScreen.cs) | "같은 탭에서 다른 화면으로 넘어가겠다"는 요청 계약. 화면이 탭을 직접 조작하지 않고 `NavigateRequested`만 올리면 `MainForm.SwapTabContent`가 내용과 탭 제목을 바꾼다 |
+| [Forms/Common/GridColumns.cs](src/SEOJIN_TMES.Client/Forms/Common/GridColumns.cs) | 그리드 컬럼 구성(순서·헤더 문구·폭·정렬·일자 서식 + 순번 NO 컬럼). 헤더 문구는 리소스에서 오므로 언어 전환에도 그대로 따라간다 |
 
 **목록 컬럼**(작업 지시 정보): NO · 작업지시번호 · 품목번호 · 시리얼번호 · 작업지시 수량 · 수주번호 · 고객사발주번호 · FCID ·
 시작 예정일자 · 종료 예정일자 · 작업 시작일자 · 작업 종료일자 · 작업지시 상태 · 비고 (뒤 4개는 가로 스크롤 영역).
@@ -237,7 +237,7 @@ POP 화면 (PopScreen) — 같은 탭의 내용만 바뀌고, 탭 제목은 "POP
 | 항목 | 내용 |
 | --- | --- |
 | 켜고 끄기 | `App.config`의 **`UseMockData`** (현재 `true`. 서버가 붙으면 `false`로 되돌리면 원래의 REST 호출 경로로 돌아간다) |
-| 샘플 데이터 | [Mock/MockWorkOrderData.cs](src/SEOJIN_MEIS.Client/Mock/MockWorkOrderData.cs) — 작업 지시 정보 8건 (`WO_260701-01` ~ `WO_260705-01`, 시리얼 `SN-260701-0001` ~, 상태 진행중/대기/완료/보류) + 각 지시의 공정 목록 |
+| 샘플 데이터 | [Mock/MockWorkOrderData.cs](src/SEOJIN_TMES.Client/Mock/MockWorkOrderData.cs) — 작업 지시 정보 8건 (`WO_260701-01` ~ `WO_260705-01`, 시리얼 `SN-260701-0001` ~, 상태 진행중/대기/완료/보류) + 각 지시의 공정 목록 |
 | 조회 동작 | 작업지시번호 / 시리얼번호를 **부분 일치(대소문자 무시)** 로 거른다. 둘 다 입력하면 AND. 예: `WO_2607` → 8건, `WO_260701` → 2건, `0703` → 2건 |
 | 공정(라우팅) | 품목 계열로 그룹이 갈린다 — `ITM-A/B` → `MAIN-01`/`MAIN-02` 5공정, `ITM-C/D` → `SUB-01`/`SUB-02` 4공정. 라우팅 공정 `OP10`~, 페이지 공정 `0010`~ |
 | 공정 진행 상태 | 작업지시 상태를 따라간다 — 완료 지시는 전 공정 **완료**, 진행중 지시는 앞 2공정 완료 + 3번째 **진행중** + 나머지 대기, 대기/보류 지시는 전 공정 **대기** |
@@ -256,14 +256,14 @@ POP 화면 (PopScreen) — 같은 탭의 내용만 바뀌고, 탭 제목은 "POP
 
 | 파일 | 역할 |
 | --- | --- |
-| [Forms/Pop/PopScreen.cs](src/SEOJIN_MEIS.Client/Forms/Pop/PopScreen.cs) | 본 화면 전체(상단 버튼 · 공정 정보 · 탭 4개 · 설비 이벤트 수신) |
-| [Forms/Pop/MaterialSerialForm.cs](src/SEOJIN_MEIS.Client/Forms/Pop/MaterialSerialForm.cs) | &lt;투입자재 정보 입력&gt; 팝업. 결과는 `SerialNumbers`로 받는다 |
-| [Forms/Pop/TorqueInputForm.cs](src/SEOJIN_MEIS.Client/Forms/Pop/TorqueInputForm.cs) | &lt;토크 결과값 입력&gt; 팝업(수동 렌치). 결과는 `Value`로 받는다 |
-| [Models/PopWorkDto.cs](src/SEOJIN_MEIS.Client.Common/Models/PopWorkDto.cs) | 공정 정보 / 투입자재 / BOM 스팩 / 검사 스팩 / 연결 장비 DTO + 조회 키(`PopProcessKey`) |
-| [IPopApiClient.cs](src/SEOJIN_MEIS.Client.ApiClient/IPopApiClient.cs) | POP 전용 REST 클라이언트(조회 5종 + 저장 3종 + 상태 전이 + 관리자 알람) |
-| [Mock/MockPopData.cs](src/SEOJIN_MEIS.Client/Mock/MockPopData.cs) | 화면 설계서 샘플 데이터(목업 모드용) |
-| [Storage/DocumentShareClient.cs](src/SEOJIN_MEIS.Client.Common/Storage/DocumentShareClient.cs) | SMB 공유 폴더에서 도면 PDF를 읽어 오는 클라이언트 |
-| [Storage/SmbConnection.cs](src/SEOJIN_MEIS.Client.Common/Storage/SmbConnection.cs) | 공유 폴더 자격증명 연결(mpr.dll WNetAddConnection2) |
+| [Forms/Pop/PopScreen.cs](src/SEOJIN_TMES.Client/Forms/Pop/PopScreen.cs) | 본 화면 전체(상단 버튼 · 공정 정보 · 탭 4개 · 설비 이벤트 수신) |
+| [Forms/Pop/MaterialSerialForm.cs](src/SEOJIN_TMES.Client/Forms/Pop/MaterialSerialForm.cs) | &lt;투입자재 정보 입력&gt; 팝업. 결과는 `SerialNumbers`로 받는다 |
+| [Forms/Pop/TorqueInputForm.cs](src/SEOJIN_TMES.Client/Forms/Pop/TorqueInputForm.cs) | &lt;토크 결과값 입력&gt; 팝업(수동 렌치). 결과는 `Value`로 받는다 |
+| [Models/PopWorkDto.cs](src/SEOJIN_TMES.Client.Common/Models/PopWorkDto.cs) | 공정 정보 / 투입자재 / BOM 스팩 / 검사 스팩 / 연결 장비 DTO + 조회 키(`PopProcessKey`) |
+| [IPopApiClient.cs](src/SEOJIN_TMES.Client.ApiClient/IPopApiClient.cs) | POP 전용 REST 클라이언트(조회 5종 + 저장 3종 + 상태 전이 + 관리자 알람) |
+| [Mock/MockPopData.cs](src/SEOJIN_TMES.Client/Mock/MockPopData.cs) | 화면 설계서 샘플 데이터(목업 모드용) |
+| [Storage/DocumentShareClient.cs](src/SEOJIN_TMES.Client.Common/Storage/DocumentShareClient.cs) | SMB 공유 폴더에서 도면 PDF를 읽어 오는 클라이언트 |
+| [Storage/SmbConnection.cs](src/SEOJIN_TMES.Client.Common/Storage/SmbConnection.cs) | 공유 폴더 자격증명 연결(mpr.dll WNetAddConnection2) |
 
 **탭별 동작**
 
@@ -297,7 +297,7 @@ POP 화면 (PopScreen) — 같은 탭의 내용만 바뀌고, 탭 제목은 "POP
 - 목업에 없던 **[결과 저장]** 버튼을 BOM 스팩/검사 스팩 탭에 두었다(입력한 결과를 서버로 올릴 통로가 필요해서).
 - 좌측 **작업 표준/도면**은 SMB 공유 폴더의 PDF를 띄운다(바로 아래 [도면 PDF](#작업-표준--도면-pdf--smb-공유-폴더) 참고). 도면이 없거나 읽지 못하면 대각선 자리표시자에 사유만 적고 화면의 나머지 기능은 그대로 쓸 수 있다.
 - 하단 탭은 DevExpress **XtraTab 없이** SimpleButton 4개 + 그리드 Visible 토글로 만들었다(이 PC에 Tab &amp; Navigation 모듈 미설치 — 위 [빌드 확인 상태](#빌드-확인-상태-2026-08-24-기준-이-개발-pc) 참고).
-- 이전 버전(설비 제어/작업지시 목록/로그 콘솔)의 POP 화면은 [Forms/Pop/_backup/](src/SEOJIN_MEIS.Client/Forms/Pop/_backup) 에 `*.bak`으로 남겨 두었다(빌드 대상 아님).
+- 이전 버전(설비 제어/작업지시 목록/로그 콘솔)의 POP 화면은 [Forms/Pop/_backup/](src/SEOJIN_TMES.Client/Forms/Pop/_backup) 에 `*.bak`으로 남겨 두었다(빌드 대상 아님).
 
 ### 작업 표준 / 도면 PDF — SMB 공유 폴더
 
@@ -359,11 +359,11 @@ MEIS &gt; 작업 현황 조회 &gt; **작업 조회 현황**. 작업지시를 �
 
 | 파일 | 역할 |
 | --- | --- |
-| [Forms/WorkStatus/WorkStatusScreen.cs](src/SEOJIN_MEIS.Client/Forms/WorkStatus/WorkStatusScreen.cs) | 조회 조건 + 작업 지시 정보 + 작업 진행 현황(필터 포함) |
-| [Forms/WorkStatus/ItemPickerForm.cs](src/SEOJIN_MEIS.Client/Forms/WorkStatus/ItemPickerForm.cs) | &lt;생산품목 선택&gt; 팝업. 결과는 `SelectedItem`으로 받는다 |
-| [Models/WorkStatusDto.cs](src/SEOJIN_MEIS.Client.Common/Models/WorkStatusDto.cs) | 조회 조건(`WorkStatusQuery`) · 진행 현황(`WorkProgressDto`) · 품목(`ItemDto`) |
-| [IWorkStatusApiClient.cs](src/SEOJIN_MEIS.Client.ApiClient/IWorkStatusApiClient.cs) | 조건 조회 + 진행 현황 + 품목 검색 |
-| [Mock/MockWorkStatusData.cs](src/SEOJIN_MEIS.Client/Mock/MockWorkStatusData.cs) | 화면 설계서 샘플 데이터(목업 모드용) |
+| [Forms/WorkStatus/WorkStatusScreen.cs](src/SEOJIN_TMES.Client/Forms/WorkStatus/WorkStatusScreen.cs) | 조회 조건 + 작업 지시 정보 + 작업 진행 현황(필터 포함) |
+| [Forms/WorkStatus/ItemPickerForm.cs](src/SEOJIN_TMES.Client/Forms/WorkStatus/ItemPickerForm.cs) | &lt;생산품목 선택&gt; 팝업. 결과는 `SelectedItem`으로 받는다 |
+| [Models/WorkStatusDto.cs](src/SEOJIN_TMES.Client.Common/Models/WorkStatusDto.cs) | 조회 조건(`WorkStatusQuery`) · 진행 현황(`WorkProgressDto`) · 품목(`ItemDto`) |
+| [IWorkStatusApiClient.cs](src/SEOJIN_TMES.Client.ApiClient/IWorkStatusApiClient.cs) | 조건 조회 + 진행 현황 + 품목 검색 |
+| [Mock/MockWorkStatusData.cs](src/SEOJIN_TMES.Client/Mock/MockWorkStatusData.cs) | 화면 설계서 샘플 데이터(목업 모드용) |
 
 **서버 API**(경로는 모두 **가정값**):
 
@@ -384,7 +384,7 @@ MEIS &gt; 작업 현황 조회 &gt; **작업 조회 현황**. 작업지시를 �
 
 ## 관리자 알람 — 유형 선택 팝업
 
-POP 본 화면의 **[관리자 알람]** 버튼은 &lt;관리자 알람 유형 선택&gt; 팝업([Forms/Pop/AdminAlarmForm.cs](src/SEOJIN_MEIS.Client/Forms/Pop/AdminAlarmForm.cs))을 연다.
+POP 본 화면의 **[관리자 알람]** 버튼은 &lt;관리자 알람 유형 선택&gt; 팝업([Forms/Pop/AdminAlarmForm.cs](src/SEOJIN_TMES.Client/Forms/Pop/AdminAlarmForm.cs))을 연다.
 
 ```
 · 알람 유형  [자재 결품 ▾]
@@ -425,9 +425,9 @@ MEIS &gt; 작업통합 개요 &gt; **작업통합 현황 조회**. "이 시리�
 
 | 파일 | 역할 |
 | --- | --- |
-| [WorkIntegratedStatusScreen.cs](src/SEOJIN_MEIS.Client/Forms/WorkIntegratedStatus/WorkIntegratedStatusScreen.cs) | 조회 조건 + 작업 통합 개요 트리 + 엑셀 내보내기 |
-| [Models/WorkIntegratedDto.cs](src/SEOJIN_MEIS.Client.Common/Models/WorkIntegratedDto.cs) | 트리 한 줄(`WorkIntegratedNodeDto`) + 줄 종류 상수(`WorkIntegratedNodeKind`) |
-| [Mock/MockWorkIntegratedData.cs](src/SEOJIN_MEIS.Client/Mock/MockWorkIntegratedData.cs) | 화면 설계서 샘플 계층(목업 모드용) |
+| [WorkIntegratedStatusScreen.cs](src/SEOJIN_TMES.Client/Forms/WorkIntegratedStatus/WorkIntegratedStatusScreen.cs) | 조회 조건 + 작업 통합 개요 트리 + 엑셀 내보내기 |
+| [Models/WorkIntegratedDto.cs](src/SEOJIN_TMES.Client.Common/Models/WorkIntegratedDto.cs) | 트리 한 줄(`WorkIntegratedNodeDto`) + 줄 종류 상수(`WorkIntegratedNodeKind`) |
+| [Mock/MockWorkIntegratedData.cs](src/SEOJIN_TMES.Client/Mock/MockWorkIntegratedData.cs) | 화면 설계서 샘플 계층(목업 모드용) |
 
 **서버 API**(경로는 **가정값**): `GET api/v1.0/production/work-integrated-overview?serialNo=`
 
@@ -439,7 +439,7 @@ MEIS &gt; 작업통합 개요 &gt; **작업통합 현황 조회**. "이 시리�
 - 조회 결과는 **전부 펼친 상태**로 보여 준다(`ExpandAll`). 목업처럼 한눈에 전 과정이 보이는 것이 이 화면의 목적이다.
 - **[엑셀 내보내기]** 는 화면에 보이는 트리를 그대로 xlsx로 저장한다(계층·컬럼 구성 유지, `TreeList.ExportToXlsx`). 저장 위치는 사용자가 고르고, 기본 파일명에 시리얼번호와 시각을 넣어 덮어쓰기를 피한다. 조회 결과가 없으면 안내만 한다.
 - 값 컬럼은 **고정 폭 + 가로 스크롤**로 뒀다 — 앵글 컬럼까지 억지로 줄여 넣지 않고 화면 설계서처럼 옆으로 밀어 본다.
-- 이전 버전(부서/라인 집계 그리드)의 화면은 [Forms/WorkIntegratedStatus/_backup/](src/SEOJIN_MEIS.Client/Forms/WorkIntegratedStatus/_backup) 에 `*.bak`으로 남겨 두었다(빌드 대상 아님).
+- 이전 버전(부서/라인 집계 그리드)의 화면은 [Forms/WorkIntegratedStatus/_backup/](src/SEOJIN_TMES.Client/Forms/WorkIntegratedStatus/_backup) 에 `*.bak`으로 남겨 두었다(빌드 대상 아님).
 
 ## 다국어 (요구사항 8)
 
@@ -452,18 +452,18 @@ MEIS &gt; 작업통합 개요 &gt; **작업통합 현황 조회**. "이 시리�
   (아래 [상단 바 우측 정보 블록](#상단-바-우측-정보-블록) 참고).
 
 문자열 키를 추가할 때 함께 갱신해야 하는 파일과, 언어를 새로 추가할 때 필요한 것
-→ **[src/SEOJIN_MEIS.Client/CLAUDE.md](src/SEOJIN_MEIS.Client/CLAUDE.md)** (7번 항목)
+→ **[src/SEOJIN_TMES.Client/CLAUDE.md](src/SEOJIN_TMES.Client/CLAUDE.md)** (7번 항목)
 
 ## UI 테마 — DevExpress 스킨/팔레트 + 컬러 셸 (Theme/)
 
 웹 MES 시안(남보라 사이드바 + 밝은 본문 + 포인트 컬러)에 맞춰 셸과 화면 전체를 컬러 테마로 구성했다.
-색 값은 화면 코드에 흩어놓지 않고 **[Theme/AppTheme.cs](src/SEOJIN_MEIS.Client/Theme/AppTheme.cs) 한 곳**에만 둔다 —
+색 값은 화면 코드에 흩어놓지 않고 **[Theme/AppTheme.cs](src/SEOJIN_TMES.Client/Theme/AppTheme.cs) 한 곳**에만 둔다 —
 톤을 바꾸려면 이 파일의 색 상수만 고치면 모든 화면에 반영된다.
 아이콘은 코드로 만드는 SVG(`Theme/AppIcons.cs`)와 파일로 들어온 이미지(`Theme/AppImages.cs`) 두 갈래이며,
 후자는 `Images/` 원본을 어셈블리에 포함해서 배포한다.
 
 화면 코드에서 색·아이콘·이미지를 다룰 때 지켜야 할 규칙
-→ **[src/SEOJIN_MEIS.Client/CLAUDE.md](src/SEOJIN_MEIS.Client/CLAUDE.md)** (4번, 8번 항목)
+→ **[src/SEOJIN_TMES.Client/CLAUDE.md](src/SEOJIN_TMES.Client/CLAUDE.md)** (4번, 8번 항목)
 
 DevExpress 기능을 두 층으로 쓴다:
 
@@ -486,20 +486,20 @@ DevExpress 기능을 두 층으로 쓴다:
 | --- | --- |
 | 좌측 사이드바 | 남보라 수직 그라데이션(#2B2676 → #3E2E98) + 상단 로고 블록(제품명/부제) + `AccordionControl` 3-Depth 메뉴. 깊이별로 들여쓰기·행 높이·아이콘·배경이 달라 계층이 드러난다(아래 [좌측 트리 메뉴 계층 표현](#좌측-트리-메뉴-계층-표현)), 선택 항목은 보라색(#6C63E0) 밴드로 강조 |
 | 상단 바 | (좌) 햄버거 · 브레드크럼(`홈 / MEIS / 대분류 / 화면`) / (우) 알림 종+빨간 배지(안 읽은 알림 수, 1분 폴링 — 누르면 [알림 팝업](#알림--1분-폴링-배지--알림-팝업목록상세)) · **`{이름} 님 환영합니다.` · 세션 남은 시간 · 언어 콤보 · 사용자 아이콘 · 로그아웃 아이콘** |
-| 탭 스트립 | 열린 화면을 브라우저/IDE 형태의 탭으로 표시 — **윗 모서리만 둥근 사각형**이 스트립 하단 경계선 위에 앉는다. 활성 탭 = 인디고 배경 + 흰 글자, 비활성 = 연회색 + 테두리(마우스 올리면 한 톤 진해짐), 탭마다 ✕ 버튼([TabChip.cs](src/SEOJIN_MEIS.Client/Forms/Common/TabChip.cs)) |
+| 탭 스트립 | 열린 화면을 브라우저/IDE 형태의 탭으로 표시 — **윗 모서리만 둥근 사각형**이 스트립 하단 경계선 위에 앉는다. 활성 탭 = 인디고 배경 + 흰 글자, 비활성 = 연회색 + 테두리(마우스 올리면 한 톤 진해짐), 탭마다 ✕ 버튼([TabChip.cs](src/SEOJIN_TMES.Client/Forms/Common/TabChip.cs)) |
 | 본문 | 밝은 회청색 바닥(#F4F6FB) 위에 흰 카드. 열린 화면이 없으면 접속 서버/등록 설비 수/로그인 사용자를 색 타일로 보여주는 환영 카드 표시 |
 
 - **사이드바 접기**: 햄버거 버튼 → 사이드바 폭 240 ↔ 64, `AccordionControl.OptionsMinimizing.State`로 아이콘만 남는 최소화 모드 사용.
 - **알림 배지**: 서버에 안 읽은 알림이 있으면 종 아이콘에 빨간 배지(개수)가 붙는다. 1분마다 갱신되고, 클릭하면 알림 팝업이 열린다.
 - **탭**: 예전에는 `Panel` + `Label` 2개에 `Region`으로 알약 모양을 오려 썼는데, `Region`은 안티에일리어싱이 없어 곡선이 계단처럼 보이고 닫기(✕) 글자까지 잘려 모양이 어색했다.
-  지금은 [TabChip.cs](src/SEOJIN_MEIS.Client/Forms/Common/TabChip.cs) 컨트롤 하나가 배경·글자·✕를 직접(안티에일리어싱으로) 그린다 — 마우스 위치로 탭 본체와 ✕ 영역을 구분해 각각 hover 표시를 준다. 색은 전부 `AppTheme`에서 가져오므로 포인트 컬러를 바꾸면 탭도 따라온다.
-- **아이콘**: [Theme/AppIcons.cs](src/SEOJIN_MEIS.Client/Theme/AppIcons.cs)에 SVG 문자열로 보관하고 `SvgImage.FromStream`으로 만든다 —
+  지금은 [TabChip.cs](src/SEOJIN_TMES.Client/Forms/Common/TabChip.cs) 컨트롤 하나가 배경·글자·✕를 직접(안티에일리어싱으로) 그린다 — 마우스 위치로 탭 본체와 ✕ 영역을 구분해 각각 hover 표시를 준다. 색은 전부 `AppTheme`에서 가져오므로 포인트 컬러를 바꾸면 탭도 따라온다.
+- **아이콘**: [Theme/AppIcons.cs](src/SEOJIN_TMES.Client/Theme/AppIcons.cs)에 SVG 문자열로 보관하고 `SvgImage.FromStream`으로 만든다 —
   이미지 파일을 프로젝트에 추가하지 않아도 되고, 같은 아이콘을 색만 바꿔 재사용하며(캐시), 고DPI에서도 깨지지 않는다.
 
 ### 좌측 트리 메뉴 계층 표현
 
 메뉴 구조(MEIS > 대분류 > 화면)는 그대로 두고, **어느 깊이인지 한눈에 보이도록** 표현만 정리했다.
-깊이별 규칙은 [AppTheme.MenuElement](src/SEOJIN_MEIS.Client/Theme/AppTheme.cs)와 `MainForm.BuildAccordionElement` 두 곳에만 있다.
+깊이별 규칙은 [AppTheme.MenuElement](src/SEOJIN_TMES.Client/Theme/AppTheme.cs)와 `MainForm.BuildAccordionElement` 두 곳에만 있다.
 
 | 깊이 | 들여쓰기 / 높이 | 아이콘 | 글꼴·색 | 배경 |
 | --- | --- | --- | --- | --- |
@@ -507,7 +507,7 @@ DevExpress 기능을 두 층으로 쓴다:
 | 1 · 대분류 | 18px / 40px | 분류 아이콘 16px(클립보드/차트/레이어) | 굵게, 밝은 라벤더 | 그대로 |
 | 2 · 화면(리프) | 36px / 34px | **트리 가지(└) + 화면별 색 점** | 보통, 옅은 라벤더 | 살짝 어두운 밴드(`#221D58`) |
 
-- **트리 가지 아이콘**: [AppIcons.TreeLeaf](src/SEOJIN_MEIS.Client/Theme/AppIcons.cs)가 SVG로 만든다. 세로 안내선이 행 높이(34px)를 가득 채우므로
+- **트리 가지 아이콘**: [AppIcons.TreeLeaf](src/SEOJIN_TMES.Client/Theme/AppIcons.cs)가 SVG로 만든다. 세로 안내선이 행 높이(34px)를 가득 채우므로
   같은 분류 아래 화면이 여러 개면 선이 이어져 계층이 보이고, 마지막 항목은 선을 중간까지만 그려 `└` 모양이 된다
   (마지막 여부는 `BuildAccordionElement`가 형제 순번으로 판단한다).
 - **화면별 색 점**: 점 색은 `MenuNode.Accent`로 정한다 — POP=Emerald, 생산 현황조회=Cyan, 작업통합 현황 조회=Amber.
@@ -519,7 +519,7 @@ DevExpress 기능을 두 층으로 쓴다:
 ### 상단 바 우측 정보 블록
 
 요청받은 형식(`{이름} 님 환영합니다.  04:59:49  [Korean ▼]  [사용자]`)에 맞춰 우측 정보 묶음을 구성했다.
-배치는 [MainForm.cs](src/SEOJIN_MEIS.Client/Forms/MainForm.cs)의 `LayoutTopBar()`가 오른쪽 정렬로 계산한다(창 폭이 바뀌어도 유지).
+배치는 [MainForm.cs](src/SEOJIN_TMES.Client/Forms/MainForm.cs)의 `LayoutTopBar()`가 오른쪽 정렬로 계산한다(창 폭이 바뀌어도 유지).
 
 | 요소 | 내용 |
 | --- | --- |
@@ -542,7 +542,7 @@ DevExpress 기능을 두 층으로 쓴다:
 
 ### 사용자 정보 팝업
 
-상단바의 **아바타 또는 아이디를 클릭**하면 [Forms/UserProfileForm.cs](src/SEOJIN_MEIS.Client/Forms/UserProfileForm.cs)가 모달로 열린다.
+상단바의 **아바타 또는 아이디를 클릭**하면 [Forms/UserProfileForm.cs](src/SEOJIN_TMES.Client/Forms/UserProfileForm.cs)가 모달로 열린다.
 표시 항목은 요구된 5개 — **사번 · 이름 · 연락처 · 부서 · 워크스테이션**.
 
 값의 출처가 두 가지다:
@@ -556,7 +556,7 @@ DevExpress 기능을 두 층으로 쓴다:
 - 팝업을 닫으면 상단바 표시가 `이름 (아이디)`로, 아바타 첫 글자도 이름 기준으로 갱신된다.
 - 팝업 상단 헤더는 사이드바와 같은 남보라 그라데이션 + 원형 아바타를 쓴다(`AppTheme.Sidebar`/`AppTheme.Avatar` 재사용).
 - **TODO**: `users/me` 경로와 응답 필드명(`employeeNo`/`userName`/`phoneNumber`/`departmentName`)은 가정값이다.
-  실제 서버 스펙 확정 후 [UserProfileDto](src/SEOJIN_MEIS.Client.Common/Models/UserProfileDto.cs) 속성명(또는 `JsonProperty` 매핑)과 엔드포인트를 맞출 것.
+  실제 서버 스펙 확정 후 [UserProfileDto](src/SEOJIN_TMES.Client.Common/Models/UserProfileDto.cs) 속성명(또는 `JsonProperty` 매핑)과 엔드포인트를 맞출 것.
 
 ### 공통 메시지/확인 창 (MessageBox 대체)
 
@@ -567,10 +567,10 @@ DevExpress 기능을 두 층으로 쓴다:
 
 | 파일 | 역할 |
 | --- | --- |
-| [Forms/Common/AppMessagePanel.cs](src/SEOJIN_MEIS.Client/Forms/Common/AppMessagePanel.cs) | **공통 유저컨트롤**(XtraUserControl). 창에 대한 의존이 없어 모달 대화상자로도, 화면 안쪽 인라인 확인 영역으로도 쓸 수 있다. 결과는 `ResultSelected` 이벤트로 알린다. |
-| [Forms/Common/AppMessageForm.cs](src/SEOJIN_MEIS.Client/Forms/Common/AppMessageForm.cs) | 위 유저컨트롤을 감싸 모달로 띄우는 호스트 폼. 사용자 정보 팝업과 같은 고정 크기 대화상자(`FixedDialog`)이고, 창 제목은 헤더와 같은 문구를 쓴다. |
-| [Forms/Common/AppMessageBox.cs](src/SEOJIN_MEIS.Client/Forms/Common/AppMessageBox.cs) | 화면이 호출하는 유일한 진입점(정적 메서드). |
-| [Forms/Common/AppMessageOptions.cs](src/SEOJIN_MEIS.Client/Forms/Common/AppMessageOptions.cs) | `AppMessageKind`(Info/Question/Success/Warning/Error), `AppMessageButtons`(Ok/OkCancel). |
+| [Forms/Common/AppMessagePanel.cs](src/SEOJIN_TMES.Client/Forms/Common/AppMessagePanel.cs) | **공통 유저컨트롤**(XtraUserControl). 창에 대한 의존이 없어 모달 대화상자로도, 화면 안쪽 인라인 확인 영역으로도 쓸 수 있다. 결과는 `ResultSelected` 이벤트로 알린다. |
+| [Forms/Common/AppMessageForm.cs](src/SEOJIN_TMES.Client/Forms/Common/AppMessageForm.cs) | 위 유저컨트롤을 감싸 모달로 띄우는 호스트 폼. 사용자 정보 팝업과 같은 고정 크기 대화상자(`FixedDialog`)이고, 창 제목은 헤더와 같은 문구를 쓴다. |
+| [Forms/Common/AppMessageBox.cs](src/SEOJIN_TMES.Client/Forms/Common/AppMessageBox.cs) | 화면이 호출하는 유일한 진입점(정적 메서드). |
+| [Forms/Common/AppMessageOptions.cs](src/SEOJIN_TMES.Client/Forms/Common/AppMessageOptions.cs) | `AppMessageKind`(Info/Question/Success/Warning/Error), `AppMessageButtons`(Ok/OkCancel). |
 
 ```csharp
 AppMessageBox.Warn(this, ex.Message, Strings.Pop_Title);        // 확인 1개
@@ -610,18 +610,18 @@ if (!AppMessageBox.Confirm(this, "이동하시겠습니까?")) return;    // 확
 
 DevExpress 컨트롤을 다루다 실제로 밟은 함정들(`PanelControl` 테두리와 배경색 충돌, `AccordionControl`의
 투명색 처리, `LabelControl` 자동 크기, 도킹 `Add` 순서 등)은 규칙 문서로 옮겼다
-→ **[src/SEOJIN_MEIS.Client/CLAUDE.md](src/SEOJIN_MEIS.Client/CLAUDE.md)** (5번 항목)
+→ **[src/SEOJIN_TMES.Client/CLAUDE.md](src/SEOJIN_TMES.Client/CLAUDE.md)** (5번 항목)
 
 ### 확인 방법
 
 실제로 앱을 띄워 화면을 캡처해 확인했다(2026-08-24, 이 개발 PC): 로그인 → 환영 카드 → POP 진입 화면(조회 결과 2건) → 작업 진입 확인 팝업(공정 9건) → [이동] 후 POP 본 화면 → 생산 현황조회 → 작업통합 현황 조회 → 사용자 정보 팝업 → 우측 상단 정보 블록(환영/카운트다운/언어) → 언어 English 전환 → 공통 메시지 창(확인/취소, 주의) → 사이드바 접기.
 로그인/서버 없이도 확인할 수 있게, 임시 하네스에서 로컬 HttpListener가 응답(작업지시 등은 빈 배열, `users/me`는 샘플 프로필)을 돌려주도록 하고 `MainForm`을 직접 띄워 캡처했다.
 원형 아바타/버튼 색처럼 화면 캡처 방식(`DrawToBitmap`)이 제대로 담지 못하는 부분은 실제 렌더링 픽셀을 1점씩 읽어 확인했다 — 아바타 모서리 = 헤더 그라데이션 색(원형 클립 정상), 닫기 버튼 테두리 = `#475569`, 공통 메시지 창의 [확인] 채움 = `#009EB3`, [취소] 테두리 = `#475569`.
-`DevExpress.BonusSkins.v26.1` 참조는 `SEOJIN_MEIS.Client.csproj`에 그대로 두었다(확장 스킨용).
+`DevExpress.BonusSkins.v26.1` 참조는 `SEOJIN_TMES.Client.csproj`에 그대로 두었다(확장 스킨용).
 
 ## 로깅 (Debug 콘솔 + 로그 파일 + API 호출 URL)
 
-- `SEOJIN_MEIS.Client.Common.Logging.AppLog` : `Step`/`Info`/`Warn`/`Error` — 타임스탬프를 붙여
+- `SEOJIN_TMES.Client.Common.Logging.AppLog` : `Step`/`Info`/`Warn`/`Error` — 타임스탬프를 붙여
   **콘솔 · VS 출력 창 · 로그 파일** 세 곳에 동시에 남긴다.
 - **로그 파일**은 첫 기록 때 자동으로 열린다(별도 초기화 호출 없음). 위치는 실행 파일 옆 `logs`,
   쓸 수 없으면 `%LOCALAPPDATA%\MEIS\logs`. 시작 로그에 실제 경로가 찍힌다.
@@ -633,22 +633,22 @@ DevExpress 컨트롤을 다루다 실제로 밟은 함정들(`PanelControl` 테�
   | 30일 보관 | 압축본·원본 모두 30일이 지나면 삭제 |
 
   정리·압축은 파일을 새로 열 때(앱 시작 / 자정 넘김) 한 번씩 돈다. 고칠 때 지켜야 할 것 →
-  **[src/SEOJIN_MEIS.Client.Common/CLAUDE.md](src/SEOJIN_MEIS.Client.Common/CLAUDE.md)** (Logging/AppLog 항목)
-- `SEOJIN_MEIS.Client.csproj`에서 **Debug 구성만 `OutputType=Exe`**(콘솔 서브시스템)로 빌드하도록 조건부 설정했다 — VS에서 F5(디버그 실행)하면 WinForms 창과 별개로 **검은 콘솔 창이 함께 뜨고**, 거기에 `AppLog`가 쓴 로그가 실시간으로 보인다. Release(배포용)는 그대로 `WinExe`라 콘솔 창이 뜨지 않는다.
+  **[src/SEOJIN_TMES.Client.Common/CLAUDE.md](src/SEOJIN_TMES.Client.Common/CLAUDE.md)** (Logging/AppLog 항목)
+- `SEOJIN_TMES.Client.csproj`에서 **Debug 구성만 `OutputType=Exe`**(콘솔 서브시스템)로 빌드하도록 조건부 설정했다 — VS에서 F5(디버그 실행)하면 WinForms 창과 별개로 **검은 콘솔 창이 함께 뜨고**, 거기에 `AppLog`가 쓴 로그가 실시간으로 보인다. Release(배포용)는 그대로 `WinExe`라 콘솔 창이 뜨지 않는다.
 - `Program.cs`에 앱 처리 단계(설정 로드 → API 클라이언트 구성 → 설비 매니저 등록 → 로그인 화면 → 로그인 성공/실패 → 메인 화면)를 `AppLog.Step`으로 남겼다.
-- `SEOJIN_MEIS.Client.ApiClient.LoggingHandler`(모든 `HttpClient`에 장착됨)가 **모든 REST 호출의 전체 URL**(`request.RequestUri`, BaseAddress까지 합쳐진 절대경로) + Method + 응답 상태코드 + 소요시간(ms)을 자동으로 남긴다. 요청/응답 바디는 비밀번호 등 민감정보가 섞일 수 있어 남기지 않는다.
+- `SEOJIN_TMES.Client.ApiClient.LoggingHandler`(모든 `HttpClient`에 장착됨)가 **모든 REST 호출의 전체 URL**(`request.RequestUri`, BaseAddress까지 합쳐진 절대경로) + Method + 응답 상태코드 + 소요시간(ms)을 자동으로 남긴다. 요청/응답 바디는 비밀번호 등 민감정보가 섞일 수 있어 남기지 않는다.
 - 설비 Modbus-TCP 접속 시도/성공/실패, 요청 ADU(16진), 실시간 이벤트 수신, POP 화면의 설비 이벤트 로그도 같은 `AppLog`를 통해 콘솔에 함께 보인다.
 - VS의 [출력] 창(디버그)에서도 `Trace.WriteLine` 덕분에 동일한 로그를 볼 수 있다 — 콘솔 창을 닫아도 로그는 계속 그쪽에 남는다.
 
 ## ClickOnce 배포 (요구사항 4)
 
-`src/SEOJIN_MEIS.Client/SEOJIN_MEIS.Client.csproj`에 ClickOnce 기본 속성이 들어있고, `Properties/PublishProfiles/ClickOnceProfile.pubxml`이
+`src/SEOJIN_TMES.Client/SEOJIN_TMES.Client.csproj`에 ClickOnce 기본 속성이 들어있고, `Properties/PublishProfiles/ClickOnceProfile.pubxml`이
 게시 프로필의 시작점이다. **배포 서버 URL/경로, 서명 인증서, 버전 정책은 환경별로 다르므로**
-Visual Studio에서 `SEOJIN_MEIS.Client` 프로젝트 우클릭 → **게시(Publish)** 마법사로 최종 확정할 것을 권장한다.
+Visual Studio에서 `SEOJIN_TMES.Client` 프로젝트 우클릭 → **게시(Publish)** 마법사로 최종 확정할 것을 권장한다.
 
 ## 다음에 정해줘야 할 것들 (TODO)
 
-1. **REST API 실제 스펙**: 로그인/작업지시/생산실적/설비상태 엔드포인트 경로·필드명 확정 → `SEOJIN_MEIS.Client.ApiClient`의 각 `*ApiClient` 클래스 조정
+1. **REST API 실제 스펙**: 로그인/작업지시/생산실적/설비상태 엔드포인트 경로·필드명 확정 → `SEOJIN_TMES.Client.ApiClient`의 각 `*ApiClient` 클래스 조정
 2. **설비 Modbus 레지스터 맵**: 제어/상태 레지스터 주소와 값의 의미, 실시간 이벤트 프레임의 payload 정의 → `App.config`의 `Equipments[].RegisterMap`과 `PopScreen`의 상태 매핑 채우기 (필요하면 Advertise/Scan ack/Search ack 자동 탐색도 함께)
 3. **화면 필드 상세**: 생산현황조회/작업통합현황조회 화면에 실제로 표시·입력할 컬럼/필드 목록
 4. **DevExpress Tab & Navigation, Splash Screen 모듈 설치 여부** → 설치되면 `MainForm.cs` 탭 영역을 `XtraTabControl`로 교체

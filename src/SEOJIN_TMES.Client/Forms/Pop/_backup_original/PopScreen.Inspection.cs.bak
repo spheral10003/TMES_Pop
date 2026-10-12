@@ -1,0 +1,112 @@
+﻿using DevExpress.XtraEditors.Controls;
+using DevExpress.XtraEditors.Repository;
+using SEOJIN_TMES.Client.ApiClient;
+using SEOJIN_TMES.Client.Common.Languages;
+using SEOJIN_TMES.Client.Common.Models;
+using SEOJIN_TMES.Client.Forms.Common;
+using SEOJIN_TMES.Client.Mock;
+using SEOJIN_TMES.Client.Theme;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace SEOJIN_TMES.Client.Forms.Pop
+{
+    public partial class PopScreen
+    {
+        private List<PopInspectionSpecDto> _inspections = new List<PopInspectionSpecDto>();
+
+        public void InspectionInit()
+        {
+            AppTheme.Grid(gridInspection, gridViewInspection, AppTheme.Violet);
+
+            // AppTheme.Grid는 모든 그리드를 읽기 전용으로 되돌리므로, 입력이 필요한 두 탭만 다시 열어 준다.
+            gridViewInspection.OptionsBehavior.Editable = true;
+            ConfigureInspectionGrid();
+
+            LoadInspectionAsync();
+        }
+
+        private async Task LoadInspectionAsync()
+        {
+            try
+            {
+                _inspections = await FetchInspectionsAsync();
+                gridInspection.DataSource = _inspections;
+            }
+            catch (ApiException ex)
+            {
+                AppMessageBox.Warn(this, ex.Message, Language.Pop_Title);
+                return;
+            }
+        }
+
+        private async Task<List<PopInspectionSpecDto>> FetchInspectionsAsync()
+        {
+            if (UseMock)
+            {
+                await Task.Yield();
+                return MockPopData.GetInspectionSpecs(_key);
+            }
+
+            return await _appSet.ApiClients.PopApiClient.GetInspectionSpecsAsync(_key)
+                   ?? new List<PopInspectionSpecDto>();
+        }
+
+
+        private void ConfigureInspectionGrid()
+        {
+            gridInspection.DataSource = new List<PopInspectionSpecDto>();
+            GridColumns.Apply(gridViewInspection, Language.Col_No,
+                GridColumns.Text("InspectionSpecName", Language.Col_InspectionSpecName, 220),
+                GridColumns.Left("InspectionRemark", Language.Col_InspectionRemark, 340),
+                GridColumns.Text("InspectionMethod", Language.Col_InspectionMethod, 120),
+                GridColumns.Text("ResultState", Language.Col_ResultState, 130),
+                GridColumns.Text("ResultValue", Language.Col_ResultValue, 130));
+
+            gridViewInspection.OptionsView.ColumnAutoWidth = true;
+
+            _resultStateEditor = new RepositoryItemComboBox();
+            _resultStateEditor.TextEditStyle = TextEditStyles.DisableTextEditor;
+            _resultStateEditor.Items.Add(Language.Pop_ResultPass);
+            _resultStateEditor.Items.Add(Language.Pop_ResultFail);
+            gridInspection.RepositoryItems.Add(_resultStateEditor);
+
+            _resultValueEditor = new RepositoryItemTextEdit();
+            gridInspection.RepositoryItems.Add(_resultValueEditor);
+
+            foreach (DevExpress.XtraGrid.Columns.GridColumn column in gridViewInspection.Columns)
+                column.OptionsColumn.AllowEdit = false;
+
+            var stateColumn = gridViewInspection.Columns.ColumnByFieldName("ResultState");
+            if (stateColumn != null)
+            {
+                stateColumn.OptionsColumn.AllowEdit = true;
+                stateColumn.ColumnEdit = _resultStateEditor;
+            }
+
+            var valueColumn = gridViewInspection.Columns.ColumnByFieldName("ResultValue");
+            if (valueColumn != null)
+            {
+                valueColumn.OptionsColumn.AllowEdit = true;
+                valueColumn.ColumnEdit = _resultValueEditor;
+            }
+
+            // 정성 검사는 결과값을 받지 않으므로 그 줄만 입력을 막는다.
+            gridViewInspection.ShowingEditor += GridViewInspection_ShowingEditor;
+        }
+
+        /// <summary>정성 검사 줄에서는 결과값 칸을 열지 않는다(결과상태만 고른다).</summary>
+        private void GridViewInspection_ShowingEditor(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (gridViewInspection.FocusedColumn?.FieldName != "ResultValue")
+                return;
+
+            var spec = gridViewInspection.GetFocusedRow() as PopInspectionSpecDto;
+            if (spec != null && !spec.IsQuantitative)
+                e.Cancel = true;
+        }
+    }
+}

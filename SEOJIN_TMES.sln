@@ -1,0 +1,54 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.9.12120.119 stable
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SEOJIN_TMES.Client", "src\SEOJIN_TMES.Client\SEOJIN_TMES.Client.csproj", "{4794C858-F464-4FF3-BFBD-8D1B60206BE5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SEOJIN_TMES.Client.Common", "src\SEOJIN_TMES.Client.Common\SEOJIN_TMES.Client.Common.csproj", "{250D8FB8-135E-4BD3-802B-B20552FFFF5F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SEOJIN_TMES.Client.ApiClient", "src\SEOJIN_TMES.Client.ApiClient\SEOJIN_TMES.Client.ApiClient.csproj", "{4BDBE39B-7FB2-4544-93FD-40734460BB97}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SEOJIN_TMES.Client.Equipment", "src\SEOJIN_TMES.Client.Equipment\SEOJIN_TMES.Client.Equipment.csproj", "{7733AC2B-5FB8-4D5C-87EC-447C0BA09ACA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SEOJIN_TMES.Client.Modbus", "src\SEOJIN_TMES.Client.Modbus\SEOJIN_TMES.Client.Modbus.csproj", "{25ED4727-2791-0F09-2D0F-EB74D5381ECD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SEOJIN_TMES.Client.Socket", "src\SEOJIN_TMES.Client.Socket\SEOJIN_TMES.Client.Socket.csproj", "{3DD17FED-7962-4C37-ACDA-D94A7C819C2A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4794C858-F464-4FF3-BFBD-8D1B60206BE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4794C858-F464-4FF3-BFBD-8D1B60206BE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4794C858-F464-4FF3-BFBD-8D1B60206BE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4794C858-F464-4FF3-BFBD-8D1B60206BE5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{250D8FB8-135E-4BD3-802B-B20552FFFF5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{250D8FB8-135E-4BD3-802B-B20552FFFF5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{250D8FB8-135E-4BD3-802B-B20552FFFF5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{250D8FB8-135E-4BD3-802B-B20552FFFF5F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4BDBE39B-7FB2-4544-93FD-40734460BB97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4BDBE39B-7FB2-4544-93FD-40734460BB97}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4BDBE39B-7FB2-4544-93FD-40734460BB97}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4BDBE39B-7FB2-4544-93FD-40734460BB97}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7733AC2B-5FB8-4D5C-87EC-447C0BA09ACA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7733AC2B-5FB8-4D5C-87EC-447C0BA09ACA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7733AC2B-5FB8-4D5C-87EC-447C0BA09ACA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7733AC2B-5FB8-4D5C-87EC-447C0BA09ACA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{25ED4727-2791-0F09-2D0F-EB74D5381ECD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{25ED4727-2791-0F09-2D0F-EB74D5381ECD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{25ED4727-2791-0F09-2D0F-EB74D5381ECD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{25ED4727-2791-0F09-2D0F-EB74D5381ECD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3DD17FED-7962-4C37-ACDA-D94A7C819C2A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3DD17FED-7962-4C37-ACDA-D94A7C819C2A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3DD17FED-7962-4C37-ACDA-D94A7C819C2A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3DD17FED-7962-4C37-ACDA-D94A7C819C2A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E8827F2B-B9BA-4ACC-BF39-4FDFB26EA737}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,936 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Login_Title" xml:space="preserve">
+    <value>TMES POP 로그인</value>
+  </data>
+  <data name="Login_UserInfoGroup" xml:space="preserve">
+    <value>접속 사용자 정보</value>
+  </data>
+  <data name="Login_Server" xml:space="preserve">
+    <value>접속서버</value>
+  </data>
+  <data name="Login_UserId" xml:space="preserve">
+    <value>아이디</value>
+  </data>
+  <data name="Login_Password" xml:space="preserve">
+    <value>비밀번호</value>
+  </data>
+  <data name="Login_Workstation" xml:space="preserve">
+    <value>워크스테이션</value>
+  </data>
+  <data name="Login_Connect" xml:space="preserve">
+    <value>접속</value>
+  </data>
+  <data name="Login_Close" xml:space="preserve">
+    <value>닫기</value>
+  </data>
+  <data name="Login_ValidationMessage" xml:space="preserve">
+    <value>아이디와 비밀번호를 입력하세요.</value>
+  </data>
+  <data name="Login_FailedMessage" xml:space="preserve">
+    <value>아이디 또는 비밀번호가 올바르지 않습니다.</value>
+  </data>
+  <data name="Login_ConnectionErrorMessage" xml:space="preserve">
+    <value>서버에 연결할 수 없습니다</value>
+  </data>
+  <data name="Login_RememberId" xml:space="preserve">
+    <value>아이디 저장</value>
+  </data>
+  <data name="MainForm_Title" xml:space="preserve">
+    <value>MEIS POP 시스템</value>
+  </data>
+  <data name="MainForm_VersionFormat" xml:space="preserve">
+    <value>Ver. {0}</value>
+  </data>
+  <data name="MainForm_Welcome" xml:space="preserve">
+    <value>{0} 님 환영합니다.</value>
+  </data>
+  <data name="MainForm_SessionRemainingHint" xml:space="preserve">
+    <value>자동 로그아웃까지 남은 시간</value>
+  </data>
+  <data name="MainForm_SessionExpired" xml:space="preserve">
+    <value>세션 시간이 만료되어 로그아웃됩니다.</value>
+  </data>
+  <data name="MainForm_LanguageHint" xml:space="preserve">
+    <value>화면 언어</value>
+  </data>
+  <data name="MainForm_Minimize" xml:space="preserve">
+    <value>최소화</value>
+  </data>
+  <data name="MainForm_Maximize" xml:space="preserve">
+    <value>최대화</value>
+  </data>
+  <data name="MainForm_Restore" xml:space="preserve">
+    <value>이전 크기로</value>
+  </data>
+  <data name="MainForm_LogoutConfirm" xml:space="preserve">
+    <value>로그아웃하면 열려 있는 화면이 모두 닫힙니다. 로그아웃하시겠습니까?</value>
+  </data>
+  <data name="MainForm_WelcomeHint" xml:space="preserve">
+    <value>좌측 메뉴에서 화면을 선택하면 위쪽 탭으로 열립니다.</value>
+  </data>
+  <data name="MainForm_TileServer" xml:space="preserve">
+    <value>접속 서버</value>
+  </data>
+  <data name="MainForm_TileWorkstation" xml:space="preserve">
+    <value>워크스테이션</value>
+  </data>
+  <data name="MainForm_TileEquipment" xml:space="preserve">
+    <value>등록 설비</value>
+  </data>
+  <data name="MainForm_TileUser" xml:space="preserve">
+    <value>로그인 사용자</value>
+  </data>
+  <data name="MainForm_EquipmentCount" xml:space="preserve">
+    <value>{0} 대</value>
+  </data>
+  <data name="MainForm_NoAlerts" xml:space="preserve">
+    <value>새 알림이 없습니다.</value>
+  </data>
+  <data name="Menu_MEIS" xml:space="preserve">
+    <value>MEIS</value>
+  </data>
+  <data name="Menu_WorkManagement" xml:space="preserve">
+    <value>작업관리</value>
+  </data>
+  <data name="Menu_POP" xml:space="preserve">
+    <value>POP</value>
+  </data>
+  <data name="Menu_WorkStatusInquiry" xml:space="preserve">
+    <value>작업 현황 조회</value>
+  </data>
+  <data name="Menu_ProductionStatusInquiry" xml:space="preserve">
+    <value>생산 현황조회</value>
+  </data>
+  <data name="Menu_WorkIntegratedOverview" xml:space="preserve">
+    <value>작업통합 개요</value>
+  </data>
+  <data name="Menu_WorkIntegratedStatusInquiry" xml:space="preserve">
+    <value>작업통합 현황 조회</value>
+  </data>
+  <data name="Common_Connect" xml:space="preserve">
+    <value>연결</value>
+  </data>
+  <data name="Common_Disconnect" xml:space="preserve">
+    <value>해제</value>
+  </data>
+  <data name="Common_Refresh" xml:space="preserve">
+    <value>새로고침</value>
+  </data>
+  <data name="Common_Logout" xml:space="preserve">
+    <value>로그아웃</value>
+  </data>
+  <data name="Common_Close" xml:space="preserve">
+    <value>닫기</value>
+  </data>
+  <data name="Common_Confirm" xml:space="preserve">
+    <value>확인</value>
+  </data>
+  <data name="Common_Cancel" xml:space="preserve">
+    <value>취소</value>
+  </data>
+  <data name="Common_PleaseWait" xml:space="preserve">
+    <value>잠시만 기다려 주세요</value>
+  </data>
+  <data name="Common_Loading" xml:space="preserve">
+    <value>처리 중...</value>
+  </data>
+  <data name="Common_Notice" xml:space="preserve">
+    <value>알림</value>
+  </data>
+  <data name="Common_UnexpectedError" xml:space="preserve">
+    <value>처리 중 오류가 발생했습니다. 이 작업만 중단되며 계속 사용할 수 있습니다.</value>
+  </data>
+  <data name="Message_TitleInfo" xml:space="preserve">
+    <value>안내</value>
+  </data>
+  <data name="Message_TitleQuestion" xml:space="preserve">
+    <value>확인</value>
+  </data>
+  <data name="Message_TitleSuccess" xml:space="preserve">
+    <value>완료</value>
+  </data>
+  <data name="Message_TitleWarning" xml:space="preserve">
+    <value>주의</value>
+  </data>
+  <data name="Message_TitleError" xml:space="preserve">
+    <value>오류</value>
+  </data>
+  <data name="Pop_Title" xml:space="preserve">
+    <value>POP</value>
+  </data>
+  <data name="Pop_Collapse" xml:space="preserve">
+    <value>접기</value>
+  </data>
+  <data name="Pop_Expand" xml:space="preserve">
+    <value>펼치기</value>
+  </data>
+  <data name="Pop_ToggleInfo" xml:space="preserve">
+    <value>공정 정보</value>
+  </data>
+  <data name="Pop_ToggleTabs" xml:space="preserve">
+    <value>상세 정보</value>
+  </data>
+  <data name="Pop_EquipmentStatus" xml:space="preserve">
+    <value>설비 상태</value>
+  </data>
+  <data name="Pop_Start" xml:space="preserve">
+    <value>가동</value>
+  </data>
+  <data name="Pop_Stop" xml:space="preserve">
+    <value>정지</value>
+  </data>
+  <data name="Pop_Reset" xml:space="preserve">
+    <value>리셋</value>
+  </data>
+  <data name="Pop_WorkOrderList" xml:space="preserve">
+    <value>작업지시 목록</value>
+  </data>
+  <data name="Pop_EquipmentLog" xml:space="preserve">
+    <value>설비 통신 로그 (Modbus-TCP)</value>
+  </data>
+  <data name="ProductionStatus_Title" xml:space="preserve">
+    <value>생산 현황조회</value>
+  </data>
+  <data name="ProductionStatus_StandardDate" xml:space="preserve">
+    <value>기준일자</value>
+  </data>
+  <data name="ProductionStatus_FilterTitle" xml:space="preserve">
+    <value>조회 조건</value>
+  </data>
+  <data name="WorkIntegratedStatus_Title" xml:space="preserve">
+    <value>작업통합 현황 조회</value>
+  </data>
+  <data name="UserProfile_Title" xml:space="preserve">
+    <value>사용자 정보</value>
+  </data>
+  <data name="UserProfile_EmployeeNo" xml:space="preserve">
+    <value>사번</value>
+  </data>
+  <data name="UserProfile_UserName" xml:space="preserve">
+    <value>이름</value>
+  </data>
+  <data name="UserProfile_Phone" xml:space="preserve">
+    <value>연락처</value>
+  </data>
+  <data name="UserProfile_Department" xml:space="preserve">
+    <value>부서</value>
+  </data>
+  <data name="UserProfile_Workstation" xml:space="preserve">
+    <value>워크스테이션</value>
+  </data>
+  <data name="UserProfile_Loading" xml:space="preserve">
+    <value>조회 중...</value>
+  </data>
+  <data name="UserProfile_LoadFailed" xml:space="preserve">
+    <value>프로필 정보를 불러오지 못했습니다.</value>
+  </data>
+  <data name="WorkEntry_Title" xml:space="preserve">
+    <value>작업지시 조회</value>
+  </data>
+  <data name="WorkEntry_Search" xml:space="preserve">
+    <value>조회</value>
+  </data>
+  <data name="WorkEntry_Work" xml:space="preserve">
+    <value>작업</value>
+  </data>
+  <data name="WorkEntry_WorkOrderNo" xml:space="preserve">
+    <value>작업지시번호</value>
+  </data>
+  <data name="WorkEntry_SerialNo" xml:space="preserve">
+    <value>생산품목 시리얼번호</value>
+  </data>
+  <data name="WorkEntry_ListTitle" xml:space="preserve">
+    <value>작업 지시 정보</value>
+  </data>
+  <data name="WorkEntry_ConditionRequired" xml:space="preserve">
+    <value>작업지시번호 또는 생산품목 시리얼번호를 입력하세요.</value>
+  </data>
+  <data name="WorkEntry_SelectWorkOrder" xml:space="preserve">
+    <value>작업할 작업지시를 목록에서 선택하세요.</value>
+  </data>
+  <data name="WorkEntry_NoResult" xml:space="preserve">
+    <value>조회 결과가 없습니다.</value>
+  </data>
+  <data name="WorkEntry_NoRouting" xml:space="preserve">
+    <value>선택한 작업지시의 공정 정보가 없습니다.</value>
+  </data>
+  <data name="WorkEntryConfirm_Title" xml:space="preserve">
+    <value>작업 진입 확인</value>
+  </data>
+  <data name="WorkEntryConfirm_ListTitle" xml:space="preserve">
+    <value>공정 목록</value>
+  </data>
+  <data name="WorkEntryConfirm_Move" xml:space="preserve">
+    <value>이동</value>
+  </data>
+  <data name="WorkEntryConfirm_SelectProcess" xml:space="preserve">
+    <value>이동할 페이지 공정을 선택하세요.</value>
+  </data>
+  <data name="Col_No" xml:space="preserve">
+    <value>NO</value>
+  </data>
+  <data name="Col_WorkOrderNo" xml:space="preserve">
+    <value>작업지시번호</value>
+  </data>
+  <data name="Col_ItemCode" xml:space="preserve">
+    <value>품목번호</value>
+  </data>
+  <data name="Col_SerialNo" xml:space="preserve">
+    <value>시리얼번호</value>
+  </data>
+  <data name="Col_OrderQty" xml:space="preserve">
+    <value>작업계획 수량</value>
+  </data>
+  <data name="Col_SalesOrderNo" xml:space="preserve">
+    <value>수주번호</value>
+  </data>
+  <data name="Col_CustomerPoNo" xml:space="preserve">
+    <value>고객사발주번호</value>
+  </data>
+  <data name="Col_Fcid" xml:space="preserve">
+    <value>FCID</value>
+  </data>
+  <data name="Col_PlanStartDate" xml:space="preserve">
+    <value>시작 예정일자</value>
+  </data>
+  <data name="Col_PlanEndDate" xml:space="preserve">
+    <value>종료 예정일자</value>
+  </data>
+  <data name="Col_ActualStartDate" xml:space="preserve">
+    <value>작업 시작일자</value>
+  </data>
+  <data name="Col_ActualEndDate" xml:space="preserve">
+    <value>작업 종료일자</value>
+  </data>
+  <data name="Col_StatusName" xml:space="preserve">
+    <value>작업지시 상태</value>
+  </data>
+  <data name="Col_Remark" xml:space="preserve">
+    <value>비고</value>
+  </data>
+  <data name="Col_RoutingGroup" xml:space="preserve">
+    <value>라우팅 그룹</value>
+  </data>
+  <data name="Col_RoutingOperation" xml:space="preserve">
+    <value>라우팅 공정</value>
+  </data>
+  <data name="Col_PageOperation" xml:space="preserve">
+    <value>페이지 공정</value>
+  </data>
+  <data name="Col_ProgressState" xml:space="preserve">
+    <value>진행 상태</value>
+  </data>
+  <data name="Pop_EntryTarget" xml:space="preserve">
+    <value>작업 대상</value>
+  </data>
+  <data name="Common_Search" xml:space="preserve">
+    <value>조회</value>
+  </data>
+  <data name="Col_CorpCode" xml:space="preserve">
+    <value>법인코드</value>
+  </data>
+  <data name="Col_FormCode" xml:space="preserve">
+    <value>알림양식코드</value>
+  </data>
+  <data name="Notification_Title" xml:space="preserve">
+    <value>알림</value>
+  </data>
+  <data name="Notification_UserName" xml:space="preserve">
+    <value>사용자명</value>
+  </data>
+  <data name="Notification_Subject" xml:space="preserve">
+    <value>제목</value>
+  </data>
+  <data name="Notification_ReadState" xml:space="preserve">
+    <value>읽음여부</value>
+  </data>
+  <data name="Notification_ReadStateAll" xml:space="preserve">
+    <value>전체</value>
+  </data>
+  <data name="Notification_ReadStateRead" xml:space="preserve">
+    <value>읽음</value>
+  </data>
+  <data name="Notification_ReadStateUnread" xml:space="preserve">
+    <value>안읽음</value>
+  </data>
+  <data name="Notification_ListTitle" xml:space="preserve">
+    <value>알림</value>
+  </data>
+  <data name="Notification_MarkRead" xml:space="preserve">
+    <value>읽음</value>
+  </data>
+  <data name="Notification_SenderId" xml:space="preserve">
+    <value>발신자아이디</value>
+  </data>
+  <data name="Notification_Content" xml:space="preserve">
+    <value>내용</value>
+  </data>
+  <data name="Notification_SentAt" xml:space="preserve">
+    <value>발신일시</value>
+  </data>
+  <data name="Notification_SelectRow" xml:space="preserve">
+    <value>읽음 처리할 알림을 선택하세요.</value>
+  </data>
+  <data name="Notification_AlreadyRead" xml:space="preserve">
+    <value>선택한 알림은 이미 읽음 상태입니다.</value>
+  </data>
+  <data name="Pop_PrevProcess" xml:space="preserve">
+    <value>이전 공정</value>
+  </data>
+  <data name="Pop_NextProcess" xml:space="preserve">
+    <value>다음 공정</value>
+  </data>
+  <data name="Pop_SkipProcess" xml:space="preserve">
+    <value>공정 생략</value>
+  </data>
+  <data name="Pop_StopProcess" xml:space="preserve">
+    <value>공정 중지</value>
+  </data>
+  <data name="Pop_StartProcess" xml:space="preserve">
+    <value>공정 시작</value>
+  </data>
+  <data name="Pop_ProcessList" xml:space="preserve">
+    <value>공정 목록</value>
+  </data>
+  <data name="Pop_AdminAlarm" xml:space="preserve">
+    <value>관리자 알람</value>
+  </data>
+  <data name="Pop_Worker" xml:space="preserve">
+    <value>작업자</value>
+  </data>
+  <data name="Pop_CurrentTime" xml:space="preserve">
+    <value>현재시각</value>
+  </data>
+  <data name="Pop_ProcessInfoTitle" xml:space="preserve">
+    <value>진행 중 공정 정보</value>
+  </data>
+  <data name="Pop_WorkOrderNo" xml:space="preserve">
+    <value>작업지시번호</value>
+  </data>
+  <data name="Pop_ItemCode" xml:space="preserve">
+    <value>생산품목코드</value>
+  </data>
+  <data name="Pop_ProductSerialNo" xml:space="preserve">
+    <value>생산품목 시리얼번호</value>
+  </data>
+  <data name="Pop_RoutingGroup" xml:space="preserve">
+    <value>라우팅 그룹</value>
+  </data>
+  <data name="Pop_RoutingOperation" xml:space="preserve">
+    <value>라우팅 공정</value>
+  </data>
+  <data name="Pop_PageOperation" xml:space="preserve">
+    <value>페이지 공정</value>
+  </data>
+  <data name="Pop_PageStartTime" xml:space="preserve">
+    <value>페이지 공정 시작시각</value>
+  </data>
+  <data name="Pop_PageEndTime" xml:space="preserve">
+    <value>페이지 공정 종료시각</value>
+  </data>
+  <data name="Pop_PageRunTime" xml:space="preserve">
+    <value>페이지 공정 가동시간</value>
+  </data>
+  <data name="Pop_PageIdleTime" xml:space="preserve">
+    <value>페이지 공정 비가동시간</value>
+  </data>
+  <data name="Pop_PageWorkTime" xml:space="preserve">
+    <value>페이지 공정 작업시간</value>
+  </data>
+  <data name="Pop_Drawing" xml:space="preserve">
+    <value>작업 표준 / 도면</value>
+  </data>
+  <data name="Pop_TabMaterial" xml:space="preserve">
+    <value>투입자재</value>
+  </data>
+  <data name="Pop_TabBomSpec" xml:space="preserve">
+    <value>BOM 스팩</value>
+  </data>
+  <data name="Pop_TabInspection" xml:space="preserve">
+    <value>검사 스팩</value>
+  </data>
+  <data name="Pop_TabEquipment" xml:space="preserve">
+    <value>연결 장비</value>
+  </data>
+  <data name="Pop_ManualWrench" xml:space="preserve">
+    <value>수동 렌치</value>
+  </data>
+  <data name="Pop_ResultInputColumn" xml:space="preserve">
+    <value>결과값 입력</value>
+  </data>
+  <data name="Pop_InputButton" xml:space="preserve">
+    <value>입력</value>
+  </data>
+  <data name="Pop_SaveResult" xml:space="preserve">
+    <value>결과 저장</value>
+  </data>
+  <data name="Pop_SavedResult" xml:space="preserve">
+    <value>결과를 저장했습니다.</value>
+  </data>
+  <data name="Pop_SerialNotRequired" xml:space="preserve">
+    <value>시리얼번호 검사 대상 자재가 아닙니다.</value>
+  </data>
+  <data name="Pop_NoProcessList" xml:space="preserve">
+    <value>이 작업지시의 공정 정보가 없습니다.</value>
+  </data>
+  <data name="Pop_ProcessMoved" xml:space="preserve">
+    <value>선택한 공정으로 이동했습니다.</value>
+  </data>
+  <data name="Pop_FirstProcess" xml:space="preserve">
+    <value>공정 목록의 첫 번째 공정입니다.</value>
+  </data>
+  <data name="Pop_LastProcess" xml:space="preserve">
+    <value>공정 목록의 마지막 공정입니다.</value>
+  </data>
+  <data name="Pop_ProcessNotInList" xml:space="preserve">
+    <value>지금 보고 있는 공정을 공정 목록에서 찾을 수 없습니다. [공정 목록]에서 직접 선택하세요.</value>
+  </data>
+  <data name="Pop_ConfirmStart" xml:space="preserve">
+    <value>공정을 시작하시겠습니까?</value>
+  </data>
+  <data name="Pop_ConfirmStop" xml:space="preserve">
+    <value>공정을 중지하시겠습니까?</value>
+  </data>
+  <data name="Pop_ConfirmSkip" xml:space="preserve">
+    <value>이 공정을 생략하시겠습니까?</value>
+  </data>
+  <data name="Pop_ConfirmPrevious" xml:space="preserve">
+    <value>이전 공정으로 이동하시겠습니까?</value>
+  </data>
+  <data name="Pop_ConfirmNext" xml:space="preserve">
+    <value>다음 공정으로 이동하시겠습니까?</value>
+  </data>
+  <data name="Pop_AdminAlarmSent" xml:space="preserve">
+    <value>관리자에게 알람을 보냈습니다.</value>
+  </data>
+  <data name="Pop_ManualWrenchOnly" xml:space="preserve">
+    <value>수동 렌치를 선택해야 결과값을 직접 입력할 수 있습니다.</value>
+  </data>
+  <data name="Pop_NoTargetProcess" xml:space="preserve">
+    <value>작업 대상이 지정되지 않았습니다. 진입 화면에서 작업지시를 선택하세요.</value>
+  </data>
+  <data name="Pop_TorqueNoPendingRow" xml:space="preserve">
+    <value>결과값을 받을 BOM 스팩 행이 없습니다.</value>
+  </data>
+  <data name="Pop_ResultPass" xml:space="preserve">
+    <value>합격</value>
+  </data>
+  <data name="Pop_ResultFail" xml:space="preserve">
+    <value>불합격</value>
+  </data>
+  <data name="Pop_CommConnected" xml:space="preserve">
+    <value>연결 성공</value>
+  </data>
+  <data name="Pop_CommFailed" xml:space="preserve">
+    <value>연결 실패</value>
+  </data>
+  <data name="Pop_CommConnecting" xml:space="preserve">
+    <value>연결 중</value>
+  </data>
+  <data name="Pop_CommUnused" xml:space="preserve">
+    <value>미사용</value>
+  </data>
+  <data name="Pop_EquipmentUsable" xml:space="preserve">
+    <value>가동가능</value>
+  </data>
+  <data name="Pop_EquipmentUnusable" xml:space="preserve">
+    <value>사용불가</value>
+  </data>
+  <data name="Col_MaterialCode" xml:space="preserve">
+    <value>투입자재 코드</value>
+  </data>
+  <data name="Col_InputQty" xml:space="preserve">
+    <value>투입 수량</value>
+  </data>
+  <data name="Col_InputUnit" xml:space="preserve">
+    <value>투입 단위</value>
+  </data>
+  <data name="Col_InputPosition" xml:space="preserve">
+    <value>투입 위치</value>
+  </data>
+  <data name="Col_SerialCheck" xml:space="preserve">
+    <value>시리얼번호 검사여부</value>
+  </data>
+  <data name="Col_SerialInputState" xml:space="preserve">
+    <value>시리얼번호 입력상태</value>
+  </data>
+  <data name="Col_BomSpecName" xml:space="preserve">
+    <value>BOM 스팩명</value>
+  </data>
+  <data name="Col_SpecType" xml:space="preserve">
+    <value>유형</value>
+  </data>
+  <data name="Col_TorqueLower" xml:space="preserve">
+    <value>토크 하한값</value>
+  </data>
+  <data name="Col_TorqueUpper" xml:space="preserve">
+    <value>토크 상한값</value>
+  </data>
+  <data name="Col_TorqueUnit" xml:space="preserve">
+    <value>토크 단위</value>
+  </data>
+  <data name="Col_TorqueResult" xml:space="preserve">
+    <value>토크 결과값</value>
+  </data>
+  <data name="Col_InspectionSpecName" xml:space="preserve">
+    <value>검사 스팩명</value>
+  </data>
+  <data name="Col_InspectionRemark" xml:space="preserve">
+    <value>검사 스팩 비고</value>
+  </data>
+  <data name="Col_InspectionMethod" xml:space="preserve">
+    <value>검사방법</value>
+  </data>
+  <data name="Col_ResultState" xml:space="preserve">
+    <value>결과상태</value>
+  </data>
+  <data name="Col_ResultValue" xml:space="preserve">
+    <value>결과값</value>
+  </data>
+  <data name="Col_EquipmentCode" xml:space="preserve">
+    <value>장비코드</value>
+  </data>
+  <data name="Col_EquipmentName" xml:space="preserve">
+    <value>장비명</value>
+  </data>
+  <data name="Col_EquipmentRemark" xml:space="preserve">
+    <value>장비 비고</value>
+  </data>
+  <data name="Col_EquipmentType" xml:space="preserve">
+    <value>장비유형</value>
+  </data>
+  <data name="Col_CommunicationState" xml:space="preserve">
+    <value>통신상태</value>
+  </data>
+  <data name="Col_EquipmentState" xml:space="preserve">
+    <value>장비상태</value>
+  </data>
+  <data name="Col_RangeLower" xml:space="preserve">
+    <value>가동범위 하한값</value>
+  </data>
+  <data name="Col_RangeUpper" xml:space="preserve">
+    <value>가동범위 상한값</value>
+  </data>
+  <data name="Col_SerialNumber" xml:space="preserve">
+    <value>시리얼번호</value>
+  </data>
+  <data name="PopSerial_Title" xml:space="preserve">
+    <value>투입자재 정보 입력</value>
+  </data>
+  <data name="PopSerial_MaterialCode" xml:space="preserve">
+    <value>투입자재 코드</value>
+  </data>
+  <data name="PopSerial_Qty" xml:space="preserve">
+    <value>투입수량</value>
+  </data>
+  <data name="PopSerial_ItemCode" xml:space="preserve">
+    <value>품목코드</value>
+  </data>
+  <data name="PopSerial_ListTitle" xml:space="preserve">
+    <value>시리얼 번호</value>
+  </data>
+  <data name="PopSerial_Save" xml:space="preserve">
+    <value>저장</value>
+  </data>
+  <data name="PopSerial_Incomplete" xml:space="preserve">
+    <value>투입수량만큼 시리얼번호를 모두 입력하세요.</value>
+  </data>
+  <data name="PopSerial_Duplicated" xml:space="preserve">
+    <value>같은 시리얼번호가 중복 입력되었습니다.</value>
+  </data>
+  <data name="PopSerial_Saved" xml:space="preserve">
+    <value>시리얼번호를 저장했습니다.</value>
+  </data>
+  <data name="PopTorque_Title" xml:space="preserve">
+    <value>토크 결과값 입력</value>
+  </data>
+  <data name="PopTorque_Invalid" xml:space="preserve">
+    <value>토크 결과값은 숫자로 입력하세요.</value>
+  </data>
+  <data name="Pop_TorqueRangeMissing" xml:space="preserve">
+    <value>토크 하한값과 상한값이 있어야 중간값을 계산할 수 있습니다.</value>
+  </data>
+  <data name="Pop_DrawingLoading" xml:space="preserve">
+    <value>도면을 불러오는 중입니다...</value>
+  </data>
+  <data name="Pop_DrawingNone" xml:space="preserve">
+    <value>표시할 도면이 없습니다.</value>
+  </data>
+  <data name="Pop_DrawingShareNotConfigured" xml:space="preserve">
+    <value>도면 공유 폴더(SMB)가 설정되지 않았습니다. App.config의 DocumentShare.RootPath를 확인하세요.</value>
+  </data>
+  <data name="Pop_DrawingLoadFailed" xml:space="preserve">
+    <value>도면을 불러오지 못했습니다.</value>
+  </data>
+  <data name="Common_All" xml:space="preserve">
+    <value>전체</value>
+  </data>
+  <data name="Menu_WorkStatusSearch" xml:space="preserve">
+    <value>작업 조회 현황</value>
+  </data>
+  <data name="WorkStatus_Title" xml:space="preserve">
+    <value>작업 조회 현황</value>
+  </data>
+  <data name="WorkStatus_OrderDate" xml:space="preserve">
+    <value>지시일자</value>
+  </data>
+  <data name="WorkStatus_Item" xml:space="preserve">
+    <value>생산품목</value>
+  </data>
+  <data name="WorkStatus_OrderListTitle" xml:space="preserve">
+    <value>작업 지시 정보</value>
+  </data>
+  <data name="WorkStatus_ProgressTitle" xml:space="preserve">
+    <value>작업 진행 현황</value>
+  </data>
+  <data name="WorkStatus_DateRequired" xml:space="preserve">
+    <value>지시일자를 입력하세요.</value>
+  </data>
+  <data name="WorkStatus_DateReversed" xml:space="preserve">
+    <value>지시일자 시작일이 종료일보다 늦습니다.</value>
+  </data>
+  <data name="WorkStatus_StatusWaiting" xml:space="preserve">
+    <value>대기</value>
+  </data>
+  <data name="WorkStatus_StatusRunning" xml:space="preserve">
+    <value>진행중</value>
+  </data>
+  <data name="WorkStatus_StatusDone" xml:space="preserve">
+    <value>완료</value>
+  </data>
+  <data name="WorkStatus_StatusHold" xml:space="preserve">
+    <value>보류</value>
+  </data>
+  <data name="Col_PageOperationName" xml:space="preserve">
+    <value>페이지 공정명</value>
+  </data>
+  <data name="Col_SpecName" xml:space="preserve">
+    <value>스팩명</value>
+  </data>
+  <data name="Col_SpecTypeName" xml:space="preserve">
+    <value>스팩 유형</value>
+  </data>
+  <data name="Col_SpecResultState" xml:space="preserve">
+    <value>스팩 결과 상태</value>
+  </data>
+  <data name="Col_ItemName" xml:space="preserve">
+    <value>품목명</value>
+  </data>
+  <data name="Col_Specification" xml:space="preserve">
+    <value>규격</value>
+  </data>
+  <data name="ItemPicker_Title" xml:space="preserve">
+    <value>생산품목 선택</value>
+  </data>
+  <data name="ItemPicker_Keyword" xml:space="preserve">
+    <value>품목코드 / 품목명</value>
+  </data>
+  <data name="ItemPicker_ListTitle" xml:space="preserve">
+    <value>품목 목록</value>
+  </data>
+  <data name="ItemPicker_Select" xml:space="preserve">
+    <value>선택</value>
+  </data>
+  <data name="ItemPicker_SelectItem" xml:space="preserve">
+    <value>품목을 선택하세요.</value>
+  </data>
+  <data name="AdminAlarm_Title" xml:space="preserve">
+    <value>관리자 알람 유형 선택</value>
+  </data>
+  <data name="AdminAlarm_Type" xml:space="preserve">
+    <value>알람 유형</value>
+  </data>
+  <data name="AdminAlarm_DetailTitle" xml:space="preserve">
+    <value>알람 상세 정보</value>
+  </data>
+  <data name="AdminAlarm_Target" xml:space="preserve">
+    <value>대상 코드</value>
+  </data>
+  <data name="AdminAlarm_Send" xml:space="preserve">
+    <value>전송</value>
+  </data>
+  <data name="AdminAlarm_SelectType" xml:space="preserve">
+    <value>알람 유형을 선택하세요.</value>
+  </data>
+  <data name="AdminAlarm_SelectTarget" xml:space="preserve">
+    <value>알람 대상을 선택하세요.</value>
+  </data>
+  <data name="AdminAlarm_NoTypes" xml:space="preserve">
+    <value>등록된 관리자 알람 유형이 없습니다.</value>
+  </data>
+  <data name="Col_Unit" xml:space="preserve">
+    <value>단위</value>
+  </data>
+  <data name="WorkIntegrated_OverviewTitle" xml:space="preserve">
+    <value>작업 통합 개요</value>
+  </data>
+  <data name="WorkIntegrated_ExcelExport" xml:space="preserve">
+    <value>엑셀 내보내기</value>
+  </data>
+  <data name="WorkIntegrated_SerialRequired" xml:space="preserve">
+    <value>생산품목 시리얼번호를 입력하세요.</value>
+  </data>
+  <data name="WorkIntegrated_ExportEmpty" xml:space="preserve">
+    <value>내보낼 조회 결과가 없습니다.</value>
+  </data>
+  <data name="WorkIntegrated_ExportDone" xml:space="preserve">
+    <value>엑셀 파일로 저장했습니다.</value>
+  </data>
+  <data name="WorkIntegrated_ExportFailed" xml:space="preserve">
+    <value>엑셀 파일로 저장하지 못했습니다.</value>
+  </data>
+  <data name="Col_NodeCode" xml:space="preserve">
+    <value>항목 코드</value>
+  </data>
+  <data name="Col_NodeDescription" xml:space="preserve">
+    <value>항목 설명</value>
+  </data>
+  <data name="Col_TorqueTarget" xml:space="preserve">
+    <value>토크 목푯값</value>
+  </data>
+  <data name="Col_TorqueMax" xml:space="preserve">
+    <value>토크 최댓값</value>
+  </data>
+  <data name="Col_AngleTarget" xml:space="preserve">
+    <value>앵글 목푯값</value>
+  </data>
+  <data name="Col_AngleLower" xml:space="preserve">
+    <value>앵글 하한값</value>
+  </data>
+  <data name="Col_AngleUpper" xml:space="preserve">
+    <value>앵글 상한값</value>
+  </data>
+  <data name="Col_AngleResult" xml:space="preserve">
+    <value>앵글 결과값</value>
+  </data>
+  <data name="Col_AngleUnit" xml:space="preserve">
+    <value>앵글 단위</value>
+  </data>
+  <data name="Pop_RestartProcess" xml:space="preserve">
+    <value>공정 재시작</value>
+  </data>
+  <data name="Pop_EndProcess" xml:space="preserve">
+    <value>공정 종료</value>
+  </data>
+  <data name="Col_WorkQty" xml:space="preserve">
+    <value>작업지시 수량</value>
+  </data>
+</root>

@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net472</TargetFramework>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>disable</ImplicitUsings>
+	<!--
+    <PlatformTarget>x86</PlatformTarget>
+	-->
+    <RootNamespace>SEOJIN_TMES.Client.Equipment</RootNamespace>
+    <AssemblyName>SEOJIN_TMES.Client.Equipment</AssemblyName>
+    <!--
+      Edge Device(Nutrunner 등) 계층.
+      - 장비 "정보"(ID / SerialNo / Model ...)와 "데이터"(통신 결과, Event Transport)를 이 프로젝트에서 관리한다.
+      - 통신은 SEOJIN_TMES.Client.Modbus 를 참조해서만 수행한다. (소켓/패킷을 직접 다루지 않는다.)
+      - View(WinForms)에 대한 의존성은 두지 않는다.
+    -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Core\IThreadBase_개선소스%28미적용%29.cs" />
+    <Compile Remove="Core\ThreadBase_개선소스%28미적용%29.cs" />
+    <Compile Remove="IsExternalInit.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SEOJIN_TMES.Client.Modbus\SEOJIN_TMES.Client.Modbus.csproj" />
+  </ItemGroup>
+
+</Project>

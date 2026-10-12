@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net472</TargetFramework>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>disable</ImplicitUsings>
+	  <!--
+    <PlatformTarget>x86</PlatformTarget>
+	-->
+    <RootNamespace>SEOJIN_TMES.Client.Modbus</RootNamespace>
+    <AssemblyName>SEOJIN_TMES.Client.Modbus</AssemblyName>
+    <!--
+      다른 프로그램에서 참조해서 쓸 수 있도록 독립된 클래스 라이브러리로 분리.
+      Nutrunner 등 특정 장비에 종속된 코드는 이 라이브러리에 포함하지 않는다.
+      (Separated into a standalone class library so other, unrelated programs can
+      reference it. Device-specific logic, e.g. Nutrunner event parsing, must not
+      live here — only the generic Modbus TCP protocol.)
+    -->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="IsExternalInit.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SEOJIN_TMES.Client.Socket\SEOJIN_TMES.Client.Socket.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- .NET Framework 4.7.2 기본 어셈블리 참조 (SDK 형식에서는 명시해야 하는 것만 추가) -->
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+
+
+
+
+
+
+
+
+
+</Project>
