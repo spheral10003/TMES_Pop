@@ -96,7 +96,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             // 
             // lblWorkOrderNo
             // 
-            this.lblWorkOrderNo.Location = new System.Drawing.Point(280, 36);
+            this.lblWorkOrderNo.Location = new System.Drawing.Point(282, 36);
             this.lblWorkOrderNo.Name = "lblWorkOrderNo";
             this.lblWorkOrderNo.Size = new System.Drawing.Size(60, 14);
             this.lblWorkOrderNo.TabIndex = 2;

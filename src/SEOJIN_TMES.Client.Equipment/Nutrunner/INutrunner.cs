@@ -24,6 +24,8 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
         /// <summary>Event Transport 채널의 연결 여부. (Request 채널과 별개로 끊길 수 있다)</summary>
         bool IsEventChannelConnected { get; }
 
+        bool IsEventEnabled { get; }
+
         /// <summary>Event Transport 채널만 다시 연결한다.</summary>
         void ConnectEventChannel();
 
@@ -41,5 +43,21 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
 
         /// <summary>장비 전용 레지스터에 값을 쓴다.</summary>
         void WriteRegister(NutrunnerRegister register, ushort value);
+
+        /// <summary>
+        /// 토크 설정값을 <see cref="NutrunnerRegister.Torque"/>에 쓴다(실수 → 레지스터 정수 변환 포함).
+        /// Request 채널이 끊겨 있거나 레지스터 범위를 넘으면 보내지 않고 false.
+        /// </summary>
+        /// <remarks>송신만 한다 — 장비가 받아들였는지는 RegisterDataReceived(StartAddress = Torque)로 확인한다.</remarks>
+        bool SetTorque(decimal torque);
+
+        /// <summary>
+        /// <see cref="NutrunnerRegister.DriverLock"/>에 잠금/해제 값을 쓴다.
+        /// Request 채널이 끊겨 있으면 보내지 않고 false.
+        /// </summary>
+        /// <param name="locked">true = 잠금(3), false = 해제(0).</param>
+        bool SetDriverLock(bool locked);
+
+        void ProcessEventHandshake();
     }
 }

@@ -7,8 +7,8 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
     /// <summary>Request 채널(Read/Write)의 응답 수신 이벤트.</summary>
     public sealed class NutrunnerRegisterEventArgs : EquipmentEventArgs
     {
-        public NutrunnerRegisterEventArgs(int id, bool success, ushort startAddress, IReadOnlyList<ushort> data)
-            : base(id)
+        public NutrunnerRegisterEventArgs(string code, bool success, ushort startAddress, IReadOnlyList<ushort> data)
+            : base(code)
         {
             Success = success;
             StartAddress = startAddress;
@@ -25,7 +25,7 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
     /// <summary>Event Transport 채널의 체결 결과 수신 이벤트.</summary>
     public sealed class NutrunnerFasteningEventArgs : EquipmentEventArgs
     {
-        public NutrunnerFasteningEventArgs(int id, FasteningData data) : base(id) => Data = data;
+        public NutrunnerFasteningEventArgs(string code, FasteningData data) : base(code) => Data = data;
 
         public FasteningData Data { get; }
     }

@@ -1,7 +1,8 @@
-using System;
 using SEOJIN_TMES.Client.Modbus.Abstractions;
 using SEOJIN_TMES.Client.Modbus.Protocol;
 using SEOJIN_TMES.Client.Modbus.Transport;
+using System;
+using System.Collections.Generic;
 
 namespace SEOJIN_TMES.Client.Modbus
 {
@@ -20,6 +21,15 @@ namespace SEOJIN_TMES.Client.Modbus
 
         private ModbusRequest _lastRequest;
         private bool _disposed;
+
+        private const int MbapPrefixLength = 6;
+
+        /// <summary>Modbus TCP 프레임 최대 길이. 이보다 길면 스트림이 어긋난 것으로 보고 버린다.</summary>
+        private const int MaxFrameLength = 260;
+
+        private readonly List<byte> _rxBuffer = new();
+        private readonly object _rxSync = new();
+
 
         public event EventHandler? Connected;
         public event EventHandler? Disconnected;
@@ -86,7 +96,11 @@ namespace SEOJIN_TMES.Client.Modbus
             _transport.Send(_codec.EncodeWrite(request));
         }
 
-        private void OnTransportConnected(object? sender, EventArgs e) => Connected?.Invoke(this, EventArgs.Empty);
+        private void OnTransportConnected(object? sender, EventArgs e)
+        {
+            lock (_rxSync) { _rxBuffer.Clear(); }
+            Connected?.Invoke(this, EventArgs.Empty);
+        }
 
         private void OnTransportDisconnected(object? sender, EventArgs e) => Disconnected?.Invoke(this, EventArgs.Empty);
 
@@ -94,8 +108,37 @@ namespace SEOJIN_TMES.Client.Modbus
 
         private void OnTransportDataReceived(object? sender, byte[] data)
         {
-            var response = _codec.Decode(data, _lastRequest);
-            ResponseReceived?.Invoke(this, response);
+            var frames = new List<byte[]>();
+
+            lock (_rxSync)
+            {
+                // TCP는 경계를 보장하지 않는다 — 응답 두 개가 한 번에 오거나 하나가 잘려서 올 수 있다.
+                _rxBuffer.AddRange(data);
+
+                while (_rxBuffer.Count >= MbapPrefixLength)
+                {
+                    int frameLength = MbapPrefixLength + ((_rxBuffer[4] << 8) | _rxBuffer[5]);
+
+                    if (frameLength <= MbapPrefixLength || frameLength > MaxFrameLength)
+                    {
+                        _rxBuffer.Clear();      // 동기가 깨진 스트림은 다음 수신부터 다시 맞춘다.
+                        break;
+                    }
+
+                    if (_rxBuffer.Count < frameLength)
+                    {
+                        break;                  // 나머지 조각을 기다린다.
+                    }
+
+                    frames.Add(_rxBuffer.GetRange(0, frameLength).ToArray());
+                    _rxBuffer.RemoveRange(0, frameLength);
+                }
+            }
+
+            foreach (byte[] frame in frames)
+            {
+                ResponseReceived?.Invoke(this, _codec.Decode(frame, _lastRequest));
+            }
         }
 
         public void Dispose()

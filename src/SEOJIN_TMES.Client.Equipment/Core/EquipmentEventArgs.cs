@@ -5,14 +5,26 @@ namespace SEOJIN_TMES.Client.Equipment.Core
     /// <summary>
     /// 모든 장비 이벤트의 공통 기반. 어떤 장비(ID)에서 발생했는지를 항상 담는다.
     /// </summary>
+    //public abstract class EquipmentEventArgs : EventArgs
+    //{
+    //    /// <summary>장비 구분 ID. Modbus TransactionId와 동일한 값이다.</summary>
+    //    public int Id { get; }
+
+    //    protected EquipmentEventArgs(int id)
+    //    {
+    //        Id = id;
+    //    }
+
+    //}
+
     public abstract class EquipmentEventArgs : EventArgs
     {
         /// <summary>장비 구분 ID. Modbus TransactionId와 동일한 값이다.</summary>
-        public int Id { get; }
+        public string Code { get; }
 
-        protected EquipmentEventArgs(int id)
+        protected EquipmentEventArgs(string code)
         {
-            Id = id;
+            Code = code;
         }
 
     }
@@ -22,7 +34,7 @@ namespace SEOJIN_TMES.Client.Equipment.Core
     {
         public bool IsConnected { get; }
 
-        public EquipmentConnectionEventArgs(int id, bool isConnected) : base(id)
+        public EquipmentConnectionEventArgs(string code, bool isConnected) : base(code)
         {
             IsConnected = isConnected;
         }
@@ -49,9 +61,9 @@ namespace SEOJIN_TMES.Client.Equipment.Core
 
         public DateTime OccurredAt { get; }
 
-        public override string ToString() => $"[{OccurredAt:HH:mm:ss}] ID:{Id} {Code} - {Message}";
+        public override string ToString() => $"[{OccurredAt:HH:mm:ss}] ID:{base.Code} {Code} - {Message}";
 
-        public AlarmEventArgs(int id, AlarmCode code, string message) : base(id)
+        public AlarmEventArgs(string seqCode, AlarmCode code, string message) : base(seqCode)
         {
             Code = code;
             Message = message;

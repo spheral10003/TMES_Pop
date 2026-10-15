@@ -129,6 +129,7 @@ namespace SEOJIN_TMES.Client.Equipment.Core
         /// <summary>Thread 루프에서 예외가 발생했을 때 호출.</summary>
         protected virtual void OnError(Exception exception)
         {
+            Console.WriteLine($"Thread Error : {exception.Message} ");
         }
 
         public virtual void Dispose()

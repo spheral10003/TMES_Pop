@@ -30,37 +30,37 @@ namespace SEOJIN_TMES.Client.Common.Models
     public class PopProcessInfoDto
     {
         /// <summary>작업지시번호 (예: WO_260608-01).</summary>
-        public string WorkOrderNo { get; set; }
+        [JsonProperty("woNo")] public string WorkOrderNo { get; set; }
 
         /// <summary>생산품목코드 (예: ITEM_01).</summary>
-        public string ItemCode { get; set; }
+        [JsonProperty("itemCd")] public string ItemCode { get; set; }
 
         /// <summary>생산품목 시리얼번호 (예: SER-01).</summary>
-        public string SerialNo { get; set; }
+        [JsonProperty("sn")] public string SerialNo { get; set; }
 
         /// <summary>라우팅 그룹 (예: MAIN_01).</summary>
-        public string RoutingGroup { get; set; }
+        [JsonProperty("routingGroupCd")] public string RoutingGroup { get; set; }
 
         /// <summary>라우팅 공정 (예: OP_10).</summary>
-        public string RoutingOperation { get; set; }
+        [JsonProperty("routingCd")] public string RoutingOperation { get; set; }
 
         /// <summary>페이지 공정 (예: 0010).</summary>
-        public string PageOperation { get; set; }
+        [JsonProperty("procCd")] public string PageOperation { get; set; }
 
         /// <summary>페이지 공정 시작시각. 아직 시작 전이면 null.</summary>
-        public DateTime? PageStartTime { get; set; }
+        [JsonProperty("trackInDtm")] public DateTime? PageStartTime { get; set; }
 
         /// <summary>페이지 공정 종료시각. 진행 중이면 null.</summary>
-        public DateTime? PageEndTime { get; set; }
+        [JsonProperty("trackOutDtm")] public DateTime? PageEndTime { get; set; }
 
         /// <summary>페이지 공정 가동시간.</summary>
-        public TimeSpan? RunTime { get; set; }
+        [JsonProperty("actlWorkDurSec")] public TimeSpan? RunTime { get; set; }
 
         /// <summary>페이지 공정 비가동시간.</summary>
-        public TimeSpan? IdleTime { get; set; }
+        [JsonProperty("dttmDurSec")] public TimeSpan? IdleTime { get; set; }
 
         /// <summary>페이지 공정 작업시간.</summary>
-        public TimeSpan? WorkTime { get; set; }
+        [JsonProperty("totalWorkDurSec")] public TimeSpan? WorkTime { get; set; }
 
         /// <summary>작업 중인 워크스테이션 코드 (예: Workstation01).</summary>
         public string WorkstationCode { get; set; }
@@ -69,7 +69,7 @@ namespace SEOJIN_TMES.Client.Common.Models
         public string WorkstationName { get; set; }
 
         /// <summary>공정 진행 상태 문구. 서버가 준 문자열을 그대로 하단 띠에 표시한다(예: 공정 진행중).</summary>
-        public string ProgressState { get; set; }
+        [JsonProperty("workStatus")] public string ProgressState { get; set; }
 
         /// <summary>
         /// 화면 좌측에 띄울 작업 표준/도면 PDF의 경로 — <b>서버가 내려주는 값</b>이다.
@@ -79,14 +79,14 @@ namespace SEOJIN_TMES.Client.Common.Models
         /// </summary>
         public string DrawingFilePath { get; set; }
 
-        [JsonProperty("equipmentList")] 
-        public List<PopEquipmentDto> EquipmentList { get; set; } = new List<PopEquipmentDto>();
-        [JsonProperty("inputMaterialList")] 
-        public List<PopInputMaterialDto> InputMaterialList { get; set; } = new List<PopInputMaterialDto>();
-        [JsonProperty("bomInspSpecList")] 
-        public List<PopBomSpecDto> BomInspSpecList { get; set; } = new List<PopBomSpecDto>();
-        [JsonProperty("inspChkItemList")] 
-        public List<PopInspectionSpecDto> InspChkItemList { get; set; } = new List<PopInspectionSpecDto>();
+        //[JsonProperty("equipmentList")] 
+        //public List<PopEquipmentDto> EquipmentList { get; set; } = new List<PopEquipmentDto>();
+        //[JsonProperty("inputMaterialList")] 
+        //public List<PopInputMaterialDto> InputMaterialList { get; set; } = new List<PopInputMaterialDto>();
+        //[JsonProperty("bomInspSpecList")] 
+        //public List<PopBomSpecDto> BomInspSpecList { get; set; } = new List<PopBomSpecDto>();
+        //[JsonProperty("inspChkItemList")] 
+        //public List<PopInspectionSpecDto> InspChkItemList { get; set; } = new List<PopInspectionSpecDto>();
 
 
 
@@ -164,6 +164,7 @@ namespace SEOJIN_TMES.Client.Common.Models
     /// </summary>
     public class PopBomSpecDto
     {
+        
         /// <summary>투입자재 코드.</summary>
         public string MaterialCode { get; set; }
 
@@ -208,6 +209,20 @@ namespace SEOJIN_TMES.Client.Common.Models
 
         /// <summary>결과값을 수동으로 입력했는지(수동 렌치). 서버 저장 시 입력 경로를 구분하기 위한 값.</summary>
         public bool IsManualInput { get; set; }
+
+        public string EquipmentCode { get; set; }
+    }
+
+    public class PopBomSpecResultDto
+    {
+        /// <summary>투입자재 코드.</summary>
+        public string eqpCd { get; set; }
+
+        /// <summary>토크 결과값 — 연결 장비에서 받거나(자동) 수동 렌치 모드에서 직접 입력한다. 미측정이면 null.</summary>
+        public decimal? torqueRsltVl { get; set; }
+
+        /// <summary>각도 하한값.</summary>
+        public decimal? angleRsltVl { get; set; }
     }
 
     /// <summary>
@@ -243,7 +258,7 @@ namespace SEOJIN_TMES.Client.Common.Models
     /// </summary>
     public class PopEquipmentDto
     {
-        public int Id { get; set; } = 0;
+        public int Id { get; set; }
         /// <summary>장비코드 — App.config의 EquipmentId와 같은 값이어야 실시간 연결상태가 붙는다.</summary>
         public string EquipmentCode { get; set; }
 
@@ -265,6 +280,9 @@ namespace SEOJIN_TMES.Client.Common.Models
 
         /// <summary>장비상태 — 가동가능/사용불가.</summary>
         public string EquipmentState { get; set; }
+
+        /// <summary>장비상태 — 가동가능/사용불가.</summary>
+        public string EquipmentModel { get; set; }
 
         /// <summary>가동범위 하한값.</summary>
         public decimal? RangeLower { get; set; }
@@ -318,12 +336,13 @@ namespace SEOJIN_TMES.Client.Common.Models
     /// </summary>
     public class PopMaterialSerialSaveRequest
     {
-        public string WorkOrderNo { get; set; }
-        public string SerialNo { get; set; }
-        public string RoutingGroup { get; set; }
-        public string RoutingOperation { get; set; }
-        public string PageOperation { get; set; }
-        public string MaterialCode { get; set; }
-        public List<string> SerialNumbers { get; set; } = new List<string>();
+        //public string CorpCode { get; set; }
+        //public string WorkOrderNo { get; set; }
+        //public string SerialNo { get; set; }
+        //public string RoutingGroup { get; set; }
+        //public string RoutingGroupRef { get; set; }
+        //public string RoutingOperation { get; set; }
+        public string inputtedItemCd { get; set; }
+        public List<string> inputtedSerialList { get; set; } = new List<string>();
     }
 }

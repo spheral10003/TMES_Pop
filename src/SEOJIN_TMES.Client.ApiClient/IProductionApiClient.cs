@@ -17,7 +17,7 @@ namespace SEOJIN_TMES.Client.ApiClient
         /// &lt;작업통합 현황 조회&gt; 화면의 [작업 통합 개요] 트리.
         /// 생산품목 시리얼번호 하나가 거쳐 온 공정/자재/스팩을 부모-자식 관계를 가진 평평한 목록으로 받는다.
         /// </summary>
-        Task<List<WorkIntegratedNodeDto>> GetWorkIntegratedOverviewAsync(string serialNo, CancellationToken cancellationToken = default);
+        Task<List<WorkIntegratedDto>> GetWorkIntegratedOverviewAsync(string corpCd,string serialNo, CancellationToken cancellationToken = default);
     }
 
     public class ProductionApiClient : ApiClientBase, IProductionApiClient
@@ -41,10 +41,11 @@ namespace SEOJIN_TMES.Client.ApiClient
             return GetAsync<List<WorkIntegratedStatusDto>>(ApiPrefix + "production/work-integrated-status", cancellationToken);
         }
 
-        public Task<List<WorkIntegratedNodeDto>> GetWorkIntegratedOverviewAsync(string serialNo, CancellationToken cancellationToken = default)
+        public async Task<List<WorkIntegratedDto>> GetWorkIntegratedOverviewAsync(string corpCd, string serialNo, CancellationToken cancellationToken = default)
         {
-            var query = BuildQuery(("serialNo", serialNo));
-            return GetAsync<List<WorkIntegratedNodeDto>>(ApiPrefix + "production/work-integrated-overview" + query, cancellationToken);
+            var query = BuildQuery(("sn", serialNo), ("corpCd", corpCd),("showSubRoutingProcess", "true"), ("showInspectionCheckItem", "false"), ("showBom", "true"), ("showBomInspectionSpecResult", "true"), ("showInspectionCheckItemResult", "true"));
+            var response = await GetAsync<ApiDataResponse<List<WorkIntegratedDto>>>(ApiPrefix + "md/routings" + query, cancellationToken);
+            return response?.Data ?? new List<WorkIntegratedDto>();
         }
     }
 }

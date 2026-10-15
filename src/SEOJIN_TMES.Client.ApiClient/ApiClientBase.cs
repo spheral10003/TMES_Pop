@@ -39,6 +39,16 @@ namespace SEOJIN_TMES.Client.ApiClient
             }
         }
 
+        protected async Task<string> GetPathAsync<TResponse>(string relativeUrl, CancellationToken cancellationToken = default)
+        {
+            using (var response = await SendAsync("GET", relativeUrl, () => HttpClient.GetAsync(relativeUrl, cancellationToken), cancellationToken).ConfigureAwait(false))
+            {
+                return await ReadPathAsync<string>(response).ConfigureAwait(false);
+            }
+        }
+
+        
+
         /// <summary>
         /// GET 후 <b>알맹이</b>만 돌려준다. 이 서버는 응답을 <c>{ "data": ... }</c>로 싸는 곳과
         /// 그냥 내려주는 곳이 섞여 있고, Swagger 선언도 일관되지 않다
@@ -75,18 +85,22 @@ namespace SEOJIN_TMES.Client.ApiClient
         protected async Task<TResponse> PostAsync<TRequest, TResponse>(string relativeUrl, TRequest body, CancellationToken cancellationToken = default)
         {
             using (var content = ToJsonContent(body))
-            using (var response = await SendAsync("POST", relativeUrl, () => HttpClient.PostAsync(relativeUrl, content, cancellationToken), cancellationToken).ConfigureAwait(false))
             {
-                return await ReadAsync<TResponse>(response).ConfigureAwait(false);
+                using (var response = await SendAsync("POST", relativeUrl, () => HttpClient.PostAsync(relativeUrl, content, cancellationToken), cancellationToken).ConfigureAwait(false))
+                {
+                    return await ReadAsync<TResponse>(response).ConfigureAwait(false);
+                }
             }
         }
 
         protected async Task PostAsync<TRequest>(string relativeUrl, TRequest body, CancellationToken cancellationToken = default)
         {
             using (var content = ToJsonContent(body))
-            using (var response = await SendAsync("POST", relativeUrl, () => HttpClient.PostAsync(relativeUrl, content, cancellationToken), cancellationToken).ConfigureAwait(false))
             {
-                await EnsureSuccessAsync(response).ConfigureAwait(false);
+                using (var response = await SendAsync("POST", relativeUrl, () => HttpClient.PostAsync(relativeUrl, content, cancellationToken), cancellationToken).ConfigureAwait(false))
+                {
+                    await EnsureSuccessAsync(response).ConfigureAwait(false);
+                }
             }
         }
 
@@ -127,6 +141,7 @@ namespace SEOJIN_TMES.Client.ApiClient
             return parts.Count == 0 ? string.Empty : "?" + string.Join("&", parts);
         }
 
+
         /// <summary>안내 문구에 넣을 전체 URL(BaseAddress + 상대 경로).</summary>
         private string AbsoluteUrl(string relativeUrl) =>
             HttpClient.BaseAddress == null ? relativeUrl : new Uri(HttpClient.BaseAddress, relativeUrl).ToString();
@@ -147,6 +162,12 @@ namespace SEOJIN_TMES.Client.ApiClient
 
             //var token = JsonConvert.DeserializeObject<ApiDataResponse<TResponse>>(body);
             //return token.Data;
+        }
+
+        private static async Task<string> ReadPathAsync<TResponse>(HttpResponseMessage response)
+        {
+            var body = await ReadBodyAsync(response).ConfigureAwait(false);
+            return string.IsNullOrWhiteSpace(body) ? default : body;
         }
 
         /// <summary>본문을 읽고, 실패 상태코드면 <see cref="ApiException"/>으로 올린다.</summary>

@@ -9,7 +9,7 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
     {
         /// <summary>장비 구분 ID. Modbus TransactionId 와 동일한 값으로 사용한다.</summary>
         public int Id { get; set; }
-
+        public string Code { get; set; } = string.Empty;
         public string Ip { get; set; } = string.Empty;
 
         /// <summary>Request(요청/응답) 채널 포트.</summary>

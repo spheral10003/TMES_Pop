@@ -307,11 +307,21 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// <summary>
         /// 연결 장비에서 올라온 토크 값을 아직 비어 있는 첫 줄에 채운다.
         /// 수동 렌치를 켠 동안에는 작업자 입력이 우선이므로 자동 반영하지 않는다.
+        /// 공정을 시작하지 않은 상태(대기 · 중지 · 완료)에서 올라온 체결 데이터는 실적이 아니므로
+        /// 화면에도 반영하지 않고 서버로도 보내지 않는다(로그만 남기고 버린다).
         /// </summary>
-        private void ApplyTorqueFromEquipment(string equipmentId, decimal TorqueValue, decimal AngleValue)
+        private async void ApplyTorqueFromEquipment(string equipmentId, decimal TorqueValue, decimal AngleValue)
         {
+            if (!IsProcessRunning)
+            {
+                AppLog.Info($"[POP] 공정 미시작 - 설비 데이터 버림 (설비 {equipmentId}, 상태 {_progressState}, " +
+                $"토크 {TorqueValue}, 각도 {AngleValue})");
+                                return;
+            }
+
             if (chkManualWrench.Checked)
                 return;
+
             //var row = gridViewBomSpec.GetRow(_bomSpecSelectedRow);
             //var target = _bomSpecs[_bomSpecSelectedRow];
             bool isTorqueRec = false;
@@ -342,7 +352,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 isAngleRec = true;
             }
 
-            if(isTorqueRec && isAngleRec)
+            
+
+            if (isTorqueRec && isAngleRec)
             {
                 AppLog.Info($"[POP] {Language.Pop_TorqueNoPendingRow} (설비 {equipmentId}, 값 {TorqueValue}, 값 {AngleValue}, 결과 OK)");
                 _bomSpecSelectedRow++;
@@ -356,8 +368,30 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             target.AngleResult = AngleValue;
             target.IsManualInput = false;
             gridViewBomSpec.RefreshData();
+
+            var result = new PopBomSpecResultDto
+            {
+                eqpCd = equipmentId,
+                torqueRsltVl = TorqueValue,
+                angleRsltVl = AngleValue
+            };
+
+            //await _apiClient.PopApiClient.SaveBomSpecResultsAsync(_key, result, target);
+            try
+            {
+                await _apiClient.PopApiClient.SaveBomSpecResultsAsync(_key, result, target);
+            }
+            catch (ApiException ex)
+            {
+                                if (IsDisposed || Disposing) return;
+                AppLog.Warn($"[POP] 설비 토크 결과 저장 실패 - {equipmentId} : {ex.Message}");
+                AppMessageBox.Warn(this, ex.Message, Language.Pop_Title);
+                                return;
+            }
             
-            if(_bomSpecs.Count >= _bomSpecSelectedRow)
+            if (IsDisposed || Disposing) return;
+
+            if (_bomSpecs.Count >= _bomSpecSelectedRow)
             {
                 gridViewBomSpec.FocusedRowHandle = _bomSpecSelectedRow;
             }
@@ -365,7 +399,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             {
                 _bomSpecSelectedRow = _bomSpecs.Count;
             }
+
             
+
             AppLog.Info($"[POP] 설비 토크 결과값 수신 - {equipmentId} → {target.BomSpecName}/{target.InputPosition} = {TorqueValue}");
         }
 

@@ -9,7 +9,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
     public class WorkEntryContext
     {
         public WorkOrderEntryDto WorkOrder { get; }
-        public RoutingProcessDto Process { get; }
+        public RoutingProcessDto Process { get; set; }
 
         public WorkEntryContext(WorkOrderEntryDto workOrder, RoutingProcessDto process)
         {

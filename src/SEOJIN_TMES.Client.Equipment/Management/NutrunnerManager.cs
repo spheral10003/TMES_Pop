@@ -35,7 +35,7 @@ namespace SEOJIN_TMES.Client.Equipment.Management
 
         public INutrunner? this[int id] => TryGet(id, out INutrunner nutrunner) ? nutrunner : null;
 
-        public INutrunner? this[string ip] => TryGet(ip, out INutrunner nutrunner) ? nutrunner : null;
+        public INutrunner? this[string code] => TryGet(code, out INutrunner nutrunner) ? nutrunner : null;
         public INutrunner Add(NutrunnerInfo info)
         {
             if (info is null)
@@ -105,11 +105,11 @@ namespace SEOJIN_TMES.Client.Equipment.Management
             return false;
         }
 
-        public bool TryGet(string ip, out INutrunner nutrunner)
+        public bool TryGet(string code, out INutrunner nutrunner)
         {
             lock (_sync)
             {
-                var sequence = _sequences.Values.FirstOrDefault(x => x.Nutrunner.Info.Ip == ip);
+                var sequence = _sequences.Values.FirstOrDefault(x => x.Nutrunner.Info.Code == code);
                 if (sequence is not null)
                 {
                     nutrunner = sequence.Nutrunner;
@@ -120,6 +120,27 @@ namespace SEOJIN_TMES.Client.Equipment.Management
             nutrunner = null!;
             return false;
         }
+
+        public bool SetTorque(string code, decimal torque)
+        {
+            if (string.IsNullOrWhiteSpace(code) || !TryGet(code, out INutrunner nutrunner))
+            {
+                return false;
+            }
+
+            return nutrunner.IsConnected && nutrunner.SetTorque(torque);
+        }
+
+        public bool SetDriverLock(string code, bool locked)
+        {
+            if (string.IsNullOrWhiteSpace(code) || !TryGet(code, out INutrunner nutrunner))
+            {
+                return false;
+            }
+
+            return nutrunner.IsConnected && nutrunner.SetDriverLock(locked);
+        }
+
 
         /// <summary>
         /// IP 주소로 Nutrunner를 찾습니다.

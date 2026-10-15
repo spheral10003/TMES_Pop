@@ -1,10 +1,8 @@
-using DevExpress.Utils;
 using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
 using DevExpress.XtraEditors.Repository;
 using DevExpress.XtraGrid.Views.Base;
 using DevExpress.XtraGrid.Views.Grid;
-using DevExpress.XtraPdfViewer.Native;
 using SEOJIN_TMES.Client.ApiClient;
 using SEOJIN_TMES.Client.Common.Languages;
 using SEOJIN_TMES.Client.Common.Logging;
@@ -66,10 +64,24 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
         private Setting _appSet;
         private Devices _equip;
+        private ApiClientFactory _apiClient;
         private WorkEntryContext _entry;
         private PopProcessKey _key;
         private PopProcessInfoDto _info;
+        private Image _image;
+        private const double ZoomMin = 10;
+        private const double ZoomMax = 800;
+        private const double ZoomStep = 1.25;   // 버튼/휠 1회당 배율
+        private bool _fitMode = true;           // true: 창 크기 변경 시 자동으로 화면 맞춤
+        private double _zoom = 100;             // 현재 배율(%)
 
+        // 드래그 이동(팬)용
+        private bool _dragging;
+        private Point _dragStart;
+        private Point _dragScroll;
+
+        private byte[] _currentBytes;
+        private ByteToImage _imgCtrl = new ByteToImage();
         private RepositoryItemButtonEdit _resultInputEditor;
         private RepositoryItemTextEdit _torqueResultEditor;
         private RepositoryItemComboBox _resultStateEditor;
@@ -77,6 +89,16 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
         private System.Windows.Forms.Timer _clock;
         private PopTab _activeTab = PopTab.Material;
+
+        // <summary>
+        /// 서버가 마지막으로 내려준 공정 진행 상태(WorkStatus: Ready / Progress / Stopped / Finished).
+        /// 장비 데이터를 받을지 버릴지 판단할 때 쓴다 — 상태 판정은 서버 몫이고 여기서는 받은 값을 기억만 한다.
+        /// </summary>
+        private string _progressState;
+
+        /// <summary>공정이 시작돼 진행 중인지(서버 상태 = Progress). 중지 · 대기 · 완료 상태에서는 false.</summary>
+        private bool IsProcessRunning =>
+        string.Equals(_progressState, "Progress", StringComparison.OrdinalIgnoreCase);
 
         /// <summary>탭별 그리드 — <see cref="BuildControlMaps"/>에서 채운다.</summary>
         private Dictionary<PopTab, Control> _tabGrids;
@@ -157,11 +179,25 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         {
             _appSet = Global.Instance.Settings;
             _equip = Global.Instance.Devices;
+            _apiClient = Global.Instance.Settings.ApiClients;
             _key = BuildKey(_entry);
 
             // 작업지시가 바뀌면 공정 목록도 다른 것이라, 다음 이동 때 새로 읽게 비워 둔다.
             _processes = new List<RoutingProcessDto>();
             _viewerMessage = Language.Pop_DrawingNone;
+
+            // Ctrl + 휠 확대 / 축소
+            scrollHost.MouseWheel += View_MouseWheel;
+            picView.MouseWheel += View_MouseWheel;
+            picView.MouseEnter += (s, e) => scrollHost.Focus();
+
+            // 마우스 드래그로 이미지 이동
+            picView.MouseDown += PicView_MouseDown;
+            picView.MouseMove += PicView_MouseMove;
+            picView.MouseUp += (s, e) => { _dragging = false; picView.Cursor = Cursors.Default; };
+
+            // 창 크기 변경 시: 맞춤 모드면 다시 맞춤, 아니면 가운데 정렬만 갱신
+            scrollHost.Resize += (s, e) => { if (_fitMode) ZoomToFit(); else LayoutImage(); };
 
             //StartClock();
         }
@@ -305,8 +341,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 ApplyLanguage();
                 ApplyTheme();
                 ConfigureActionTiles();
-                WireEquipmentEvents();
-
+                
                 // 임시 Test 용입니다.
                 ConfigureMaterialGrid();
                 ConfigureBomSpecGrid();
@@ -317,11 +352,16 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
                 await LoadAllAsync();
 
+                WireEquipmentEvents();
+                RefreshEquipmentStates();
+
                 //InitializeTabConfigs();
                 //await InitializeAllTabsAsync();
 
                 // Set initial active tab
                 //SetActiveTab(PopTab.BomSpec);
+
+                
             }
             catch (Exception ex)
             {
@@ -356,9 +396,15 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 gridInspection.DataSource = _inspections;
                 gridEquipment.DataSource = _equipments;
 
+                gridViewMaterial.RefreshData();
+                gridViewBomSpec.RefreshData();
+                gridViewInspection.RefreshData();
+                gridViewEquipment.RefreshData();
+
                 ApplyBomSpecHighlighting(_bomSpecs);
 
-                await LoadDrawingAsync();
+                await LoadImageAsync();
+                //await LoadDrawingAsync();
                 DisplayProcessInfo();
             }
             catch (ApiException ex)
@@ -406,17 +452,17 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                     TabName = "Inspection",
                     LoadDataAsync = FetchAndBindInspectionAsync,
                     ConfigureColumns = ConfigureInspectionGrid
-                },
-                new TabInitConfig
-                {
-                    TabType = PopTab.Equipment,
-                    GridControl = gridEquipment,
-                    GridView = gridViewEquipment,
-                    ThemeColor = AppTheme.Cyan,
-                    TabName = "Equipment",
-                    LoadDataAsync = FetchAndBindEquipmentAsync,
-                    ConfigureColumns = ConfigureEquipmentGrid
-                }
+                }//,
+                //new TabInitConfig
+                //{
+                //    TabType = PopTab.Equipment,
+                //    GridControl = gridEquipment,
+                //    GridView = gridViewEquipment,
+                //    ThemeColor = AppTheme.Cyan,
+                //    TabName = "Equipment",
+                //    LoadDataAsync = FetchAndBindEquipmentAsync,
+                //    ConfigureColumns = ConfigureEquipmentGrid
+                //}
             };
         }
 
@@ -500,7 +546,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// "토크 결과값" 칸에 들어온 값이 실수인지 확인하고, 통과하면 소수 둘째 자리에서 올려 저장한다.
         /// 빈칸(또는 "-")은 "아직 측정하지 않음"(null)으로 되돌린다 — 잘못 넣은 값을 지울 수 있어야 한다.
         /// </summary>
-        private void GridViewBomSpec_ValidatingEditor(object sender, BaseContainerValidateEditorEventArgs e)
+        private async void GridViewBomSpec_ValidatingEditor(object sender, BaseContainerValidateEditorEventArgs e)
         {
             if (gridViewBomSpec.FocusedColumn?.FieldName != TorqueResultField)
                 return;
@@ -523,8 +569,19 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 return;
             }
 
+            var view = (GridView)sender;
+            int rowHandle = view.FocusedRowHandle;
+            var spec = view.GetRow(rowHandle) as PopBomSpecDto;
+            var result = new PopBomSpecResultDto
+            {
+                eqpCd = "MAN",
+                torqueRsltVl = CeilTorque((decimal)parsed)
+            };
+
             try
             {
+                
+                await _apiClient.PopApiClient.SaveBomSpecResultsAsync(_key, result, spec);
                 e.Value = CeilTorque((decimal)parsed);
             }
             catch (OverflowException)
@@ -540,7 +597,18 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (e.FocusedRowHandle < 0)
                 return;
 
-            var value = gridViewBomSpec.GetRowCellValue(e.FocusedRowHandle, TorqueResultField);
+            //var value = gridViewBomSpec.GetRowCellValue(e.FocusedRowHandle, TorqueResultField);
+
+            var spec = gridViewBomSpec.GetRow(e.FocusedRowHandle) as PopBomSpecDto;
+
+            if (spec?.TorqueTarget == null)
+                    return;
+            
+            // 목표 토크는 서버 기준정보 값을 그대로 쓴다(클라이언트가 계산하지 않는다).
+            if (WriteTorqueToEquipment(spec.TorqueTarget.Value) == null)
+                AppMessageBox.Warn(this, "장비 없음", Language.Pop_Title);
+            //AppMessageBox.Warn(this, Language.PopTorque_NoEquipment, Language.Pop_Title);
+
         }
 
         private void GridViewBomSpec_RowClick(object sender, RowClickEventArgs e)
@@ -551,6 +619,12 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 클릭한 Row 처리
             //var row = gridViewBomSpec.GetRow(e.RowHandle);
             _bomSpecSelectedRow = e.RowHandle;
+
+            //var spec = gridViewBomSpec.GetRow(e.RowHandle) as PopBomSpecDto;
+
+            // WriteRegister
+            //spec.TorqueTarget;
+
         }
 
 
@@ -783,11 +857,11 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// </summary>
         private async Task FetchAndBindEquipmentAsync()
         {
-            _equipments = await LoadAndBindGridAsync(
-                gridEquipment,
-                FetchEquipmentsAsync,
-                "Equipment"
-            );
+            //_equipments = await LoadAndBindGridAsync(
+            //    gridEquipment,
+            //    FetchEquipmentsAsync,
+            //    "Equipment"
+            //);
 
             // Refresh equipment connection states
             RefreshEquipmentStates();
@@ -892,6 +966,81 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             }
         }
 
+        private async Task LoadImageAsync()
+        {
+            ClearImage();
+            string path = @"X:\attach";
+            //string pathTest = @"D:\01_Project\01_Seojin_meis\03_Source\seojin_tmes\seojin_meis\src\SEOJIN_TMES.Client\Images\11_Texon_Logo_Signature.svg";
+            if (_info.DrawingFilePath == null)
+            {
+                ShowViewerMessage(Language.Pop_DrawingNone);
+                return;
+            }
+            _info.DrawingFilePath = _info.DrawingFilePath.Replace('/', '\\').TrimStart('\\');
+            //string omsPath = await _apiClient.PopApiClient.GetOmsPathAsync(_key);
+
+            path = Path.Combine(path, _info.DrawingFilePath);
+            //ByteToImage img = new ByteToImage();
+            byte[] raw = File.ReadAllBytes(path);
+
+            // Base64 텍스트이면 먼저 디코딩
+            byte[] decoded;
+            if (ByteToImage.TryDecodeBase64(raw, out decoded))
+                raw = decoded;
+
+            ShowImage(raw, path);
+        }
+
+        private void ShowImage(byte[] data, string source)
+        {
+            // OLE 헤더 등이 앞에 붙어 있으면 실제 이미지 시작 위치를 찾아 잘라냄
+            int offset = ByteToImage.FindImageOffset(data);
+            if (offset < 0)
+            {
+                XtraMessageBox.Show(this, "이미지 데이터를 찾을 수 없습니다.\n(손상되었거나 이미지가 아닌 바이너리입니다.)",
+                    "이미지 열기", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            if (offset > 0)
+            {
+                byte[] trimmed = new byte[data.Length - offset];
+                Buffer.BlockCopy(data, offset, trimmed, 0, trimmed.Length);
+                data = trimmed;
+            }
+
+            Image img = ByteToImage.BytesToImage(data);
+
+            Image old = _image;
+            _image = img;
+            picView.Image = img;
+            if (old != null) old.Dispose();
+
+            _currentBytes = data;
+            //ZoomToFit();
+            //lblInfo.Text = string.Format("{0}  |  {1} x {2}  |  {3:N0} bytes{4}",
+            //    Path.GetFileName(source), img.Width, img.Height, data.Length,
+            //    offset > 0 ? string.Format("  |  헤더 {0} bytes 제거", offset) : "");
+            
+        }
+
+        private void ClearImage()
+        {
+            Image old = _image;
+            picView.Image = null;
+            picView.Size = new Size(1, 1);
+            _image = null;
+            if (old != null) old.Dispose();
+
+            _currentBytes = null;
+            _fitMode = true;
+            _zoom = 100;
+            //UpdateZoomLabel();
+            //lblInfo.Text = "이미지를 열어주세요.";
+            //UpdateButtons();
+        }
+
+
         /// <summary>열려 있던 도면을 닫고 자리표시자로 되돌린다(진행 중인 읽기도 취소).</summary>
         private void CloseDrawing()
         {
@@ -955,16 +1104,37 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// </summary>
         private void ApplyProgressState(string progressState)
         {
+            _progressState = progressState;
             lblProgressState.Text = progressState;
 
             Color accent;
-            if (Contains(progressState, "진행")) accent = AppTheme.Emerald;
-            else if (Contains(progressState, "중지")) accent = AppTheme.Rose;
-            else if (Contains(progressState, "생략")) accent = AppTheme.Amber;
-            else if (Contains(progressState, "대기")) accent = AppTheme.Slate;
+            if (Contains(progressState, "Progress")) accent = AppTheme.Emerald;
+            else if (Contains(progressState, "Stopped")) accent = AppTheme.Rose;
+            else if (Contains(progressState, "Finished")) accent = AppTheme.Amber;
+            else if (Contains(progressState, "Ready")) accent = AppTheme.Slate;
             else accent = AppTheme.Violet;
 
             lblProgressState.BackColor = accent;
+
+            switch (progressState)
+            {
+                case "Finished":
+                case "Progress":
+                    btnStartProcess.Text = Language.Pop_EndProcess;
+                    break;
+                case "Stopped":
+                    btnStartProcess.Text = Language.Pop_EndProcess;
+                    btnStopProcess.Text = Language.Pop_RestartProcess;
+                    btnStopProcess.Tag = new ProcessActionInfo(PopProcessAction.resume, Language.Pop_ConfirmStop, MockPopData.StateStopped);
+                    break;
+                case "Ready":
+                    btnStartProcess.Text = Language.Pop_StartProcess;
+                    btnStopProcess.Text = Language.Pop_StopProcess;
+                    btnStartProcess.Tag = new ProcessActionInfo(PopProcessAction.start, Language.Pop_ConfirmStart, MockPopData.StateRunning);
+                    btnStopProcess.Tag = new ProcessActionInfo(PopProcessAction.stop, Language.Pop_ConfirmStop, MockPopData.StateStopped);
+                    break;
+            }
+
         }
 
         private static bool Contains(string text, string keyword) =>
@@ -1279,10 +1449,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
                     //if (!UseMock)
                     //{
-                        if (_activeTab == PopTab.BomSpec)
-                            await _appSet.ApiClients.PopApiClient.SaveBomSpecResultsAsync(_key, _bomSpecs);
-                        else if (_activeTab == PopTab.Inspection)
-                            await _appSet.ApiClients.PopApiClient.SaveInspectionResultsAsync(_key, _inspections);
+                        //if (_activeTab == PopTab.BomSpec)
+                        //    await _appSet.ApiClients.PopApiClient.SaveBomSpecResultsAsync(_key, _bomSpecs);
+                        //else if (_activeTab == PopTab.Inspection)
+                        //    await _appSet.ApiClients.PopApiClient.SaveInspectionResultsAsync(_key, _inspections);
                     //}
 
                     if (IsDisposed || Disposing) return;   // 저장 중 탭을 닫았다
@@ -1422,20 +1592,22 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (info == null)
                 return;
 
-            await RequestProcessActionAsync(info.Action, info.ConfirmMessage, info.MockState);
+            // 취소했거나 서버가 거절했으면 버튼 문구/Tag를 그대로 둔다.
+            if (!await RequestProcessActionAsync(info.Action, info.ConfirmMessage, info.MockState))
+                return;
 
             switch (info.Action)
             {
-                case PopProcessAction.Start:
+                case PopProcessAction.start:
                     btnStartProcess.Text = Language.Pop_EndProcess;
                     break;
-                case PopProcessAction.Stop:
+                case PopProcessAction.stop:
                     btnStopProcess.Text = Language.Pop_RestartProcess;
-                    btnStopProcess.Tag = new ProcessActionInfo(PopProcessAction.Resume, Language.Pop_ConfirmStop, MockPopData.StateStopped);
+                    btnStopProcess.Tag = new ProcessActionInfo(PopProcessAction.resume, Language.Pop_ConfirmStop, MockPopData.StateStopped);
                     break;
-                case PopProcessAction.Resume:
+                case PopProcessAction.resume:
                     btnStopProcess.Text = Language.Pop_StopProcess;
-                    btnStopProcess.Tag = new ProcessActionInfo(PopProcessAction.Stop, Language.Pop_ConfirmStop, MockPopData.StateRunning);
+                    btnStopProcess.Tag = new ProcessActionInfo(PopProcessAction.stop, Language.Pop_ConfirmStop, MockPopData.StateRunning);
                     break;
                 case PopProcessAction.Previous:
                 case PopProcessAction.Next:
@@ -1452,8 +1624,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// <summary>시작/중지/생략 타일이 요청할 동작과 확인 문구를 Tag에 실어 둔다.</summary>
         private void ConfigureActionTiles()
         {
-            btnStartProcess.Tag = new ProcessActionInfo(PopProcessAction.Start, Language.Pop_ConfirmStart, MockPopData.StateRunning);
-            btnStopProcess.Tag = new ProcessActionInfo(PopProcessAction.Stop, Language.Pop_ConfirmStop, MockPopData.StateStopped);
+            btnStartProcess.Tag = new ProcessActionInfo(PopProcessAction.start, Language.Pop_ConfirmStart, MockPopData.StateRunning);
+            btnStopProcess.Tag = new ProcessActionInfo(PopProcessAction.stop, Language.Pop_ConfirmStop, MockPopData.StateStopped);
             //btnSkipProcess.Tag = new ProcessActionInfo(PopProcessAction.Skip, Language.Pop_ConfirmSkip, MockPopData.StateSkipped);
         }
 
@@ -1475,9 +1647,11 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private async void btnPrevProcess_Click(object sender, EventArgs e) =>
             await MoveByProcessListAsync(-1, Language.Pop_ConfirmPrevious, Language.Pop_FirstProcess);
 
-        private async void btnNextProcess_Click(object sender, EventArgs e) =>
+        private async void btnNextProcess_Click(object sender, EventArgs e)
+        {
             await MoveByProcessListAsync(+1, Language.Pop_ConfirmNext, Language.Pop_LastProcess);
-
+        }
+            
         /// <summary>
         /// 공정 상태 전이([공정 시작] · [공정 중지] · [공정 생략])를 서버에 요청한다.
         /// 전이 가능 여부와 시간 집계는 서버가 판단하고, 클라이언트는 응답으로 받은
@@ -1487,16 +1661,46 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// 목업 모드에서 옮겨 갈 상태. 서버가 없으니 <see cref="MockPopData"/>가 대신 상태를 기억해
         /// 화면 흐름(시작 → 중지 → 재시작 → 생략)을 그대로 확인할 수 있게 한다.
         /// </param>
-        private async Task RequestProcessActionAsync(PopProcessAction action, string confirmMessage, string mockState)
+        private async Task<bool> RequestProcessActionAsync(PopProcessAction action, string confirmMessage, string mockState)
         {
             if (_key == null)
             {
                 AppMessageBox.Warn(this, Language.Pop_NoTargetProcess, Language.Pop_Title);
-                return;
+                return false;
             }
 
             //if (!AppMessageBox.Confirm(this, confirmMessage, Language.Pop_Title))
             //    return;
+
+            PopProcessActionRequest request = null;
+
+            if (action == PopProcessAction.Previous || action == PopProcessAction.Next)
+            {
+
+            }
+
+            if (action == PopProcessAction.stop)
+            {
+                using (var form = new StopIssueForm())
+                {
+                    if (form.ShowDialog(this) != DialogResult.OK)
+                    {
+                        // [취소] / Esc / X — 중지 요청을 보내지 않고 끝낸다.
+                        AppLog.Info("[POP] 공정 중지 취소 - 사유 선택 창에서 취소");
+                        return false;
+                    }
+
+                    // using을 벗어나면 Dispose되므로 블록 안에서 값을 꺼내 둔다.
+                    request = new PopProcessActionRequest()
+                    {
+                        dttmCd = form.StopType.ToString(),   // "PD01" ~ "PD09"
+                        remark = form.Remark
+                    };
+
+                    AppLog.Info($"[POP] 공정 중지 사유 - [{form.SelectedIndex}] {request.dttmCd} : {request.remark}");
+                }
+
+            }
 
             try
             {
@@ -1508,15 +1712,22 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 //}
                 //else
                 //{
-                    _info = await _appSet.ApiClients.PopApiClient.ChangeProcessStateAsync(_key, action);
-                    AppLog.Info($"[POP] 공정 상태 전이 - {action} → {_info?.ProgressState}");
-                //}
 
+                await _appSet.ApiClients.PopApiClient.ChangeProcessStateAsync(_key, action, request);
+                await LoadAllAsync();
+                //_info
+                if (IsDisposed || Disposing) return false;
+
+                AppLog.Info($"[POP] 공정 상태 전이 - {action} → {_info?.ProgressState}");
                 DisplayProcessInfo();
+                return true;
+                
             }
             catch (ApiException ex)
             {
+                if (IsDisposed || Disposing) return false;
                 AppMessageBox.Warn(this, ex.Message, Language.Pop_Title);
+                return false;
             }
         }
 
@@ -1584,9 +1795,11 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// <summary>고른 공정으로 조회 키를 옮기고 화면 전체(공정 정보 + 탭 4개 + 도면)를 다시 읽는다.</summary>
         private async Task MoveToProcessAsync(RoutingProcessDto process)
         {
-            _key.RoutingGroup = process.RoutingGroup;
-            _key.RoutingOperation = process.RoutingName;
-            _key.PageOperation = process.PageName;
+            _entry.Process = process;
+            _key = BuildKey(_entry);
+            //_key.RoutingGroup = process.RoutingGroup;
+            //_key.RoutingOperation = process.RoutingName;
+            //_key.PageOperation = process.PageName;
 
             AppLog.Step($"[POP] 공정 이동 - {_key.RoutingOperation}/{_key.PageOperation}");
             await LoadAllAsync();
@@ -1846,14 +2059,14 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 return null;
 
             var key = new PopProcessKey();
-            key.WorkOrderNo = entry.WorkOrder.WorkOrderNo;
-            key.SerialNo = entry.WorkOrder.SerialNo;
-            key.RoutingGroup = entry.Process.RoutingGroup;
-            key.RoutingGroupRef = entry.Process.RoutingGroupRef;
-            key.RoutingOperation = entry.Process.RoutingName;
-            key.PageOperation = entry.Process.PageName;
-            key.SubRoutingRef = entry.Process.SubRoutingReference;
-            key.CorpCode = entry.Process.CorpCode;
+            key.WorkOrderNo = _entry.WorkOrder.WorkOrderNo;
+            key.SerialNo = _entry.WorkOrder.SerialNo;
+            key.RoutingGroup = _entry.Process.RoutingGroup;
+            key.RoutingGroupRef = _entry.Process.RoutingGroupRef;
+            key.RoutingOperation = _entry.Process.RoutingName;
+            key.PageOperation = _entry.Process.PageName;
+            key.SubRoutingRef = _entry.Process.SubRoutingReference;
+            key.CorpCode = _entry.Process.CorpCode;
             key.WorkstationRef = _appSet.CurrentUser.WorkstationInfo.WorkstationRef;
             return key;
         }
@@ -1886,11 +2099,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 _clock.Dispose();
                 _clock = null;
             }
-
-
-
-
-
 
         }
 
@@ -1926,6 +2134,109 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 
             }
 
+        }
+
+        private void View_MouseWheel(object sender, MouseEventArgs e)
+        {
+            if (_image == null || (ModifierKeys & Keys.Control) != Keys.Control) return;
+
+            ZoomBy(e.Delta > 0 ? ZoomStep : 1 / ZoomStep);
+
+            var he = e as HandledMouseEventArgs;
+            if (he != null) he.Handled = true;
+        }
+
+        private void PicView_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Left || _image == null) return;
+            _dragging = true;
+            _dragStart = Control.MousePosition;
+            _dragScroll = new Point(-scrollHost.AutoScrollPosition.X, -scrollHost.AutoScrollPosition.Y);
+            picView.Cursor = Cursors.SizeAll;
+        }
+
+        private void PicView_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (!_dragging) return;
+            Point p = Control.MousePosition;
+            scrollHost.AutoScrollPosition = new Point(
+                _dragScroll.X - (p.X - _dragStart.X),
+                _dragScroll.Y - (p.Y - _dragStart.Y));
+        }
+
+        private void ZoomBy(double factor)
+        {
+            SetZoom(_zoom * factor);
+        }
+
+        // 지정 배율(%)로 설정. 수동 조작이므로 자동 맞춤은 해제
+        private void SetZoom(double percent)
+        {
+            if (_image == null) return;
+            _fitMode = false;
+            ApplyZoom(percent);
+        }
+
+        // 화면 영역에 이미지 전체가 보이도록 배율 계산
+        private void ZoomToFit()
+        {
+            if (_image == null) return;
+            _fitMode = true;
+
+            Rectangle r = scrollHost.ClientRectangle;
+            double w = Math.Max(1, r.Width - 4);
+            double h = Math.Max(1, r.Height - 4);
+            ApplyZoom(Math.Min(w / _image.Width, h / _image.Height) * 100.0);
+        }
+
+        private void ApplyZoom(double percent)
+        {
+            if (_image == null) return;
+            percent = Math.Max(ZoomMin, Math.Min(ZoomMax, percent));
+
+            // 현재 보이는 영역의 중심이 이미지의 어느 비율 위치인지 기억
+            double fx = 0.5, fy = 0.5;
+            if (picView.Width > 0 && picView.Height > 0)
+            {
+                fx = (scrollHost.ClientSize.Width / 2.0 - picView.Left) / picView.Width;
+                fy = (scrollHost.ClientSize.Height / 2.0 - picView.Top) / picView.Height;
+                fx = Math.Max(0, Math.Min(1, fx));
+                fy = Math.Max(0, Math.Min(1, fy));
+            }
+
+            _zoom = percent;
+            LayoutImage();
+
+            // 같은 중심이 유지되도록 스크롤 위치 보정
+            int sx = (int)(fx * picView.Width - scrollHost.ClientSize.Width / 2.0);
+            int sy = (int)(fy * picView.Height - scrollHost.ClientSize.Height / 2.0);
+            if (picView.Width > scrollHost.ClientSize.Width || picView.Height > scrollHost.ClientSize.Height)
+                scrollHost.AutoScrollPosition = new Point(Math.Max(0, sx), Math.Max(0, sy));
+
+            //UpdateZoomLabel();
+        }
+
+        // 현재 배율에 맞게 크기를 정하고, 화면보다 작으면 가운데에 배치
+        private void LayoutImage()
+        {
+            if (_image == null) return;
+
+            int w = Math.Max(1, (int)Math.Round(_image.Width * _zoom / 100.0));
+            int h = Math.Max(1, (int)Math.Round(_image.Height * _zoom / 100.0));
+
+            scrollHost.SuspendLayout();
+            scrollHost.AutoScrollMinSize = new Size(w, h);
+            picView.Size = new Size(w, h);
+
+            int cw = scrollHost.ClientSize.Width;
+            int ch = scrollHost.ClientSize.Height;
+            if (w <= cw || h <= ch)
+            {
+                int x = w < cw ? (cw - w) / 2 : picView.Left;
+                int y = h < ch ? (ch - h) / 2 : picView.Top;
+                picView.Location = new Point(x, y);
+            }
+            scrollHost.ResumeLayout();
         }
     }
 

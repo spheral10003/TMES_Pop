@@ -32,7 +32,20 @@ namespace SEOJIN_TMES.Client.Equipment.Management
         bool Remove(int id);
 
         bool TryGet(int id, out INutrunner nutrunner);
-        bool TryGet(string ip, out INutrunner nutrunner);
+        bool TryGet(string code, out INutrunner nutrunner);
+
+        /// <summary>
+        /// 장비코드(<see cref="NutrunnerInfo.Code"/>)로 장비를 찾아 토크 설정값을 쓴다.
+        /// 장비가 없거나 네트워크(Request 채널)에 연결돼 있지 않으면 false.
+        /// </summary>
+        bool SetTorque(string code, decimal torque);
+
+        /// <summary>
+        /// 장비코드로 장비를 찾아 DriverLock을 잠금(3) 또는 해제(0)한다.
+        /// 장비가 없거나 네트워크(Request 채널)에 연결돼 있지 않으면 false.
+        /// </summary>
+        bool SetDriverLock(string code, bool locked);
+
         int FindIdByIp(string ip);
         INutrunner? FindByIp(string ip);
         /// <summary>해당 장비의 통신 시퀀스를 시작한다.</summary>

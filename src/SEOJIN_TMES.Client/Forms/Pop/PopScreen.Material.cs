@@ -1,16 +1,9 @@
-﻿using DevExpress.XtraGrid.Views.Grid;
-using SEOJIN_TMES.Client.ApiClient;
+﻿using SEOJIN_TMES.Client.ApiClient;
 using SEOJIN_TMES.Client.Common.Languages;
 using SEOJIN_TMES.Client.Common.Models;
 using SEOJIN_TMES.Client.Forms.Common;
-using SEOJIN_TMES.Client.Mock;
-using SEOJIN_TMES.Client.Theme;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace SEOJIN_TMES.Client.Forms.Pop
 {
@@ -76,18 +69,28 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             {
                 //if (!UseMock)
                 //{
-                    var request = new PopMaterialSerialSaveRequest
-                    {
-                        WorkOrderNo = _key.WorkOrderNo,
-                        SerialNo = _key.SerialNo,
-                        RoutingGroup = _key.RoutingGroup,
-                        RoutingOperation = _key.RoutingOperation,
-                        PageOperation = _key.PageOperation,
-                        MaterialCode = material.MaterialCode,
-                        SerialNumbers = material.SerialNumbers
-                    };
+                //var request = new PopMaterialSerialSaveRequest
+                //{
+                //    Key = _key,
+                //    CorpCode = _key.CorpCode,
+                //    WorkOrderNo = _key.WorkOrderNo,
+                //    SerialNo = _key.SerialNo,
+                //    RoutingGroup = _key.RoutingGroup,
+                //    RoutingOperation = _key.RoutingOperation,
+                //    PageOperation = _key.PageOperation,
+                //    SubRoutingRef = _key.SubRoutingRef,
+                //    RoutingGroupRef = _key.RoutingGroupRef,
+                //    MaterialCode = material.MaterialCode,
+                //    SerialNumbers = material.SerialNumbers
+                //};
 
-                    await _appSet.ApiClients.PopApiClient.SaveMaterialSerialsAsync(request);
+                var request = new PopMaterialSerialSaveRequest
+                {
+                    inputtedItemCd = material.MaterialCode,
+                    inputtedSerialList = material.SerialNumbers
+                };
+
+                await _appSet.ApiClients.PopApiClient.SaveMaterialSerialsAsync(request, _key, material.MaterialCode);
                 //}
 
                 AppMessageBox.Success(this, Language.PopSerial_Saved, Language.PopSerial_Title);

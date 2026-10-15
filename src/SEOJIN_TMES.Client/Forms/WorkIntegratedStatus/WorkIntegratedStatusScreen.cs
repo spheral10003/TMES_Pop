@@ -1,24 +1,22 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using DevExpress.Utils;
 using DevExpress.XtraEditors;
+using DevExpress.XtraTreeList;
 using DevExpress.XtraTreeList.Columns;
 using DevExpress.XtraTreeList.Nodes;
 using SEOJIN_TMES.Client.ApiClient;
+using SEOJIN_TMES.Client.Common.Configuration;
+using SEOJIN_TMES.Client.Common.Languages;
 using SEOJIN_TMES.Client.Common.Logging;
 using SEOJIN_TMES.Client.Common.Models;
-using SEOJIN_TMES.Client.Composition;
 using SEOJIN_TMES.Client.Core;
 using SEOJIN_TMES.Client.Export;
 using SEOJIN_TMES.Client.Forms.Common;
-using SEOJIN_TMES.Client.Common.Languages;
-using SEOJIN_TMES.Client.Mock;
 using SEOJIN_TMES.Client.Theme;
-using SEOJIN_TMES.Client.Common.Configuration;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
 {
@@ -37,8 +35,10 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
     {
         private AppSettings _appSet;
         private ApiClientFactory _apiClients;
+        private UserSession _user;
         /// <summary>현재 트리에 물려 있는 결과. 엑셀 내보내기 전에 비어 있는지 판단하는 데 쓴다.</summary>
-        private List<WorkIntegratedNodeDto> _nodes = new List<WorkIntegratedNodeDto>();
+        private List<WorkIntegratedDto> _workIntegrateds = new List<WorkIntegratedDto>();
+        private List<WorkIntegratedNode> _node = new List<WorkIntegratedNode>();
 
         public WorkIntegratedStatusScreen()
         {
@@ -49,6 +49,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
         {
             _appSet = Global.Instance.Settings.AppSet;
             _apiClients = Global.Instance.Settings.ApiClients;
+            _user = Global.Instance.Settings.CurrentUser;
 
             lblOverviewTitle.Text = Language.WorkIntegrated_OverviewTitle;
             lblFilterTitle.Text = Language.ProductionStatus_FilterTitle;
@@ -95,16 +96,22 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
                 treeOverview.Columns.Clear();
                 treeOverview.OptionsBehavior.PopulateServiceColumns = false;
                 treeOverview.OptionsView.AutoWidth = false;
+                treeOverview.ChildListFieldName = nameof(WorkIntegratedNode.Children);
 
+                treeOverview.OptionsBehavior.Editable = false;
+                treeOverview.OptionsView.ShowIndicator = false;
                 // 폭 합계(220 + 250 + 130*8 = 1510)를 화면 기본 폭에 맞춰, 값 컬럼은 고정 폭 + 가로 스크롤로 둔다
                 // (앵글 컬럼까지 억지로 줄여 넣지 않고 화면 설계서처럼 옆으로 밀어 본다).
-                AddColumn("NodeCode", Language.Col_NodeCode, 220, HorzAlignment.Near);
-                AddColumn("NodeDescription", Language.Col_NodeDescription, 250, HorzAlignment.Near);
+                AddColumn("Name", Language.Col_NodeDescription, 250, HorzAlignment.Near);
+                AddColumn("Code", Language.Col_NodeCode, 220, HorzAlignment.Near);
+                
 
+                AddValueColumn("UsageQty", Language.Col_WorkQty, 130);
+                AddValueColumn("Unit", Language.Col_Unit, 130);
                 AddValueColumn("TorqueResult", Language.Col_TorqueResult, 130);
                 AddValueColumn("TorqueTarget", Language.Col_TorqueTarget, 130);
                 AddValueColumn("TorqueLower", Language.Col_TorqueLower, 130);
-                AddValueColumn("TorqueMax", Language.Col_TorqueMax, 130);
+                AddValueColumn("TorqueUpper", Language.Col_TorqueMax, 130);
                 AddValueColumn("AngleTarget", Language.Col_AngleTarget, 130);
                 AddValueColumn("AngleLower", Language.Col_AngleLower, 130);
                 AddValueColumn("AngleUpper", Language.Col_AngleUpper, 130);
@@ -139,7 +146,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
         {
             var column = AddColumn(fieldName, caption, width, HorzAlignment.Center);
             column.Format.FormatType = FormatType.Numeric;
-            column.Format.FormatString = "0.000";
+            column.Format.FormatString = "0.00##";
         }
 
         /// <summary>
@@ -182,19 +189,21 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
                 return;
             }
 
+            string corpCd = _user.Server; 
+
             using (var busy = BusyOverlay.Show(this, cancelable: true))
             {
                 try
                 {
                     btnSearch.Enabled = false;
-                    _nodes = await FetchOverviewAsync(serialNo, busy.Token);
-
+                    _workIntegrateds = await FetchOverviewAsync(corpCd, serialNo, busy.Token);
+                    _node = WorkIntegratedNode.BuildTree(_workIntegrateds);
                     if (IsDisposed || Disposing) return;   // 조회 중 탭을 닫았다
 
-                    treeOverview.DataSource = _nodes;
+                    treeOverview.DataSource = _node;
                     treeOverview.ExpandAll();
 
-                    if (_nodes.Count == 0)
+                    if (_node.Count == 0)
                         AppMessageBox.Info(this, Language.WorkEntry_NoResult, Language.WorkIntegratedStatus_Title);
                 }
                 catch (OperationCanceledException)
@@ -214,16 +223,16 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
             }
         }
 
-        private async Task<List<WorkIntegratedNodeDto>> FetchOverviewAsync(string serialNo, CancellationToken cancellationToken)
+        private async Task<List<WorkIntegratedDto>> FetchOverviewAsync(string corpCd, string serialNo, CancellationToken cancellationToken)
         {
-            if (_appSet.UseMockData)
-            {
-                await Task.Yield();
-                return MockWorkIntegratedData.GetOverview(serialNo);
-            }
+            //if (_appSet.UseMockData)
+            //{
+            //    await Task.Yield();
+            //    return MockWorkIntegratedData.GetOverview(serialNo);
+            //}
 
-            return await _apiClients.ProductionApiClient.GetWorkIntegratedOverviewAsync(serialNo, cancellationToken)
-                   ?? new List<WorkIntegratedNodeDto>();
+            return await _apiClients.ProductionApiClient.GetWorkIntegratedOverviewAsync(corpCd, serialNo, cancellationToken)
+                   ?? new List<WorkIntegratedDto>();
         }
 
         /// <summary>
@@ -232,7 +241,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
         /// </summary>
         private void btnExcelExport_Click(object sender, EventArgs e)
         {
-            if (_nodes.Count == 0)
+            if (_workIntegrateds.Count == 0)
             {
                 AppMessageBox.Info(this, Language.WorkIntegrated_ExportEmpty, Language.WorkIntegrated_ExcelExport);
                 return;
@@ -298,7 +307,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
         {
             foreach (TreeListNode node in nodes)
             {
-                var dto = treeOverview.GetDataRecordByNode(node) as WorkIntegratedNodeDto;
+                var dto = treeOverview.GetDataRecordByNode(node) as WorkIntegratedDto;
                 if (dto != null)
                     writer.AddRow(node.Level, BuildExportValues(dto));
 
@@ -311,7 +320,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
         /// 한 줄의 값. 값이 있는 칸은 <b>숫자 그대로</b> 넘겨 엑셀에서 계산·비교가 되게 하고,
         /// 값이 없는 칸은 화면과 같이 ".."로 채운다.
         /// </summary>
-        private static object[] BuildExportValues(WorkIntegratedNodeDto dto)
+        private static object[] BuildExportValues(WorkIntegratedDto dto)
         {
             return new object[]
             {
@@ -320,7 +329,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
                 ValueOrPlaceholder(dto.TorqueResult),
                 ValueOrPlaceholder(dto.TorqueTarget),
                 ValueOrPlaceholder(dto.TorqueLower),
-                ValueOrPlaceholder(dto.TorqueMax),
+                ValueOrPlaceholder(dto.TorqueUpper),
                 ValueOrPlaceholder(dto.AngleTarget),
                 ValueOrPlaceholder(dto.AngleLower),
                 ValueOrPlaceholder(dto.AngleUpper),

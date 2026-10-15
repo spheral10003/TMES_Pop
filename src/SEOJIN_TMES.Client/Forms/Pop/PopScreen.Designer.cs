@@ -38,8 +38,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.spacerTop = new System.Windows.Forms.Panel();
             this.mainPanel = new DevExpress.XtraEditors.PanelControl();
             this.viewerCard = new DevExpress.XtraEditors.PanelControl();
-            this.pdfViewer = new DevExpress.XtraPdfViewer.PdfViewer();
             this.viewerSurface = new System.Windows.Forms.Panel();
+            this.scrollHost = new DevExpress.XtraEditors.XtraScrollableControl();
+            this.picView = new System.Windows.Forms.PictureBox();
+            this.pdfViewer = new DevExpress.XtraPdfViewer.PdfViewer();
             this.spacerMain = new System.Windows.Forms.Panel();
             this.infoCard = new DevExpress.XtraEditors.PanelControl();
             this.fieldPanel = new DevExpress.XtraEditors.PanelControl();
@@ -101,6 +103,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.mainPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.viewerCard)).BeginInit();
             this.viewerCard.SuspendLayout();
+            this.viewerSurface.SuspendLayout();
+            this.scrollHost.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picView)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.infoCard)).BeginInit();
             this.infoCard.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.fieldPanel)).BeginInit();
@@ -178,7 +183,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 
             // viewerCard
             // 
-            this.viewerCard.Controls.Add(this.pdfViewer);
             this.viewerCard.Controls.Add(this.viewerSurface);
             this.viewerCard.Dock = System.Windows.Forms.DockStyle.Fill;
             this.viewerCard.Location = new System.Drawing.Point(2, 2);
@@ -187,19 +191,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.viewerCard.Size = new System.Drawing.Size(1080, 589);
             this.viewerCard.TabIndex = 0;
             // 
-            // pdfViewer
-            // 
-            this.pdfViewer.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.pdfViewer.Location = new System.Drawing.Point(3, 3);
-            this.pdfViewer.Name = "pdfViewer";
-            this.pdfViewer.NavigationPanePageVisibility = DevExpress.XtraPdfViewer.PdfNavigationPanePageVisibility.None;
-            this.pdfViewer.Size = new System.Drawing.Size(1074, 583);
-            this.pdfViewer.TabIndex = 0;
-            this.pdfViewer.Visible = false;
-            this.pdfViewer.ZoomMode = DevExpress.XtraPdfViewer.PdfZoomMode.FitToWidth;
-            // 
             // viewerSurface
             // 
+            this.viewerSurface.Controls.Add(this.scrollHost);
             this.viewerSurface.Dock = System.Windows.Forms.DockStyle.Fill;
             this.viewerSurface.Location = new System.Drawing.Point(3, 3);
             this.viewerSurface.Name = "viewerSurface";
@@ -207,6 +201,37 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.viewerSurface.TabIndex = 0;
             this.viewerSurface.Paint += new System.Windows.Forms.PaintEventHandler(this.ViewerSurface_Paint);
             this.viewerSurface.Resize += new System.EventHandler(this.ViewerSurface_Resize);
+            // 
+            // scrollHost
+            // 
+            this.scrollHost.Controls.Add(this.picView);
+            this.scrollHost.Controls.Add(this.pdfViewer);
+            this.scrollHost.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.scrollHost.Location = new System.Drawing.Point(0, 0);
+            this.scrollHost.Name = "scrollHost";
+            this.scrollHost.Size = new System.Drawing.Size(1074, 583);
+            this.scrollHost.TabIndex = 1;
+            // 
+            // picView
+            // 
+            this.picView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.picView.Image = ((System.Drawing.Image)(resources.GetObject("picView.Image")));
+            this.picView.Location = new System.Drawing.Point(0, 0);
+            this.picView.Name = "picView";
+            this.picView.Size = new System.Drawing.Size(1074, 583);
+            this.picView.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.picView.TabIndex = 1;
+            this.picView.TabStop = false;
+            // 
+            // pdfViewer
+            // 
+            this.pdfViewer.Location = new System.Drawing.Point(10, 3);
+            this.pdfViewer.Name = "pdfViewer";
+            this.pdfViewer.NavigationPanePageVisibility = DevExpress.XtraPdfViewer.PdfNavigationPanePageVisibility.None;
+            this.pdfViewer.Size = new System.Drawing.Size(261, 193);
+            this.pdfViewer.TabIndex = 0;
+            this.pdfViewer.Visible = false;
+            this.pdfViewer.ZoomMode = DevExpress.XtraPdfViewer.PdfZoomMode.FitToWidth;
             // 
             // spacerMain
             // 
@@ -858,7 +883,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.gridViewInspection.Accent = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
             this.gridViewInspection.GridControl = this.gridInspection;
             this.gridViewInspection.Name = "gridViewInspection";
-            this.gridViewInspection.ShowingEditor += this.GridViewInspection_ShowingEditor;
             // 
             // pageEquip
             // 
@@ -911,6 +935,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.mainPanel.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.viewerCard)).EndInit();
             this.viewerCard.ResumeLayout(false);
+            this.viewerSurface.ResumeLayout(false);
+            this.scrollHost.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.picView)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.infoCard)).EndInit();
             this.infoCard.ResumeLayout(false);
             this.infoCard.PerformLayout();
@@ -1018,5 +1045,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private System.Windows.Forms.Label lblProgressState;
         private System.Windows.Forms.Label lblWorkstation;
         private System.Windows.Forms.Button btnSaveResults;
+        private DevExpress.XtraEditors.XtraScrollableControl scrollHost;
+        private System.Windows.Forms.PictureBox picView;
     }
 }

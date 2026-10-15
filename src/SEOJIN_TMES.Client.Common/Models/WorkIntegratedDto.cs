@@ -1,3 +1,5 @@
+using Newtonsoft.Json;
+
 namespace SEOJIN_TMES.Client.Common.Models
 {
     /// <summary>
@@ -10,48 +12,82 @@ namespace SEOJIN_TMES.Client.Common.Models
     ///
     /// TODO: 실제 서버 응답 필드명이 확정되면 속성명을 맞추거나 JsonProperty로 매핑할 것.
     /// </summary>
-    public class WorkIntegratedNodeDto
+    public class WorkIntegratedDto
     {
         /// <summary>줄 식별자(트리 구성용). 같은 응답 안에서만 유일하면 된다.</summary>
-        public int NodeId { get; set; }
+        [JsonProperty("sysObjId")]
+        public string NodeId { get; set; }
 
         /// <summary>부모 줄의 <see cref="NodeId"/>. 최상위(품목) 줄은 0.</summary>
-        public int ParentNodeId { get; set; }
+        [JsonProperty("parentRef")]
+        public string ParentNodeId { get; set; }
 
         /// <summary>항목 코드 — 계층에 따라 품목코드 / 라우팅 그룹 / 공정 / 자재코드 / 스팩명이 들어간다.</summary>
+        [JsonProperty("code")]
         public string NodeCode { get; set; }
 
         /// <summary>항목 설명.</summary>
+        [JsonProperty("name")]
         public string NodeDescription { get; set; }
+
+        [JsonProperty("level")]
+        public int NodeLevel { get; set; }
+
+        [JsonProperty("type")]
+        public string NodeType { get; set; }
+
+        [JsonProperty("sortSeq")]
+        public int SortSeq { get; set; }
+
+        [JsonProperty("unit")]
+        public string Unit { get; set; }
+
+        [JsonProperty("usageQty")]
+        public decimal? UsageQty { get; set; }
 
         /// <summary>
         /// 줄의 종류(품목/라우팅그룹/라우팅공정/페이지공정/투입자재/스팩).
         /// 화면에서 값 컬럼을 보여줄 줄인지 판단하는 데만 쓰고, 업무 판정에는 쓰지 않는다.
         /// </summary>
+        //[JsonProperty("type")]
         public string NodeKind { get; set; }
+        
+        [JsonProperty("torqueUnit")]
+        public string TorqueUnit { get; set; }
 
         /// <summary>토크 결과값(실적). 스팩 줄에서만 값이 있다.</summary>
+        [JsonProperty("torqueRsltVl")]
         public decimal? TorqueResult { get; set; }
 
         /// <summary>토크 목푯값(기준정보).</summary>
+        [JsonProperty("torqueTarget")]
         public decimal? TorqueTarget { get; set; }
 
         /// <summary>토크 하한값(기준정보).</summary>
+        [JsonProperty("torqueLsl")]
         public decimal? TorqueLower { get; set; }
 
         /// <summary>토크 최댓값(기준정보).</summary>
-        public decimal? TorqueMax { get; set; }
+        [JsonProperty("torqueUsl")]
+        public decimal? TorqueUpper { get; set; }
+
+        [JsonProperty("angleUnit")]
+        public string AngleUnit { get; set; }
 
         /// <summary>앵글 목푯값(기준정보).</summary>
+        [JsonProperty("angleTarget")]
         public decimal? AngleTarget { get; set; }
 
         /// <summary>앵글 하한값(기준정보).</summary>
+        [JsonProperty("angleLsl")]
         public decimal? AngleLower { get; set; }
 
         /// <summary>앵글 상한값(기준정보).</summary>
+        [JsonProperty("angleUsl")]
         public decimal? AngleUpper { get; set; }
 
         /// <summary>앵글 결과값(실적).</summary>
+        [JsonProperty("angleRsltVl")]
         public decimal? AngleResult { get; set; }
     }
 

@@ -33,12 +33,12 @@ namespace SEOJIN_TMES.Client.Core
         {
             _manager = new NutrunnerManager();
 
-            foreach (var info in LoadEquipments())
-            {
-                TryAdd(info);
-            }
+            //foreach (var info in LoadEquipments())
+            //{
+            //    TryAdd(info);
+            //}
 
-            AppLog.Step($"설비 {_manager.Count}대 등록 완료");
+            //AppLog.Step($"설비 {_manager.Count}대 등록 완료");
         }
 
         private static List<NutrunnerInfo> LoadEquipments()
@@ -71,7 +71,7 @@ namespace SEOJIN_TMES.Client.Core
         /// 장비 한 대를 등록한다. 한 대의 설정이 잘못됐다고 나머지 장비까지 못 쓰게 되지 않도록
         /// 문제가 있는 항목만 건너뛴다.
         /// </summary>
-        private void TryAdd(NutrunnerInfo info)
+        public void TryAdd(NutrunnerInfo info)
         {
             // JSON 배열 안의 null 항목("[null, {...}]")은 Add()에서 ArgumentNullException이 된다.
             if (info == null)

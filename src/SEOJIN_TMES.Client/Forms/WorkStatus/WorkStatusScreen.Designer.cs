@@ -63,10 +63,10 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             this.lblProgressTitle = new DevExpress.XtraEditors.LabelControl();
             ((System.ComponentModel.ISupportInitialize)(this.topCard)).BeginInit();
             this.topCard.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dateFrom.Properties.CalendarTimeProperties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dateFrom.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dateTo.Properties.CalendarTimeProperties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dateFrom.Properties.CalendarTimeProperties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dateTo.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dateTo.Properties.CalendarTimeProperties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtWorkOrderNo.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtItemCode.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtItemName.Properties)).BeginInit();
@@ -85,9 +85,9 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             ((System.ComponentModel.ISupportInitialize)(this.cboProgressState.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.cboSpecResultState.Properties)).BeginInit();
             this.SuspendLayout();
-            //
+            // 
             // topCard
-            //
+            // 
             this.topCard.Controls.Add(this.btnSearch);
             this.topCard.Controls.Add(this.lblOrderDate);
             this.topCard.Controls.Add(this.dateFrom);
@@ -108,141 +108,149 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             this.topCard.Name = "topCard";
             this.topCard.Size = new System.Drawing.Size(1509, 104);
             this.topCard.TabIndex = 0;
-            //
+            // 
             // btnSearch
-            //
+            // 
+            this.btnSearch.Accent = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
+            this.btnSearch.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnSearch.Icon = null;
             this.btnSearch.Location = new System.Drawing.Point(16, 20);
+            this.btnSearch.LookAndFeel.Style = DevExpress.LookAndFeel.LookAndFeelStyle.Flat;
             this.btnSearch.Name = "btnSearch";
+            this.btnSearch.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
+            this.btnSearch.Selected = false;
+            this.btnSearch.ShowFocusRectangle = DevExpress.Utils.DefaultBoolean.False;
             this.btnSearch.Size = new System.Drawing.Size(100, 64);
             this.btnSearch.TabIndex = 0;
             this.btnSearch.Text = "조회";
+            this.btnSearch.TextAfterIcon = false;
             this.btnSearch.Click += new System.EventHandler(this.btnSearch_Click);
-            //
+            // 
             // lblOrderDate
-            //
+            // 
             this.lblOrderDate.Location = new System.Drawing.Point(140, 24);
             this.lblOrderDate.Name = "lblOrderDate";
-            this.lblOrderDate.Size = new System.Drawing.Size(96, 20);
+            this.lblOrderDate.Size = new System.Drawing.Size(65, 14);
             this.lblOrderDate.TabIndex = 1;
             this.lblOrderDate.Text = "· 지시일자(*)";
-            //
+            // 
             // dateFrom
-            //
+            // 
             this.dateFrom.EditValue = null;
             this.dateFrom.Location = new System.Drawing.Point(244, 20);
             this.dateFrom.Name = "dateFrom";
             this.dateFrom.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.dateFrom.Size = new System.Drawing.Size(126, 26);
+            this.dateFrom.Size = new System.Drawing.Size(126, 20);
             this.dateFrom.TabIndex = 2;
-            //
+            // 
             // lblDateTilde
-            //
+            // 
             this.lblDateTilde.Location = new System.Drawing.Point(376, 24);
             this.lblDateTilde.Name = "lblDateTilde";
-            this.lblDateTilde.Size = new System.Drawing.Size(12, 20);
+            this.lblDateTilde.Size = new System.Drawing.Size(9, 14);
             this.lblDateTilde.TabIndex = 3;
             this.lblDateTilde.Text = "~";
-            //
+            // 
             // dateTo
-            //
+            // 
             this.dateTo.EditValue = null;
             this.dateTo.Location = new System.Drawing.Point(394, 20);
             this.dateTo.Name = "dateTo";
             this.dateTo.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.dateTo.Size = new System.Drawing.Size(126, 26);
+            this.dateTo.Size = new System.Drawing.Size(126, 20);
             this.dateTo.TabIndex = 4;
-            //
+            // 
             // lblWorkOrderNo
-            //
+            // 
             this.lblWorkOrderNo.Location = new System.Drawing.Point(556, 24);
             this.lblWorkOrderNo.Name = "lblWorkOrderNo";
-            this.lblWorkOrderNo.Size = new System.Drawing.Size(96, 20);
+            this.lblWorkOrderNo.Size = new System.Drawing.Size(68, 14);
             this.lblWorkOrderNo.TabIndex = 5;
             this.lblWorkOrderNo.Text = "· 작업지시번호";
-            //
+            // 
             // txtWorkOrderNo
-            //
+            // 
             this.txtWorkOrderNo.Location = new System.Drawing.Point(660, 20);
             this.txtWorkOrderNo.Name = "txtWorkOrderNo";
-            this.txtWorkOrderNo.Size = new System.Drawing.Size(170, 26);
+            this.txtWorkOrderNo.Size = new System.Drawing.Size(170, 20);
             this.txtWorkOrderNo.TabIndex = 6;
-            //
+            // 
             // lblItem
-            //
+            // 
             this.lblItem.Location = new System.Drawing.Point(866, 24);
             this.lblItem.Name = "lblItem";
-            this.lblItem.Size = new System.Drawing.Size(72, 20);
+            this.lblItem.Size = new System.Drawing.Size(48, 14);
             this.lblItem.TabIndex = 7;
             this.lblItem.Text = "· 생산품목";
-            //
+            // 
             // txtItemCode
-            //
+            // 
             this.txtItemCode.Location = new System.Drawing.Point(946, 20);
             this.txtItemCode.Name = "txtItemCode";
-            this.txtItemCode.Size = new System.Drawing.Size(110, 26);
+            this.txtItemCode.Size = new System.Drawing.Size(110, 20);
             this.txtItemCode.TabIndex = 8;
-            //
+            // 
             // txtItemName
-            //
+            // 
             this.txtItemName.Location = new System.Drawing.Point(1062, 20);
             this.txtItemName.Name = "txtItemName";
             this.txtItemName.Properties.ReadOnly = true;
-            this.txtItemName.Size = new System.Drawing.Size(140, 26);
+            this.txtItemName.Size = new System.Drawing.Size(140, 20);
             this.txtItemName.TabIndex = 9;
-            //
+            // 
             // btnItemPick
-            //
+            // 
             this.btnItemPick.Location = new System.Drawing.Point(1206, 19);
             this.btnItemPick.Name = "btnItemPick";
             this.btnItemPick.Size = new System.Drawing.Size(34, 28);
             this.btnItemPick.TabIndex = 10;
             this.btnItemPick.Click += new System.EventHandler(this.btnItemPick_Click);
-            //
+            // 
             // lblSerialNo
-            //
+            // 
             this.lblSerialNo.Location = new System.Drawing.Point(140, 62);
             this.lblSerialNo.Name = "lblSerialNo";
-            this.lblSerialNo.Size = new System.Drawing.Size(140, 20);
+            this.lblSerialNo.Size = new System.Drawing.Size(102, 14);
             this.lblSerialNo.TabIndex = 11;
             this.lblSerialNo.Text = "· 생산품목 시리얼번호";
-            //
+            // 
             // txtSerialNo
-            //
+            // 
             this.txtSerialNo.Location = new System.Drawing.Point(288, 58);
             this.txtSerialNo.Name = "txtSerialNo";
-            this.txtSerialNo.Size = new System.Drawing.Size(232, 26);
+            this.txtSerialNo.Size = new System.Drawing.Size(232, 20);
             this.txtSerialNo.TabIndex = 12;
-            //
+            // 
             // lblStatus
-            //
+            // 
             this.lblStatus.Location = new System.Drawing.Point(556, 62);
             this.lblStatus.Name = "lblStatus";
-            this.lblStatus.Size = new System.Drawing.Size(96, 20);
+            this.lblStatus.Size = new System.Drawing.Size(72, 14);
             this.lblStatus.TabIndex = 13;
             this.lblStatus.Text = "· 작업지시 상태";
-            //
+            // 
             // cboStatus
-            //
+            // 
             this.cboStatus.Location = new System.Drawing.Point(660, 58);
             this.cboStatus.Name = "cboStatus";
             this.cboStatus.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
             this.cboStatus.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
-            this.cboStatus.Size = new System.Drawing.Size(170, 26);
+            this.cboStatus.Size = new System.Drawing.Size(170, 20);
             this.cboStatus.TabIndex = 14;
-            //
+            // 
             // spacerTop
-            //
+            // 
             this.spacerTop.Dock = System.Windows.Forms.DockStyle.Top;
             this.spacerTop.Location = new System.Drawing.Point(0, 104);
             this.spacerTop.Name = "spacerTop";
             this.spacerTop.Size = new System.Drawing.Size(1509, 8);
             this.spacerTop.TabIndex = 1;
-            //
+            // 
             // orderCard
-            //
+            // 
             this.orderCard.Controls.Add(this.gridOrders);
             this.orderCard.Controls.Add(this.lblOrderTitle);
             this.orderCard.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -251,44 +259,45 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             this.orderCard.Padding = new System.Windows.Forms.Padding(1);
             this.orderCard.Size = new System.Drawing.Size(1509, 292);
             this.orderCard.TabIndex = 2;
-            //
-            // lblOrderTitle
-            //
-            this.lblOrderTitle.Dock = System.Windows.Forms.DockStyle.Top;
-            this.lblOrderTitle.Location = new System.Drawing.Point(1, 1);
-            this.lblOrderTitle.Name = "lblOrderTitle";
-            this.lblOrderTitle.Padding = new System.Windows.Forms.Padding(18, 12, 0, 10);
-            this.lblOrderTitle.Size = new System.Drawing.Size(1507, 38);
-            this.lblOrderTitle.TabIndex = 0;
-            this.lblOrderTitle.Text = "작업 지시 정보";
-            //
+            // 
             // gridOrders
-            //
+            // 
             this.gridOrders.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gridOrders.Location = new System.Drawing.Point(1, 39);
+            this.gridOrders.Location = new System.Drawing.Point(3, 39);
             this.gridOrders.MainView = this.gridViewOrders;
             this.gridOrders.Name = "gridOrders";
-            this.gridOrders.Size = new System.Drawing.Size(1507, 252);
+            this.gridOrders.Size = new System.Drawing.Size(1503, 250);
             this.gridOrders.TabIndex = 1;
             this.gridOrders.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
             this.gridViewOrders});
-            //
+            // 
             // gridViewOrders
-            //
+            // 
+            this.gridViewOrders.Accent = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
             this.gridViewOrders.GridControl = this.gridOrders;
             this.gridViewOrders.Name = "gridViewOrders";
             this.gridViewOrders.OptionsBehavior.Editable = false;
-            //
+            // 
+            // lblOrderTitle
+            // 
+            this.lblOrderTitle.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lblOrderTitle.Location = new System.Drawing.Point(3, 3);
+            this.lblOrderTitle.Name = "lblOrderTitle";
+            this.lblOrderTitle.Padding = new System.Windows.Forms.Padding(18, 12, 0, 10);
+            this.lblOrderTitle.Size = new System.Drawing.Size(86, 36);
+            this.lblOrderTitle.TabIndex = 0;
+            this.lblOrderTitle.Text = "작업 지시 정보";
+            // 
             // spacerBottom
-            //
+            // 
             this.spacerBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.spacerBottom.Location = new System.Drawing.Point(0, 404);
             this.spacerBottom.Name = "spacerBottom";
             this.spacerBottom.Size = new System.Drawing.Size(1509, 8);
             this.spacerBottom.TabIndex = 3;
-            //
+            // 
             // progressCard
-            //
+            // 
             this.progressCard.Controls.Add(this.gridProgress);
             this.progressCard.Controls.Add(this.filterPanel);
             this.progressCard.Controls.Add(this.lblProgressTitle);
@@ -298,86 +307,87 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             this.progressCard.Padding = new System.Windows.Forms.Padding(1);
             this.progressCard.Size = new System.Drawing.Size(1509, 330);
             this.progressCard.TabIndex = 4;
-            //
-            // lblProgressTitle
-            //
-            this.lblProgressTitle.Dock = System.Windows.Forms.DockStyle.Top;
-            this.lblProgressTitle.Location = new System.Drawing.Point(1, 1);
-            this.lblProgressTitle.Name = "lblProgressTitle";
-            this.lblProgressTitle.Padding = new System.Windows.Forms.Padding(18, 12, 0, 10);
-            this.lblProgressTitle.Size = new System.Drawing.Size(1507, 38);
-            this.lblProgressTitle.TabIndex = 0;
-            this.lblProgressTitle.Text = "작업 진행 현황";
-            //
+            // 
+            // gridProgress
+            // 
+            this.gridProgress.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.gridProgress.Location = new System.Drawing.Point(3, 89);
+            this.gridProgress.MainView = this.gridViewProgress;
+            this.gridProgress.Name = "gridProgress";
+            this.gridProgress.Size = new System.Drawing.Size(1503, 238);
+            this.gridProgress.TabIndex = 2;
+            this.gridProgress.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
+            this.gridViewProgress});
+            // 
+            // gridViewProgress
+            // 
+            this.gridViewProgress.Accent = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
+            this.gridViewProgress.GridControl = this.gridProgress;
+            this.gridViewProgress.Name = "gridViewProgress";
+            this.gridViewProgress.OptionsBehavior.Editable = false;
+            // 
             // filterPanel
-            //
+            // 
             this.filterPanel.Controls.Add(this.lblProgressState);
             this.filterPanel.Controls.Add(this.cboProgressState);
             this.filterPanel.Controls.Add(this.lblSpecResultState);
             this.filterPanel.Controls.Add(this.cboSpecResultState);
             this.filterPanel.Dock = System.Windows.Forms.DockStyle.Top;
-            this.filterPanel.Location = new System.Drawing.Point(1, 39);
+            this.filterPanel.Location = new System.Drawing.Point(3, 39);
             this.filterPanel.Name = "filterPanel";
-            this.filterPanel.Size = new System.Drawing.Size(1507, 50);
+            this.filterPanel.Size = new System.Drawing.Size(1503, 50);
             this.filterPanel.TabIndex = 1;
-            //
+            // 
             // lblProgressState
-            //
+            // 
             this.lblProgressState.Location = new System.Drawing.Point(18, 15);
             this.lblProgressState.Name = "lblProgressState";
-            this.lblProgressState.Size = new System.Drawing.Size(80, 20);
+            this.lblProgressState.Size = new System.Drawing.Size(52, 14);
             this.lblProgressState.TabIndex = 0;
             this.lblProgressState.Text = "· 진행 상태";
-            //
+            // 
             // cboProgressState
-            //
+            // 
             this.cboProgressState.Location = new System.Drawing.Point(106, 11);
             this.cboProgressState.Name = "cboProgressState";
             this.cboProgressState.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
             this.cboProgressState.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
-            this.cboProgressState.Size = new System.Drawing.Size(150, 26);
+            this.cboProgressState.Size = new System.Drawing.Size(150, 20);
             this.cboProgressState.TabIndex = 1;
             this.cboProgressState.SelectedIndexChanged += new System.EventHandler(this.Filter_SelectedIndexChanged);
-            //
+            // 
             // lblSpecResultState
-            //
+            // 
             this.lblSpecResultState.Location = new System.Drawing.Point(292, 15);
             this.lblSpecResultState.Name = "lblSpecResultState";
-            this.lblSpecResultState.Size = new System.Drawing.Size(110, 20);
+            this.lblSpecResultState.Size = new System.Drawing.Size(76, 14);
             this.lblSpecResultState.TabIndex = 2;
             this.lblSpecResultState.Text = "· 스팩 결과 상태";
-            //
+            // 
             // cboSpecResultState
-            //
+            // 
             this.cboSpecResultState.Location = new System.Drawing.Point(410, 11);
             this.cboSpecResultState.Name = "cboSpecResultState";
             this.cboSpecResultState.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
             this.cboSpecResultState.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
-            this.cboSpecResultState.Size = new System.Drawing.Size(150, 26);
+            this.cboSpecResultState.Size = new System.Drawing.Size(150, 20);
             this.cboSpecResultState.TabIndex = 3;
             this.cboSpecResultState.SelectedIndexChanged += new System.EventHandler(this.Filter_SelectedIndexChanged);
-            //
-            // gridProgress
-            //
-            this.gridProgress.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gridProgress.Location = new System.Drawing.Point(1, 89);
-            this.gridProgress.MainView = this.gridViewProgress;
-            this.gridProgress.Name = "gridProgress";
-            this.gridProgress.Size = new System.Drawing.Size(1507, 240);
-            this.gridProgress.TabIndex = 2;
-            this.gridProgress.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
-            this.gridViewProgress});
-            //
-            // gridViewProgress
-            //
-            this.gridViewProgress.GridControl = this.gridProgress;
-            this.gridViewProgress.Name = "gridViewProgress";
-            this.gridViewProgress.OptionsBehavior.Editable = false;
-            //
+            // 
+            // lblProgressTitle
+            // 
+            this.lblProgressTitle.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lblProgressTitle.Location = new System.Drawing.Point(3, 3);
+            this.lblProgressTitle.Name = "lblProgressTitle";
+            this.lblProgressTitle.Padding = new System.Windows.Forms.Padding(18, 12, 0, 10);
+            this.lblProgressTitle.Size = new System.Drawing.Size(86, 36);
+            this.lblProgressTitle.TabIndex = 0;
+            this.lblProgressTitle.Text = "작업 진행 현황";
+            // 
             // WorkStatusScreen
-            //
+            // 
             this.Controls.Add(this.orderCard);
             this.Controls.Add(this.spacerBottom);
             this.Controls.Add(this.progressCard);
@@ -385,29 +395,33 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             this.Controls.Add(this.topCard);
             this.Name = "WorkStatusScreen";
             this.Size = new System.Drawing.Size(1509, 742);
-            ((System.ComponentModel.ISupportInitialize)(this.cboSpecResultState.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.cboProgressState.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.filterPanel)).EndInit();
-            this.filterPanel.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.gridViewProgress)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridProgress)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.progressCard)).EndInit();
-            this.progressCard.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.gridViewOrders)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridOrders)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.orderCard)).EndInit();
-            this.orderCard.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.cboStatus.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txtSerialNo.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txtItemName.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txtItemCode.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txtWorkOrderNo.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dateTo.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dateTo.Properties.CalendarTimeProperties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dateFrom.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dateFrom.Properties.CalendarTimeProperties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.topCard)).EndInit();
             this.topCard.ResumeLayout(false);
+            this.topCard.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dateFrom.Properties.CalendarTimeProperties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dateFrom.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dateTo.Properties.CalendarTimeProperties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dateTo.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtWorkOrderNo.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtItemCode.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtItemName.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtSerialNo.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.cboStatus.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.orderCard)).EndInit();
+            this.orderCard.ResumeLayout(false);
+            this.orderCard.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.gridOrders)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridViewOrders)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.progressCard)).EndInit();
+            this.progressCard.ResumeLayout(false);
+            this.progressCard.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.gridProgress)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridViewProgress)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.filterPanel)).EndInit();
+            this.filterPanel.ResumeLayout(false);
+            this.filterPanel.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.cboProgressState.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.cboSpecResultState.Properties)).EndInit();
             this.ResumeLayout(false);
 
         }

@@ -306,5 +306,6 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             var title = $"{Language.Menu_POP} - {entry.WorkOrder.WorkOrderNo}";
             NavigateRequested?.Invoke(this, new ScreenNavigationEventArgs(pop, title));
         }
+
     }
 }

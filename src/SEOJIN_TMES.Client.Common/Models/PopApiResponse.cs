@@ -30,6 +30,7 @@ namespace SEOJIN_TMES.Client.Common.Models
         [JsonProperty("actlWorkDurSec")] public double ActlWorkDurSec { get; set; }
         [JsonProperty("dttmDurSec")] public double DttmDurSec { get; set; }
         [JsonProperty("totalWorkDurSec")] public double TotalWorkDurSec { get; set; }
+        [JsonProperty("subRoutingProcImagePath")] public string ProcImagePath { get; set; }
 
         [JsonProperty("equipmentList")] public List<EquipmentApi> EquipmentList { get; set; } = new List<EquipmentApi>();
         [JsonProperty("inputMaterialList")] public List<InputMaterialApi> InputMaterialList { get; set; } = new List<InputMaterialApi>();
@@ -49,7 +50,9 @@ namespace SEOJIN_TMES.Client.Common.Models
         [JsonProperty("wkstnNm")] public string WkstnNm { get; set; }
         [JsonProperty("torqueMinVl")] public decimal? TorqueMinVl { get; set; }
         [JsonProperty("torqueMaxVl")] public decimal? TorqueMaxVl { get; set; }
+        [JsonProperty("mdlNm")] public string EqpModel { get; set; }
         [JsonProperty("remark")] public string Remark { get; set; }
+        
     }
 
     public class InputMaterialApi
@@ -133,7 +136,7 @@ namespace SEOJIN_TMES.Client.Common.Models
                     WorkstationCode = eq?.WkstnCd,
                     WorkstationName = eq?.WkstnNm,
                     ProgressState = d.WorkStatus,   // 필요 시 Ready→"대기" 등 변환
-                    DrawingFilePath = null          // 응답에 없음 → 별도 API/필드 필요
+                    DrawingFilePath = d.ProcImagePath,          // 응답에 없음 → 별도 API/필드 필요
                 },
 
                 Materials = d.InputMaterialList.Select(m => new PopInputMaterialDto
@@ -179,15 +182,18 @@ namespace SEOJIN_TMES.Client.Common.Models
 
                 Equipments = d.EquipmentList.Select(e => new PopEquipmentDto
                 {
+                    //Id = int.Parse(e.EqpCd),
                     EquipmentCode = e.EqpCd,
                     EquipmentName = e.EqpNm,
                     EquipmentIp = e.EqpIp,
                     EquipmentPort = e.EqpPort?.ToString(),
                     EquipmentType = e.EqpType,
                     EquipmentRemark = e.Remark,
-                    EquipmentState = e.EqpStatus == "Active" ? "가동가능" : "사용불가",
+                    EquipmentState = e.EqpStatus = "사용불가",
+                    EquipmentModel = e.EqpModel,
                     RangeLower = e.TorqueMinVl,
-                    RangeUpper = e.TorqueMaxVl
+                    RangeUpper = e.TorqueMaxVl,
+                    CommunicationState = "Disconnected"
                     // CommunicationState: Modbus 연결 상태로 클라이언트에서 채움
                 }).ToList()
             };

@@ -1,9 +1,11 @@
-using System;
 using SEOJIN_TMES.Client.Equipment.Core;
 using SEOJIN_TMES.Client.Modbus;
 using SEOJIN_TMES.Client.Modbus.Abstractions;
 using SEOJIN_TMES.Client.Modbus.Protocol;
 using SEOJIN_TMES.Client.Modbus.Transport;
+using System;
+using System.Diagnostics;
+using System.Net.Sockets;
 
 namespace SEOJIN_TMES.Client.Equipment.Nutrunner
 {
@@ -25,7 +27,41 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
         /// <summary>요청 송신 직렬화용. (시퀀스 Thread / 소켓 콜백 / UI Thread 가 같이 쓴다)</summary>
         private readonly object _requestSync = new();
 
+        private const ushort EventEnableValue = 2;
+
+        /// <summary>
+        /// 토크 레지스터는 소수점 없는 16bit 정수라 실수 토크에 이 배율을 곱해 보낸다(1.25 → 125).
+        /// TODO: 가정값 — 한타스/Mountz 레지스터 맵에서 모델(세대)별 토크 소수 자릿수를 확인할 것.
+        /// </summary>
+        private const decimal TorqueScale = 100m;
+
+        /// <summary>DriverLock 레지스터 값 — 0 = 해제(체결 가능).</summary>
+        private const ushort DriverUnlockValue = 0;
+
+        /// <summary>
+        /// DriverLock 레지스터 값 — 3 = 잠금(체결 불가).
+        /// TODO: 3의 의미(비트별 잠금 대상)는 장비 레지스터 맵으로 확인할 것.
+        /// </summary>
+        private const ushort DriverLockValue = 3;
+
+        /// <summary>이벤트 채널 연결 후 첫 송신까지 기다리는 시간. 장비가 이벤트 세션을 준비할 여유.</summary>
+        private const double EventEnableDelayMs = 300;
+
+        /// <summary>응답이 이 시간 안에 오지 않으면 다시 보낸다.</summary>
+        private const double EventEnableTimeoutMs = 1000;
+
+        /// <summary>이 횟수만큼 실패하면 이벤트 채널을 끊고 재연결부터 다시 한다.</summary>
+        private const int EventEnableMaxRetry = 5;
+
+        private readonly object _handshakeSync = new();
+        private readonly Stopwatch _eventEnableTimer = new();
+        private volatile bool _eventEnabled;
+        private int _eventEnableRetry;
+
         private bool _disposed;
+
+        /// <summary>장비가 EventDataEnable 쓰기를 받았음을 응답으로 확인했는지 여부.</summary>
+        public bool IsEventEnabled => _eventEnabled;
 
         public event EventHandler<EquipmentConnectionEventArgs>? Connected;
         public event EventHandler<EquipmentConnectionEventArgs>? Disconnected;
@@ -81,7 +117,10 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
             _eventTransport.Connected += OnEventTransportConnected;
             _eventTransport.DataReceived += OnEventDataReceived;
             _eventTransport.ErrorOccurred += OnError;
+            _eventTransport.Disconnected += OnEventTransportDisconnected;
         }
+
+       
 
         public void Connect() => _client.Connect(Info.Ip, Info.Port);
 
@@ -120,37 +159,131 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
         }
 
         public void WriteRegister(NutrunnerRegister register, ushort value)
-            => WriteRegister((ushort)register, value);
+        {
+            WriteRegister((ushort)register, value);
+        }
+
+        public bool SetTorque(decimal torque)
+        {
+            // 쓰기는 Request 채널로만 나간다 — 이벤트 채널 상태와 상관없이 Request 연결만 본다.
+            if (!_client.IsConnected)
+            {
+                return false;
+            }
+
+            decimal raw = decimal.Round(torque * TorqueScale, 0, MidpointRounding.AwayFromZero);
+            if (raw<ushort.MinValue || raw> ushort.MaxValue)
+            {
+                ErrorOccurred?.Invoke(this, new ArgumentOutOfRangeException(nameof(torque), torque,
+                    $"[{Info.Code}] 토크 값이 레지스터 범위(0 ~ {ushort.MaxValue / TorqueScale})를 벗어났습니다."));
+                return false;
+            }
+
+            WriteRegister(NutrunnerRegister.Torque, (ushort) raw);
+            return true;
+        }
+
+        public bool SetDriverLock(bool locked)
+        {
+            if (!_client.IsConnected)
+            {
+                return false;
+            }
+
+            WriteRegister(NutrunnerRegister.DriverLock, locked? DriverLockValue : DriverUnlockValue);
+            return true;
+        }
+
+        private void ResetEventHandshake()
+        {
+            lock (_handshakeSync)
+            {
+                _eventEnabled = false;
+                _eventEnableRetry = 0;
+                _eventEnableTimer.Restart();
+            }
+        }
+
+        /// <summary>
+        /// 시퀀스 Thread 에서 매 tick 호출한다.
+        /// 응답으로 확인될 때까지 EventDataEnable 을 다시 보낸다.
+        /// </summary>
+        public void ProcessEventHandshake()
+        {
+            if (_eventEnabled || !_client.IsConnected || !_eventTransport.IsConnected)
+            {
+                return;
+            }
+
+            lock (_handshakeSync)
+            {
+                double wait = _eventEnableRetry == 0 ? EventEnableDelayMs : EventEnableTimeoutMs;
+                if (_eventEnableTimer.Elapsed.TotalMilliseconds < wait)
+                {
+                    return;
+                }
+
+                if (_eventEnableRetry >= EventEnableMaxRetry)
+                {
+                    ErrorOccurred?.Invoke(this, new TimeoutException(
+                        $"EventDataEnable 응답 없음 ({EventEnableMaxRetry}회). 이벤트 채널을 다시 연결합니다."));
+
+                    // 끊어 두면 KeepAlive 의 ConnectEventChannel 이 다시 붙이고, 핸드셰이크도 처음부터 다시 한다.
+                    _eventTransport.Disconnect();
+                    return;
+                }
+
+                _eventEnableRetry++;
+                _eventEnableTimer.Restart();
+            }
+
+            WriteRegister(NutrunnerRegister.EventDataEnable, EventEnableValue);
+        }
 
         private void OnClientConnected(object? sender, EventArgs e)
         {
             // Request 채널이 붙으면 Event Transport 채널도 연결한다.
             _eventTransport.Connect(Info.Ip, Info.ResolvedEventPort);
-            Connected?.Invoke(this, new EquipmentConnectionEventArgs(Id, true));
+            Connected?.Invoke(this, new EquipmentConnectionEventArgs(Info.Code, true));
         }
 
         private void OnClientDisconnected(object? sender, EventArgs e)
         {
             _eventTransport.Disconnect();
-            Disconnected?.Invoke(this, new EquipmentConnectionEventArgs(Id, false));
+            Disconnected?.Invoke(this, new EquipmentConnectionEventArgs(Info.Code, false));
         }
 
         private void OnEventTransportConnected(object? sender, EventArgs e)
         {
             // 이벤트 채널 핸드셰이크: EventDataEnable 레지스터 ON.
-            WriteRegister(NutrunnerRegister.EventDataEnable, 2);
+            ResetEventHandshake();
+            //WriteRegister(NutrunnerRegister.EventDataEnable, 2);
+            //Console.WriteLine("\n\n\n\n");
+            //Console.WriteLine($"EventDataEnable {NutrunnerRegister.EventDataEnable} : {2}");
+        }
+
+        private void OnEventTransportDisconnected(object sender, EventArgs e)
+        {
+            ResetEventHandshake();
         }
 
         private void OnResponseReceived(object? sender, ModbusResponse response)
         {
             // TransactionId 로 장비를 구분한다. (0 은 장비가 echo 하지 않는 경우 대비)
-            if (response.TransactionId != 0 && response.TransactionId != Info.TransactionId)
+            //if (response.TransactionId != 0 && response.TransactionId != Info.TransactionId)
+            //{
+            //    return;
+            //}
+
+            if (!response.IsError
+                && response.FunctionCode == ModbusFunctionCode.WriteSingleRegister
+                && response.StartAddress == (ushort)NutrunnerRegister.EventDataEnable)
             {
-                return;
+                _eventEnabled = true;
             }
 
             RegisterDataReceived?.Invoke(this,
-                new NutrunnerRegisterEventArgs(Id, !response.IsError, response.StartAddress, response.Data));
+                new NutrunnerRegisterEventArgs(Info.Code, !response.IsError, response.StartAddress, response.Data));
         }
 
         private void OnEventDataReceived(object? sender, byte[] data)
@@ -161,13 +294,17 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
             }
 
             LastFastening = fastening;
-            FasteningReceived?.Invoke(this, new NutrunnerFasteningEventArgs(Id, fastening));
+            
+            //FasteningReceived?.Invoke(this, new NutrunnerFasteningEventArgs(Id, fastening));
+            FasteningReceived?.Invoke(this, new NutrunnerFasteningEventArgs(Info.Code, fastening));
 
             // 수신 확인(Ack).
             WriteRegister(NutrunnerRegister.EventAck, 1);
         }
 
         private void OnError(object? sender, Exception exception) => ErrorOccurred?.Invoke(this, exception);
+
+
 
         public void Dispose()
         {
@@ -186,6 +323,7 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
             _eventTransport.Connected -= OnEventTransportConnected;
             _eventTransport.DataReceived -= OnEventDataReceived;
             _eventTransport.ErrorOccurred -= OnError;
+            _eventTransport.Disconnected -= OnEventTransportDisconnected;
 
             _client.Dispose();
             _eventTransport.Dispose();

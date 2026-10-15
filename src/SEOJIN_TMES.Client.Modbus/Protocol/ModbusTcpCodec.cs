@@ -72,6 +72,7 @@ namespace SEOJIN_TMES.Client.Modbus.Protocol
                 };
             }
 
+            ushort startAddress = lastRequest.Address;
             ushort transactionId = FromBigEndian(frame, (int)ResponseIndex.TransactionId);
             ushort porotocolId = FromBigEndian(frame, (int)ResponseIndex.ProtocolId);
             byte unitId = frame[(int)ResponseIndex.UnitId];
@@ -90,6 +91,7 @@ namespace SEOJIN_TMES.Client.Modbus.Protocol
                     break;
 
                 case ModbusFunctionCode.WriteSingleRegister:
+                    startAddress = FromBigEndian(frame, (int)ResponseIndex.WriteAckAddress);
                     dataLength = 2;
                     dataStartIndex = (int)ResponseIndex.WriteAckData;
                     break;
@@ -105,7 +107,7 @@ namespace SEOJIN_TMES.Client.Modbus.Protocol
             var data = new List<ushort>(dataLength / 2);
             int index = dataStartIndex;
 
-            for (int i = 0; i < dataLength && index + 1 < frame.Length; i += 2)
+            for (int i = 0; i < dataLength && index + 1 < frame.Length; i += 2, index += 2)
             {
                 //data.Add((ushort)((frame[index++] << 8) + frame[index++]));
                 data.Add(FromBigEndian(frame, index));

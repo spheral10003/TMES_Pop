@@ -70,6 +70,8 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
         {
             if (_nutrunner.IsConnected)
             {
+                // 핸드셰이크는 Alive 주기(5초)와 별도로, 50ms tick 마다 확인한다.
+                _nutrunner.ProcessEventHandshake();
                 KeepAlive();
                 return;
             }
@@ -119,7 +121,7 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
             _firstAttempt = false;
             _aliveTimer.Restart();
 
-            Console.WriteLine($"{e.Id} , 연결 {e.IsConnected}");
+            Console.WriteLine($"{e.Code} , 연결 {e.IsConnected}");
 
         }
 
@@ -151,7 +153,7 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
 
         private void RaiseAlarm(AlarmCode code, string message)
         {
-            AlarmOccurred?.Invoke(this, new AlarmEventArgs(Id, code, message));
+            AlarmOccurred?.Invoke(this, new AlarmEventArgs(_nutrunner.Info.Code, code, message));
         }
             
 

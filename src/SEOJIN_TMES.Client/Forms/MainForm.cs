@@ -590,7 +590,7 @@ namespace SEOJIN_TMES.Client.Forms
 
         private void OnConnectionChanged(object? sender, EquipmentConnectionEventArgs e)
         {
-            InvokeUi(() => AppLog.Warn($"[ID {e.Id}] {(e.IsConnected ? "연결 됨" : "연결 끊김")}"));
+            InvokeUi(() => AppLog.Warn($"[ID {e.Code}] {(e.IsConnected ? "연결 됨" : "연결 끊김")}"));
         }
             
 
@@ -607,7 +607,7 @@ namespace SEOJIN_TMES.Client.Forms
 
                foreach (ushort value in e.Data)
                {
-                   AppLog.Warn($"[ID {e.Id}][{address++:D4}] : {value}");
+                   AppLog.Warn($"[ID {e.Code}][{address++:D4}] : {value}");
                }
 
            });
@@ -620,7 +620,7 @@ namespace SEOJIN_TMES.Client.Forms
                 FasteningData data = e.Data;
 
                 AppLog.Warn("────────────────────────");
-                AppLog.Warn($"[ID {e.Id}] Fastening");
+                AppLog.Warn($"[ID {e.Code}] Fastening");
                 AppLog.Warn($"[ToolId] : {data.ToolId}");
                 AppLog.Warn($"[FastenTime] : {data.FastenTime}");
                 AppLog.Warn($"[Preset] : {data.Preset}");
