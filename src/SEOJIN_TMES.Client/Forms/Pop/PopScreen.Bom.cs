@@ -32,6 +32,39 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
         private int _bomSpecSelectedRow = 0;
 
+        /// <summary>
+        /// [BOM 스팩] 그리드를 다시 그리는 중(DataSource 바인딩 · RefreshData)인 구간의 깊이.
+        /// 0보다 크면 <c>GridViewBomSpec_FocusedRowChanged</c>를 무시한다 —
+        /// 다시 그릴 때 DevExpress가 포커스 행을 재설정하며 이벤트를 올리는데,
+        /// 그때마다 너트러너에 목표 토크를 다시 쓰거나 "사용할 수 있는 너트러너가 없습니다" 창이 뜨면 안 된다.
+        /// 바깥 구간 안에서 <see cref="RefreshBomSpecGrid"/>를 또 불러도 풀리지 않도록 bool이 아닌 카운터로 둔다.
+        /// </summary>
+        private int _bomSpecRedrawDepth;
+
+        private bool IsBomSpecRedrawing => _bomSpecRedrawDepth > 0;
+
+        private void BeginBomSpecRedraw() => _bomSpecRedrawDepth++;
+
+        private void EndBomSpecRedraw()
+        {
+            if (_bomSpecRedrawDepth > 0)
+                _bomSpecRedrawDepth--;
+        }
+
+        /// <summary>값만 바뀐 행을 다시 그린다 — 포커스 이벤트는 올리지 않는다.</summary>
+        private void RefreshBomSpecGrid()
+        {
+            BeginBomSpecRedraw();
+            try
+            {
+                gridViewBomSpec.RefreshData();
+            }
+            finally
+            {
+                EndBomSpecRedraw();
+            }
+        }
+
         private async Task<List<PopBomSpecDto>> FetchBomSpecsAsync()
         {
             //if (UseMock)
@@ -367,7 +400,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             target.TorqueResult = TorqueValue;
             target.AngleResult = AngleValue;
             target.IsManualInput = false;
-            gridViewBomSpec.RefreshData();
+            RefreshBomSpecGrid();
 
             var result = new PopBomSpecResultDto
             {

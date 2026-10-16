@@ -395,16 +395,25 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 _equipments = screen.Equipments;
 
                 gridMaterial.DataSource = _materials;
-                gridBomSpec.DataSource = _bomSpecs;
                 gridInspection.DataSource = _inspections;
                 gridEquipment.DataSource = _equipments;
 
                 gridViewMaterial.RefreshData();
-                gridViewBomSpec.RefreshData();
                 gridViewInspection.RefreshData();
                 gridViewEquipment.RefreshData();
 
-                ApplyBomSpecHighlighting(_bomSpecs);
+                // 바인딩 · 하이라이트 중 포커스가 움직여도 너트러너에 토크를 쓰지 않는다.
+                BeginBomSpecRedraw();
+                try
+                {
+                    gridBomSpec.DataSource = _bomSpecs;
+                    gridViewBomSpec.RefreshData();
+                    ApplyBomSpecHighlighting(_bomSpecs);
+                }
+                finally
+                {
+                    EndBomSpecRedraw();
+                }
 
                 await LoadImageAsync();
                 //await LoadDrawingAsync();
@@ -540,7 +549,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             spec.TorqueResult = CeilTorque((spec.TorqueLower.Value + spec.TorqueUpper.Value) / 2m);
             spec.IsManualInput = true;
 
-            gridViewBomSpec.RefreshData();
+            RefreshBomSpecGrid();
             AppLog.Info($"[POP] 수동 렌치 중간값 입력 - {spec.BomSpecName}/{spec.InputPosition} = {spec.TorqueResult} " +
                         $"(하한 {spec.TorqueLower} ~ 상한 {spec.TorqueUpper})");
         }
@@ -603,6 +612,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
         private void GridViewBomSpec_FocusedRowChanged(object sender, FocusedRowChangedEventArgs e)
         {
+            // 바인딩 · RefreshData로 다시 그리는 중에 생긴 포커스 이동은 작업자가 고른 것이 아니다.
+            if (IsBomSpecRedrawing)
+                return;
+
             if (e.FocusedRowHandle < 0)
                 return;
 
@@ -837,14 +850,23 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// </summary>
         private async Task FetchAndBindBomAsync()
         {
-            _bomSpecs = await LoadAndBindGridAsync(
-                gridBomSpec,
-                FetchBomSpecsAsync,
-                "BOM"
-            );
+            // LoadAndBindGridAsync 안에서 DataSource를 넣으므로 조회 · 바인딩 전체를 감싼다.
+            BeginBomSpecRedraw();
+            try
+            {
+                _bomSpecs = await LoadAndBindGridAsync(
+                    gridBomSpec,
+                    FetchBomSpecsAsync,
+                    "BOM"
+                );
 
-            // Apply BOM-specific highlighting for torque results
-            ApplyBomSpecHighlighting(_bomSpecs);
+                // Apply BOM-specific highlighting for torque results
+                ApplyBomSpecHighlighting(_bomSpecs);
+            }
+            finally
+            {
+                EndBomSpecRedraw();
+            }
         }
 
         /// <summary>
