@@ -236,6 +236,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             pageEquip.Text = Language.Pop_TabEquipment;
             chkManualWrench.Text = Language.Pop_ManualWrench;
             btnSaveResults.Text = Language.Pop_SaveResult;
+
+            mnuFit.Text = Language.Pop_ImageFit;
+            mnuActual.Text = Language.Pop_ImageActualSize;
         }
 
         /// <summary>현재 테마 색을 화면 전체에 입힌다. 상단바에서 라이트/다크를 전환하면 다시 호출된다.</summary>
@@ -551,6 +554,12 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (gridViewBomSpec.FocusedColumn?.FieldName != TorqueResultField)
                 return;
 
+            if (!IsProcessRunning)
+            {
+                AppLog.Info($"[POP] 공정 미시작 - 수정 데이터 버림 ( 상태 {_progressState})");
+                return;
+            }
+
             var text = Convert.ToString(e.Value, CultureInfo.CurrentCulture)?.Trim();
 
             if (string.IsNullOrEmpty(text) || text == "-")
@@ -606,7 +615,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             
             // 목표 토크는 서버 기준정보 값을 그대로 쓴다(클라이언트가 계산하지 않는다).
             if (WriteTorqueToEquipment(spec.TorqueTarget.Value) == null)
-                AppMessageBox.Warn(this, "장비 없음", Language.Pop_Title);
+                AppMessageBox.Warn(this, "사용 할 수 있는 너트러너가 없습니다.", Language.Pop_Title);
             //AppMessageBox.Warn(this, Language.PopTorque_NoEquipment, Language.Pop_Title);
 
         }
@@ -1017,7 +1026,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (old != null) old.Dispose();
 
             _currentBytes = data;
-            //ZoomToFit();
+            ZoomToFit();
             //lblInfo.Text = string.Format("{0}  |  {1} x {2}  |  {3:N0} bytes{4}",
             //    Path.GetFileName(source), img.Width, img.Height, data.Length,
             //    offset > 0 ? string.Format("  |  헤더 {0} bytes 제거", offset) : "");
@@ -2162,6 +2171,28 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             scrollHost.AutoScrollPosition = new Point(
                 _dragScroll.X - (p.X - _dragStart.X),
                 _dragScroll.Y - (p.Y - _dragStart.Y));
+        }
+
+        /// <summary>
+        /// 이미지가 없으면 우클릭 메뉴를 띄우지 않는다 — 빈 화면에서 맞춤/원본 크기는 의미가 없다.
+        /// 현재 맞춤 모드인지 체크 표시로 알려 준다.
+        /// </summary>
+        private void MenuView_Opening(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            e.Cancel = _image == null;
+            mnuFit.Checked = _fitMode;
+        }
+
+        /// <summary>우클릭 → Image fit. 이후 창 크기가 바뀌어도 계속 맞춘다(_fitMode).</summary>
+        private void MnuFit_Click(object sender, EventArgs e)
+        {
+            ZoomToFit();
+        }
+
+        /// <summary>우클릭 → 원본 크기(100%).</summary>
+        private void MnuActual_Click(object sender, EventArgs e)
+        {
+            SetZoom(100);
         }
 
         private void ZoomBy(double factor)

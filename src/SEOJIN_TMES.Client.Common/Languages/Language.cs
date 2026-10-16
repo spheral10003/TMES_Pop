@@ -272,6 +272,8 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string Pop_DrawingNone => Get(nameof(Pop_DrawingNone));
         public static string Pop_DrawingShareNotConfigured => Get(nameof(Pop_DrawingShareNotConfigured));
         public static string Pop_DrawingLoadFailed => Get(nameof(Pop_DrawingLoadFailed));
+        public static string Pop_ImageFit => Get(nameof(Pop_ImageFit));
+        public static string Pop_ImageActualSize => Get(nameof(Pop_ImageActualSize));
 
         // 작업 조회 현황 / 생산품목 선택 / 관리자 알람
         public static string Common_All => Get(nameof(Common_All));

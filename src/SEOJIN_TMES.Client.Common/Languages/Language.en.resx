@@ -933,4 +933,10 @@
   <data name="Col_WorkQty" xml:space="preserve">
     <value>Work Qty</value>
   </data>
+  <data name="Pop_ImageFit" xml:space="preserve">
+    <value>Image fit</value>
+  </data>
+  <data name="Pop_ImageActualSize" xml:space="preserve">
+    <value>Actual size (100%)</value>
+  </data>
 </root>

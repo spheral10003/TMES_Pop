@@ -34,7 +34,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
     public partial class WorkStatusScreen : XtraUserControl, IThemedScreen
     {
         //private ClientContext _context;
-        private AppSettings _appSet;
+        private Setting _appSet;
         private ApiClientFactory _apiClients;
         /// <summary>선택한 작업지시의 진행 현황 원본(필터 전). 필터는 이 목록을 걸러 그리드에 다시 물린다.</summary>
         private List<WorkProgressDto> _progress = new List<WorkProgressDto>();
@@ -54,7 +54,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
         public void Init()
         {
             //_context = context;
-            _appSet = Global.Instance.Settings.AppSet;
+            _appSet = Global.Instance.Settings;
             _apiClients = Global.Instance.Settings.ApiClients;
 
             ApplyTexts();
@@ -243,7 +243,9 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
                 {
                     btnSearch.Enabled = false;
                     var result = await FetchWorkOrdersAsync(query, busy.Token);
-
+                   // var result = await _apiClients.WorkOrderApiClient.SearchWorkOrdersAsync(_appSet.CurrentUser.Server, cancellationToken)
+                   //?? new List<WorkOrderEntryDto>();
+                    
                     if (IsDisposed || Disposing) return;   // 조회 중 탭을 닫았다
 
                     // 새로 조회한 결과이므로 이전에 읽어 둔 진행 현황은 버린다(같은 지시라도 다시 읽는다).
@@ -280,11 +282,11 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
 
         private async Task<List<WorkOrderEntryDto>> FetchWorkOrdersAsync(WorkStatusQuery query, CancellationToken cancellationToken)
         {
-            if (_appSet.UseMockData)
-            {
-                await Task.Yield();
-                return MockWorkStatusData.SearchWorkOrders(query);
-            }
+            //if (_appSet.UseMockData)
+            //{
+            //    await Task.Yield();
+            //    return MockWorkStatusData.SearchWorkOrders(query);
+            //}
 
             return await _apiClients.WorkStatusApiClient.SearchWorkOrdersAsync(query, cancellationToken)
                    ?? new List<WorkOrderEntryDto>();
@@ -320,7 +322,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
 
         private async Task<List<WorkProgressDto>> FetchProgressAsync(string workOrderNo, string serialNo)
         {
-            if (_appSet.UseMockData)
+            if (_appSet.AppSet.UseMockData)
             {
                 await Task.Yield();
                 return MockWorkStatusData.GetWorkProgress(workOrderNo, serialNo);

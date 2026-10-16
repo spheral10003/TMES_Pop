@@ -38,15 +38,15 @@ namespace SEOJIN_TMES.Client.Menu
 
             var workStatusInquiry = new MenuNode("WorkStatusInquiry", () => Language.Menu_WorkStatusInquiry);
             workStatusInquiry.Icon = AppIcons.Chart;
-            var productionStatus = new MenuNode("ProductionStatusInquiry", () => Language.Menu_ProductionStatusInquiry, () =>
-            {
-                var screen = new ProductionStatusScreen();
-                screen.Init();
-                return screen;
-            });
-            productionStatus.Icon = AppIcons.Chart;
-            productionStatus.Accent = AppTheme.Cyan;
-            workStatusInquiry.AddChild(productionStatus);
+            //var productionStatus = new MenuNode("ProductionStatusInquiry", () => Language.Menu_ProductionStatusInquiry, () =>
+            //{
+            //    var screen = new ProductionStatusScreen();
+            //    screen.Init();
+            //    return screen;
+            //});
+            //productionStatus.Icon = AppIcons.Chart;
+            //productionStatus.Accent = AppTheme.Cyan;
+            //workStatusInquiry.AddChild(productionStatus);
 
             // 작업지시 조건 조회 → 선택한 지시의 공정·스팩별 진행 현황까지 한 화면에서 본다.
             var workStatusSearch = new MenuNode("WorkStatusSearch", () => Language.Menu_WorkStatusSearch, () =>

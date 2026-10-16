@@ -33,7 +33,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PopScreen));
+            
             this.btnPrevProcess = new System.Windows.Forms.Button();
             this.spacerTop = new System.Windows.Forms.Panel();
             this.mainPanel = new DevExpress.XtraEditors.PanelControl();
@@ -41,6 +43,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.viewerSurface = new System.Windows.Forms.Panel();
             this.scrollHost = new DevExpress.XtraEditors.XtraScrollableControl();
             this.picView = new System.Windows.Forms.PictureBox();
+            this.menuView = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.mnuFit = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuActual = new System.Windows.Forms.ToolStripMenuItem();
             this.pdfViewer = new DevExpress.XtraPdfViewer.PdfViewer();
             this.spacerMain = new System.Windows.Forms.Panel();
             this.infoCard = new DevExpress.XtraEditors.PanelControl();
@@ -106,6 +111,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.viewerSurface.SuspendLayout();
             this.scrollHost.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picView)).BeginInit();
+            this.menuView.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.infoCard)).BeginInit();
             this.infoCard.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.fieldPanel)).BeginInit();
@@ -214,14 +220,40 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 
             // picView
             // 
-            this.picView.Dock = System.Windows.Forms.DockStyle.Fill;
+            //this.picView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.picView.ContextMenuStrip = this.menuView;
             this.picView.Image = ((System.Drawing.Image)(resources.GetObject("picView.Image")));
             this.picView.Location = new System.Drawing.Point(0, 0);
             this.picView.Name = "picView";
             this.picView.Size = new System.Drawing.Size(1074, 583);
-            this.picView.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            //this.picView.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.picView.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.picView.TabIndex = 1;
             this.picView.TabStop = false;
+            //
+            // menuView
+            //
+            this.menuView.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mnuFit,
+            this.mnuActual});
+            this.menuView.Name = "menuView";
+            this.menuView.Size = new System.Drawing.Size(181, 48);
+            this.menuView.Opening += new System.ComponentModel.CancelEventHandler(this.MenuView_Opening);
+            //
+            // mnuFit
+            //
+            this.mnuFit.Name = "mnuFit";
+            this.mnuFit.Size = new System.Drawing.Size(180, 22);
+            this.mnuFit.Text = "Image fit";
+            this.mnuFit.Click += new System.EventHandler(this.MnuFit_Click);
+            //
+            // mnuActual
+            //
+            this.mnuActual.Name = "mnuActual";
+            this.mnuActual.Size = new System.Drawing.Size(180, 22);
+            this.mnuActual.Text = "100%";
+            this.mnuActual.Click += new System.EventHandler(this.MnuActual_Click);
+
             // 
             // pdfViewer
             // 
@@ -938,6 +970,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.viewerSurface.ResumeLayout(false);
             this.scrollHost.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.picView)).EndInit();
+            this.menuView.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.infoCard)).EndInit();
             this.infoCard.ResumeLayout(false);
             this.infoCard.PerformLayout();
@@ -1047,5 +1080,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private System.Windows.Forms.Button btnSaveResults;
         private DevExpress.XtraEditors.XtraScrollableControl scrollHost;
         private System.Windows.Forms.PictureBox picView;
+        private System.Windows.Forms.ContextMenuStrip menuView;
+        private System.Windows.Forms.ToolStripMenuItem mnuFit;
+        private System.Windows.Forms.ToolStripMenuItem mnuActual;
     }
 }
