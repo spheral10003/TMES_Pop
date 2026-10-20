@@ -35,7 +35,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PopScreen));
-            
             this.btnPrevProcess = new System.Windows.Forms.Button();
             this.spacerTop = new System.Windows.Forms.Panel();
             this.mainPanel = new DevExpress.XtraEditors.PanelControl();
@@ -153,10 +152,11 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 
             // btnPrevProcess
             // 
-            this.btnPrevProcess.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
+            this.btnPrevProcess.BackColor = System.Drawing.Color.Gray;
+            this.btnPrevProcess.FlatAppearance.MouseOverBackColor = System.Drawing.Color.LightGray;
             this.btnPrevProcess.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnPrevProcess.Font = new System.Drawing.Font("Arial Narrow", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnPrevProcess.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.btnPrevProcess.Font = new System.Drawing.Font("Noto Sans KR Medium", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.btnPrevProcess.ForeColor = System.Drawing.Color.White;
             this.btnPrevProcess.Image = ((System.Drawing.Image)(resources.GetObject("btnPrevProcess.Image")));
             this.btnPrevProcess.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.btnPrevProcess.Location = new System.Drawing.Point(13, 7);
@@ -220,40 +220,36 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 
             // picView
             // 
-            //this.picView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.picView.ContextMenuStrip = this.menuView;
-            this.picView.Image = ((System.Drawing.Image)(resources.GetObject("picView.Image")));
             this.picView.Location = new System.Drawing.Point(0, 0);
             this.picView.Name = "picView";
             this.picView.Size = new System.Drawing.Size(1074, 583);
-            //this.picView.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.picView.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.picView.TabIndex = 1;
             this.picView.TabStop = false;
-            //
+            // 
             // menuView
-            //
+            // 
             this.menuView.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.mnuFit,
             this.mnuActual});
             this.menuView.Name = "menuView";
-            this.menuView.Size = new System.Drawing.Size(181, 48);
+            this.menuView.Size = new System.Drawing.Size(123, 48);
             this.menuView.Opening += new System.ComponentModel.CancelEventHandler(this.MenuView_Opening);
-            //
+            // 
             // mnuFit
-            //
+            // 
             this.mnuFit.Name = "mnuFit";
-            this.mnuFit.Size = new System.Drawing.Size(180, 22);
+            this.mnuFit.Size = new System.Drawing.Size(122, 22);
             this.mnuFit.Text = "Image fit";
             this.mnuFit.Click += new System.EventHandler(this.MnuFit_Click);
-            //
+            // 
             // mnuActual
-            //
+            // 
             this.mnuActual.Name = "mnuActual";
-            this.mnuActual.Size = new System.Drawing.Size(180, 22);
+            this.mnuActual.Size = new System.Drawing.Size(122, 22);
             this.mnuActual.Text = "100%";
             this.mnuActual.Click += new System.EventHandler(this.MnuActual_Click);
-
             // 
             // pdfViewer
             // 
@@ -620,7 +616,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.lblProgressState.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.lblProgressState.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(124)))), ((int)(((byte)(58)))), ((int)(((byte)(237)))));
             this.lblProgressState.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.lblProgressState.Font = new System.Drawing.Font("Arial", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblProgressState.Font = new System.Drawing.Font("Noto Sans KR Medium", 9.75F, System.Drawing.FontStyle.Bold);
             this.lblProgressState.ForeColor = System.Drawing.Color.White;
             this.lblProgressState.Location = new System.Drawing.Point(768, 7);
             this.lblProgressState.Name = "lblProgressState";
@@ -667,9 +663,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 
             // btnAdminAlarm
             // 
-            this.btnAdminAlarm.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(158)))), ((int)(((byte)(11)))));
+            this.btnAdminAlarm.BackColor = System.Drawing.Color.Gray;
+            this.btnAdminAlarm.FlatAppearance.MouseOverBackColor = System.Drawing.Color.LightGray;
             this.btnAdminAlarm.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnAdminAlarm.Font = new System.Drawing.Font("Arial Narrow", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnAdminAlarm.Font = new System.Drawing.Font("Noto Sans KR Medium", 9.75F, System.Drawing.FontStyle.Bold);
             this.btnAdminAlarm.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
             this.btnAdminAlarm.Image = ((System.Drawing.Image)(resources.GetObject("btnAdminAlarm.Image")));
             this.btnAdminAlarm.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -684,9 +681,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 
             // btnProcessList
             // 
-            this.btnProcessList.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(124)))), ((int)(((byte)(58)))), ((int)(((byte)(237)))));
+            this.btnProcessList.BackColor = System.Drawing.Color.Gray;
+            this.btnProcessList.FlatAppearance.MouseOverBackColor = System.Drawing.Color.LightGray;
             this.btnProcessList.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnProcessList.Font = new System.Drawing.Font("Arial Narrow", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnProcessList.Font = new System.Drawing.Font("Noto Sans KR Medium", 9.75F, System.Drawing.FontStyle.Bold);
             this.btnProcessList.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
             this.btnProcessList.Image = ((System.Drawing.Image)(resources.GetObject("btnProcessList.Image")));
             this.btnProcessList.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -701,9 +699,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 
             // btnStartProcess
             // 
-            this.btnStartProcess.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(16)))), ((int)(((byte)(185)))), ((int)(((byte)(129)))));
+            this.btnStartProcess.BackColor = System.Drawing.Color.Gray;
+            this.btnStartProcess.FlatAppearance.MouseOverBackColor = System.Drawing.Color.LightGray;
             this.btnStartProcess.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnStartProcess.Font = new System.Drawing.Font("Arial Narrow", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnStartProcess.Font = new System.Drawing.Font("Noto Sans KR Medium", 9.75F, System.Drawing.FontStyle.Bold);
             this.btnStartProcess.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
             this.btnStartProcess.Image = ((System.Drawing.Image)(resources.GetObject("btnStartProcess.Image")));
             this.btnStartProcess.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -718,9 +717,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 
             // btnNextProcess
             // 
-            this.btnNextProcess.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
+            this.btnNextProcess.BackColor = System.Drawing.Color.Gray;
+            this.btnNextProcess.FlatAppearance.MouseOverBackColor = System.Drawing.Color.LightGray;
             this.btnNextProcess.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnNextProcess.Font = new System.Drawing.Font("Arial Narrow", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnNextProcess.Font = new System.Drawing.Font("Noto Sans KR Medium", 9.75F, System.Drawing.FontStyle.Bold);
             this.btnNextProcess.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
             this.btnNextProcess.Image = ((System.Drawing.Image)(resources.GetObject("btnNextProcess.Image")));
             this.btnNextProcess.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -729,15 +729,16 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.btnNextProcess.Padding = new System.Windows.Forms.Padding(5, 0, 0, 0);
             this.btnNextProcess.Size = new System.Drawing.Size(124, 31);
             this.btnNextProcess.TabIndex = 12;
-            this.btnNextProcess.Text = "이전 공정";
+            this.btnNextProcess.Text = "다음 공정";
             this.btnNextProcess.UseVisualStyleBackColor = false;
             this.btnNextProcess.Click += new System.EventHandler(this.btnNextProcess_Click);
             // 
             // btnStopProcess
             // 
-            this.btnStopProcess.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(244)))), ((int)(((byte)(63)))), ((int)(((byte)(94)))));
+            this.btnStopProcess.BackColor = System.Drawing.Color.Gray;
+            this.btnStopProcess.FlatAppearance.MouseOverBackColor = System.Drawing.Color.LightGray;
             this.btnStopProcess.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnStopProcess.Font = new System.Drawing.Font("Arial Narrow", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnStopProcess.Font = new System.Drawing.Font("Noto Sans KR Medium", 9.75F, System.Drawing.FontStyle.Bold);
             this.btnStopProcess.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
             this.btnStopProcess.Image = ((System.Drawing.Image)(resources.GetObject("btnStopProcess.Image")));
             this.btnStopProcess.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -886,7 +887,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.gridViewBomSpec.GridControl = this.gridBomSpec;
             this.gridViewBomSpec.Name = "gridViewBomSpec";
             this.gridViewBomSpec.RowClick += new DevExpress.XtraGrid.Views.Grid.RowClickEventHandler(this.GridViewBomSpec_RowClick);
-            this.gridViewBomSpec.RowCellStyle += new DevExpress.XtraGrid.Views.Grid.RowCellStyleEventHandler(this.GridViewBomSpec_RowCellStyle);
+            this.gridViewBomSpec.RowStyle += new DevExpress.XtraGrid.Views.Grid.RowStyleEventHandler(this.GridViewBomSpec_RowStyle);
             this.gridViewBomSpec.FocusedRowChanged += new DevExpress.XtraGrid.Views.Base.FocusedRowChangedEventHandler(this.GridViewBomSpec_FocusedRowChanged);
             this.gridViewBomSpec.CellValueChanged += new DevExpress.XtraGrid.Views.Base.CellValueChangedEventHandler(this.GridViewBomSpec_CellValueChanged);
             this.gridViewBomSpec.ValidatingEditor += new DevExpress.XtraEditors.Controls.BaseContainerValidateEditorEventHandler(this.GridViewBomSpec_ValidatingEditor);

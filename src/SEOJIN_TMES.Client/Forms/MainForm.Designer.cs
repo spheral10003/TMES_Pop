@@ -226,9 +226,11 @@ namespace SEOJIN_TMES.Client.Forms
             // 
             // lblSessionTime
             // 
-            this.lblSessionTime.Location = new System.Drawing.Point(242, 10);
+            this.lblSessionTime.Appearance.Font = new System.Drawing.Font("Noto Sans KR Medium", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.lblSessionTime.Appearance.Options.UseFont = true;
+            this.lblSessionTime.Location = new System.Drawing.Point(259, 4);
             this.lblSessionTime.Name = "lblSessionTime";
-            this.lblSessionTime.Size = new System.Drawing.Size(50, 14);
+            this.lblSessionTime.Size = new System.Drawing.Size(64, 24);
             this.lblSessionTime.TabIndex = 6;
             this.lblSessionTime.Text = "00:00:00";
             // 

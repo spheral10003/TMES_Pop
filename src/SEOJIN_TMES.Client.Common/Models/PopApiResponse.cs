@@ -82,6 +82,8 @@ namespace SEOJIN_TMES.Client.Common.Models
         [JsonProperty("inptMth")] public string InptMth { get; set; }          // EQP / 그 외=수동
         [JsonProperty("torqueRsltVl")] public decimal? TorqueRsltVl { get; set; }
         [JsonProperty("angleRsltVl")] public decimal? AngleRsltVl { get; set; }
+        [JsonProperty("eqpCd")] public string EquipmentCode { get; set; }
+
     }
 
     public class InspChkItemApi
@@ -168,6 +170,7 @@ namespace SEOJIN_TMES.Client.Common.Models
                     AngleUpper = b.AngleUsl,
                     AngleUnit = b.AngleUnit,
                     AngleResult = b.AngleRsltVl,
+                    EquipmentCode = b.EquipmentCode,
                     IsManualInput = !string.Equals(b.InptMth, "EQP", StringComparison.OrdinalIgnoreCase)
                 }).ToList(),
 

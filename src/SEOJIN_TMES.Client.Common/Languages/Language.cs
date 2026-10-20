@@ -1,3 +1,4 @@
+using System;
 using System.Globalization;
 using System.Reflection;
 using System.Resources;
@@ -8,6 +9,35 @@ namespace SEOJIN_TMES.Client.Common.Languages
     /// <summary>언어 콤보 항목 — 표시 문구와 문화권 코드 한 쌍.</summary>
     public class LanguageOption
     {
+        /// <summary>
+        /// 언어 콤보(로그인 · 메인 화면 공용) 목록.
+        /// 표시 문구는 화면 언어와 상관없이 각 나라 말로 고정한다 — 읽을 수 없는 언어로 바뀌었어도 자기 나라 말은 찾을 수 있어야 한다.
+        ///
+        /// 언어를 추가할 때는 <b>세 곳을 함께</b> 갖춰야 한다 —
+        /// 여기 한 줄 + Language.{두 글자 코드}.resx + Images\flag\{두 글자 코드}.png.
+        /// </summary>
+        public static readonly LanguageOption[] All =
+        {
+            new LanguageOption("한국어", "ko-KR"),
+            new LanguageOption("English", "en-US"),
+            new LanguageOption("Tiếng Việt", "vi-VN")
+        };
+
+        /// <summary>문화권 코드에 해당하는 항목 위치. 못 찾으면 0(한국어).</summary>
+        public static int IndexOf(string culture)
+        {
+            if (string.IsNullOrEmpty(culture) || culture.Length < 2) return 0;
+
+            var twoLetter = culture.Substring(0, 2);
+            for (var i = 0; i < All.Length; i++)
+            {
+                if (All[i].FlagCode.Equals(twoLetter, StringComparison.OrdinalIgnoreCase))
+                    return i;
+            }
+            return 0;
+        }
+
+
         public string Display { get; }
         public string Culture { get; }
 
@@ -36,6 +66,12 @@ namespace SEOJIN_TMES.Client.Common.Languages
             new ResourceManager("SEOJIN_TMES.Client.Common.Languages.Language", typeof(Language).GetTypeInfo().Assembly);
 
         private static string Get(string name) => ResourceManager.GetString(name, CultureInfo.CurrentUICulture);
+
+        /// <summary>
+        /// 스레드 문화권과 상관없이 지정한 문화권의 문구를 꺼낸다.
+        /// 로그인 창처럼 "이 화면만 다른 언어로" 보여야 할 때 쓴다 — 전체 언어는 바꾸지 않는다.
+        /// </summary>
+        public static string GetString(string name, CultureInfo culture) => ResourceManager.GetString(name, culture);
 
         public static string Login_Title => Get(nameof(Login_Title));
         public static string Login_UserInfoGroup => Get(nameof(Login_UserInfoGroup));

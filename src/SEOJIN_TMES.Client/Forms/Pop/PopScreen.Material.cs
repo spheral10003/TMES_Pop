@@ -1,9 +1,13 @@
-﻿using SEOJIN_TMES.Client.ApiClient;
+﻿using DevExpress.Utils;
+using DevExpress.XtraGrid.Views.Grid;
+using SEOJIN_TMES.Client.ApiClient;
 using SEOJIN_TMES.Client.Common.Languages;
 using SEOJIN_TMES.Client.Common.Models;
 using SEOJIN_TMES.Client.Forms.Common;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace SEOJIN_TMES.Client.Forms.Pop
 {
@@ -11,7 +15,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
     {
         private List<PopInputMaterialDto> _materials = new List<PopInputMaterialDto>();
 
-        private async Task<List<PopInputMaterialDto>> FetchMaterialsAsync()
+        private async Task<List<PopInputMaterialDto>> GetInputMaterials()
         {
             //if (UseMock)
             //{
@@ -24,7 +28,34 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
 
+        private bool MaterialsChk()
+        {
+            for (int i = 0; i < _materials.Count; i++)
+            {
+                var item = _materials[i];
+                if (item.IsSerialInputCompleted)
+                    continue;
 
+                int rowHandle = gridViewMaterial.GetRowHandle(i);   // DataSource 인덱스 → rowHandle
+                gridViewMaterial.FocusedRowHandle = rowHandle;
+                gridViewMaterial.FocusedColumn = gridViewMaterial.Columns["SerialInputStateText"];
+
+                var e = new RowCellClickEventArgs(
+                    new DXMouseEventArgs(MouseButtons.Left, 1, 0, 0, 0),
+                    rowHandle,
+                    gridViewMaterial.Columns["SerialInputStateText"]
+                    );
+
+                GridViewMaterial_RowCellClick(gridViewMaterial, e); // RowCellClick 이벤트 핸들러 호출
+                
+            }
+
+            // 모든 자재의 시리얼 입력이 끝났을 때만 BOM 탭으로 이동
+            if (_materials.Count > 0 && _materials.All(m => m.IsSerialInputCompleted))
+                tabSpec.SelectedTabPage = pageBom;
+
+            return true;
+        }
 
         // ─────────────────────────────────────────────────────────────────────────
         //  탭 1 — 투입자재 시리얼번호 입력

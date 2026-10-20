@@ -1,3 +1,4 @@
+using DevExpress.XtraBars.Navigation;
 using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
 using DevExpress.XtraEditors.Repository;
@@ -107,8 +108,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         //private Dictionary<PopTab, MeisButton> _tabButtons;
 
         /// <summary>우측 공정 정보 카드의 캡션 라벨 / 입력칸(같은 순서로 짝을 이룬다).</summary>
-        private LabelControl[] _fieldLabels;
-        private TextEdit[] _fieldEditors;
+        //private LabelControl[] _fieldLabels;
+        //private TextEdit[] _fieldEditors;
 
         /// <summary>도면 자리표시자에 그릴 안내 문구(불러오는 중 / 도면 없음 / 실패 사유).</summary>
         private string _viewerMessage;
@@ -357,14 +358,14 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
                 WireEquipmentEvents();
                 RefreshEquipmentStates();
-
+                MaterialsChk();
                 //InitializeTabConfigs();
                 //await InitializeAllTabsAsync();
 
                 // Set initial active tab
                 //SetActiveTab(PopTab.BomSpec);
 
-                
+
             }
             catch (Exception ex)
             {
@@ -402,13 +403,17 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 gridViewInspection.RefreshData();
                 gridViewEquipment.RefreshData();
 
+                //gridBomSpec.DataSource = _bomSpecs;
+                //gridViewBomSpec.RefreshData();
+
                 // 바인딩 · 하이라이트 중 포커스가 움직여도 너트러너에 토크를 쓰지 않는다.
                 BeginBomSpecRedraw();
+
                 try
                 {
                     gridBomSpec.DataSource = _bomSpecs;
                     gridViewBomSpec.RefreshData();
-                    ApplyBomSpecHighlighting(_bomSpecs);
+                    //ApplyBomSpecHighlighting(_bomSpecs);
                 }
                 finally
                 {
@@ -433,38 +438,38 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// </summary>
         private void InitializeTabConfigs()
         {
-            _tabConfigs = new TabInitConfig[]
-            {
-                new TabInitConfig
-                {
-                    TabType = PopTab.Material,
-                    GridControl = gridMaterial,
-                    GridView = gridViewMaterial,
-                    ThemeColor = AppTheme.Emerald,
-                    TabName = "Material",
-                    LoadDataAsync = FetchAndBindMaterialAsync,
-                    ConfigureColumns = ConfigureMaterialGrid
-                },
-                new TabInitConfig
-                {
-                    TabType = PopTab.BomSpec,
-                    GridControl = gridBomSpec,
-                    GridView = gridViewBomSpec,
-                    ThemeColor = AppTheme.Indigo,
-                    TabName = "BOM",
-                    LoadDataAsync = FetchAndBindBomAsync,
-                    ConfigureColumns = ConfigureBomSpecGrid
-                },
-                new TabInitConfig
-                {
-                    TabType = PopTab.Inspection,
-                    GridControl = gridInspection,
-                    GridView = gridViewInspection,
-                    ThemeColor = AppTheme.Violet,
-                    TabName = "Inspection",
-                    LoadDataAsync = FetchAndBindInspectionAsync,
-                    ConfigureColumns = ConfigureInspectionGrid
-                }//,
+            //_tabConfigs = new TabInitConfig[]
+            //{
+            //    new TabInitConfig
+            //    {
+            //        TabType = PopTab.Material,
+            //        GridControl = gridMaterial,
+            //        GridView = gridViewMaterial,
+            //        ThemeColor = AppTheme.Emerald,
+            //        TabName = "Material",
+            //        LoadDataAsync = FetchAndBindMaterialAsync,
+            //        ConfigureColumns = ConfigureMaterialGrid
+            //    },
+            //    new TabInitConfig
+            //    {
+            //        TabType = PopTab.BomSpec,
+            //        GridControl = gridBomSpec,
+            //        GridView = gridViewBomSpec,
+            //        ThemeColor = AppTheme.Indigo,
+            //        TabName = "BOM",
+            //        LoadDataAsync = FetchAndBindBomAsync,
+            //        ConfigureColumns = ConfigureBomSpecGrid
+            //    },
+            //    new TabInitConfig
+            //    {
+            //        TabType = PopTab.Inspection,
+            //        GridControl = gridInspection,
+            //        GridView = gridViewInspection,
+            //        ThemeColor = AppTheme.Violet,
+            //        TabName = "Inspection",
+            //        LoadDataAsync = FetchAndBindInspectionAsync,
+            //        ConfigureColumns = ConfigureInspectionGrid
+            //    }
                 //new TabInitConfig
                 //{
                 //    TabType = PopTab.Equipment,
@@ -475,36 +480,36 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 //    LoadDataAsync = FetchAndBindEquipmentAsync,
                 //    ConfigureColumns = ConfigureEquipmentGrid
                 //}
-            };
+            //};
         }
 
         /// <summary>
         /// Phase 1: Unified tab initialization method.
         /// All tabs are initialized using the same pattern from _tabConfigs array.
         /// </summary>
-        private async Task InitializeAllTabsAsync()
-        {
-            foreach (var config in _tabConfigs)
-            {
-                try
-                {
-                    // Apply theme to grid
-                    AppTheme.Grid(config.GridControl, config.GridView, config.ThemeColor);
+        //private async Task InitializeAllTabsAsync()
+        //{
+        //    foreach (var config in _tabConfigs)
+        //    {
+        //        try
+        //        {
+        //            // Apply theme to grid
+        //            AppTheme.Grid(config.GridControl, config.GridView, config.ThemeColor);
 
-                    // Configure grid columns
-                    config.ConfigureColumns();
+        //            // Configure grid columns
+        //            config.ConfigureColumns();
 
-                    // Load data
-                    await config.LoadDataAsync();
-                }
-                catch (Exception ex)
-                {
-                    AppMessageBox.Warn(this, 
-                        string.Format("Failed to initialize tab '{0}': {1}", config.TabName, ex.Message), 
-                        Language.Pop_Title);
-                }
-            }
-        }
+        //            // Load data
+        //            await config.LoadDataAsync();
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            AppMessageBox.Warn(this, 
+        //                string.Format("Failed to initialize tab '{0}': {1}", config.TabName, ex.Message), 
+        //                Language.Pop_Title);
+        //        }
+        //    }
+        //}
 
         /// <summary>연결 실패/사용불가 상태는 붉은 글씨로 눈에 띄게 한다(상태 표시일 뿐 판정은 아니다).</summary>
         private void GridViewEquipment_RowCellStyle(object sender, RowCellStyleEventArgs e)
@@ -547,7 +552,17 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             }
 
             spec.TorqueResult = CeilTorque((spec.TorqueLower.Value + spec.TorqueUpper.Value) / 2m);
+            spec.AngleResult = spec.AngleTarget.Value;
             spec.IsManualInput = true;
+            spec.EquipmentCode = "MAN";
+
+            var result = new PopBomSpecResultDto
+            {
+                eqpCd = "MAN",
+                torqueRsltVl = spec.TorqueResult,
+                angleRsltVl = spec.AngleResult
+
+            };
 
             RefreshBomSpecGrid();
             AppLog.Info($"[POP] 수동 렌치 중간값 입력 - {spec.BomSpecName}/{spec.InputPosition} = {spec.TorqueResult} " +
@@ -560,7 +575,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// </summary>
         private async void GridViewBomSpec_ValidatingEditor(object sender, BaseContainerValidateEditorEventArgs e)
         {
-            if (gridViewBomSpec.FocusedColumn?.FieldName != TorqueResultField)
+            if (gridViewBomSpec.FocusedColumn?.FieldName != TorqueResultField || gridViewBomSpec.FocusedColumn?.FieldName != AngleResultField)
                 return;
 
             if (!IsProcessRunning)
@@ -590,10 +605,15 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             var view = (GridView)sender;
             int rowHandle = view.FocusedRowHandle;
             var spec = view.GetRow(rowHandle) as PopBomSpecDto;
+            spec.IsManualInput = true;
+            spec.AngleResult = spec.AngleTarget.Value;
+            spec.EquipmentCode = "MAN";
+
             var result = new PopBomSpecResultDto
             {
                 eqpCd = "MAN",
-                torqueRsltVl = CeilTorque((decimal)parsed)
+                torqueRsltVl = CeilTorque((decimal)parsed),
+                angleRsltVl = spec.AngleResult
             };
 
             try
@@ -615,7 +635,11 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 바인딩 · RefreshData로 다시 그리는 중에 생긴 포커스 이동은 작업자가 고른 것이 아니다.
             if (IsBomSpecRedrawing)
                 return;
-
+            if (!IsProcessRunning)
+            {
+                AppLog.Info($"[POP] 공정 미시작 - ( 상태 {_progressState})");
+                return;
+            }
             if (e.FocusedRowHandle < 0)
                 return;
 
@@ -625,7 +649,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
             if (spec?.TorqueTarget == null)
                     return;
-            
+            _bomSpecSelectedRow = e.FocusedRowHandle;
+            AppLog.Info($"[POP] FocusedRow - ( value {_bomSpecSelectedRow})");
             // 목표 토크는 서버 기준정보 값을 그대로 쓴다(클라이언트가 계산하지 않는다).
             if (WriteTorqueToEquipment(spec.TorqueTarget.Value) == null)
                 AppMessageBox.Warn(this, "사용 할 수 있는 너트러너가 없습니다.", Language.Pop_Title);
@@ -635,13 +660,18 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
         private void GridViewBomSpec_RowClick(object sender, RowClickEventArgs e)
         {
+            if (!IsProcessRunning)
+            {
+                AppLog.Info($"[POP] 공정 미시작 - ( 상태 {_progressState})");
+                return;
+            }
             if (e.RowHandle < 0)
                 return;
-
+            
             // 클릭한 Row 처리
             //var row = gridViewBomSpec.GetRow(e.RowHandle);
             _bomSpecSelectedRow = e.RowHandle;
-
+            AppLog.Info($"[POP] 선택한 Row - ( Row 값 {_bomSpecSelectedRow})");
             //var spec = gridViewBomSpec.GetRow(e.RowHandle) as PopBomSpecDto;
 
             // WriteRegister
@@ -656,7 +686,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// </summary>
         private void GridViewBomSpec_InvalidValueException(object sender, InvalidValueExceptionEventArgs e)
         {
-            if (gridViewBomSpec.FocusedColumn?.FieldName != TorqueResultField)
+            if (gridViewBomSpec.FocusedColumn?.FieldName != TorqueResultField || gridViewBomSpec.FocusedColumn?.FieldName != AngleResultField)
                 return;
 
             e.ExceptionMode = ExceptionMode.DisplayError;
@@ -668,14 +698,21 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// </summary>
         private void GridViewBomSpec_CellValueChanged(object sender, CellValueChangedEventArgs e)
         {
-            if (e.Column.FieldName != TorqueResultField)
+            if (!IsProcessRunning)
+            {
+                AppLog.Info($"[POP] 공정 미시작 - ( 상태 {_progressState})");
                 return;
+            }
+            
+            if (e.Column.FieldName != TorqueResultField || e.Column.FieldName != AngleResultField)
+            return;
 
             var spec = gridViewBomSpec.GetRow(e.RowHandle) as PopBomSpecDto;
             if (spec == null)
                 return;
 
             spec.IsManualInput = true;
+            spec.EquipmentCode = "MAN";
             AppLog.Info($"[POP] 토크 결과값 직접 입력 - {spec.BomSpecName}/{spec.InputPosition} = {spec.TorqueResult}");
         }
 
@@ -683,74 +720,31 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// TorqueResult 필드의 특정 셀 색상을 변경합니다.
         /// 토크 값이 범위를 벗어나면 셀의 글자 색상을 Rose(빨강)로 표시합니다.
         /// </summary>
-        private void GridViewBomSpec_RowCellStyle(object sender, RowCellStyleEventArgs e)
+        private void GridViewBomSpec_RowStyle(object sender, RowStyleEventArgs e)
         {
-            if (e.Column.FieldName != TorqueResultField)
-                return;
-
-            bool isTorqueRec = false;
-            bool isAngleRec = false;
-            var target = gridViewBomSpec.GetRow(_bomSpecSelectedRow) as PopBomSpecDto;
-
+            //if (e.RowHandle != _bomSpecSelectedRow)
+            //    return;
+            if (e.RowHandle < 0) return;
+            var target = gridViewBomSpec.GetRow(e.RowHandle) as PopBomSpecDto;
+            
             if (target == null) return;
+            if (target.TorqueResult == null && target.AngleResult == null) return;
 
-            if (target.TorqueLower > target.TorqueResult || target.TorqueResult > target.TorqueUpper)
-            {
-                //gridViewBomSpec.Columns[TorqueResultField].AppearanceCell.ForeColor = AppTheme.Rose;
-                //AppLog.Info($"[POP] {Language.Pop_TorqueNoPendingRow} (설비 {equipmentId}, 값 {TorqueValue}, 결과 NG)");
-                isTorqueRec = false;
-            }
-            else
-            {
-                isTorqueRec = true;
-            }
+            AppLog.Info($"RowStyle {target.TorqueResult}");
 
-            if (target.AngleLower > target.AngleResult || target.AngleResult > target.AngleUpper)
+
+            bool torqueOk = target.TorqueResult >= target.TorqueLower && target.TorqueResult <= target.TorqueUpper;
+            bool angleOk = target.AngleResult >= target.AngleLower && target.AngleResult <= target.AngleUpper;
+
+
+            if (!(torqueOk && angleOk))
             {
-                //gridViewBomSpec.Columns["AngleResult"].AppearanceCell.ForeColor = AppTheme.Rose;
-                //AppLog.Info($"[POP] {Language.Pop_TorqueNoPendingRow} (설비 {equipmentId}, 값 {AngleValue}, 결과 NG)");
-                isAngleRec = false;
-            }
-            else
-            {
-                isAngleRec = true;
+                e.Appearance.BackColor = AppTheme.Rose;
+                //e.Appearance.ForeColor = Color.White;   // 글자가 안 보이면 지정
+                e.HighPriority = true;                  // 선택/포커스 행 색상보다 우선 적용
             }
 
-            if (isTorqueRec && isAngleRec)
-            {
-                //AppLog.Info($"[POP] {Language.Pop_TorqueNoPendingRow} (설비 {equipmentId}, 값 {TorqueValue}, 값 {AngleValue}, 결과 OK)");
-                //_bomSpecSelectedRow++;
-
-                e.Appearance.ForeColor = AppTheme.Rose;
-            }
-            else
-            {
-                //AppLog.Info($"[POP] {Language.Pop_TorqueNoPendingRow} (설비 {equipmentId}, 값 {TorqueValue}, 값 {AngleValue}, 결과 NG)");
-
-                e.Appearance.ForeColor = AppTheme.Emerald;
-            }
-
-
-
-            var row = gridViewBomSpec.GetRow(e.RowHandle) as PopBomSpecDto;
-            if (row == null)
-                return;
-
-            if (decimal.TryParse(row.TorqueResult?.ToString(), out decimal value))
-            {
-                decimal.TryParse(row.TorqueLower?.ToString(), out decimal min);
-                decimal.TryParse(row.TorqueUpper?.ToString(), out decimal max);
-
-                // 토크 값이 범위를 벗어나면 글자 색상을 Rose(빨강)로 변경
-                if (value < min || value > max)
-                {
-                    e.Appearance.ForeColor = AppTheme.Rose;
-                }
-                else
-                {
-                    e.Appearance.ForeColor = AppTheme.Emerald;
-                }
-            }
+            AppLog.Info($"RowStyle 결과에 따른 색상 변경");
         }
 
         private void GridViewInspection_ShowingEditor(object sender, System.ComponentModel.CancelEventArgs e)
@@ -835,101 +829,102 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// Phase 2: Material tab data fetch and bind.
         /// Replaces: Material.cs의 LoadMaterialAsync()
         /// </summary>
-        private async Task FetchAndBindMaterialAsync()
-        {
-            _materials = await LoadAndBindGridAsync(
-                gridMaterial,
-                FetchMaterialsAsync,
-                "Material"
-            );
-        }
+        //private async Task FetchAndBindMaterialAsync()
+        //{
+        //    _materials = await LoadAndBindGridAsync(
+        //        gridMaterial,
+        //        FetchMaterialsAsync,
+        //        "Material"
+        //    );
+        //}
 
         /// <summary>
         /// Phase 2: BOM tab data fetch and bind with additional highlighting logic.
         /// Replaces: Bom.cs의 LoadBomAsync() (특수 로직 유지)
         /// </summary>
-        private async Task FetchAndBindBomAsync()
-        {
-            // LoadAndBindGridAsync 안에서 DataSource를 넣으므로 조회 · 바인딩 전체를 감싼다.
-            BeginBomSpecRedraw();
-            try
-            {
-                _bomSpecs = await LoadAndBindGridAsync(
-                    gridBomSpec,
-                    FetchBomSpecsAsync,
-                    "BOM"
-                );
+        //private async Task FetchAndBindBomAsync()
+        //{
+        //    // LoadAndBindGridAsync 안에서 DataSource를 넣으므로 조회 · 바인딩 전체를 감싼다.
+        //    BeginBomSpecRedraw();
+        //    try
+        //    {
+        //        _bomSpecs = await LoadAndBindGridAsync(
+        //            gridBomSpec,
+        //            FetchBomSpecsAsync,
+        //            "BOM"
+        //        );
 
-                // Apply BOM-specific highlighting for torque results
-                ApplyBomSpecHighlighting(_bomSpecs);
-            }
-            finally
-            {
-                EndBomSpecRedraw();
-            }
-        }
+        //        // Apply BOM-specific highlighting for torque results
+        //        ApplyBomSpecHighlighting(_bomSpecs);
+        //    }
+        //    finally
+        //    {
+        //        EndBomSpecRedraw();
+        //    }
+        //}
 
         /// <summary>
         /// Phase 2: Inspection tab data fetch and bind.
         /// Replaces: Inspection.cs의 LoadInspectionAsync()
         /// </summary>
-        private async Task FetchAndBindInspectionAsync()
-        {
-            _inspections = await LoadAndBindGridAsync(
-                gridInspection,
-                FetchInspectionsAsync,
-                "Inspection"
-            );
-        }
+        //private async Task FetchAndBindInspectionAsync()
+        //{
+        //    _inspections = await LoadAndBindGridAsync(
+        //        gridInspection,
+        //        FetchInspectionsAsync,
+        //        "Inspection"
+        //    );
+        //}
 
         /// <summary>
         /// Phase 2: Equipment tab data fetch and bind with equipment state refresh.
         /// Replaces: Equipment.cs의 LoadEquipAsync()
         /// </summary>
-        private async Task FetchAndBindEquipmentAsync()
-        {
-            //_equipments = await LoadAndBindGridAsync(
-            //    gridEquipment,
-            //    FetchEquipmentsAsync,
-            //    "Equipment"
-            //);
+        //private async Task FetchAndBindEquipmentAsync()
+        //{
+        //    //_equipments = await LoadAndBindGridAsync(
+        //    //    gridEquipment,
+        //    //    FetchEquipmentsAsync,
+        //    //    "Equipment"
+        //    //);
 
-            // Refresh equipment connection states
-            RefreshEquipmentStates();
-        }
+        //    // Refresh equipment connection states
+        //    RefreshEquipmentStates();
+        //}
 
-        /// <summary>
-        /// Helper method for BOM tab: Highlight torque results outside specification range.
-        /// Extracted from original LoadBomAsync() method in Bom.cs.
-        /// </summary>
-        private void ApplyBomSpecHighlighting(List<PopBomSpecDto> specs)
-        {
-            if (specs == null || specs.Count == 0)
-                return;
+        ///// <summary>
+        ///// Helper method for BOM tab: Highlight torque results outside specification range.
+        ///// Extracted from original LoadBomAsync() method in Bom.cs.
+        ///// </summary>
+        //private void ApplyBomSpecHighlighting(List<PopBomSpecDto> specs)
+        //{
+        //    if (specs == null || specs.Count == 0)
+        //        return;
 
-            for (int i = 0; i < gridViewBomSpec.RowCount; i++)
-            {
-                var target = gridViewBomSpec.GetRow(i) as PopBomSpecDto;
-                if (target == null)
-                    continue;
+        //    for (int i = 0; i < gridViewBomSpec.RowCount; i++)
+        //    {
+        //        var target = gridViewBomSpec.GetRow(i) as PopBomSpecDto;
+        //        if (target == null)
+        //            continue;
 
-                if (decimal.TryParse(target.TorqueResult?.ToString(), out decimal value))
-                {
-                    decimal.TryParse(target.TorqueLower?.ToString(), out decimal min);
-                    decimal.TryParse(target.TorqueUpper?.ToString(), out decimal max);
+        //        if (decimal.TryParse(target.TorqueResult?.ToString(), out decimal value))
+        //        {
+        //            decimal.TryParse(target.TorqueLower?.ToString(), out decimal min);
+        //            decimal.TryParse(target.TorqueUpper?.ToString(), out decimal max);
 
-                    if (value < min || value > max)
-                    {
-                        gridViewBomSpec.Columns["TorqueResult"].AppearanceCell.ForeColor = AppTheme.Rose;
+        //            if (value < min || value > max)
+        //            {
+        //                gridViewBomSpec.Columns["TorqueResult"].AppearanceCell.ForeColor = AppTheme.Rose;
                         
-                    }
-                    else
-                    {
-                        gridViewBomSpec.FocusedRowHandle = i;
-                    }
-                }
-            }
-        }
+
+        //            }
+        //            else
+        //            {
+        //                gridViewBomSpec.FocusedRowHandle = i;
+        //            }
+        //        }
+        //    }
+        //}
 
         // 
         //  작업 표준 / 도면 (SMB 공유 폴더의 PDF)
@@ -999,27 +994,38 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
         private async Task LoadImageAsync()
         {
-            ClearImage();
-            string path = @"X:\attach";
-            //string pathTest = @"D:\01_Project\01_Seojin_meis\03_Source\seojin_tmes\seojin_meis\src\SEOJIN_TMES.Client\Images\11_Texon_Logo_Signature.svg";
-            if (_info.DrawingFilePath == null)
+            try
             {
-                ShowViewerMessage(Language.Pop_DrawingNone);
-                return;
+                ClearImage();
+                string path = @"X:\attach";
+                //string pathTest = @"D:\01_Project\01_Seojin_meis\03_Source\seojin_tmes\seojin_meis\src\SEOJIN_TMES.Client\Images\11_Texon_Logo_Signature.svg";
+                if (_info.DrawingFilePath == null)
+                {
+                    ShowViewerMessage(Language.Pop_DrawingNone);
+                    return;
+                }
+                _info.DrawingFilePath = _info.DrawingFilePath.Replace('/', '\\').TrimStart('\\');
+                //string omsPath = await _apiClient.PopApiClient.GetOmsPathAsync(_key);
+
+                path = Path.Combine(path, _info.DrawingFilePath);
+                //ByteToImage img = new ByteToImage();
+                byte[] raw = File.ReadAllBytes(@"E:\sjf0e4b2f7434924a49b47e2cadf20a9134"); // path);
+                
+                //byte[] raw = File.ReadAllBytes(path);
+
+                // Base64 텍스트이면 먼저 디코딩
+                byte[] decoded;
+                if (ByteToImage.TryDecodeBase64(raw, out decoded))
+                    raw = decoded;
+
+                ShowImage(raw, path);
             }
-            _info.DrawingFilePath = _info.DrawingFilePath.Replace('/', '\\').TrimStart('\\');
-            //string omsPath = await _apiClient.PopApiClient.GetOmsPathAsync(_key);
+            catch (Exception)
+            {
 
-            path = Path.Combine(path, _info.DrawingFilePath);
-            //ByteToImage img = new ByteToImage();
-            byte[] raw = File.ReadAllBytes(path);
-
-            // Base64 텍스트이면 먼저 디코딩
-            byte[] decoded;
-            if (ByteToImage.TryDecodeBase64(raw, out decoded))
-                raw = decoded;
-
-            ShowImage(raw, path);
+                throw;
+            }
+            
         }
 
         private void ShowImage(byte[] data, string source)
@@ -1263,6 +1269,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 GridColumns.Text("AngleTarget", Language.Col_AngleTarget, 120),
                 GridColumns.Text("AngleUnit", Language.Col_AngleUnit, 100),
                 GridColumns.Text("AngleResult", Language.Col_AngleResult, 130),
+                GridColumns.Text("EquipmentCode", "결과동작", 130),
                 GridColumns.Text(ResultInputField, Language.Pop_ResultInputColumn, 120));
 
             gridViewBomSpec.OptionsView.ColumnAutoWidth = true;
@@ -1278,7 +1285,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             foreach (DevExpress.XtraGrid.Columns.GridColumn column in gridViewBomSpec.Columns)
             {
                 column.OptionsColumn.AllowEdit =
-                    column.FieldName == ResultInputField || column.FieldName == TorqueResultField;
+                    column.FieldName == ResultInputField || column.FieldName == TorqueResultField || column.FieldName == AngleResultField; ;
 
             }
 
@@ -1794,19 +1801,19 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (current < 0)
             {
                 // 목록에 없는 공정을 보고 있다 — 어디가 "옆"인지 정할 수 없으므로 목록에서 직접 고르게 한다.
-                AppMessageBox.Info(this, Language.Pop_ProcessNotInList, Language.Pop_Title);
+                //AppMessageBox.Info(this, Language.Pop_ProcessNotInList, Language.Pop_Title);
                 return;
             }
 
             var target = current + offset;
             if (target < 0 || target >= _processes.Count)
             {
-                AppMessageBox.Info(this, edgeMessage, Language.Pop_Title);
+                //AppMessageBox.Info(this, edgeMessage, Language.Pop_Title);
                 return;
             }
 
-            if (!AppMessageBox.Confirm(this, confirmMessage, Language.Pop_Title))
-                return;
+            //if (!AppMessageBox.Confirm(this, confirmMessage, Language.Pop_Title))
+            //    return;
 
             await MoveToProcessAsync(_processes[target]);
         }
@@ -1815,9 +1822,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private int CurrentProcessIndex()
         {
             return _processes.FindIndex(process =>
-                Same(process.RoutingGroup, _key.RoutingGroup)
-                && Same(process.RoutingName, _key.RoutingOperation)
-                && Same(process.PageName, _key.PageOperation));
+                Same(process.SubRoutingReference, _key.SubRoutingRef));
+                //&& Same(process.RoutingName, _key.RoutingOperation)
+                //&& Same(process.PageName, _key.PageOperation));
         }
 
         private static bool Same(string left, string right) =>
@@ -2146,13 +2153,13 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             {
                 case "pageInspec":
                     chkManualWrench.Visible = false;
-                    btnSaveResults.Visible = true;
+                    btnSaveResults.Visible = false;
                     _activeTab = PopTab.Inspection;
                     break;
 
                 case "pageBom":
                     chkManualWrench.Visible = true;
-                    btnSaveResults.Visible = true;
+                    btnSaveResults.Visible = false;
                     _activeTab = PopTab.BomSpec;
                     break;
 

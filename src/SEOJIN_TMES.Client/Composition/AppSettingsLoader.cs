@@ -13,7 +13,8 @@ namespace SEOJIN_TMES.Client.Composition
             var settings = new AppSettings
             {
                 ApiBaseUrl = ConfigurationManager.AppSettings["ApiBaseUrl"],
-                DefaultCulture = ConfigurationManager.AppSettings["DefaultCulture"] ?? "ko-KR"
+                DefaultCulture = ConfigurationManager.AppSettings["DefaultCulture"] ?? "ko-KR",
+                ServerName = ConfigurationManager.AppSettings["ServerName"] ?? "GUM"
             };
 
             if (int.TryParse(ConfigurationManager.AppSettings["ApiTimeoutSeconds"], out var timeout))

@@ -117,6 +117,9 @@ namespace SEOJIN_TMES.Client.Forms
             //_context = context;
             _setting = Global.Instance.Settings;
             _devices = Global.Instance.Devices;
+            // 로그인 창에서 고른 언어(AppSettings.DefaultCulture)를 앱 전체에 적용한다.
+            // 이 아래에서 만드는 문구 · 메뉴 · 언어 콤보 선택이 모두 이 문화권을 따른다 — 반드시 맨 앞에 둘 것.
+            _setting.ApplyCulture();
 
             BuildLanguageList();
             RefreshWelcome();

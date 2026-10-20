@@ -29,8 +29,7 @@ namespace SEOJIN_TMES.Client.Forms
             this.picLogo = new DevExpress.XtraEditors.PictureEdit();
             this.panelRight = new DevExpress.XtraEditors.PanelControl();
             this.groupUserInfo = new DevExpress.XtraEditors.GroupControl();
-            this.lblServer = new DevExpress.XtraEditors.LabelControl();
-            this.cboServer = new DevExpress.XtraEditors.ComboBoxEdit();
+            this.lblLanguage = new DevExpress.XtraEditors.LabelControl();
             this.lblUserId = new DevExpress.XtraEditors.LabelControl();
             this.txtUserId = new DevExpress.XtraEditors.TextEdit();
             this.lblPassword = new DevExpress.XtraEditors.LabelControl();
@@ -46,6 +45,7 @@ namespace SEOJIN_TMES.Client.Forms
             this.cboWorkstation = new DevExpress.XtraEditors.ComboBoxEdit();
             this.btnConfirm = new System.Windows.Forms.Button();
             this.btnCancel = new System.Windows.Forms.Button();
+            this.cboLanguage = new DevExpress.XtraEditors.ImageComboBoxEdit();
             ((System.ComponentModel.ISupportInitialize)(this.panelLeft)).BeginInit();
             this.panelLeft.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picLogo.Properties)).BeginInit();
@@ -53,7 +53,6 @@ namespace SEOJIN_TMES.Client.Forms
             this.panelRight.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.groupUserInfo)).BeginInit();
             this.groupUserInfo.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.cboServer.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtUserId.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtPassword.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chkRememberId.Properties)).BeginInit();
@@ -61,6 +60,7 @@ namespace SEOJIN_TMES.Client.Forms
             this.panelBottom.SuspendLayout();
             this.pnlStation.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.cboWorkstation.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.cboLanguage.Properties)).BeginInit();
             this.SuspendLayout();
             // 
             // panelLeft
@@ -100,8 +100,8 @@ namespace SEOJIN_TMES.Client.Forms
             // 
             this.groupUserInfo.AppearanceCaption.Font = new System.Drawing.Font("맑은 고딕", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.groupUserInfo.AppearanceCaption.Options.UseFont = true;
-            this.groupUserInfo.Controls.Add(this.lblServer);
-            this.groupUserInfo.Controls.Add(this.cboServer);
+            this.groupUserInfo.Controls.Add(this.cboLanguage);
+            this.groupUserInfo.Controls.Add(this.lblLanguage);
             this.groupUserInfo.Controls.Add(this.lblUserId);
             this.groupUserInfo.Controls.Add(this.txtUserId);
             this.groupUserInfo.Controls.Add(this.lblPassword);
@@ -114,23 +114,13 @@ namespace SEOJIN_TMES.Client.Forms
             this.groupUserInfo.TabIndex = 0;
             this.groupUserInfo.Text = "접속 사용자 정보";
             // 
-            // lblServer
+            // lblLanguage
             // 
-            this.lblServer.Location = new System.Drawing.Point(24, 49);
-            this.lblServer.Name = "lblServer";
-            this.lblServer.Size = new System.Drawing.Size(40, 14);
-            this.lblServer.TabIndex = 0;
-            this.lblServer.Text = "접속서버";
-            // 
-            // cboServer
-            // 
-            this.cboServer.Location = new System.Drawing.Point(140, 45);
-            this.cboServer.Name = "cboServer";
-            this.cboServer.Properties.Items.AddRange(new object[] {
-            "GUM"});
-            this.cboServer.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
-            this.cboServer.Size = new System.Drawing.Size(260, 20);
-            this.cboServer.TabIndex = 1;
+            this.lblLanguage.Location = new System.Drawing.Point(24, 49);
+            this.lblLanguage.Name = "lblLanguage";
+            this.lblLanguage.Size = new System.Drawing.Size(44, 14);
+            this.lblLanguage.TabIndex = 0;
+            this.lblLanguage.Text = "언어 선택";
             // 
             // lblUserId
             // 
@@ -291,6 +281,14 @@ namespace SEOJIN_TMES.Client.Forms
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
+            // cboLanguage
+            // 
+            this.cboLanguage.Location = new System.Drawing.Point(140, 46);
+            this.cboLanguage.Name = "cboLanguage";
+            this.cboLanguage.Size = new System.Drawing.Size(260, 20);
+            this.cboLanguage.TabIndex = 9;
+            this.cboLanguage.SelectedIndexChanged += new System.EventHandler(this.cboLanguage_SelectedIndexChanged);
+            // 
             // LoginForm
             // 
             this.Appearance.Options.UseFont = true;
@@ -315,7 +313,6 @@ namespace SEOJIN_TMES.Client.Forms
             ((System.ComponentModel.ISupportInitialize)(this.groupUserInfo)).EndInit();
             this.groupUserInfo.ResumeLayout(false);
             this.groupUserInfo.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.cboServer.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtUserId.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtPassword.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.chkRememberId.Properties)).EndInit();
@@ -325,6 +322,7 @@ namespace SEOJIN_TMES.Client.Forms
             this.pnlStation.ResumeLayout(false);
             this.pnlStation.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.cboWorkstation.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.cboLanguage.Properties)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -335,8 +333,7 @@ namespace SEOJIN_TMES.Client.Forms
         private DevExpress.XtraEditors.PictureEdit picLogo;
         private DevExpress.XtraEditors.PanelControl panelRight;
         private DevExpress.XtraEditors.GroupControl groupUserInfo;
-        private DevExpress.XtraEditors.LabelControl lblServer;
-        private DevExpress.XtraEditors.ComboBoxEdit cboServer;
+        private DevExpress.XtraEditors.LabelControl lblLanguage;
         private DevExpress.XtraEditors.LabelControl lblUserId;
         private DevExpress.XtraEditors.TextEdit txtUserId;
         private DevExpress.XtraEditors.LabelControl lblPassword;
@@ -352,5 +349,6 @@ namespace SEOJIN_TMES.Client.Forms
         private System.Windows.Forms.Label lblWorkstationMsg;
         private DevExpress.XtraEditors.LabelControl lblWorkstation;
         private DevExpress.XtraEditors.ComboBoxEdit cboWorkstation;
+        private DevExpress.XtraEditors.ImageComboBoxEdit cboLanguage;
     }
 }

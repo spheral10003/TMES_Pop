@@ -185,7 +185,7 @@ namespace SEOJIN_TMES.Client.ApiClient
         }
 
         public Task<List<AdminAlarmTypeDto>> GetAdminAlarmTypesAsync(CancellationToken cancellationToken = default) =>
-            GetAsync<List<AdminAlarmTypeDto>>(PopPrefix + "admin-alarm/types", cancellationToken);
+            GetAsync<List<AdminAlarmTypeDto>>(PopPrefix + "md/abnormal-alarm-types", cancellationToken);
 
         public Task NotifyAdministratorAsync(PopAdminAlarmRequest request, CancellationToken cancellationToken = default) =>
             PostAsync(PopPrefix + "admin-alarm", request, cancellationToken);

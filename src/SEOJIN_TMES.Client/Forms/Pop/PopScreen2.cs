@@ -3,13 +3,6 @@ using SEOJIN_TMES.Client.Common.Models;
 using SEOJIN_TMES.Client.Core;
 using SEOJIN_TMES.Client.Forms.WorkOrderEntry;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace SEOJIN_TMES.Client.Forms.Pop
@@ -61,9 +54,5 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
             //StartClock();
         }
-
-
-
-
     }
 }

@@ -1,8 +1,11 @@
 ﻿using SEOJIN_TMES.Client.ApiClient;
 using SEOJIN_TMES.Client.Common.Configuration;
+using SEOJIN_TMES.Client.Common.Logging;
 using SEOJIN_TMES.Client.Common.Models;
 using SEOJIN_TMES.Client.Common.Storage;
 using SEOJIN_TMES.Client.Composition;
+using System;
+using System.Configuration;
 using System.Globalization;
 using System.Threading;
 
@@ -30,7 +33,6 @@ namespace SEOJIN_TMES.Client.Core
         private AppSettings _appSet;
         private ApiClientFactory _apiClients;
         private ApiClientOptions _apiOptions;
-
         private UserSession _currentUser;
 
         public AppSettings AppSet { get => _appSet; set => _appSet = value; }
@@ -59,7 +61,7 @@ namespace SEOJIN_TMES.Client.Core
             ApplyCulture();
         }
 
-        private void ApplyCulture()
+        public void ApplyCulture()
         {
             if (string.IsNullOrWhiteSpace(_appSet.DefaultCulture))
                 return;
@@ -75,6 +77,44 @@ namespace SEOJIN_TMES.Client.Core
                 // 알 수 없는 culture 설정 값이면 OS 기본 culture를 그대로 사용한다.
             }
         }
+
+        /// <summary>
+        /// 로그인 화면에서 고른 언어를 <see cref="AppSettings.DefaultCulture"/>와 App.config(exe.config) 양쪽에 남긴다.
+        /// 메모리 값은 바로 이어지는 MainForm이 쓰고, 파일 값은 다음 실행 때 로그인 화면이 읽는다.
+        /// 파일 저장에 실패해도(설치 폴더 쓰기 권한 없음 등) 로그인은 계속돼야 하므로 예외를 올리지 않고 로그만 남긴다.
+        /// </summary>
+        public void SaveCulture(string cultureName)
+        {
+            if (string.IsNullOrWhiteSpace(cultureName))
+                return;
+
+            _appSet.DefaultCulture = cultureName;
+
+            try
+            {
+                var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+                var settings = config.AppSettings.Settings;
+
+                if (settings["DefaultCulture"] == null)
+                    settings.Add("DefaultCulture", cultureName);
+                else
+                    settings["DefaultCulture"].Value = cultureName;
+
+                config.Save(ConfigurationSaveMode.Modified);
+
+                // 같은 실행 안에서 AppSettingsLoader.Load()가 다시 불려도 캐시된 옛 값이 나오지 않게 한다.
+                ConfigurationManager.RefreshSection("appSettings");
+
+                AppLog.Step($"화면 언어 저장 - DefaultCulture={cultureName}");
+            }
+            catch (Exception ex)
+            {
+                AppLog.Warn($"화면 언어 저장 실패(DefaultCulture={cultureName}): {ex.Message}");
+            }
+        }
+
+
+
 
     }
 }

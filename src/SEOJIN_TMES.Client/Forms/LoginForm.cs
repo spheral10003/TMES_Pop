@@ -1,3 +1,5 @@
+using DevExpress.Drawing;
+using DevExpress.Utils;
 using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
 using SEOJIN_TMES.Client.ApiClient;
@@ -5,15 +7,17 @@ using SEOJIN_TMES.Client.Common.Configuration;
 using SEOJIN_TMES.Client.Common.Languages;
 using SEOJIN_TMES.Client.Common.Logging;
 using SEOJIN_TMES.Client.Common.Models;
-using SEOJIN_TMES.Client.Composition;
 using SEOJIN_TMES.Client.Core;
 using SEOJIN_TMES.Client.Theme;
 using System;
-using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+//using static DevExpress.Utils.Frames.FrameHelper;
+
 
 namespace SEOJIN_TMES.Client.Forms
 {
@@ -34,15 +38,26 @@ namespace SEOJIN_TMES.Client.Forms
     /// VS 디자이너에서 열 수 있도록 매개변수 없는 생성자 + InitializeComponent()만 사용하고,
     /// 실제 의존성(ClientContext)은 생성 직후 Initialize()로 주입한다.
     /// </summary>
-    public partial class LoginForm : DevExpress.XtraEditors.XtraForm
+    public partial class LoginForm : XtraForm
     {
-        //private ClientContext _context;
+        /// <summary>언어 콤보 국기 아이콘 한 변(px) — 메인 화면 상단 바와 같은 크기.</summary>
+        private const int LanguageFlagSize = 20;
+
+        private Setting _setting;
         private ApiClientFactory _apiClient;
         private UserSession _currentUser;
         private UserPreferences _preferences;
         private string _selectedStation;
+        //private readonly AppSettings _appSet = Global.Instance.Settings.AppSet;
         private TaskCompletionSource<bool> _isTaskComplete;
+        /// <summary>로그인 창 문구에만 쓰는 문화권. 스레드 문화권과는 따로 움직인다.</summary>
+        private CultureInfo _loginCulture;
 
+        /// <summary>국기 아이콘 모음. 폼이 살아 있는 동안 콤보가 참조한다.</summary>
+        private ImageCollection _languageFlags;
+
+        /// <summary>콤보를 코드로 채우는 동안 SelectedIndexChanged가 문구를 다시 입히지 않도록 막는다.</summary>
+        private bool _suppressLanguageChange;
         public LoginForm()
         {
             InitializeComponent();
@@ -53,29 +68,57 @@ namespace SEOJIN_TMES.Client.Forms
         public void Init()
         {
             //_context = context;
+            _setting = Global.Instance.Settings;
             _apiClient = Global.Instance.Settings.ApiClients;
             _currentUser = Global.Instance.Settings.CurrentUser;
 
-            Text = Language.Login_Title;
+
+            // 지난번 접속 때 저장한 언어(AppSettings.DefaultCulture)로 로그인 창을 연다.
+            _loginCulture = Culture(_setting.AppSet.DefaultCulture);
+
+            //Text = Language.Login_Title;
 
             // 로그인 창이 앱의 첫 창이라, 작업 표시줄에 처음 뜨는 아이콘이 이 값이다.
             Icon = AppImages.AppIcon();
             ShowIcon = true;   // FixedDialog는 기본으로 제목 줄 아이콘을 감춘다
 
+            BuildLanguageList();
+            ApplyTexts();
+
+            if (cboLanguage.Properties.Items.Count > 0) cboLanguage.SelectedIndex = 0;
+            if (cboWorkstation.Properties.Items.Count > 0) cboWorkstation.SelectedIndex = 0;
+
+            RestoreSavedUserId();
+            ApplyTheme();
+        }
+
+        /// <summary>설정 값이 비었거나 잘못됐으면 목록의 첫 언어(한국어)로 대신한다.</summary>
+        private CultureInfo Culture(string cultureName)
+        {
+            var option = LanguageOption.All[LanguageOption.IndexOf(cultureName)];
+            return CultureInfo.GetCultureInfo(option.Culture);
+        }
+
+
+        // <summary>
+        /// 화면 문구를 <see cref="_loginCulture"/>로 입힌다.
+        /// 처음 열 때와 언어 콤보를 바꿀 때 모두 이 메서드를 다시 부른다.
+        /// </summary>
+        private void ApplyTexts()
+        {
+            Text = Language.Login_Title;
             groupUserInfo.Text = Language.Login_UserInfoGroup;
-            lblServer.Text = Language.Login_Server;
+            lblLanguage.Text = Language.MainForm_LanguageHint;
             lblUserId.Text = Language.Login_UserId;
             lblPassword.Text = Language.Login_Password;
             lblWorkstation.Text = Language.Login_Workstation;
             btnConnect.Text = Language.Login_Connect;
             btnClose.Text = Language.Login_Close;
             chkRememberId.Text = Language.Login_RememberId;
-
-            if (cboServer.Properties.Items.Count > 0) cboServer.SelectedIndex = 0;
-            if (cboWorkstation.Properties.Items.Count > 0) cboWorkstation.SelectedIndex = 0;
-
-            RestoreSavedUserId();
-            ApplyTheme();
+            btnCancel.Text = Language.Common_Cancel;
+            btnConfirm.Text = Language.Common_Confirm;
+            // 앞서 띄운 오류 문구는 이전 언어이므로 지운다.
+            lblMessage.Text = string.Empty;
         }
 
         /// <summary>
@@ -91,12 +134,12 @@ namespace SEOJIN_TMES.Client.Forms
             AppTheme.ContentSurface(panelBottom);
             AppTheme.CardGroup(groupUserInfo, AppTheme.Violet);
 
-            AppTheme.BodyText(lblServer);
+            AppTheme.BodyText(lblLanguage);
             AppTheme.BodyText(lblUserId);
             AppTheme.BodyText(lblPassword);
             AppTheme.BodyText(lblWorkstation);
 
-            AppTheme.Editor(cboServer);
+            AppTheme.Editor(cboLanguage);
             AppTheme.Editor(txtUserId);
             AppTheme.Editor(txtPassword);
             AppTheme.Editor(cboWorkstation);
@@ -108,6 +151,32 @@ namespace SEOJIN_TMES.Client.Forms
             lblMessage.Appearance.Options.UseForeColor = true;
             lblMessage.Appearance.Options.UseFont = true;
             lblMessage.Text = string.Empty;
+        }
+
+        /// <summary>
+        /// 언어 콤보를 [국기 + 각 나라 말로 적은 언어 이름]으로 채우고 <see cref="_loginCulture"/>를 선택해 둔다.
+        /// 목록은 메인 화면과 같은 <see cref="LanguageOption.All"/>을 쓴다.
+        /// </summary>
+        private void BuildLanguageList()
+        {
+            _suppressLanguageChange = true;
+
+            _languageFlags = new ImageCollection();
+            _languageFlags.ImageSize = new Size(LanguageFlagSize, LanguageFlagSize);
+            foreach (var language in LanguageOption.All)
+                _languageFlags.AddImage(AppImages.Flag(language.FlagCode, LanguageFlagSize));
+            cboLanguage.Properties.SmallImages = _languageFlags;
+
+            cboLanguage.Properties.Items.Clear();
+            for (var i = 0; i < LanguageOption.All.Length; i++)
+            {
+                var option = LanguageOption.All[i];
+                cboLanguage.Properties.Items.Add(new ImageComboBoxItem(option.Display, option.Culture, i));
+            }
+
+            cboLanguage.SelectedIndex = LanguageOption.IndexOf(_loginCulture.Name);
+
+            _suppressLanguageChange = false;
         }
 
         /// <summary>
@@ -185,8 +254,8 @@ namespace SEOJIN_TMES.Client.Forms
             }
 
             // 접속서버 콤보에서 고른 값이 곧 사업장 코드(corpCd)다 — 서버가 이 값으로 계정을 찾는다.
-            var corpCd = cboServer.Text?.Trim();
-
+            //var corpCd = cboServer.Text?.Trim();
+            var corpCd = _setting.AppSet.ServerName;
             btnConnect.Enabled = false;
             lblMessage.Text = string.Empty;
             AppLog.Step($"로그인 시도 - CorpCd={corpCd}, UserId={userId}");
@@ -225,8 +294,8 @@ namespace SEOJIN_TMES.Client.Forms
                     Workstation = cboWorkstation.Text,
                     WorkstationInfo = stationInfo.Workstation[cboWorkstation.SelectedIndex]
                 };
-                
 
+                _setting.SaveCulture(_loginCulture.Name);
                 Global.Instance.Settings.CurrentUser = _currentUser;
 
                 AppLog.Step($"로그인 성공 - UserId={userId}");
@@ -278,5 +347,23 @@ namespace SEOJIN_TMES.Client.Forms
         {
             _isTaskComplete.TrySetCanceled();
         }
+
+        private void cboLanguage_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            this.SuspendLayout();
+
+            var index = cboLanguage.SelectedIndex;
+            if (index < 0 || index >= LanguageOption.All.Length)
+                return;
+            
+            _loginCulture = CultureInfo.GetCultureInfo(LanguageOption.All[index].Culture);
+            Thread.CurrentThread.CurrentUICulture = _loginCulture;
+            ApplyTexts();
+
+            this.ResumeLayout(false);
+            
+        }
+
+
     }
 }
