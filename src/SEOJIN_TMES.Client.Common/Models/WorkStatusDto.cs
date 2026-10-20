@@ -1,3 +1,4 @@
+using Newtonsoft.Json;
 using System;
 
 namespace SEOJIN_TMES.Client.Common.Models
@@ -8,6 +9,9 @@ namespace SEOJIN_TMES.Client.Common.Models
     /// </summary>
     public class WorkStatusQuery
     {
+        public string CorpCode { get; set; }
+        public string WorkstationRef { get; set; }
+
         /// <summary>지시일자 시작(필수). 화면에서 기본값은 한 달 전.</summary>
         public DateTime? OrderDateFrom { get; set; }
 
@@ -34,14 +38,18 @@ namespace SEOJIN_TMES.Client.Common.Models
     /// </summary>
     public class WorkProgressDto
     {
+        [JsonProperty("corpCd")] public string CorpCode { get; set; }
+        [JsonProperty("sn")] public string SerialNo { get; set; }
+        [JsonProperty("routingGroupRef")] public string RoutingGroupRef { get; set; }
+
         /// <summary>라우팅 그룹.</summary>
-        public string RoutingGroup { get; set; }
+        [JsonProperty("routingGroupNm")] public string RoutingGroup { get; set; }
 
         /// <summary>라우팅 공정.</summary>
-        public string RoutingOperation { get; set; }
+        [JsonProperty("routingNm")] public string RoutingOperation { get; set; }
 
         /// <summary>페이지 공정명.</summary>
-        public string PageOperationName { get; set; }
+        [JsonProperty("procNm")] public string PageOperationName { get; set; }
 
         /// <summary>스팩명 (BOM 스팩 / 검사 스팩의 이름).</summary>
         public string SpecName { get; set; }
@@ -50,7 +58,7 @@ namespace SEOJIN_TMES.Client.Common.Models
         public string SpecType { get; set; }
 
         /// <summary>진행 상태 (대기 / 진행중 / 완료).</summary>
-        public string ProgressState { get; set; }
+        [JsonProperty("workStatus")] public string ProgressState { get; set; }
 
         /// <summary>스팩 결과 상태 (합격 / 불합격). 아직 결과가 없으면 비어 있다.</summary>
         public string SpecResultState { get; set; }
@@ -73,4 +81,5 @@ namespace SEOJIN_TMES.Client.Common.Models
         /// <summary>단위.</summary>
         public string Unit { get; set; }
     }
+
 }

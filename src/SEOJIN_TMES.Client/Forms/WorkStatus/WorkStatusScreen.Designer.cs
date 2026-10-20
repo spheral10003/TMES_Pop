@@ -31,7 +31,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
         private void InitializeComponent()
         {
             this.topCard = new DevExpress.XtraEditors.PanelControl();
-            this.btnSearch = new SEOJIN_TMES.Client.Forms.Common.MeisButton();
+            this.btnSearch = new System.Windows.Forms.Button();
             this.lblOrderDate = new DevExpress.XtraEditors.LabelControl();
             this.dateFrom = new DevExpress.XtraEditors.DateEdit();
             this.lblDateTilde = new DevExpress.XtraEditors.LabelControl();
@@ -111,19 +111,15 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             // 
             // btnSearch
             // 
-            this.btnSearch.Accent = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
-            this.btnSearch.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnSearch.Icon = null;
-            this.btnSearch.Location = new System.Drawing.Point(16, 20);
-            this.btnSearch.LookAndFeel.Style = DevExpress.LookAndFeel.LookAndFeelStyle.Flat;
+            this.btnSearch.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
+            this.btnSearch.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSearch.Font = new System.Drawing.Font("Noto Sans KR", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSearch.Location = new System.Drawing.Point(21, 19);
             this.btnSearch.Name = "btnSearch";
-            this.btnSearch.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
-            this.btnSearch.Selected = false;
-            this.btnSearch.ShowFocusRectangle = DevExpress.Utils.DefaultBoolean.False;
-            this.btnSearch.Size = new System.Drawing.Size(100, 64);
-            this.btnSearch.TabIndex = 0;
+            this.btnSearch.Size = new System.Drawing.Size(103, 68);
+            this.btnSearch.TabIndex = 15;
             this.btnSearch.Text = "조회";
-            this.btnSearch.TextAfterIcon = false;
+            this.btnSearch.UseVisualStyleBackColor = true;
             this.btnSearch.Click += new System.EventHandler(this.btnSearch_Click);
             // 
             // lblOrderDate
@@ -240,6 +236,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             this.cboStatus.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
             this.cboStatus.Size = new System.Drawing.Size(170, 20);
             this.cboStatus.TabIndex = 14;
+            this.cboStatus.SelectedIndexChanged += new System.EventHandler(this.cboStatus_SelectedIndexChanged);
             // 
             // spacerTop
             // 
@@ -429,7 +426,6 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
         #endregion
 
         private DevExpress.XtraEditors.PanelControl topCard;
-        private SEOJIN_TMES.Client.Forms.Common.MeisButton btnSearch;
         private DevExpress.XtraEditors.LabelControl lblOrderDate;
         private DevExpress.XtraEditors.DateEdit dateFrom;
         private DevExpress.XtraEditors.LabelControl lblDateTilde;
@@ -459,5 +455,6 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
         private DevExpress.XtraEditors.ComboBoxEdit cboSpecResultState;
         private DevExpress.XtraGrid.GridControl gridProgress;
         private SEOJIN_TMES.Client.Forms.Common.MeisGridView gridViewProgress;
+        private System.Windows.Forms.Button btnSearch;
     }
 }

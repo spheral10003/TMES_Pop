@@ -58,7 +58,7 @@ namespace SEOJIN_TMES.Client.ApiClient
 
         public async Task<List<RoutingProcessDto>> GetRoutingProcessesAsync(string corpCode, string workStationRef, string serialNo, CancellationToken cancellationToken = default)
         {
-            var query = BuildQuery(("corpCd", corpCode), ("wkstnRef", workStationRef));
+            var query = BuildQuery(("corpCd", corpCode), ("wkstnRef", workStationRef), ("sn", serialNo));
             var response = await GetAsync<ApiDataResponse<List<RoutingProcessDto>>>($"{WorkOrderPrefix}{serialNo}/processes{query}", cancellationToken);
             return response?.Data ?? new List<RoutingProcessDto>();
         }

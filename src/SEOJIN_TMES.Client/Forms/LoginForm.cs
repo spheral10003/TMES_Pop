@@ -71,29 +71,22 @@ namespace SEOJIN_TMES.Client.Forms
             _setting = Global.Instance.Settings;
             _apiClient = Global.Instance.Settings.ApiClients;
             _currentUser = Global.Instance.Settings.CurrentUser;
-
-
-            // 지난번 접속 때 저장한 언어(AppSettings.DefaultCulture)로 로그인 창을 연다.
-            _loginCulture = Culture(_setting.AppSet.DefaultCulture);
-
-            //Text = Language.Login_Title;
+            _loginCulture = GetCulture(_setting.AppSet.DefaultCulture);
 
             // 로그인 창이 앱의 첫 창이라, 작업 표시줄에 처음 뜨는 아이콘이 이 값이다.
             Icon = AppImages.AppIcon();
             ShowIcon = true;   // FixedDialog는 기본으로 제목 줄 아이콘을 감춘다
 
-            BuildLanguageList();
-            ApplyTexts();
-
-            if (cboLanguage.Properties.Items.Count > 0) cboLanguage.SelectedIndex = 0;
+            SetLanguageList();
+            LoadUser();
+            SetTexts();
+            SetTheme();
             if (cboWorkstation.Properties.Items.Count > 0) cboWorkstation.SelectedIndex = 0;
 
-            RestoreSavedUserId();
-            ApplyTheme();
         }
 
         /// <summary>설정 값이 비었거나 잘못됐으면 목록의 첫 언어(한국어)로 대신한다.</summary>
-        private CultureInfo Culture(string cultureName)
+        private CultureInfo GetCulture(string cultureName)
         {
             var option = LanguageOption.All[LanguageOption.IndexOf(cultureName)];
             return CultureInfo.GetCultureInfo(option.Culture);
@@ -104,7 +97,7 @@ namespace SEOJIN_TMES.Client.Forms
         /// 화면 문구를 <see cref="_loginCulture"/>로 입힌다.
         /// 처음 열 때와 언어 콤보를 바꿀 때 모두 이 메서드를 다시 부른다.
         /// </summary>
-        private void ApplyTexts()
+        private void SetTexts()
         {
             Text = Language.Login_Title;
             groupUserInfo.Text = Language.Login_UserInfoGroup;
@@ -125,7 +118,7 @@ namespace SEOJIN_TMES.Client.Forms
         /// 로그인 화면에 공통 테마를 입힌다 — 좌측은 메인 화면과 같은 남보라 그라데이션 브랜드 블록,
         /// 우측은 흰 카드 + 포인트 컬러 버튼. 색 값은 전부 <see cref="AppTheme"/>에서 가져온다.
         /// </summary>
-        private void ApplyTheme()
+        private void SetTheme()
         {
             AppTheme.Sidebar(panelLeft);
             BuildBrandBlock();
@@ -157,17 +150,21 @@ namespace SEOJIN_TMES.Client.Forms
         /// 언어 콤보를 [국기 + 각 나라 말로 적은 언어 이름]으로 채우고 <see cref="_loginCulture"/>를 선택해 둔다.
         /// 목록은 메인 화면과 같은 <see cref="LanguageOption.All"/>을 쓴다.
         /// </summary>
-        private void BuildLanguageList()
+        private void SetLanguageList()
         {
             _suppressLanguageChange = true;
 
             _languageFlags = new ImageCollection();
             _languageFlags.ImageSize = new Size(LanguageFlagSize, LanguageFlagSize);
-            foreach (var language in LanguageOption.All)
-                _languageFlags.AddImage(AppImages.Flag(language.FlagCode, LanguageFlagSize));
-            cboLanguage.Properties.SmallImages = _languageFlags;
 
+            foreach (var language in LanguageOption.All)
+            {
+                _languageFlags.AddImage(AppImages.Flag(language.FlagCode, LanguageFlagSize));
+            }
+                
+            cboLanguage.Properties.SmallImages = _languageFlags;
             cboLanguage.Properties.Items.Clear();
+
             for (var i = 0; i < LanguageOption.All.Length; i++)
             {
                 var option = LanguageOption.All[i];
@@ -176,13 +173,15 @@ namespace SEOJIN_TMES.Client.Forms
 
             cboLanguage.SelectedIndex = LanguageOption.IndexOf(_loginCulture.Name);
 
+            Thread.CurrentThread.CurrentUICulture = _loginCulture;
+
             _suppressLanguageChange = false;
         }
 
         /// <summary>
         /// 저장해 둔 아이디가 있으면 채워 넣고 커서를 비밀번호로 옮긴다(바로 비밀번호만 치면 되도록).
         /// </summary>
-        private void RestoreSavedUserId()
+        private void LoadUser()
         {
             _preferences = UserPreferences.Load();
 
@@ -358,7 +357,7 @@ namespace SEOJIN_TMES.Client.Forms
             
             _loginCulture = CultureInfo.GetCultureInfo(LanguageOption.All[index].Culture);
             Thread.CurrentThread.CurrentUICulture = _loginCulture;
-            ApplyTexts();
+            SetTexts();
 
             this.ResumeLayout(false);
             

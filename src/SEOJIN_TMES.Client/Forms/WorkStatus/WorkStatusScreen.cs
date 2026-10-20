@@ -1,19 +1,20 @@
+using DevExpress.Xpo.DB.Helpers;
+using DevExpress.XtraEditors;
+using SEOJIN_TMES.Client.ApiClient;
+using SEOJIN_TMES.Client.Common.Configuration;
+using SEOJIN_TMES.Client.Common.Languages;
+using SEOJIN_TMES.Client.Common.Models;
+using SEOJIN_TMES.Client.Composition;
+using SEOJIN_TMES.Client.Core;
+using SEOJIN_TMES.Client.Forms.Common;
+using SEOJIN_TMES.Client.Mock;
+using SEOJIN_TMES.Client.Theme;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DevExpress.XtraEditors;
-using SEOJIN_TMES.Client.ApiClient;
-using SEOJIN_TMES.Client.Common.Models;
-using SEOJIN_TMES.Client.Composition;
-using SEOJIN_TMES.Client.Forms.Common;
-using SEOJIN_TMES.Client.Common.Languages;
-using SEOJIN_TMES.Client.Mock;
-using SEOJIN_TMES.Client.Theme;
-using SEOJIN_TMES.Client.Core;
-using SEOJIN_TMES.Client.Common.Configuration;
 
 namespace SEOJIN_TMES.Client.Forms.WorkStatus
 {
@@ -36,6 +37,9 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
         //private ClientContext _context;
         private Setting _appSet;
         private ApiClientFactory _apiClients;
+
+        private WorkOrderQuery _query = new WorkOrderQuery();
+
         /// <summary>선택한 작업지시의 진행 현황 원본(필터 전). 필터는 이 목록을 걸러 그리드에 다시 물린다.</summary>
         private List<WorkProgressDto> _progress = new List<WorkProgressDto>();
 
@@ -128,7 +132,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             AppTheme.Editor(cboProgressState);
             AppTheme.Editor(cboSpecResultState);
 
-            btnSearch.Icon = AppIcons.Search;
+            //btnSearch.Icon = AppIcons.Search;
             AppTheme.IconButton(btnItemPick, AppIcons.Search, AppTheme.Cyan, 16);
 
             AppTheme.Grid(gridOrders, gridViewOrders, AppTheme.Cyan);
@@ -178,7 +182,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
         private void FillFilterCombos()
         {
             FillCombo(cboStatus, Language.WorkStatus_StatusWaiting, Language.WorkStatus_StatusRunning,
-                Language.WorkStatus_StatusDone, Language.WorkStatus_StatusHold);
+                Language.WorkStatus_StatusDone);
 
             FillCombo(cboProgressState, Language.WorkStatus_StatusWaiting, Language.WorkStatus_StatusRunning,
                 Language.WorkStatus_StatusDone);
@@ -229,20 +233,21 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
                 return;
             }
 
-            var query = new WorkStatusQuery();
-            query.OrderDateFrom = from;
-            query.OrderDateTo = to;
-            query.WorkOrderNo = txtWorkOrderNo.Text?.Trim();
-            query.ItemCode = txtItemCode.Text?.Trim();
-            query.SerialNo = txtSerialNo.Text?.Trim();
-            query.StatusName = SelectedFilterValue(cboStatus);
+            //var query = new WorkStatusQuery();
+            _query.CorpCode = _appSet.CurrentUser.Server;
+            _query.OrderDateFrom = from;
+            _query.OrderDateTo = to;
+            _query.WorkOrderNo = txtWorkOrderNo.Text?.Trim();
+            _query.ItemCode = txtItemCode.Text?.Trim();
+            _query.SerialNo = txtSerialNo.Text?.Trim();
+            _query.StatusName = SelectedFilterValue(cboStatus);
 
             using (var busy = BusyOverlay.Show(this, cancelable: true))
             {
                 try
                 {
                     btnSearch.Enabled = false;
-                    var result = await FetchWorkOrdersAsync(query, busy.Token);
+                    var result = await FetchWorkOrdersAsync(_query, busy.Token);
                    // var result = await _apiClients.WorkOrderApiClient.SearchWorkOrdersAsync(_appSet.CurrentUser.Server, cancellationToken)
                    //?? new List<WorkOrderEntryDto>();
                     
@@ -280,7 +285,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             }
         }
 
-        private async Task<List<WorkOrderEntryDto>> FetchWorkOrdersAsync(WorkStatusQuery query, CancellationToken cancellationToken)
+        private async Task<List<WorkOrderEntryDto>> FetchWorkOrdersAsync(WorkOrderQuery query, CancellationToken cancellationToken)
         {
             //if (_appSet.UseMockData)
             //{
@@ -307,10 +312,10 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
                 return;
 
             _loadedWorkOrderNo = selected.WorkOrderNo;
-
+            var workStationRef = _appSet.CurrentUser?.WorkstationInfo?.WorkstationRef;
             try
             {
-                _progress = await FetchProgressAsync(selected.WorkOrderNo, selected.SerialNo);
+                _progress = await FetchProgressAsync(selected.CorpCode, workStationRef, selected.SerialNo);
                 ApplyProgressFilter();
             }
             catch (ApiException ex)
@@ -320,15 +325,15 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             }
         }
 
-        private async Task<List<WorkProgressDto>> FetchProgressAsync(string workOrderNo, string serialNo)
+        private async Task<List<WorkProgressDto>> FetchProgressAsync(string corpCode, string workStationRef, string serialNo)
         {
-            if (_appSet.AppSet.UseMockData)
-            {
-                await Task.Yield();
-                return MockWorkStatusData.GetWorkProgress(workOrderNo, serialNo);
-            }
+            //if (_appSet.AppSet.UseMockData)
+            //{
+            //    await Task.Yield();
+            //    return MockWorkStatusData.GetWorkProgress(workOrderNo, serialNo);
+            //}
 
-            return await _apiClients.WorkStatusApiClient.GetWorkProgressAsync(workOrderNo, serialNo)
+            return await _apiClients.WorkStatusApiClient.GetWorkProgressAsync(corpCode, workStationRef, serialNo)
                    ?? new List<WorkProgressDto>();
         }
 
@@ -359,8 +364,24 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
         }
 
         /// <summary>콤보에서 고른 값. "전체"(첫 항목)면 조건 없음을 뜻하는 null을 돌려준다.</summary>
-        private static string SelectedFilterValue(ComboBoxEdit combo)
+        private string SelectedFilterValue(ComboBoxEdit combo)
         {
+            if(combo.Name != "cboSpecResultState")
+            {
+                int index = combo.SelectedIndex;
+
+                switch (index)
+                {
+                    case 0: return null;
+                    case 1: return "Ready";
+                    case 2: return "Progress";
+                    case 3: return "Completed";
+                    default: return null;
+
+                }
+            }
+
+
             var value = combo.SelectedItem as string;
             return string.IsNullOrEmpty(value) || value == Language.Common_All ? null : value;
         }
@@ -378,6 +399,11 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
                 txtItemCode.Text = picker.SelectedItem.ItemCode;
                 txtItemName.Text = picker.SelectedItem.ItemName;
             }
+        }
+
+        private void cboStatus_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

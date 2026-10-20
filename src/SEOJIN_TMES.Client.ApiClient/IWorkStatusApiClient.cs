@@ -1,9 +1,10 @@
+using SEOJIN_TMES.Client.Common.Models;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Reflection.Emit;
 using System.Threading;
 using System.Threading.Tasks;
-using SEOJIN_TMES.Client.Common.Models;
 
 namespace SEOJIN_TMES.Client.ApiClient
 {
@@ -15,10 +16,10 @@ namespace SEOJIN_TMES.Client.ApiClient
     public interface IWorkStatusApiClient
     {
         /// <summary>조회 조건에 맞는 작업 지시 정보 목록.</summary>
-        Task<List<WorkOrderEntryDto>> SearchWorkOrdersAsync(WorkStatusQuery query, CancellationToken cancellationToken = default);
+        Task<List<WorkOrderEntryDto>> SearchWorkOrdersAsync(WorkOrderQuery query, CancellationToken cancellationToken = default);
 
         /// <summary>선택한 작업지시의 공정/스팩별 진행 현황.</summary>
-        Task<List<WorkProgressDto>> GetWorkProgressAsync(string workOrderNo, string serialNo, CancellationToken cancellationToken = default);
+        Task<List<WorkProgressDto>> GetWorkProgressAsync(string corpCode, string workStationRef, string serialNo, CancellationToken cancellationToken = default);
 
         /// <summary>&lt;생산품목 선택&gt; 팝업의 품목 검색(품목코드/품목명 부분 일치).</summary>
         Task<List<ItemDto>> SearchItemsAsync(string keyword, CancellationToken cancellationToken = default);
@@ -30,25 +31,30 @@ namespace SEOJIN_TMES.Client.ApiClient
         {
         }
 
-        public Task<List<WorkOrderEntryDto>> SearchWorkOrdersAsync(WorkStatusQuery query, CancellationToken cancellationToken = default)
+        public async Task<List<WorkOrderEntryDto>> SearchWorkOrdersAsync(WorkOrderQuery query, CancellationToken cancellationToken = default)
         {
-            var condition = query ?? new WorkStatusQuery();
-            var url = ApiPrefix + "work-status/workorders" + BuildQuery(
-                ("orderDateFrom", condition.OrderDateFrom?.ToString("yyyy-MM-dd")),
-                ("orderDateTo", condition.OrderDateTo?.ToString("yyyy-MM-dd")),
-                ("workOrderNo", condition.WorkOrderNo),
-                ("itemCode", condition.ItemCode),
-                ("serialNo", condition.SerialNo),
-                ("statusName", condition.StatusName));
-
-            return GetAsync<List<WorkOrderEntryDto>>(url, cancellationToken);
+            var condition = query ?? new WorkOrderQuery();
+            var url = ApiPrefix + "md/work-orders/overview"; 
+            var search = BuildQuery(
+                ("corpCd", condition.CorpCode),
+                ("startDt", condition.OrderDateFrom?.ToString("yyyy-MM-dd")),
+                ("endDt", condition.OrderDateTo?.ToString("yyyy-MM-dd")),
+                ("itemCd", condition.ItemCode),
+                ("workPlanNo", condition.ItemCode),
+                ("woNo", condition.WorkOrderNo),
+                ("sn", condition.SerialNo),
+                ("statusList", condition.StatusName));
+            
+            var response = await GetAsync<ApiDataResponse<List<WorkOrderEntryDto>>>($"{url}{search}", cancellationToken);
+            return response?.Data ?? new List<WorkOrderEntryDto>();
         }
 
-        public Task<List<WorkProgressDto>> GetWorkProgressAsync(string workOrderNo, string serialNo, CancellationToken cancellationToken = default)
+        public async Task<List<WorkProgressDto>> GetWorkProgressAsync(string corpCode, string workStationRef, string serialNo, CancellationToken cancellationToken = default)
         {
-            var query = BuildQuery(("serialNo", serialNo));
-            return GetAsync<List<WorkProgressDto>>(
-                $"{ApiPrefix}work-status/workorders/{WebUtility.UrlEncode(workOrderNo)}/progress{query}", cancellationToken);
+            var url = ApiPrefix + $"pop/{serialNo}/processes";
+            var query = BuildQuery(("corpCd", corpCode), ("wkstnRef", workStationRef), ("sn", serialNo));
+            var response = await GetAsync<ApiDataResponse<List<WorkProgressDto>>>($"{url}{query}", cancellationToken);
+            return response?.Data ?? new List<WorkProgressDto>();
         }
 
         public Task<List<ItemDto>> SearchItemsAsync(string keyword, CancellationToken cancellationToken = default) =>

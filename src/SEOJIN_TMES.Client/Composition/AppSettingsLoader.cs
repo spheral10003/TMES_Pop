@@ -17,6 +17,9 @@ namespace SEOJIN_TMES.Client.Composition
                 ServerName = ConfigurationManager.AppSettings["ServerName"] ?? "GUM"
             };
 
+            if (int.TryParse(ConfigurationManager.AppSettings["UploadMaxMegaBytes"], out var uploadMaxMb))
+                settings.UploadMaxMegaBytes = uploadMaxMb;
+
             if (int.TryParse(ConfigurationManager.AppSettings["ApiTimeoutSeconds"], out var timeout))
                 settings.ApiTimeoutSeconds = timeout;
 

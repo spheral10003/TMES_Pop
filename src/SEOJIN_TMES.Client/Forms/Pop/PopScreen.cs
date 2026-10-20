@@ -96,7 +96,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// 장비 데이터를 받을지 버릴지 판단할 때 쓴다 — 상태 판정은 서버 몫이고 여기서는 받은 값을 기억만 한다.
         /// </summary>
         private string _progressState;
-
+        private bool _bomManualEnabled;
         /// <summary>공정이 시작돼 진행 중인지(서버 상태 = Progress). 중지 · 대기 · 완료 상태에서는 false.</summary>
         private bool IsProcessRunning =>
         string.Equals(_progressState, "Progress", StringComparison.OrdinalIgnoreCase);
@@ -394,6 +394,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 _bomSpecs = screen.BomSpecs;
                 _inspections = screen.InspectionSpecs;
                 _equipments = screen.Equipments;
+                _bomManualEnabled = screen.BomManualEnabled;
 
                 gridMaterial.DataSource = _materials;
                 gridInspection.DataSource = _inspections;
@@ -997,27 +998,33 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             try
             {
                 ClearImage();
-                string path = @"X:\attach";
-                //string pathTest = @"D:\01_Project\01_Seojin_meis\03_Source\seojin_tmes\seojin_meis\src\SEOJIN_TMES.Client\Images\11_Texon_Logo_Signature.svg";
+                string path;
+                
+                if ( string.IsNullOrEmpty( _appSet.AppSet.DocumentShare.RootPath))
+                {
+                    ShowViewerMessage(Language.Pop_DrawingNone);
+                    return;
+                }
+                
                 if (_info.DrawingFilePath == null)
                 {
                     ShowViewerMessage(Language.Pop_DrawingNone);
                     return;
                 }
-                _info.DrawingFilePath = _info.DrawingFilePath.Replace('/', '\\').TrimStart('\\');
-                //string omsPath = await _apiClient.PopApiClient.GetOmsPathAsync(_key);
 
-                path = Path.Combine(path, _info.DrawingFilePath);
-                //ByteToImage img = new ByteToImage();
-                byte[] raw = File.ReadAllBytes(@"E:\sjf0e4b2f7434924a49b47e2cadf20a9134"); // path);
+                _info.DrawingFilePath = _info.DrawingFilePath.Replace('/', '\\').TrimStart('\\');
+                path = Path.Combine(_appSet.AppSet.DocumentShare.RootPath, _info.DrawingFilePath);
                 
-                //byte[] raw = File.ReadAllBytes(path);
+                byte[] raw = File.ReadAllBytes(path);
 
                 // Base64 텍스트이면 먼저 디코딩
                 byte[] decoded;
-                if (ByteToImage.TryDecodeBase64(raw, out decoded))
-                    raw = decoded;
 
+                if (ByteToImage.TryDecodeBase64(raw, out decoded))
+                {
+                    raw = decoded;
+                }
+                
                 ShowImage(raw, path);
             }
             catch (Exception)
@@ -1034,8 +1041,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             int offset = ByteToImage.FindImageOffset(data);
             if (offset < 0)
             {
-                XtraMessageBox.Show(this, "이미지 데이터를 찾을 수 없습니다.\n(손상되었거나 이미지가 아닌 바이너리입니다.)",
-                    "이미지 열기", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                AppMessageBox.Warn(this, "이미지 데이터를 찾을 수 없습니다.\n(손상되었거나 이미지가 아닌 바이너리입니다.)", Language.Pop_Title);    
                 return;
             }
 
@@ -2152,21 +2158,21 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             switch (e.Page.Name)
             {
                 case "pageInspec":
-                    chkManualWrench.Visible = false;
-                    btnSaveResults.Visible = false;
+                    chkManualWrench.Visible = _bomManualEnabled;
+                    //btnSaveResults.Visible = false;
                     _activeTab = PopTab.Inspection;
                     break;
 
                 case "pageBom":
-                    chkManualWrench.Visible = true;
-                    btnSaveResults.Visible = false;
+                    chkManualWrench.Visible = _bomManualEnabled;
+                    //btnSaveResults.Visible = false;
                     _activeTab = PopTab.BomSpec;
                     break;
 
                 case "pageEquip":
                 case "pageMaterial":
                     chkManualWrench.Visible = false;
-                    btnSaveResults.Visible = false;
+                    //btnSaveResults.Visible = false;
                     _activeTab = PopTab.Material;
                     break;
                 
@@ -2297,6 +2303,12 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 picView.Location = new Point(x, y);
             }
             scrollHost.ResumeLayout();
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            FileUploadForm upload = new FileUploadForm(_info.WorkOrderRef);
+            upload.ShowDialog();
         }
     }
 

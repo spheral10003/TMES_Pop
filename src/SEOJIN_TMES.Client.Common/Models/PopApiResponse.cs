@@ -18,6 +18,7 @@ namespace SEOJIN_TMES.Client.Common.Models
 
     public class PopApiResponse
     {
+        [JsonProperty("sysObjId")] public string WorkOrderRef { get; set; }
         [JsonProperty("woNo")] public string WoNo { get; set; }
         [JsonProperty("itemCd")] public string ItemCd { get; set; }
         [JsonProperty("sn")] public string Sn { get; set; }
@@ -34,7 +35,8 @@ namespace SEOJIN_TMES.Client.Common.Models
 
         [JsonProperty("equipmentList")] public List<EquipmentApi> EquipmentList { get; set; } = new List<EquipmentApi>();
         [JsonProperty("inputMaterialList")] public List<InputMaterialApi> InputMaterialList { get; set; } = new List<InputMaterialApi>();
-        [JsonProperty("bomInspSpecList")] public List<BomInspSpecApi> BomInspSpecList { get; set; } = new List<BomInspSpecApi>();
+        //[JsonProperty("bomInspSpecList")] public List<BomInspSpecApi> BomInspSpecList { get; set; } = new List<BomInspSpecApi>();
+        [JsonProperty("bomInspSpec")] public BomInspSpecGroupApi BomInspSpec { get; set; } = new BomInspSpecGroupApi();
         [JsonProperty("inspChkItemList")] public List<InspChkItemApi> InspChkItemList { get; set; } = new List<InspChkItemApi>();
     }
 
@@ -64,6 +66,17 @@ namespace SEOJIN_TMES.Client.Common.Models
         [JsonProperty("unit")] public string Unit { get; set; }
         [JsonProperty("serialVrfcYn")] public string SerialVrfcYn { get; set; }
         [JsonProperty("inputtedSerials")] public string InputtedSerials { get; set; } // 구분자 형식은 서버 확인 필요
+    }
+
+    public class BomInspSpecGroupApi
+    {
+        [JsonProperty("bomInspSpecList")] public List<BomInspSpecApi> BomInspSpecList { get; set; } = new List<BomInspSpecApi>();
+
+        /// <summary>
+        /// 수동 렌치(작업자 직접 입력) 허용 여부. 서버 기준정보 값이다.
+        /// null로 올 수도 있어 bool?로 받고, 값이 없으면 허용하지 않는 쪽(false)으로 본다.
+        /// </summary>
+        [JsonProperty("manualEnabled")] public bool? ManualEnabled { get; set; }
     }
 
     public class BomInspSpecApi
@@ -103,6 +116,7 @@ namespace SEOJIN_TMES.Client.Common.Models
         public List<PopBomSpecDto> BomSpecs { get; set; }
         public List<PopInspectionSpecDto> InspectionSpecs { get; set; }
         public List<PopEquipmentDto> Equipments { get; set; }
+        public bool BomManualEnabled { get; set; }
     }
 
 
@@ -116,32 +130,35 @@ namespace SEOJIN_TMES.Client.Common.Models
             return Map(res.Data);
         }
 
-        public static PopScreenData Map(PopApiResponse d)
+        public static PopScreenData Map(PopApiResponse data)
         {
-            var eq = d.EquipmentList.FirstOrDefault();
+            var eq = data.EquipmentList.FirstOrDefault();
+            var bom = data.BomInspSpec ?? new BomInspSpecGroupApi();
+            var bomList = bom.BomInspSpecList ?? new List<BomInspSpecApi>();
 
             return new PopScreenData
             {
                 Process = new PopProcessInfoDto
                 {
-                    WorkOrderNo = d.WoNo,
-                    ItemCode = d.ItemCd,
-                    SerialNo = d.Sn,
-                    RoutingGroup = d.RoutingGroupCd,
-                    RoutingOperation = d.RoutingCd,
-                    PageOperation = d.ProcCd,
-                    PageStartTime = d.TrackInDtm,
-                    PageEndTime = d.TrackOutDtm,
-                    RunTime = TimeSpan.FromSeconds(d.ActlWorkDurSec),
-                    IdleTime = TimeSpan.FromSeconds(d.DttmDurSec),
-                    WorkTime = TimeSpan.FromSeconds(d.TotalWorkDurSec),
+                    WorkOrderRef = data.WorkOrderRef,
+                    WorkOrderNo = data.WoNo,
+                    ItemCode = data.ItemCd,
+                    SerialNo = data.Sn,
+                    RoutingGroup = data.RoutingGroupCd,
+                    RoutingOperation = data.RoutingCd,
+                    PageOperation = data.ProcCd,
+                    PageStartTime = data.TrackInDtm,
+                    PageEndTime = data.TrackOutDtm,
+                    RunTime = TimeSpan.FromSeconds(data.ActlWorkDurSec),
+                    IdleTime = TimeSpan.FromSeconds(data.DttmDurSec),
+                    WorkTime = TimeSpan.FromSeconds(data.TotalWorkDurSec),
                     WorkstationCode = eq?.WkstnCd,
                     WorkstationName = eq?.WkstnNm,
-                    ProgressState = d.WorkStatus,   // 필요 시 Ready→"대기" 등 변환
-                    DrawingFilePath = d.ProcImagePath,          // 응답에 없음 → 별도 API/필드 필요
+                    ProgressState = data.WorkStatus,   // 필요 시 Ready→"대기" 등 변환
+                    DrawingFilePath = data.ProcImagePath,          // 응답에 없음 → 별도 API/필드 필요
                 },
 
-                Materials = d.InputMaterialList.Select(m => new PopInputMaterialDto
+                Materials = data.InputMaterialList.Select(m => new PopInputMaterialDto
                 {
                     MaterialCode = m.InputItemCd,
                     ItemCode = m.InputItemCd,
@@ -154,7 +171,7 @@ namespace SEOJIN_TMES.Client.Common.Models
                                            .Select(s => s.Trim()).ToList()
                 }).ToList(),
 
-                BomSpecs = d.BomInspSpecList.Select(b => new PopBomSpecDto
+                BomSpecs = bomList.Select(b => new PopBomSpecDto
                 {
                     MaterialCode = b.InputItemCd,
                     InputPosition = b.Seq.ToString(),
@@ -174,7 +191,9 @@ namespace SEOJIN_TMES.Client.Common.Models
                     IsManualInput = !string.Equals(b.InptMth, "EQP", StringComparison.OrdinalIgnoreCase)
                 }).ToList(),
 
-                InspectionSpecs = d.InspChkItemList.Select(i => new PopInspectionSpecDto
+                BomManualEnabled = bom.ManualEnabled == true,
+
+                InspectionSpecs = data.InspChkItemList.Select(i => new PopInspectionSpecDto
                 {
                     InspectionSpecName = i.InspItemNm,
                     InspectionRemark = i.InspRemark,
@@ -183,7 +202,7 @@ namespace SEOJIN_TMES.Client.Common.Models
                     ResultValue = i.InspDataType == "QNT" ? i.InspRsltVl : null
                 }).ToList(),
 
-                Equipments = d.EquipmentList.Select(e => new PopEquipmentDto
+                Equipments = data.EquipmentList.Select(e => new PopEquipmentDto
                 {
                     //Id = int.Parse(e.EqpCd),
                     EquipmentCode = e.EqpCd,

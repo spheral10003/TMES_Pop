@@ -29,6 +29,7 @@ namespace SEOJIN_TMES.Client.Common.Models
     /// </summary>
     public class PopProcessInfoDto
     {
+        [JsonProperty("sysObjId")] public string WorkOrderRef { get; set; }
         /// <summary>작업지시번호 (예: WO_260608-01).</summary>
         [JsonProperty("woNo")] public string WorkOrderNo { get; set; }
 

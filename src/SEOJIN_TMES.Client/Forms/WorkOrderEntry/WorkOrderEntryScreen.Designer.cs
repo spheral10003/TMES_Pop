@@ -25,6 +25,8 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
         private void InitializeComponent()
         {
             this.topCard = new DevExpress.XtraEditors.PanelControl();
+            this.lblItem = new DevExpress.XtraEditors.LabelControl();
+            this.txtItem = new DevExpress.XtraEditors.TextEdit();
             this.btnSearch = new SEOJIN_TMES.Client.Forms.Common.MeisButton();
             this.btnWork = new SEOJIN_TMES.Client.Forms.Common.MeisButton();
             this.lblWorkOrderNo = new DevExpress.XtraEditors.LabelControl();
@@ -36,17 +38,15 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.grid = new DevExpress.XtraGrid.GridControl();
             this.gridView = new SEOJIN_TMES.Client.Forms.Common.MeisGridView();
             this.lblGridTitle = new DevExpress.XtraEditors.LabelControl();
-            this.lblItem = new DevExpress.XtraEditors.LabelControl();
-            this.txtItem = new DevExpress.XtraEditors.TextEdit();
             ((System.ComponentModel.ISupportInitialize)(this.topCard)).BeginInit();
             this.topCard.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.txtItem.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtWorkOrderNo.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtSerialNo.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridCard)).BeginInit();
             this.gridCard.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.grid)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txtItem.Properties)).BeginInit();
             this.SuspendLayout();
             // 
             // topCard
@@ -64,6 +64,21 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.topCard.Name = "topCard";
             this.topCard.Size = new System.Drawing.Size(1509, 88);
             this.topCard.TabIndex = 0;
+            // 
+            // lblItem
+            // 
+            this.lblItem.Location = new System.Drawing.Point(1052, 36);
+            this.lblItem.Name = "lblItem";
+            this.lblItem.Size = new System.Drawing.Size(40, 14);
+            this.lblItem.TabIndex = 6;
+            this.lblItem.Text = "생산품목";
+            // 
+            // txtItem
+            // 
+            this.txtItem.Location = new System.Drawing.Point(1138, 32);
+            this.txtItem.Name = "txtItem";
+            this.txtItem.Size = new System.Drawing.Size(200, 20);
+            this.txtItem.TabIndex = 7;
             // 
             // btnSearch
             // 
@@ -176,21 +191,6 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.lblGridTitle.TabIndex = 0;
             this.lblGridTitle.Text = "작업 지시 정보";
             // 
-            // lblItem
-            // 
-            this.lblItem.Location = new System.Drawing.Point(1052, 36);
-            this.lblItem.Name = "lblItem";
-            this.lblItem.Size = new System.Drawing.Size(40, 14);
-            this.lblItem.TabIndex = 6;
-            this.lblItem.Text = "생산품목";
-            // 
-            // txtItem
-            // 
-            this.txtItem.Location = new System.Drawing.Point(1138, 32);
-            this.txtItem.Name = "txtItem";
-            this.txtItem.Size = new System.Drawing.Size(200, 20);
-            this.txtItem.TabIndex = 7;
-            // 
             // WorkOrderEntryScreen
             // 
             this.Controls.Add(this.gridCard);
@@ -201,6 +201,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             ((System.ComponentModel.ISupportInitialize)(this.topCard)).EndInit();
             this.topCard.ResumeLayout(false);
             this.topCard.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.txtItem.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtWorkOrderNo.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtSerialNo.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridCard)).EndInit();
@@ -208,7 +209,6 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.gridCard.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.grid)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txtItem.Properties)).EndInit();
             this.ResumeLayout(false);
 
         }

@@ -19,7 +19,7 @@ namespace SEOJIN_TMES.Client.Common.Configuration
         public int LogApiResponseBodyMaxLength { get; set; } = 20000;
         public string DefaultCulture { get; set; } = "ko-KR";
         public string ServerName { get; set; } = "GUM";
-
+        public int UploadMaxMegaBytes { get; set; } = 10;
         /// <summary>자동 로그아웃까지의 세션 유지 시간(분). 메인 화면 우측 상단 카운트다운의 시작 값이다.</summary>
         public int SessionTimeoutMinutes { get; set; } = 300;
         //public List<EquipmentEndpoint> Equipments { get; set; } = new List<EquipmentEndpoint>();

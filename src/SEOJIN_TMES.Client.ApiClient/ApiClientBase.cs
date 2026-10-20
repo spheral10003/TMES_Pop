@@ -47,7 +47,18 @@ namespace SEOJIN_TMES.Client.ApiClient
             }
         }
 
-        
+        /// <summary>
+        /// multipart/form-data 본문을 POST하고 응답의 <b>알맹이</b>를 돌려준다(봉투가 있으면 벗긴다 — GetDataAsync와 같은 규칙).
+        /// 본문은 호출자가 만들고, 이 메서드는 전송 · 타임아웃 변환 · 실패 시 ApiException만 담당한다.
+        /// </summary>
+        protected async Task<TData> PostMultipartAsync<TData>(string relativeUrl, MultipartFormDataContent content, CancellationToken cancellationToken = default)
+        {
+            using (var response = await SendAsync("POST", relativeUrl, () => HttpClient.PostAsync(relativeUrl, content, cancellationToken), cancellationToken).ConfigureAwait(false))
+            {
+                var body = await ReadBodyAsync(response).ConfigureAwait(false);
+                return Unwrap<TData>(body);
+            }
+        }
 
         /// <summary>
         /// GET 후 <b>알맹이</b>만 돌려준다. 이 서버는 응답을 <c>{ "data": ... }</c>로 싸는 곳과

@@ -266,6 +266,14 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string Pop_CommUnused => Get(nameof(Pop_CommUnused));
         public static string Pop_EquipmentUsable => Get(nameof(Pop_EquipmentUsable));
         public static string Pop_EquipmentUnusable => Get(nameof(Pop_EquipmentUnusable));
+        public static string Upload_ConnectionError => Get(nameof(Upload_ConnectionError));
+        public static string Upload_Failed => Get(nameof(Upload_Failed));
+        public static string Upload_FileOpen => Get(nameof(Upload_FileOpen));
+        public static string Upload_ProgressFormat => Get(nameof(Upload_ProgressFormat));
+        public static string Upload_ReadFailed => Get(nameof(Upload_ReadFailed));
+        public static string Upload_SelectFile => Get(nameof(Upload_SelectFile));
+        public static string Upload_Title => Get(nameof(Upload_Title));
+        public static string Upload_Upload => Get(nameof(Upload_Upload));
         public static string Col_MaterialCode => Get(nameof(Col_MaterialCode));
         public static string Col_InputQty => Get(nameof(Col_InputQty));
         public static string Col_InputUnit => Get(nameof(Col_InputUnit));
