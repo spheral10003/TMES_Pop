@@ -2,17 +2,8 @@
 using System.Drawing;
 using System.Runtime.InteropServices;
 
-// ReSharper disable InconsistentNaming
-
-namespace ImageGlass {
-    // Cyotek ImageBox
-    // Copyright (c) 2010-2015 Cyotek Ltd.
-    // http://cyotek.com
-    // http://cyotek.com/blog/tag/imagebox
-
-    // Licensed under the MIT License. See license.txt for the full text.
-
-    // If you use this control in your applications, attribution, donations or contributions are welcome.
+namespace ImageBoxExtensions
+{
 
     internal class NativeMethods {
         #region Externals

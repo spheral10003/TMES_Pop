@@ -85,9 +85,6 @@
     (Visual Studio에서 DevExpress 항목을 추가하면 자동으로 경로가 보정되는 경우가 많음)
   -->
   <ItemGroup>
-    <Reference Include="ImageGlass.ImageBox">
-      <HintPath>Dlls\ImageGlass.ImageBox.dll</HintPath>
-    </Reference>
     <Reference Include="System.Configuration" />
     <Reference Include="System.Net.Http" />
     <!-- 사이드바 하단에 표시하는 ClickOnce 배포 버전(ApplicationDeployment) — Composition/AppVersion.cs -->

@@ -2,18 +2,8 @@
 using System.Drawing;
 using System.Windows.Forms;
 
-// Cyotek ImageBox
-// Copyright (c) 2010-2015 Cyotek Ltd.
-// http://cyotek.com
-// http://cyotek.com/blog/tag/imagebox
-
-// Licensed under the MIT License. See license.txt for the full text.
-
-// If you use this control in your applications, attribution, donations or contributions are welcome.
-
-// This code is derived from http://stackoverflow.com/a/13292894/148962 and http://stackoverflow.com/a/11034674/148962
-
-namespace ImageGlass {
+namespace ImageBoxExtensions
+{
     /// <summary>
     /// A message filter for WM_MOUSEWHEEL and WM_MOUSEHWHEEL. This class cannot be inherited.
     /// </summary>

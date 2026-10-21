@@ -28,7 +28,8 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Threading;
 
-namespace ImageGlass {
+namespace ImageBoxExtensions
+{
 
     /// <summary>
     /// <p> Implements GifAnimator with the potential to offer a timer resolution of 10ms,

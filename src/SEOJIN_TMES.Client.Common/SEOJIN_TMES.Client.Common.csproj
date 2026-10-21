@@ -12,6 +12,9 @@
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ImageBoxEx\ImageBoxEx.csproj" />
+  </ItemGroup>
 
   <!-- 로그 파일 7일 단위 zip 백업(AppLog). .NET Framework에서는 두 어셈블리를 직접 참조해야 한다. -->
   <ItemGroup>

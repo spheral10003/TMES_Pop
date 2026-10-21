@@ -41,7 +41,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.viewerCard = new DevExpress.XtraEditors.PanelControl();
             this.viewerSurface = new System.Windows.Forms.Panel();
             this.scrollHost = new DevExpress.XtraEditors.XtraScrollableControl();
-            this.picView = new System.Windows.Forms.PictureBox();
+            //this.picView = new System.Windows.Forms.PictureBox();
+            
+            this.picView = new ImageBoxExtensions.ImageBoxEx();
             this.menuView = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.mnuFit = new System.Windows.Forms.ToolStripMenuItem();
             this.mnuActual = new System.Windows.Forms.ToolStripMenuItem();
@@ -114,7 +116,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.viewerCard.SuspendLayout();
             this.viewerSurface.SuspendLayout();
             this.scrollHost.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.picView)).BeginInit();
+            //((System.ComponentModel.ISupportInitialize)(this.picView)).BeginInit();
             this.menuView.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.infoCard)).BeginInit();
             this.infoCard.SuspendLayout();
@@ -228,13 +230,19 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 
             // picView
             // 
+            //this.picView.ContextMenuStrip = this.menuView;
+            //this.picView.Location = new System.Drawing.Point(-5, -1);
+            //this.picView.Name = "picView";
+            //this.picView.Size = new System.Drawing.Size(840, 583);
+            //this.picView.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            //this.picView.TabIndex = 1;
+            //this.picView.TabStop = false;
+
+            this.picView.BorderStyle = System.Windows.Forms.BorderStyle.None;   // 추가: 기본값 Fixed3D
             this.picView.ContextMenuStrip = this.menuView;
-            this.picView.Location = new System.Drawing.Point(-5, -1);
+            this.picView.Dock = System.Windows.Forms.DockStyle.Fill;           // 추가: 크기를 키우지 않고 영역을 채운다
             this.picView.Name = "picView";
-            this.picView.Size = new System.Drawing.Size(840, 583);
-            this.picView.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.picView.TabIndex = 1;
-            this.picView.TabStop = false;
             // 
             // menuView
             // 
@@ -1045,7 +1053,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.viewerCard.ResumeLayout(false);
             this.viewerSurface.ResumeLayout(false);
             this.scrollHost.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.picView)).EndInit();
+            //((System.ComponentModel.ISupportInitialize)(this.picView)).EndInit();
             this.menuView.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.infoCard)).EndInit();
             this.infoCard.ResumeLayout(false);
@@ -1157,7 +1165,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private System.Windows.Forms.Label lblWorkstation;
         private System.Windows.Forms.Button btnSaveResults;
         private DevExpress.XtraEditors.XtraScrollableControl scrollHost;
-        private System.Windows.Forms.PictureBox picView;
+        //private System.Windows.Forms.PictureBox picView;
+        private ImageBoxExtensions.ImageBoxEx picView;
         private System.Windows.Forms.ContextMenuStrip menuView;
         private System.Windows.Forms.ToolStripMenuItem mnuFit;
         private System.Windows.Forms.ToolStripMenuItem mnuActual;

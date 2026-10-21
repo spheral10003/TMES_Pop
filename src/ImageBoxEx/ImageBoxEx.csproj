@@ -8,8 +8,8 @@
     <ProjectGuid>{4159C8D3-C18D-4BED-8BE6-9BAD1B0CA4F6}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ImageGlass</RootNamespace>
-    <AssemblyName>ImageGlass.ImageBox</AssemblyName>
+    <RootNamespace>ImageBoxExtensions</RootNamespace>
+    <AssemblyName>ImageBoxEx</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>

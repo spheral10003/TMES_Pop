@@ -1,7 +1,8 @@
 ﻿using System.ComponentModel;
 using System.Windows.Forms;
 
-namespace ImageGlass {
+namespace ImageBoxExtensions
+{
     /// <summary>
     /// Encapsulates properties related to scrolling.
     /// </summary>
