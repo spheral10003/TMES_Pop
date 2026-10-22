@@ -1,18 +1,21 @@
+using DevExpress.Xpo.DB.Helpers;
+using DevExpress.XtraEditors;
+using SEOJIN_TMES.Client.ApiClient;
+using SEOJIN_TMES.Client.Common.Languages;
+using SEOJIN_TMES.Client.Common.Models;
+using SEOJIN_TMES.Client.Composition;
+using SEOJIN_TMES.Client.Core;
+using SEOJIN_TMES.Client.Forms.Common;
+using SEOJIN_TMES.Client.Forms.Pop;
+using SEOJIN_TMES.Client.Forms.WorkStatus;
+using SEOJIN_TMES.Client.Mock;
+using SEOJIN_TMES.Client.Theme;
 using System;
 using System.Collections.Generic;
+using System.Reflection.Emit;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DevExpress.XtraEditors;
-using SEOJIN_TMES.Client.ApiClient;
-using SEOJIN_TMES.Client.Common.Models;
-using SEOJIN_TMES.Client.Composition;
-using SEOJIN_TMES.Client.Forms.Common;
-using SEOJIN_TMES.Client.Forms.Pop;
-using SEOJIN_TMES.Client.Common.Languages;
-using SEOJIN_TMES.Client.Mock;
-using SEOJIN_TMES.Client.Theme;
-using SEOJIN_TMES.Client.Core;
 
 namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
 {
@@ -30,6 +33,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
     {
         //private ClientContext _context;
         private Setting _appSet;
+        //private WorkOrderQuery _query;
         /// <summary>[이동] 선택 시 같은 탭에 띄울 화면을 MainForm에 요청한다.</summary>
         public event EventHandler<ScreenNavigationEventArgs> NavigateRequested;
 
@@ -42,10 +46,12 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
         {
             //_context = context;
             _appSet = Global.Instance.Settings;
+            //_query = new WorkOrderQuery();
 
             lblGridTitle.Text = Language.WorkEntry_ListTitle;
             lblWorkOrderNo.Text = "· " + Language.WorkEntry_WorkOrderNo + "(*)";
             lblSerialNo.Text = "· " + Language.WorkEntry_SerialNo + "(*)";
+            lblItemCode.Text = "· " + Language.ItemPicker_Keyword;
             btnSearch.Text = Language.WorkEntry_Search;
             btnWork.Text = Language.WorkEntry_Work;
 
@@ -72,9 +78,11 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
 
             AppTheme.BodyText(lblWorkOrderNo);
             AppTheme.BodyText(lblSerialNo);
+            AppTheme.BodyText(lblItemCode);
             AppTheme.CodeEditor(txtWorkOrderNo);
             AppTheme.CodeEditor(txtSerialNo);
-
+            AppTheme.CodeEditor(txtItemCode);
+            
             btnSearch.Icon = AppIcons.Search;
             btnWork.Icon = AppIcons.Play;
 
@@ -145,24 +153,36 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             //    return;
             //}
 
-            using (var busy = BusyOverlay.Show(this, cancelable: true))
-            {
+            //using (var busy = BusyOverlay.Show(this, cancelable: true))
+            //{
                 try
                 {
                     btnSearch.Enabled = false;
                     List<WorkOrderEntryDto> result;
+                WorkOrderQuery _query = new WorkOrderQuery
+                {
+                    CorpCode = _appSet.CurrentUser?.Server,
+                    WorkOrderNo = workOrderNo,
+                    SerialNo = serialNo,
+                    ItemCode = txtItemCode.Text?.Trim(),
+                    ItemName = txtItemName.Text?.Trim(),
+                    WorkStationRef = _appSet.CurrentUser?.WorkstationInfo?.WorkstationRef
+                };
+                
+                
+                //if (string.IsNullOrEmpty(workOrderNo) && string.IsNullOrEmpty(serialNo))
+                //    {
+                //        result = await FetchWorkOrdersAsync();
+                //    }
+                //    else
+                //    {
+                //        result = await FetchWorkOrdersAsync(_query, chkWorkStationEnable.Checked);
+                //    }
 
-                    if (string.IsNullOrEmpty(workOrderNo) && string.IsNullOrEmpty(serialNo))
-                    {
-                        result = await FetchWorkOrdersAsync(busy.Token);
-                    }
-                    else
-                    {
-                        result = await FetchWorkOrdersAsync(workOrderNo, serialNo, busy.Token);
-                    }
-                    //var result = await FetchWorkOrdersAsync(workOrderNo, serialNo, busy.Token);
-                    //var result = await FetchWorkOrdersAsync(busy.Token);
-                    if (IsDisposed || Disposing) return;   // 조회 중 탭을 닫았다
+                result = await FetchWorkOrdersAsync(_query, chkWorkStationEnable.Checked);
+                //var result = await FetchWorkOrdersAsync(workOrderNo, serialNo, busy.Token);
+                //var result = await FetchWorkOrdersAsync(busy.Token);
+                if (IsDisposed || Disposing) return;   // 조회 중 탭을 닫았다
 
                     grid.DataSource = result;
                     gridView.BestFitColumns();
@@ -186,36 +206,16 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
                     if (!IsDisposed && !Disposing)
                         btnSearch.Enabled = true;
                 }
-            }
+            //}
         }
 
         /// <summary>
         /// 조회 결과를 가져온다. 목업 모드(App.config의 UseMockData=true)면 서버를 호출하지 않고
         /// 화면 설계서 샘플 데이터를 돌려준다 — 서버 없이도 화면/컬럼/서식을 그대로 확인하기 위한 임시 경로다.
         /// </summary>
-        private async Task<List<WorkOrderEntryDto>> FetchWorkOrdersAsync(string workOrderNo, string serialNo, CancellationToken cancellationToken)
+        private async Task<List<WorkOrderEntryDto>> FetchWorkOrdersAsync(WorkOrderQuery query, bool workStationEnable, CancellationToken cancellationToken = default)
         {
-            //if (_appSet.AppSet.UseMockData)
-            //{
-            //    // 서버 왕복처럼 보이도록 한 틱 양보한다(UI가 먼저 그려지고 버튼 비활성 상태가 보이도록).
-            //    await Task.Yield();
-            //    return MockWorkOrderData.SearchWorkOrders(workOrderNo, serialNo);
-            //}
-
-            return await _appSet.ApiClients.WorkOrderApiClient.SearchWorkOrdersAsync(_appSet.CurrentUser.Server, workOrderNo, serialNo, cancellationToken)
-                   ?? new List<WorkOrderEntryDto>();
-        }
-
-        private async Task<List<WorkOrderEntryDto>> FetchWorkOrdersAsync(CancellationToken cancellationToken)
-        {
-            //if (_appSet.AppSet.UseMockData)
-            //{
-            //    // 서버 왕복처럼 보이도록 한 틱 양보한다(UI가 먼저 그려지고 버튼 비활성 상태가 보이도록).
-            //    await Task.Yield();
-            //    return MockWorkOrderData.SearchWorkOrders(workOrderNo, serialNo);
-            //}
-
-            return await _appSet.ApiClients.WorkOrderApiClient.SearchWorkOrdersAsync(_appSet.CurrentUser.Server, cancellationToken)
+            return await _appSet.ApiClients.WorkOrderApiClient.SearchWorkOrdersAsync(query, workStationEnable, cancellationToken)
                    ?? new List<WorkOrderEntryDto>();
         }
 
@@ -307,5 +307,18 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             NavigateRequested?.Invoke(this, new ScreenNavigationEventArgs(pop, title));
         }
 
+        private void btnItemPick_Click(object sender, EventArgs e)
+        {
+            using (var picker = new ItemPickerForm())
+            {
+                //picker.Init(txtItemCode.Text?.Trim());
+                picker.CenterOn(this);
+                if (picker.ShowDialog(this) != DialogResult.OK || picker.SelectedItem == null)
+                    return;
+
+                txtItemCode.Text = picker.SelectedItem.ItemCode;
+                txtItemName.Text = picker.SelectedItem.ItemName;
+            }
+        }
     }
 }

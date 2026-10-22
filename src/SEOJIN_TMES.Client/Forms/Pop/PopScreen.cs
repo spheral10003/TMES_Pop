@@ -576,7 +576,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// </summary>
         private async void GridViewBomSpec_ValidatingEditor(object sender, BaseContainerValidateEditorEventArgs e)
         {
-            if (gridViewBomSpec.FocusedColumn?.FieldName != TorqueResultField || gridViewBomSpec.FocusedColumn?.FieldName != AngleResultField)
+            if (gridViewBomSpec.FocusedColumn?.FieldName != TorqueResultField && gridViewBomSpec.FocusedColumn?.FieldName != AngleResultField)
                 return;
 
             if (!IsProcessRunning)
@@ -752,7 +752,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         {
             if (gridViewInspection.FocusedColumn?.FieldName != "ResultValue")
                 return;
-
+            
             var spec = gridViewInspection.GetFocusedRow() as PopInspectionSpecDto;
             if (spec != null && !spec.IsQuantitative)
                 e.Cancel = true;
@@ -1348,6 +1348,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             gridViewInspection.Appearance.HorzLine.Options.UseBackColor = true;
             gridViewInspection.Appearance.VertLine.BackColor = Color.FromArgb(230, 233, 241);
             gridViewInspection.Appearance.VertLine.Options.UseBackColor = true;
+            
+            
+            
         }
 
         private void ConfigureEquipmentGrid()
@@ -1485,8 +1488,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
             // 저장은 서버 상태를 바꾸는 처리라 [취소]를 주지 않는다 —
             // 중간에 끊으면 무엇이 반영되고 무엇이 안 됐는지 화면에서 알 수 없다.
-            using (BusyOverlay.Show(this))
-            {
+            //using (BusyOverlay.Show(this))
+            //{
                 try
                 {
                     btnSaveResults.Enabled = false;
@@ -1512,7 +1515,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                     if (!IsDisposed && !Disposing)
                         btnSaveResults.Enabled = true;
                 }
-            }
+            //}
         }
 
         // ─────────────────────────────────────────────────────────────────────────
@@ -2305,10 +2308,19 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             scrollHost.ResumeLayout();
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private async void gridViewInspection_CellValueChanged(object sender, CellValueChangedEventArgs e)
         {
-            FileUploadForm upload = new FileUploadForm(_info.WorkOrderRef);
-            upload.ShowDialog();
+            if (!IsProcessRunning)
+            {
+                AppLog.Info($"[POP] 공정 미시작 - ( 상태 {_progressState})");
+                return;
+            }
+
+            var spec = gridViewInspection.GetRow(e.RowHandle) as PopInspectionSpecDto;
+            if (spec == null)
+                return;
+
+            await _appSet.ApiClients.PopApiClient.SaveInspectionResultsAsync(_key, _inspections);
         }
     }
 

@@ -18,12 +18,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
         private async Task<List<PopInspectionSpecDto>> FetchInspectionsAsync()
         {
-            //if (UseMock)
-            //{
-            //    await Task.Yield();
-            //    return MockPopData.GetInspectionSpecs(_key);
-            //}
-
             return await _appSet.ApiClients.PopApiClient.GetInspectionSpecsAsync(_key)
                    ?? new List<PopInspectionSpecDto>();
         }

@@ -25,11 +25,17 @@ namespace SEOJIN_TMES.Client.Common.Models
 
         /// <summary>생산품목 코드.</summary>
         public string ItemCode { get; set; }
+        /// <summary>생산품목명.</summary>
+        public string ItemName { get; set; }
 
         /// <summary>생산품목 시리얼번호(부분 일치).</summary>
         public string SerialNo { get; set; }
 
         /// <summary>작업지시 상태. 비어 있거나 "전체"면 상태로 거르지 않는다.</summary>
         public string StatusName { get; set; }
+
+        /// <summary>워크스테이션 참조 코드.</summary>
+        public string WorkStationRef { get; set; }
+
     }
 }

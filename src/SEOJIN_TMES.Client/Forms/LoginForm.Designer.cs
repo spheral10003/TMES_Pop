@@ -262,9 +262,6 @@ namespace SEOJIN_TMES.Client.Forms
             this.cboWorkstation.Name = "cboWorkstation";
             this.cboWorkstation.Properties.Appearance.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.cboWorkstation.Properties.Appearance.Options.UseFont = true;
-            this.cboWorkstation.Properties.Items.AddRange(new object[] {
-            "Workstation01(워크스테이션01)",
-            "Workstation02(워크스테이션02)"});
             this.cboWorkstation.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
             this.cboWorkstation.Size = new System.Drawing.Size(282, 22);
             this.cboWorkstation.TabIndex = 9;

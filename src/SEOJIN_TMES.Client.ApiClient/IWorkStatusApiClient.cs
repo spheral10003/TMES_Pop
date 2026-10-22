@@ -22,7 +22,7 @@ namespace SEOJIN_TMES.Client.ApiClient
         Task<List<WorkProgressDto>> GetWorkProgressAsync(string corpCode, string workStationRef, string serialNo, CancellationToken cancellationToken = default);
 
         /// <summary>&lt;생산품목 선택&gt; 팝업의 품목 검색(품목코드/품목명 부분 일치).</summary>
-        Task<List<ItemDto>> SearchItemsAsync(string keyword, CancellationToken cancellationToken = default);
+        Task<List<ItemResponse>> SearchItemsAsync(ItemQuery keyword, CancellationToken cancellationToken = default);
     }
 
     public class WorkStatusApiClient : ApiClientBase, IWorkStatusApiClient
@@ -57,7 +57,13 @@ namespace SEOJIN_TMES.Client.ApiClient
             return response?.Data ?? new List<WorkProgressDto>();
         }
 
-        public Task<List<ItemDto>> SearchItemsAsync(string keyword, CancellationToken cancellationToken = default) =>
-            GetAsync<List<ItemDto>>(ApiPrefix + "items/search" + BuildQuery(("keyword", keyword)), cancellationToken);
+        public async Task<List<ItemResponse>> SearchItemsAsync(ItemQuery keyword, CancellationToken cancellationToken = default)
+        {
+            var url = $"{ ApiPrefix }md/items";
+            var query = BuildQuery(("corpCd", keyword.CorpCode), ("itemCd", keyword.ItemCode), ("itemNm", keyword.ItemName));
+            var response = await GetAsync<ApiDataResponse<List<ItemResponse>>>($"{url}{query}", cancellationToken);
+            return response?.Data ?? new List<ItemResponse>();
+        }
+            
     }
 }

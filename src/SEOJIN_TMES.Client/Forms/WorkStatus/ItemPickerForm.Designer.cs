@@ -35,9 +35,11 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             this.lblListTitle = new DevExpress.XtraEditors.LabelControl();
             this.spacer = new System.Windows.Forms.Panel();
             this.searchCard = new DevExpress.XtraEditors.PanelControl();
-            this.lblKeyword = new DevExpress.XtraEditors.LabelControl();
-            this.txtKeyword = new DevExpress.XtraEditors.TextEdit();
-            this.btnSearch = new SEOJIN_TMES.Client.Forms.Common.MeisButton();
+            this.btnSearch = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
+            this.lblItemCode = new System.Windows.Forms.Label();
+            this.txtItemName = new DevExpress.XtraEditors.TextEdit();
+            this.txtItemCode = new DevExpress.XtraEditors.TextEdit();
             this.footerPanel = new DevExpress.XtraEditors.PanelControl();
             this.btnSelect = new SEOJIN_TMES.Client.Forms.Common.MeisButton();
             this.btnClose = new SEOJIN_TMES.Client.Forms.Common.MeisButton();
@@ -52,7 +54,8 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             ((System.ComponentModel.ISupportInitialize)(this.gridView)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.searchCard)).BeginInit();
             this.searchCard.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.txtKeyword.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtItemName.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtItemCode.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.footerPanel)).BeginInit();
             this.footerPanel.SuspendLayout();
             this.SuspendLayout();
@@ -143,9 +146,11 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             // 
             // searchCard
             // 
-            this.searchCard.Controls.Add(this.lblKeyword);
-            this.searchCard.Controls.Add(this.txtKeyword);
             this.searchCard.Controls.Add(this.btnSearch);
+            this.searchCard.Controls.Add(this.label1);
+            this.searchCard.Controls.Add(this.lblItemCode);
+            this.searchCard.Controls.Add(this.txtItemName);
+            this.searchCard.Controls.Add(this.txtItemCode);
             this.searchCard.Dock = System.Windows.Forms.DockStyle.Top;
             this.searchCard.Location = new System.Drawing.Point(18, 14);
             this.searchCard.Name = "searchCard";
@@ -153,37 +158,51 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             this.searchCard.Size = new System.Drawing.Size(584, 62);
             this.searchCard.TabIndex = 0;
             // 
-            // lblKeyword
-            // 
-            this.lblKeyword.Location = new System.Drawing.Point(18, 22);
-            this.lblKeyword.Name = "lblKeyword";
-            this.lblKeyword.Size = new System.Drawing.Size(91, 14);
-            this.lblKeyword.TabIndex = 0;
-            this.lblKeyword.Text = "· 품목코드 / 품목명";
-            // 
-            // txtKeyword
-            // 
-            this.txtKeyword.Location = new System.Drawing.Point(156, 18);
-            this.txtKeyword.Name = "txtKeyword";
-            this.txtKeyword.Size = new System.Drawing.Size(300, 20);
-            this.txtKeyword.TabIndex = 1;
-            // 
             // btnSearch
             // 
-            this.btnSearch.Accent = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
-            this.btnSearch.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnSearch.Icon = null;
-            this.btnSearch.Location = new System.Drawing.Point(466, 17);
-            this.btnSearch.LookAndFeel.Style = DevExpress.LookAndFeel.LookAndFeelStyle.Flat;
+            this.btnSearch.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
+            this.btnSearch.FlatAppearance.MouseOverBackColor = System.Drawing.Color.MediumSeaGreen;
+            this.btnSearch.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSearch.Font = new System.Drawing.Font("Noto Sans KR", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnSearch.Location = new System.Drawing.Point(490, 12);
             this.btnSearch.Name = "btnSearch";
-            this.btnSearch.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
-            this.btnSearch.Selected = false;
-            this.btnSearch.ShowFocusRectangle = DevExpress.Utils.DefaultBoolean.False;
-            this.btnSearch.Size = new System.Drawing.Size(104, 28);
-            this.btnSearch.TabIndex = 2;
-            this.btnSearch.Text = "조회";
-            this.btnSearch.TextAfterIcon = false;
+            this.btnSearch.Size = new System.Drawing.Size(83, 30);
+            this.btnSearch.TabIndex = 7;
+            this.btnSearch.Text = "조 회";
+            this.btnSearch.UseVisualStyleBackColor = true;
             this.btnSearch.Click += new System.EventHandler(this.btnSearch_Click);
+            // 
+            // label1
+            // 
+            this.label1.Font = new System.Drawing.Font("Noto Sans KR", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Location = new System.Drawing.Point(227, 17);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(76, 21);
+            this.label1.TabIndex = 6;
+            this.label1.Text = "· 품목 명";
+            // 
+            // lblItemCode
+            // 
+            this.lblItemCode.Font = new System.Drawing.Font("Noto Sans KR", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblItemCode.Location = new System.Drawing.Point(36, 17);
+            this.lblItemCode.Name = "lblItemCode";
+            this.lblItemCode.Size = new System.Drawing.Size(76, 21);
+            this.lblItemCode.TabIndex = 5;
+            this.lblItemCode.Text = "· 품목코드";
+            // 
+            // txtItemName
+            // 
+            this.txtItemName.Location = new System.Drawing.Point(309, 17);
+            this.txtItemName.Name = "txtItemName";
+            this.txtItemName.Size = new System.Drawing.Size(80, 20);
+            this.txtItemName.TabIndex = 3;
+            // 
+            // txtItemCode
+            // 
+            this.txtItemCode.Location = new System.Drawing.Point(118, 18);
+            this.txtItemCode.Name = "txtItemCode";
+            this.txtItemCode.Size = new System.Drawing.Size(80, 20);
+            this.txtItemCode.TabIndex = 1;
             // 
             // footerPanel
             // 
@@ -249,6 +268,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "생산품목 선택";
+            this.Load += new System.EventHandler(this.ItemPickerForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.headerPanel)).EndInit();
             this.headerPanel.ResumeLayout(false);
             this.headerPanel.PerformLayout();
@@ -262,8 +282,8 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             ((System.ComponentModel.ISupportInitialize)(this.gridView)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.searchCard)).EndInit();
             this.searchCard.ResumeLayout(false);
-            this.searchCard.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.txtKeyword.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtItemName.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtItemCode.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.footerPanel)).EndInit();
             this.footerPanel.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -277,9 +297,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
         private DevExpress.XtraEditors.LabelControl lblTitle;
         private DevExpress.XtraEditors.PanelControl bodyPanel;
         private DevExpress.XtraEditors.PanelControl searchCard;
-        private DevExpress.XtraEditors.LabelControl lblKeyword;
-        private DevExpress.XtraEditors.TextEdit txtKeyword;
-        private SEOJIN_TMES.Client.Forms.Common.MeisButton btnSearch;
+        private DevExpress.XtraEditors.TextEdit txtItemCode;
         private System.Windows.Forms.Panel spacer;
         private DevExpress.XtraEditors.PanelControl listCard;
         private DevExpress.XtraEditors.LabelControl lblListTitle;
@@ -288,5 +306,9 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
         private DevExpress.XtraEditors.PanelControl footerPanel;
         private SEOJIN_TMES.Client.Forms.Common.MeisButton btnSelect;
         private SEOJIN_TMES.Client.Forms.Common.MeisButton btnClose;
+        private DevExpress.XtraEditors.TextEdit txtItemName;
+        private System.Windows.Forms.Button btnSearch;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label lblItemCode;
     }
 }

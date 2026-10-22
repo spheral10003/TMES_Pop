@@ -232,6 +232,7 @@ namespace SEOJIN_TMES.Client.Common.Models
     /// </summary>
     public class PopInspectionSpecDto
     {
+        public string InspectionItemCode { get; set; }
         /// <summary>검사 스팩명.</summary>
         public string InspectionSpecName { get; set; }
 

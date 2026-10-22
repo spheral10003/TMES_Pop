@@ -15,7 +15,7 @@ namespace SEOJIN_TMES.Client.ApiClient
         /// <summary>
         /// POP 진입 화면의 작업지시 조회. 작업지시번호 / 생산품목 시리얼번호 중 입력된 조건만 서버로 전달한다.
         /// </summary>
-        Task<List<WorkOrderEntryDto>> SearchWorkOrdersAsync(string corpCode, string workOrderNo, string serialNo, CancellationToken cancellationToken = default);
+        Task<List<WorkOrderEntryDto>> SearchWorkOrdersAsync(WorkOrderQuery search, bool workStationEnable,CancellationToken cancellationToken = default);
 
         Task<List<WorkOrderEntryDto>> SearchWorkOrdersAsync(string corpCode, CancellationToken cancellationToken = default);
 
@@ -39,12 +39,19 @@ namespace SEOJIN_TMES.Client.ApiClient
             return GetAsync<List<WorkOrderDto>>(url, cancellationToken);
         }
 
-        public async Task<List<WorkOrderEntryDto>> SearchWorkOrdersAsync(string corpCode, string workOrderNo, string serialNo, CancellationToken cancellationToken = default)
+        public async Task<List<WorkOrderEntryDto>> SearchWorkOrdersAsync(WorkOrderQuery search, bool workStationEnable,  CancellationToken cancellationToken = default)
         {
-            var query = BuildQuery(("corpCd", corpCode), ("woNo", workOrderNo), ("sn", serialNo));
-            var response = await GetAsync<ApiDataResponse<List<WorkOrderEntryDto>>>(ApiPrefix + "md/work-orders/overview" + query, cancellationToken);
+            var query = BuildQuery(
+                ("corpCd", search.CorpCode), 
+                ("woNo", search.WorkOrderNo), 
+                ("sn", search.SerialNo),
+                ("itemCd", search.ItemCode),
+                ("wkstnRef", workStationEnable ? search.WorkStationRef : "")
+                );
+
+            var response = await GetAsync<ApiDataResponse<List<WorkOrderEntryDto>>>($"{ApiPrefix}md/work-orders/overview{query}", cancellationToken);
             return response?.Data ?? new List<WorkOrderEntryDto>();
-            //return GetAsync<List<WorkOrderEntryDto>>(WorkOrderPrefix + "work-orders/search" + query, cancellationToken);
+            
         }
 
         public async Task<List<WorkOrderEntryDto>> SearchWorkOrdersAsync(string corpCode, CancellationToken cancellationToken = default)

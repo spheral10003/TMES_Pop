@@ -28,11 +28,11 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
     public partial class ItemPickerForm : XtraForm
     {
         //private ClientContext _context;
-        private AppSettings _appSet;
+        private Setting _appSet;
         private ApiClientFactory _apiClients;
 
         /// <summary>[선택]으로 확정한 품목. 취소/닫기면 null.</summary>
-        public ItemDto SelectedItem { get; private set; }
+        public ItemResponse SelectedItem { get; private set; }
 
         public ItemPickerForm()
         {
@@ -40,11 +40,11 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
         }
 
         /// <summary>화면에 이미 입력돼 있던 품목코드가 있으면 검색어로 채워 바로 조회한다.</summary>
-        public void Init(string keyword)
+        public void Init(string keyword = null)
         {
             //_context = context;
 
-            _appSet = Global.Instance.Settings.AppSet;
+            _appSet = Global.Instance.Settings;
             _apiClients = Global.Instance.Settings.ApiClients;
 
             //Text = Language.ItemPicker_Title;
@@ -59,22 +59,22 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             ApplyTheme();
             ConfigureGrid();
 
-            txtKeyword.Text = keyword;
+            //txtItemCode.Text = keyword;
 
             // 바코드 스캐너처럼 Enter로 끝나는 입력을 그대로 조회로 연결한다.
-            txtKeyword.KeyDown += Keyword_KeyDown;
+            txtItemCode.KeyDown += Keyword_KeyDown;
 
             // 목록을 더블클릭하면 [선택]과 같게 동작한다.
             gridView.DoubleClick += (s, e) => ConfirmSelection();
 
-            Load += async (s, e) => await SearchAsync();
+            //Load += async (s, e) => await SearchAsync();
         }
 
         private void ApplyLanguage()
         {
             Text = Language.ItemPicker_Title;
             lblTitle.Text = Language.ItemPicker_Title;
-            lblKeyword.Text = "· " + Language.ItemPicker_Keyword;
+            lblItemCode.Text = "· " + Language.ItemPicker_Keyword;
             lblListTitle.Text = Language.ItemPicker_ListTitle;
             btnSearch.Text = Language.Common_Search;
             btnSelect.Text = Language.ItemPicker_Select;
@@ -93,9 +93,9 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             spacer.BackColor = AppTheme.Surface;
 
             AppTheme.SectionTitle(lblListTitle, AppTheme.Cyan);
-            AppTheme.BodyText(lblKeyword);
-            AppTheme.CodeEditor(txtKeyword);
-            btnSearch.Icon = AppIcons.Search;
+            //AppTheme.BodyText(lblItemCode);
+            AppTheme.CodeEditor(txtItemCode);
+            //btnSearch.Icon = AppIcons.Search;
             AppTheme.Grid(grid, gridView, AppTheme.Cyan);
 
             headerIcon.SvgImage = AppIcons.Get(AppIcons.Search, Color.White);
@@ -106,7 +106,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
 
         private void ConfigureGrid()
         {
-            grid.DataSource = new List<ItemDto>();
+            grid.DataSource = new List<ItemResponse>();
             GridColumns.Apply(gridView, Language.Col_No,
                 GridColumns.Text("ItemCode", Language.Col_ItemCode, 130),
                 GridColumns.Left("ItemName", Language.Col_ItemName, 180),
@@ -128,12 +128,19 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
 
         private async Task SearchAsync()
         {
-            using (var busy = BusyOverlay.Show(this, cancelable: true))
-            {
+            //using (var busy = BusyOverlay.Show(this, cancelable: true))
+            //{
                 try
                 {
                     btnSearch.Enabled = false;
-                    var result = await FetchItemsAsync(txtKeyword.Text?.Trim(), busy.Token);
+                    ItemQuery query = new ItemQuery
+                    {
+                        CorpCode = _appSet.CurrentUser?.Server,
+                        ItemCode = txtItemCode.Text?.Trim(),
+                        ItemName = txtItemName.Text?.Trim()
+                    };
+
+                    var result = await FetchItemsAsync(query);
 
                     if (IsDisposed || Disposing) return;   // 조회 중 팝업을 닫았다
 
@@ -155,19 +162,19 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
                     if (!IsDisposed && !Disposing)
                         btnSearch.Enabled = true;
                 }
-            }
+            //}
         }
 
-        private async Task<List<ItemDto>> FetchItemsAsync(string keyword, CancellationToken cancellationToken)
+        private async Task<List<ItemResponse>> FetchItemsAsync(ItemQuery query, CancellationToken cancellationToken = default)
         {
-            if (_appSet.UseMockData)
-            {
-                await Task.Yield();
-                return MockWorkStatusData.SearchItems(keyword);
-            }
+            //if (_appSet.UseMockData)
+            //{
+            //    await Task.Yield();
+            //    return MockWorkStatusData.SearchItems(keyword);
+            //}
 
-            return await _apiClients.WorkStatusApiClient.SearchItemsAsync(keyword, cancellationToken)
-                   ?? new List<ItemDto>();
+            return await _apiClients.WorkStatusApiClient.SearchItemsAsync(query, cancellationToken)
+                   ?? new List<ItemResponse>();
         }
 
         /// <summary>부모 창(없으면 화면) 가운데에 띄운다.</summary>
@@ -192,7 +199,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
         /// <summary>선택한 품목을 확정한다. 선택이 없으면 안내만 하고 창은 유지한다.</summary>
         private void ConfirmSelection()
         {
-            var item = gridView.GetFocusedRow() as ItemDto;
+            var item = gridView.GetFocusedRow() as ItemResponse;
             if (item == null)
             {
                 AppMessageBox.Warn(this, Language.ItemPicker_SelectItem, Language.ItemPicker_Title);
@@ -202,6 +209,11 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             SelectedItem = item;
             DialogResult = DialogResult.OK;
             Close();
+        }
+
+        private void ItemPickerForm_Load(object sender, EventArgs e)
+        {
+            Init();
         }
     }
 }

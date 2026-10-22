@@ -101,6 +101,7 @@ namespace SEOJIN_TMES.Client.Common.Models
 
     public class InspChkItemApi
     {
+        [JsonProperty("inspItemCd")] public string InspItemCode { get; set; }
         [JsonProperty("inspItemNm")] public string InspItemNm { get; set; }
         [JsonProperty("inspDataType")] public string InspDataType { get; set; } // QLT 정성 / QNT 정량
         [JsonProperty("jgmtRslt")] public string JgmtRslt { get; set; }         // OK / NG
@@ -195,6 +196,7 @@ namespace SEOJIN_TMES.Client.Common.Models
 
                 InspectionSpecs = data.InspChkItemList.Select(i => new PopInspectionSpecDto
                 {
+                    InspectionItemCode = i.InspItemCode,
                     InspectionSpecName = i.InspItemNm,
                     InspectionRemark = i.InspRemark,
                     InspectionMethod = i.InspDataType == "QNT" ? "정량" : "정성",

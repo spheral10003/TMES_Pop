@@ -198,7 +198,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             // 
             // btnItemPick
             // 
-            this.btnItemPick.Location = new System.Drawing.Point(1206, 19);
+            this.btnItemPick.Location = new System.Drawing.Point(1208, 17);
             this.btnItemPick.Name = "btnItemPick";
             this.btnItemPick.Size = new System.Drawing.Size(34, 28);
             this.btnItemPick.TabIndex = 10;

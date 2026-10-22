@@ -10,6 +10,7 @@ namespace SEOJIN_TMES.Client.Common.Models
     public class WorkStatusQuery
     {
         public string CorpCode { get; set; }
+
         public string WorkstationRef { get; set; }
 
         /// <summary>지시일자 시작(필수). 화면에서 기본값은 한 달 전.</summary>

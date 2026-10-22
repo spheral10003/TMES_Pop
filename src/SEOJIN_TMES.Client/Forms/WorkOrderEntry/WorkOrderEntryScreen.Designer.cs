@@ -24,9 +24,13 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(WorkOrderEntryScreen));
             this.topCard = new DevExpress.XtraEditors.PanelControl();
-            this.lblItem = new DevExpress.XtraEditors.LabelControl();
-            this.txtItem = new DevExpress.XtraEditors.TextEdit();
+            this.chkWorkStationEnable = new System.Windows.Forms.CheckBox();
+            this.btnItemPick = new System.Windows.Forms.Button();
+            this.txtItemName = new DevExpress.XtraEditors.TextEdit();
+            this.lblItemCode = new DevExpress.XtraEditors.LabelControl();
+            this.txtItemCode = new DevExpress.XtraEditors.TextEdit();
             this.btnSearch = new SEOJIN_TMES.Client.Forms.Common.MeisButton();
             this.btnWork = new SEOJIN_TMES.Client.Forms.Common.MeisButton();
             this.lblWorkOrderNo = new DevExpress.XtraEditors.LabelControl();
@@ -40,7 +44,8 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.lblGridTitle = new DevExpress.XtraEditors.LabelControl();
             ((System.ComponentModel.ISupportInitialize)(this.topCard)).BeginInit();
             this.topCard.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.txtItem.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtItemName.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtItemCode.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtWorkOrderNo.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtSerialNo.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridCard)).BeginInit();
@@ -51,8 +56,11 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             // 
             // topCard
             // 
-            this.topCard.Controls.Add(this.lblItem);
-            this.topCard.Controls.Add(this.txtItem);
+            this.topCard.Controls.Add(this.chkWorkStationEnable);
+            this.topCard.Controls.Add(this.btnItemPick);
+            this.topCard.Controls.Add(this.txtItemName);
+            this.topCard.Controls.Add(this.lblItemCode);
+            this.topCard.Controls.Add(this.txtItemCode);
             this.topCard.Controls.Add(this.btnSearch);
             this.topCard.Controls.Add(this.btnWork);
             this.topCard.Controls.Add(this.lblWorkOrderNo);
@@ -65,27 +73,62 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.topCard.Size = new System.Drawing.Size(1509, 88);
             this.topCard.TabIndex = 0;
             // 
-            // lblItem
+            // chkWorkStationEnable
             // 
-            this.lblItem.Location = new System.Drawing.Point(1052, 36);
-            this.lblItem.Name = "lblItem";
-            this.lblItem.Size = new System.Drawing.Size(40, 14);
-            this.lblItem.TabIndex = 6;
-            this.lblItem.Text = "생산품목";
+            this.chkWorkStationEnable.AutoSize = true;
+            this.chkWorkStationEnable.Checked = true;
+            this.chkWorkStationEnable.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkWorkStationEnable.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.chkWorkStationEnable.Location = new System.Drawing.Point(1410, 35);
+            this.chkWorkStationEnable.Name = "chkWorkStationEnable";
+            this.chkWorkStationEnable.Size = new System.Drawing.Size(91, 18);
+            this.chkWorkStationEnable.TabIndex = 11;
+            this.chkWorkStationEnable.Text = "WorkStation";
+            this.chkWorkStationEnable.UseVisualStyleBackColor = true;
             // 
-            // txtItem
+            // btnItemPick
             // 
-            this.txtItem.Location = new System.Drawing.Point(1138, 32);
-            this.txtItem.Name = "txtItem";
-            this.txtItem.Size = new System.Drawing.Size(200, 20);
-            this.txtItem.TabIndex = 7;
+            this.btnItemPick.BackColor = System.Drawing.Color.Transparent;
+            this.btnItemPick.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("btnItemPick.BackgroundImage")));
+            this.btnItemPick.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
+            this.btnItemPick.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
+            this.btnItemPick.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnItemPick.Location = new System.Drawing.Point(1371, 32);
+            this.btnItemPick.Margin = new System.Windows.Forms.Padding(1);
+            this.btnItemPick.Name = "btnItemPick";
+            this.btnItemPick.Size = new System.Drawing.Size(23, 20);
+            this.btnItemPick.TabIndex = 10;
+            this.btnItemPick.UseVisualStyleBackColor = false;
+            this.btnItemPick.Click += new System.EventHandler(this.btnItemPick_Click);
+            // 
+            // txtItemName
+            // 
+            this.txtItemName.Location = new System.Drawing.Point(1269, 33);
+            this.txtItemName.Name = "txtItemName";
+            this.txtItemName.Size = new System.Drawing.Size(98, 20);
+            this.txtItemName.TabIndex = 9;
+            // 
+            // lblItemCode
+            // 
+            this.lblItemCode.Location = new System.Drawing.Point(1072, 36);
+            this.lblItemCode.Name = "lblItemCode";
+            this.lblItemCode.Size = new System.Drawing.Size(75, 14);
+            this.lblItemCode.TabIndex = 6;
+            this.lblItemCode.Text = "품목코드/품목명";
+            // 
+            // txtItemCode
+            // 
+            this.txtItemCode.Location = new System.Drawing.Point(1165, 33);
+            this.txtItemCode.Name = "txtItemCode";
+            this.txtItemCode.Size = new System.Drawing.Size(98, 20);
+            this.txtItemCode.TabIndex = 7;
             // 
             // btnSearch
             // 
             this.btnSearch.Accent = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
             this.btnSearch.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnSearch.Icon = null;
-            this.btnSearch.Location = new System.Drawing.Point(20, 26);
+            this.btnSearch.Location = new System.Drawing.Point(16, 25);
             this.btnSearch.LookAndFeel.Style = DevExpress.LookAndFeel.LookAndFeelStyle.Flat;
             this.btnSearch.Name = "btnSearch";
             this.btnSearch.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
@@ -102,7 +145,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.btnWork.Accent = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
             this.btnWork.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnWork.Icon = null;
-            this.btnWork.Location = new System.Drawing.Point(132, 26);
+            this.btnWork.Location = new System.Drawing.Point(126, 25);
             this.btnWork.LookAndFeel.Style = DevExpress.LookAndFeel.LookAndFeelStyle.Flat;
             this.btnWork.Name = "btnWork";
             this.btnWork.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
@@ -201,7 +244,8 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             ((System.ComponentModel.ISupportInitialize)(this.topCard)).EndInit();
             this.topCard.ResumeLayout(false);
             this.topCard.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.txtItem.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtItemName.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtItemCode.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtWorkOrderNo.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtSerialNo.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridCard)).EndInit();
@@ -227,7 +271,10 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
         private DevExpress.XtraEditors.LabelControl lblGridTitle;
         private DevExpress.XtraGrid.GridControl grid;
         private SEOJIN_TMES.Client.Forms.Common.MeisGridView gridView;
-        private DevExpress.XtraEditors.LabelControl lblItem;
-        private DevExpress.XtraEditors.TextEdit txtItem;
+        private DevExpress.XtraEditors.LabelControl lblItemCode;
+        private DevExpress.XtraEditors.TextEdit txtItemCode;
+        private DevExpress.XtraEditors.TextEdit txtItemName;
+        private System.Windows.Forms.Button btnItemPick;
+        private System.Windows.Forms.CheckBox chkWorkStationEnable;
     }
 }
