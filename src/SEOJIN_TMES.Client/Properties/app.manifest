@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ClickOnce 신뢰 수준 = 완전 신뢰(Unrestricted).
+  POP는 설비 Modbus-TCP 소켓, SMB 공유 폴더, 로컬 로그 파일을 쓰므로 부분 신뢰(LocalIntranet)로 설치되면
+  실행 중 SecurityException 이 난다. csproj 의 TargetZone=Custom 이 이 파일의 권한 집합을 그대로 쓴다.
+-->
+<assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1">
+  <assemblyIdentity version="1.0.0.0" name="SEOJIN_TMES_POP.app" />
+  <trustInfo xmlns="urn:schemas-microsoft-com:asm.v2">
+    <security>
+      <requestedPrivileges xmlns="urn:schemas-microsoft-com:asm.v3">
+        <requestedExecutionLevel level="asInvoker" uiAccess="false" />
+      </requestedPrivileges>
+      <applicationRequestMinimum>
+        <PermissionSet class="System.Security.PermissionSet" version="1" Unrestricted="true" ID="Custom" SameSite="site" />
+        <defaultAssemblyRequest permissionSetReference="Custom" />
+      </applicationRequestMinimum>
+    </security>
+  </trustInfo>
+</assembly>

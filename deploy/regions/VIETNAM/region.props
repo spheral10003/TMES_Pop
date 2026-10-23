@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ClickOnce 게시 지역 설정 — 베트남 (VIETNAM).
+  SEOJIN_TMES.Client.csproj 가 -p:Region=VIETNAM 로 빌드될 때만 이 파일을 불러온다.
+-->
+<Project>
+  <PropertyGroup>
+    <!--
+      [입력 필요] 배포 서버 주소 — 현장 PC가 설치 · 업데이트 확인 때 접속하는 URL(끝에 / 필수).
+      예 "https://tmes-gm-test.texon.co.kr/pop/"
+      비어 있으면 게시 스크립트가 물어보고 여기에 채워 넣는다. -DeployBaseUrl 로 이번 게시에만 덮어쓸 수도 있다.
+      주의: 이미 설치된 PC는 설치할 때의 주소로 업데이트를 확인한다. 주소를 바꾸면 기존 PC는
+      옛 주소에도 새 버전을 한 번 게시하거나, PC에서 제거 후 새 주소로 재설치해야 한다.
+    -->
+    <DeployBaseUrl Condition="'$(DeployBaseUrl)'==''"></DeployBaseUrl>
+
+    <!-- 시작 메뉴 · 바탕화면 바로가기 · 프로그램 추가/제거에 보이는 이름. -->
+    <ProductName>TMES POP (베트남)</ProductName>
+
+    <!-- 게시본의 exe.config 로 들어갈 파일. 개발용 src/SEOJIN_TMES.Client/App.config 대신 쓰인다. -->
+    <AppConfig>$(MSBuildThisFileDirectory)App.config</AppConfig>
+  </PropertyGroup>
+</Project>

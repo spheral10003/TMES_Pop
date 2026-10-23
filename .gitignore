@@ -361,3 +361,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+# ClickOnce 게시 결과(deploy/Publish-ClickOnce.ps1)
+deploy/out/
