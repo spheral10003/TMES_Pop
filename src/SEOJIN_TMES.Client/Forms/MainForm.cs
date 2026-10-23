@@ -52,21 +52,6 @@ namespace SEOJIN_TMES.Client.Forms
         ///// </summary>
         //private const string ClockFormat = "yyyy-MM-dd hh:mm:ss tt";
 
-        ///// <summary>
-        ///// 언어 콤보에 표시할 목록(표시 문구 ↔ 문화권 코드 ↔ 국기 아이콘).
-        ///// 국기는 Images\flag\{두 글자 코드}.png 이며 문화권 코드 앞 두 글자로 찾는다.
-        /////
-        ///// 언어를 추가할 때는 <b>세 곳을 함께</b> 갖춰야 한다 —
-        ///// 여기 한 줄 + Localization\Language.{두 글자 코드}.resx + Images\flag\{두 글자 코드}.png.
-        ///// 번역 리소스 없이 항목만 넣으면 골라도 중립 리소스(한국어)로 되돌아가 고장처럼 보인다.
-        ///// </summary>
-        //private static readonly LanguageOption[] Languages =
-        //{
-        //    new LanguageOption("한국어", "ko-KR"),
-        //    new LanguageOption("English", "en-US"),
-        //    new LanguageOption("Việt Nam", "vi-VN")
-        //};
-
         ///// <summary>언어 콤보의 국기 아이콘 모음. 콤보가 살아 있는 동안 함께 유지된다.</summary>
         //private ImageCollection _languageFlags;
 
@@ -76,10 +61,14 @@ namespace SEOJIN_TMES.Client.Forms
         private readonly Dictionary<string, OpenedScreen> _openScreens = new Dictionary<string, OpenedScreen>();
         private readonly Dictionary<string, string> _breadcrumbs = new Dictionary<string, string>();
         private readonly Dictionary<string, AccordionControlElement> _menuElements = new Dictionary<string, AccordionControlElement>();
-        private readonly HashSet<string> _visibleMenuNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        /// <summary>
+        /// 서버가 내려준 화면 메뉴 코드(POP01 …). <see cref="MenuCatalog"/>는 이 목록에 있는 화면만 남긴다.
+        /// 서버 응답 전 · 조회 실패 시에는 비어 있어 화면 메뉴가 하나도 열리지 않는다(권한 없는 화면을 먼저 보여 주지 않기 위함).
+        /// </summary>
+        private readonly HashSet<string> _allowedMenuCodes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         /// <summary>서버가 알려준 "안 읽은 알림" 개수. 폴링으로 갱신되며 배지 숫자의 근거가 된다.</summary>
         private long _unreadNotificationCount;
-        private bool IsMenuVisible(string menuKey) => _visibleMenuNames.Contains(menuKey);
+        private bool IsMenuVisible(string menuCode) => _allowedMenuCodes.Contains(menuCode);
 
         /// <summary>
         /// 홈 탭의 화면 키. 메뉴에서 오는 키(<see cref="MenuNode.Key"/>)와 겹치면 안 되므로
@@ -330,7 +319,8 @@ namespace SEOJIN_TMES.Client.Forms
             BuildMenu();
             RefreshHomeTabLanguage();
 
-            var root = MenuCatalog.BuildRoot();
+            // 언어 전환 뒤 탭을 다시 열 때도 서버가 허용한 화면만 대상으로 한다.
+            var root = MenuCatalog.BuildRoot(IsMenuVisible);
             foreach (var key in openKeys)
             {
                 var node = FindNode(root, key);
@@ -682,7 +672,7 @@ namespace SEOJIN_TMES.Client.Forms
 
         private void Accordion_ElementClick(object sender, ElementClickEventArgs e)
         {
-            if (e.Element.Tag is MenuNode node && node.ScreenFactory != null)
+            if (e.Element.Tag is MenuNode node && node.IsScreen)
                 OpenOrFocusTab(node);
         }
 
@@ -703,12 +693,14 @@ namespace SEOJIN_TMES.Client.Forms
                 var menus = await _setting.ApiClients.MenuApiClient.GetMenusAsync();   // menuNm·useYn 비움
                 if (IsDisposed || Disposing) return;
 
-                _visibleMenuNames.Clear();
+                // 사용 중인 메뉴의 코드만 모은다. 화면 여부는 MenuCatalog의 화면 노드가 정하므로,
+                // 서버의 분류 코드(P000000 등)가 섞여도 매칭되는 화면이 없어 영향이 없다.
+                _allowedMenuCodes.Clear();
                 foreach (var menu in menus)
-                    if (menu.IsUsed && !string.IsNullOrWhiteSpace(menu.MenuName))
-                        _visibleMenuNames.Add(menu.MenuName.Trim());
+                    if (menu.IsUsed && !string.IsNullOrWhiteSpace(menu.MenuCode))
+                        _allowedMenuCodes.Add(menu.MenuCode.Trim());
 
-                AppLog.Info($"[메뉴] 서버 메뉴 {menus.Count}건 수신, 표시 {_visibleMenuNames.Count}건: {string.Join(", ", _visibleMenuNames)}");
+                AppLog.Info($"[메뉴] 서버 메뉴 {menus.Count}건 수신, 허용 화면 {_allowedMenuCodes.Count}건: {string.Join(", ", _allowedMenuCodes)}");
                 BuildMenu();
                 RefreshMenuHighlight();
             }

@@ -940,31 +940,31 @@
     <value>Actual size (100%)</value>
   </data>
   <data name="Upload_Title" xml:space="preserve">
-    <value>파일 업로드</value>
+    <value>File Upload</value>
   </data>
   <data name="Upload_FileOpen" xml:space="preserve">
     <value>File Open</value>
   </data>
   <data name="Upload_Upload" xml:space="preserve">
-    <value>파일 올리기</value>
+    <value>Upload</value>
   </data>
   <data name="Upload_SelectFile" xml:space="preserve">
-    <value>파일 선택</value>
+    <value>Select File</value>
   </data>
   <data name="Upload_ReadFailed" xml:space="preserve">
-    <value>파일 읽기 실패</value>
+    <value>File read failed</value>
   </data>
   <data name="Upload_ProgressFormat" xml:space="preserve">
-    <value>파일 업로드 중</value>
+    <value>Uploading file</value>
   </data>
   <data name="Upload_ConnectionError" xml:space="preserve">
-    <value>파일 업로드 연결 오류</value>
+    <value>File upload connection error</value>
   </data>
   <data name="Upload_Failed" xml:space="preserve">
     <value>File transfer failed</value>
   </data>
   <data name="Col_Description" xml:space="preserve">
-    <value>설명</value>
+    <value>Description</value>
   </data>
   <data name="Upload_Delete" xml:space="preserve">
     <value>Delete File</value>

@@ -158,13 +158,7 @@ namespace SEOJIN_TMES.Client.ApiClient
         {
             var query = PostKeyQuery(key);
             string url = $"{PopPrefix}{key.SerialNo}/{key.SubRoutingRef}/{action.ToString()}{query}";
-            //var body = request;
-
-            //if(action == PopProcessAction.stop)
-            //{
-            //    return PostAsync<PopProcessActionRequest, PopProcessInfoDto>($"{PopPrefix}{key.SerialNo}/{key.SubRoutingRef}/{action.ToString()}{query}", request, cancellationToken);
-            //}
-
+            
             return PostAsync<PopProcessActionRequest, PopProcessInfoDto>(url, request, cancellationToken);
         }
 

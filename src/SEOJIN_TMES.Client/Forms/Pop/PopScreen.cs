@@ -117,15 +117,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private string _viewerMessage;
 
         /// <summary>
-        /// 화면에 떠 있는 PDF의 원본 바이트. PdfViewer가 문서를 닫을 때까지 스트림을 잡고 있으므로
-        /// 필드로 들고 있다가 다음 도면을 열기 전/화면을 닫을 때 함께 정리한다.
-        /// </summary>
-        private MemoryStream _drawingStream;
-
-        /// <summary>진행 중인 도면 읽기. 공정을 빠르게 옮기면 이전 요청은 취소한다.</summary>
-        private CancellationTokenSource _drawingCancellation;
-
-        /// <summary>
         /// Phase 1: Tab initialization configuration stored as data structure.
         /// Each tab's initialization info is managed in one place; adding new tabs only requires adding to this array.
         /// </summary>
@@ -416,7 +407,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 }
 
                 await LoadImageAsync();
-                //await LoadDrawingAsync();
                 DisplayProcessInfo();
             }
             catch (ApiException ex)
@@ -985,70 +975,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         //}
 
         // 
-        //  작업 표준 / 도면 (SMB 공유 폴더의 PDF)
+        //  작업 표준 / 도면 (공유 폴더의 도면 이미지 → picView)
         // ─────────────────────────────────────────────────────────────────────────
-
-        /// <summary>
-        /// 서버가 내려준 도면 경로(<see cref="PopProcessInfoDto.DrawingFilePath"/>)의 PDF를
-        /// SMB 공유 폴더에서 읽어 좌측 뷰어에 띄운다.
-        ///
-        /// 공유 폴더가 아직 안 잡혔거나 파일이 없어도 화면은 계속 쓸 수 있어야 하므로,
-        /// 실패는 예외로 올리지 않고 도면 영역에 사유만 적어 둔다.
-        /// </summary>
-        private async Task LoadDrawingAsync()
-        {
-            CloseDrawing();
-
-            var path = _info?.DrawingFilePath;
-            if (string.IsNullOrWhiteSpace(path))
-            {
-                ShowViewerMessage(Language.Pop_DrawingNone);
-                return;
-            }
-
-            var share = _appSet?.DocShare;
-            if (share == null || !share.IsConfigured)
-            {
-                ShowViewerMessage(Language.Pop_DrawingShareNotConfigured);
-                return;
-            }
-
-            _drawingCancellation = new CancellationTokenSource();
-            var cancellation = _drawingCancellation;
-
-            ShowViewerMessage(Language.Pop_DrawingLoading);
-
-            try
-            {
-                var bytes = await share.ReadAllBytesAsync(path, cancellation.Token);
-
-                // 읽는 동안 공정을 옮겼다면(= 다른 요청이 시작됐다면) 이 결과는 버린다.
-                if (cancellation.IsCancellationRequested || cancellation != _drawingCancellation)
-                    return;
-
-                _drawingStream = new MemoryStream(bytes, false);
-                pdfViewer.LoadDocument(_drawingStream);
-                pdfViewer.Visible = true;
-                _viewerMessage = null;
-
-                AppLog.Info($"[POP] 도면 표시 - {path} ({bytes.Length:N0} bytes)");
-            }
-            catch (OperationCanceledException)
-            {
-                // 공정을 옮기면서 취소된 경우 — 안내할 것이 없다.
-            }
-            catch (DocumentShareException ex)
-            {
-                ShowViewerMessage($"{Language.Pop_DrawingLoadFailed}  {ex.Message}");
-                AppLog.Info($"[POP] 도면 표시 실패 - {path} : {ex.Message}");
-            }
-            catch (Exception ex)
-            {
-                // PDF가 깨졌거나 암호가 걸린 경우 등 뷰어가 던지는 예외까지 여기서 삼킨다.
-                ShowViewerMessage($"{Language.Pop_DrawingLoadFailed}  {ex.Message}");
-                AppLog.Info($"[POP] 도면 표시 실패(뷰어) - {path} : {ex.Message}");
-            }
-        }
 
         private async Task LoadImageAsync()
         {
@@ -1130,30 +1058,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             //UpdateZoomLabel();
             //lblInfo.Text = "이미지를 열어주세요.";
             //UpdateButtons();
-        }
-
-
-        /// <summary>열려 있던 도면을 닫고 자리표시자로 되돌린다(진행 중인 읽기도 취소).</summary>
-        private void CloseDrawing()
-        {
-            if (_drawingCancellation != null)
-            {
-                _drawingCancellation.Cancel();
-                _drawingCancellation.Dispose();
-                _drawingCancellation = null;
-            }
-
-            if (pdfViewer.Visible)
-            {
-                pdfViewer.CloseDocument();
-                pdfViewer.Visible = false;
-            }
-
-            if (_drawingStream != null)
-            {
-                _drawingStream.Dispose();
-                _drawingStream = null;
-            }
         }
 
         /// <summary>도면 자리표시자에 안내 문구를 띄운다.</summary>
@@ -2115,7 +2019,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// <summary>
         /// 도면이 떠 있지 않을 때 보이는 자리표시자 — 화면 설계서와 같은 대각선 상자를 그리고,
         /// 가운데에 현재 상태(<see cref="_viewerMessage"/>: 불러오는 중 / 도면 없음 / 실패 사유)를 적는다.
-        /// PDF가 열리면 <c>pdfViewer</c>가 이 면을 덮으므로 이 그림은 보이지 않는다.
+        /// 도면 이미지가 열리면 <c>picView</c>가 이 면을 덮으므로 이 그림은 보이지 않는다.
         /// </summary>
         private void ViewerSurface_Paint(object sender, PaintEventArgs e)
         {
@@ -2201,9 +2105,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private void PopScreen_Disposed(object sender, EventArgs e)
         {
             if (_equip != null) UnwireEquipmentEvents();
-            CloseDrawing();
 
-            // 이벤트 연결을 끊고 들고 있던 도면 이미지를 해제한다(CloseDrawing 뒤 — 그 안에서 ClearImage를 부를 수 있다).
+            // 이벤트 연결을 끊고 들고 있던 도면 이미지를 해제한다.
             _viewer?.Dispose();
             _viewer = null;
 

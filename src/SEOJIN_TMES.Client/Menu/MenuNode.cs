@@ -18,6 +18,16 @@ namespace SEOJIN_TMES.Client.Menu
         public List<MenuNode> Children { get; } = new List<MenuNode>();
         public Func<Control> ScreenFactory { get; }
 
+        /// <summary>
+        /// 서버 메뉴 코드(POP01, POP02 …). 서버가 내려준 메뉴(<c>menuCd</c>)와 이 값으로 매칭해 화면 노출 여부를 정한다.
+        /// 화면 노드 생성자에서만 받는다 — 화면과 코드를 한 줄에서 묶어 두어야 코드 누락 · 엇갈림이 눈에 띈다.
+        /// Key는 탭 · 브레드크럼 식별용 내부 이름이라 서버 코드와 분리해 둔다. 분류 노드는 null이다.
+        /// </summary>
+        public string MenuCode { get; }
+
+        /// <summary>화면을 여는 노드인지. 서버 메뉴와 매칭되는 대상은 이 노드들뿐이다.</summary>
+        public bool IsScreen => ScreenFactory != null;
+
         /// <summary>메뉴 아이콘(AppIcons의 SVG 템플릿 문자열). 지정하지 않으면 점 아이콘이 사용된다.</summary>
         public string Icon { get; set; }
 
@@ -29,18 +39,20 @@ namespace SEOJIN_TMES.Client.Menu
 
         public string Text => TextAccessor();
 
-        public MenuNode(string key, Func<string> textAccessor, Func<Control> screenFactory = null)
+        /// <summary>화면 노드 — 서버 메뉴 코드와 화면 생성 함수를 함께 받는다.</summary>
+        public MenuNode(string key, string menuCode, Func<string> textAccessor, Func<Control> screenFactory)
         {
             Key = key;
+            MenuCode = menuCode;
             TextAccessor = textAccessor;
             ScreenFactory = screenFactory;
         }
 
+        /// <summary>분류(폴더) 노드 — 화면이 없고 하위 노드만 묶는다.</summary>
         public MenuNode(string key, Func<string> textAccessor)
         {
             Key = key;
             TextAccessor = textAccessor;
-            //ScreenFactory = screenFactory;
         }
 
         public MenuNode AddChild(MenuNode child)
