@@ -1,6 +1,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using SEOJIN_TMES.Client.ApiClient;
+using SEOJIN_TMES.Client.Common.Logging;
 using SEOJIN_TMES.Client.Common.Models;
 using System;
 using System.Collections.Generic;
@@ -31,34 +32,37 @@ namespace SEOJIN_TMES.Client.ApiClient
             HttpClient = httpClient;
         }
 
-        protected async Task<TResponse> GetAsync<TResponse>(string relativeUrl, CancellationToken cancellationToken = default)
-        {
-            using (var response = await SendAsync("GET", relativeUrl, () => HttpClient.GetAsync(relativeUrl, cancellationToken), cancellationToken).ConfigureAwait(false))
+        protected Task<TResponse> GetAsync<TResponse>(string relativeUrl, CancellationToken cancellationToken = default) =>
+            ExecuteAsync("GET", relativeUrl, async () =>
             {
-                return await ReadAsync<TResponse>(response).ConfigureAwait(false);
-            }
-        }
+                using (var response = await HttpClient.GetAsync(relativeUrl, cancellationToken).ConfigureAwait(false))
+                {
+                    return await ReadAsync<TResponse>(response).ConfigureAwait(false);
+                }
+            }, cancellationToken);
 
-        protected async Task<string> GetPathAsync<TResponse>(string relativeUrl, CancellationToken cancellationToken = default)
-        {
-            using (var response = await SendAsync("GET", relativeUrl, () => HttpClient.GetAsync(relativeUrl, cancellationToken), cancellationToken).ConfigureAwait(false))
+        protected Task<string> GetPathAsync<TResponse>(string relativeUrl, CancellationToken cancellationToken = default) =>
+            ExecuteAsync("GET", relativeUrl, async () =>
             {
-                return await ReadPathAsync<string>(response).ConfigureAwait(false);
-            }
-        }
+                using (var response = await HttpClient.GetAsync(relativeUrl, cancellationToken).ConfigureAwait(false))
+                {
+                    return await ReadPathAsync<string>(response).ConfigureAwait(false);
+                }
+            }, cancellationToken);
 
         /// <summary>
         /// multipart/form-data 본문을 POST하고 응답의 <b>알맹이</b>를 돌려준다(봉투가 있으면 벗긴다 — GetDataAsync와 같은 규칙).
         /// 본문은 호출자가 만들고, 이 메서드는 전송 · 타임아웃 변환 · 실패 시 ApiException만 담당한다.
         /// </summary>
-        protected async Task<TData> PostMultipartAsync<TData>(string relativeUrl, MultipartFormDataContent content, CancellationToken cancellationToken = default)
-        {
-            using (var response = await SendAsync("POST", relativeUrl, () => HttpClient.PostAsync(relativeUrl, content, cancellationToken), cancellationToken).ConfigureAwait(false))
+        protected Task<TData> PostMultipartAsync<TData>(string relativeUrl, MultipartFormDataContent content, CancellationToken cancellationToken = default) =>
+            ExecuteAsync("POST", relativeUrl, async () =>
             {
-                var body = await ReadBodyAsync(response).ConfigureAwait(false);
-                return Unwrap<TData>(body);
-            }
-        }
+                using (var response = await HttpClient.PostAsync(relativeUrl, content, cancellationToken).ConfigureAwait(false))
+                {
+                    var body = await ReadBodyAsync(response).ConfigureAwait(false);
+                    return Parse(response, body, Unwrap<TData>);
+                }
+            }, cancellationToken);
 
         /// <summary>
         /// GET 후 <b>알맹이</b>만 돌려준다. 이 서버는 응답을 <c>{ "data": ... }</c>로 싸는 곳과
@@ -69,14 +73,15 @@ namespace SEOJIN_TMES.Client.ApiClient
         /// 봉투 유무를 잘못 짚으면 값이 전부 null이 되는데, 예외가 나지 않아 발견이 늦다
         /// (로그인 토큰·사용자 프로필에서 실제로 겪었다).
         /// </summary>
-        protected async Task<TData> GetDataAsync<TData>(string relativeUrl, CancellationToken cancellationToken = default)
-        {
-            using (var response = await SendAsync("GET", relativeUrl, () => HttpClient.GetAsync(relativeUrl, cancellationToken), cancellationToken).ConfigureAwait(false))
+        protected Task<TData> GetDataAsync<TData>(string relativeUrl, CancellationToken cancellationToken = default) =>
+            ExecuteAsync("GET", relativeUrl, async () =>
             {
-                var body = await ReadBodyAsync(response).ConfigureAwait(false);
-                return Unwrap<TData>(body);
-            }
-        }
+                using (var response = await HttpClient.GetAsync(relativeUrl, cancellationToken).ConfigureAwait(false))
+                {
+                    var body = await ReadBodyAsync(response).ConfigureAwait(false);
+                    return Parse(response, body, Unwrap<TData>);
+                }
+            }, cancellationToken);
 
         /// <summary>봉투(<c>{"data":...}</c>)가 있으면 그 안을, 없으면 본문 전체를 대상 형식으로 읽는다.</summary>
         private static TData Unwrap<TData>(string body)
@@ -93,81 +98,113 @@ namespace SEOJIN_TMES.Client.ApiClient
             return token.Type == JTokenType.Null ? default : token.ToObject<TData>();
         }
 
-        protected async Task<TResponse> PostAsync<TRequest, TResponse>(string relativeUrl, TRequest body, CancellationToken cancellationToken = default)
-        {
-            using (var content = ToJsonContent(body))
+        protected Task<TResponse> PostAsync<TRequest, TResponse>(string relativeUrl, TRequest body, CancellationToken cancellationToken = default) =>
+            ExecuteAsync("POST", relativeUrl, async () =>
             {
-                using (var response = await SendAsync("POST", relativeUrl, () => HttpClient.PostAsync(relativeUrl, content, cancellationToken), cancellationToken).ConfigureAwait(false))
+                using (var content = ToJsonContent(body))
+                using (var response = await HttpClient.PostAsync(relativeUrl, content, cancellationToken).ConfigureAwait(false))
                 {
                     return await ReadAsync<TResponse>(response).ConfigureAwait(false);
                 }
-            }
-        }
+            }, cancellationToken);
 
-        protected async Task PostAsync<TRequest>(string relativeUrl, TRequest body, CancellationToken cancellationToken = default)
-        {
-            using (var content = ToJsonContent(body))
+        protected Task PostAsync<TRequest>(string relativeUrl, TRequest body, CancellationToken cancellationToken = default) =>
+            ExecuteAsync("POST", relativeUrl, async () =>
             {
-                using (var response = await SendAsync("POST", relativeUrl, () => HttpClient.PostAsync(relativeUrl, content, cancellationToken), cancellationToken).ConfigureAwait(false))
+                using (var content = ToJsonContent(body))
+                using (var response = await HttpClient.PostAsync(relativeUrl, content, cancellationToken).ConfigureAwait(false))
                 {
                     await EnsureSuccessAsync(response).ConfigureAwait(false);
+                    return true;
                 }
-            }
-        }
+            }, cancellationToken);
 
         /// <summary>
         /// GET 후 본문을 <b>바이트 그대로</b> 돌려준다(파일 다운로드용).
         /// JSON 봉투를 벗기는 GetDataAsync와 달리 본문을 해석하지 않는다 — 이미지/문서 바이너리를 깨뜨리지 않기 위해서다.
         /// </summary>
-        protected async Task<byte[]> GetBytesAsync(string relativeUrl, CancellationToken cancellationToken = default)
-        {
-            using (var response = await SendAsync("GET", relativeUrl, () => HttpClient.GetAsync(relativeUrl, cancellationToken), cancellationToken).ConfigureAwait(false))
+        protected Task<byte[]> GetBytesAsync(string relativeUrl, CancellationToken cancellationToken = default) =>
+            ExecuteAsync("GET", relativeUrl, async () =>
             {
-                await EnsureSuccessAsync(response).ConfigureAwait(false);
-                return await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
-            }
-        }
+                using (var response = await HttpClient.GetAsync(relativeUrl, cancellationToken).ConfigureAwait(false))
+                {
+                    await EnsureSuccessAsync(response).ConfigureAwait(false);
+                    return await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+                }
+            }, cancellationToken);
 
         /// <summary>
         /// 바디(JSON)를 실어 DELETE한다. HttpClient.DeleteAsync는 바디를 받지 못해서 요청 메시지를 직접 만든다.
         /// 실패는 다른 호출과 똑같이 ApiException으로 올린다.
         /// </summary>
-        protected async Task DeleteAsync<TRequest>(string relativeUrl, TRequest body, CancellationToken cancellationToken = default)
-        {
-            using (var request = new HttpRequestMessage(HttpMethod.Delete, relativeUrl))
+        protected Task DeleteAsync<TRequest>(string relativeUrl, TRequest body, CancellationToken cancellationToken = default) =>
+            ExecuteAsync("DELETE", relativeUrl, async () =>
             {
                 // request를 Dispose하면 Content도 함께 정리된다.
-                request.Content = ToJsonContent(body);
-
-                using (var response = await SendAsync("DELETE", relativeUrl, () => HttpClient.SendAsync(request, cancellationToken), cancellationToken).ConfigureAwait(false))
+                using (var request = new HttpRequestMessage(HttpMethod.Delete, relativeUrl) { Content = ToJsonContent(body) })
+                using (var response = await HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false))
                 {
                     await EnsureSuccessAsync(response).ConfigureAwait(false);
+                    return true;
                 }
-            }
-        }
+            }, cancellationToken);
 
         /// <summary>
-        /// HttpClient 호출을 감싸 <b>응답 시간 초과</b>를 <see cref="ApiException"/>으로 바꿔 올린다.
+        /// 호출 한 건(전송 → 본문 읽기 → 역직렬화) 전체를 감싸 <b>어떤 실패든 <see cref="ApiException"/>으로만</b> 올린다.
+        /// 화면은 catch(ApiException) 하나로 안내하므로, 다른 예외가 새면 async void 핸들러를 타고 앱이 중단된다.
         ///
-        /// HttpClient는 타임아웃도 취소와 똑같이 TaskCanceledException으로 던진다.
-        /// 핸들러(LoggingHandler) 안에서 보는 토큰은 타임아웃 토큰과 호출자 토큰이 합쳐진 링크 토큰이라
-        /// 둘을 구분할 수 없고, <b>호출자가 준 원본 토큰</b>을 볼 수 있는 이 자리에서만 구분할 수 있다.
-        /// 원본 토큰이 취소되지 않았는데 취소 예외가 났다면 = 타임아웃이므로 화면이 안내할 수 있게 ApiException으로 바꾼다.
-        /// (호출자가 정말 취소한 경우는 오류가 아니므로 그대로 통과시킨다.)
+        /// - 타임아웃: HttpClient는 타임아웃도 취소와 똑같이 TaskCanceledException으로 던진다.
+        ///   핸들러(LoggingHandler) 안에서 보는 토큰은 타임아웃 토큰과 호출자 토큰이 합쳐진 링크 토큰이라
+        ///   둘을 구분할 수 없고, <b>호출자가 준 원본 토큰</b>을 볼 수 있는 이 자리에서만 구분할 수 있다.
+        ///   호출자가 정말 취소한 경우는 오류가 아니므로 그대로 통과시킨다.
+        /// - LoggingHandler 밖에서 나는 통신 예외: HttpClient는 핸들러가 응답을 돌려준 <b>뒤에</b> 본문을 버퍼로 읽는데,
+        ///   그 사이 연결이 끊기면 HttpRequestException/IOException이 핸들러를 거치지 않고 바로 올라온다.
+        /// - 응답 형식 오류는 <see cref="Parse{T}"/>에서 따로 ApiException으로 바꾼다(상태코드를 알 수 있는 곳이 거기다).
         /// </summary>
-        private async Task<HttpResponseMessage> SendAsync(string method, string relativeUrl, Func<Task<HttpResponseMessage>> send, CancellationToken cancellationToken)
+        private async Task<T> ExecuteAsync<T>(string method, string relativeUrl, Func<Task<T>> call, CancellationToken cancellationToken)
         {
             try
             {
-                return await send().ConfigureAwait(false);
+                return await call().ConfigureAwait(false);
             }
-            catch (OperationCanceledException ex) when (!cancellationToken.IsCancellationRequested)
+            catch (ApiException)
             {
+                throw;
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                // 타임아웃은 LoggingHandler가 이미 Warn으로 남겼다 — 그 밖의 예외만 여기서 스택까지 남긴다.
+                if (!(ex is OperationCanceledException))
+                    AppLog.Error($"API 호출 예외(핸들러 밖) {method} {AbsoluteUrl(relativeUrl)}", ex);
+
                 throw ApiException.FromTransportFailure(method, AbsoluteUrl(relativeUrl), ex);
             }
         }
 
-    
+        /// <summary>
+        /// 성공 응답의 본문을 해석한다. 해석이 안 되면(HTML 오류 페이지, 필드 형식 불일치 등)
+        /// 통신 실패(StatusCode 0)가 아니라 <b>받은 상태코드 그대로</b> ApiException으로 올린다 —
+        /// 0으로 올리면 로그인 화면이 "서버에 연결할 수 없습니다"로 잘못 안내한다.
+        /// </summary>
+        private static T Parse<T>(HttpResponseMessage response, string body, Func<string, T> parse)
+        {
+            try
+            {
+                return parse(body);
+            }
+            catch (Exception ex)
+            {
+                var request = response.RequestMessage;
+                AppLog.Error($"API 응답 해석 실패 ({typeof(T).Name}) {request?.Method} {request?.RequestUri}", ex);
+                throw ApiException.FromInvalidResponse(response.StatusCode, body, request?.Method?.Method, request?.RequestUri?.ToString(), ex);
+            }
+        }
+
+
         /// <summary>
         /// 값이 있는 조건만 골라 쿼리 문자열을 만든다(빈 조건은 서버로 보내지 않는다).
         /// 조건이 하나도 없으면 빈 문자열이라 그대로 이어 붙여도 URL이 깨지지 않는다.
@@ -197,7 +234,7 @@ namespace SEOJIN_TMES.Client.ApiClient
         private static async Task<TResponse> ReadAsync<TResponse>(HttpResponseMessage response)
         {
             var body = await ReadBodyAsync(response).ConfigureAwait(false);
-            return string.IsNullOrWhiteSpace(body) ? default : JsonConvert.DeserializeObject<TResponse>(body);
+            return string.IsNullOrWhiteSpace(body) ? default : Parse(response, body, JsonConvert.DeserializeObject<TResponse>);
 
             //if (string.IsNullOrWhiteSpace(body))
             //    return default;

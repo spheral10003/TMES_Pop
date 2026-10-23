@@ -78,6 +78,13 @@ namespace SEOJIN_TMES.Client.Common.Models
         /// <summary>비고.</summary>
         [JsonProperty("remark")]
         public string Remark { get; set; }
+
+        /// <summary>
+        /// 작업지시에 붙은 첨부파일 개수(첨부파일 조회 화면). 서버가 센 값을 그대로 표시한다.
+        /// TODO: 필드명(atchCnt)은 <b>가정값</b>이다 — 서버 스펙이 확정되면 맞출 것.
+        /// </summary>
+        [JsonProperty("atchCnt")]
+        public int? AttachmentCount { get; set; }
     }
 
     //public class WorkOrderEntryDto

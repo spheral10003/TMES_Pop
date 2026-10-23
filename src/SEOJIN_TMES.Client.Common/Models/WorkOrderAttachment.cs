@@ -26,6 +26,14 @@ namespace SEOJIN_TMES.Client.Common.Models
         [JsonProperty("fileExtn")]
         public string FileExtension { get; set; }
 
+        /// <summary>작성자. TODO: 필드명은 가정값.</summary>
+        [JsonProperty("createdBy")]
+        public string CreatedBy { get; set; }
+
+        /// <summary>작성일시. TODO: 필드명은 가정값.</summary>
+        [JsonProperty("createdAt")]
+        public DateTime? CreatedAt { get; set; }
+
         private static readonly HashSet<string> ImageExtensions =
             new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "png", "jpg", "jpeg", "bmp", "gif" };
 

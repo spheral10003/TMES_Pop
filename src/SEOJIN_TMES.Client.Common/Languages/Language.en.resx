@@ -975,4 +975,79 @@
   <data name="Upload_DeleteFailed" xml:space="preserve">
     <value>File delete failed</value>
   </data>
+  <data name="Menu_AttachmentSearch" xml:space="preserve">
+    <value>Attachment Search</value>
+  </data>
+  <data name="Attach_Title" xml:space="preserve">
+    <value>Attachment Search</value>
+  </data>
+  <data name="Attach_RegDate" xml:space="preserve">
+    <value>Registration Date</value>
+  </data>
+  <data name="Attach_ListTitle" xml:space="preserve">
+    <value>List</value>
+  </data>
+  <data name="Attach_DetailTitle" xml:space="preserve">
+    <value>Details</value>
+  </data>
+  <data name="Attach_Files" xml:space="preserve">
+    <value>Attachments</value>
+  </data>
+  <data name="Attach_FileListTitle" xml:space="preserve">
+    <value>File Details</value>
+  </data>
+  <data name="Attach_Download" xml:space="preserve">
+    <value>Download</value>
+  </data>
+  <data name="Attach_Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Attach_Upload" xml:space="preserve">
+    <value>Upload</value>
+  </data>
+  <data name="Attach_FileTypeImage" xml:space="preserve">
+    <value>Image</value>
+  </data>
+  <data name="Attach_FileTypeDocument" xml:space="preserve">
+    <value>Document</value>
+  </data>
+  <data name="Attach_SelectOrder" xml:space="preserve">
+    <value>Please select a work order first.</value>
+  </data>
+  <data name="Attach_SelectFile" xml:space="preserve">
+    <value>Please select a file.</value>
+  </data>
+  <data name="Attach_DownloadDone" xml:space="preserve">
+    <value>Download completed.</value>
+  </data>
+  <data name="Attach_DownloadFailed" xml:space="preserve">
+    <value>Download failed.</value>
+  </data>
+  <data name="Attach_UploadFilter" xml:space="preserve">
+    <value>Images|*.png;*.jpg;*.jpeg;*.bmp|PDF|*.pdf|All files|*.*</value>
+  </data>
+  <data name="Col_AttachmentCount" xml:space="preserve">
+    <value>Attachments</value>
+  </data>
+  <data name="Col_CreatedDate" xml:space="preserve">
+    <value>Created Date</value>
+  </data>
+  <data name="Col_FileName" xml:space="preserve">
+    <value>File Name</value>
+  </data>
+  <data name="Col_FileType" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="Col_FileSize" xml:space="preserve">
+    <value>File Size</value>
+  </data>
+  <data name="Col_CreatedBy" xml:space="preserve">
+    <value>Created By</value>
+  </data>
+  <data name="Col_CreatedAt" xml:space="preserve">
+    <value>Created At</value>
+  </data>
+  <data name="Common_NoData" xml:space="preserve">
+    <value>No data available.</value>
+  </data>
 </root>

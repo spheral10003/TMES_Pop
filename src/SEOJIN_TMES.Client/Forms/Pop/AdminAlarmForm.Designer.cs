@@ -57,9 +57,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             ((System.ComponentModel.ISupportInitialize)(this.footerPanel)).BeginInit();
             this.footerPanel.SuspendLayout();
             this.SuspendLayout();
-            //
+            // 
             // headerPanel
-            //
+            // 
             this.headerPanel.Controls.Add(this.headerIcon);
             this.headerPanel.Controls.Add(this.lblTitle);
             this.headerPanel.Dock = System.Windows.Forms.DockStyle.Top;
@@ -67,24 +67,24 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.headerPanel.Name = "headerPanel";
             this.headerPanel.Size = new System.Drawing.Size(640, 56);
             this.headerPanel.TabIndex = 0;
-            //
+            // 
             // headerIcon
-            //
+            // 
             this.headerIcon.Location = new System.Drawing.Point(22, 15);
             this.headerIcon.Name = "headerIcon";
             this.headerIcon.Size = new System.Drawing.Size(26, 26);
             this.headerIcon.TabIndex = 0;
-            //
+            // 
             // lblTitle
-            //
+            // 
             this.lblTitle.Location = new System.Drawing.Point(58, 20);
             this.lblTitle.Name = "lblTitle";
-            this.lblTitle.Size = new System.Drawing.Size(150, 14);
+            this.lblTitle.Size = new System.Drawing.Size(102, 14);
             this.lblTitle.TabIndex = 1;
             this.lblTitle.Text = "관리자 알람 유형 선택";
-            //
+            // 
             // bodyPanel
-            //
+            // 
             this.bodyPanel.Controls.Add(this.detailCard);
             this.bodyPanel.Controls.Add(this.spacer);
             this.bodyPanel.Controls.Add(this.typeCard);
@@ -94,111 +94,111 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.bodyPanel.Padding = new System.Windows.Forms.Padding(16, 12, 16, 8);
             this.bodyPanel.Size = new System.Drawing.Size(640, 336);
             this.bodyPanel.TabIndex = 1;
-            //
-            // typeCard
-            //
-            this.typeCard.Controls.Add(this.lblAlarmType);
-            this.typeCard.Controls.Add(this.cboAlarmType);
-            this.typeCard.Dock = System.Windows.Forms.DockStyle.Top;
-            this.typeCard.Location = new System.Drawing.Point(16, 12);
-            this.typeCard.Name = "typeCard";
-            this.typeCard.Padding = new System.Windows.Forms.Padding(1);
-            this.typeCard.Size = new System.Drawing.Size(608, 62);
-            this.typeCard.TabIndex = 0;
-            //
-            // lblAlarmType
-            //
-            this.lblAlarmType.Location = new System.Drawing.Point(18, 22);
-            this.lblAlarmType.Name = "lblAlarmType";
-            this.lblAlarmType.Size = new System.Drawing.Size(110, 20);
-            this.lblAlarmType.TabIndex = 0;
-            this.lblAlarmType.Text = "· 알람 유형";
-            //
-            // cboAlarmType
-            //
-            this.cboAlarmType.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.cboAlarmType.Location = new System.Drawing.Point(136, 18);
-            this.cboAlarmType.Name = "cboAlarmType";
-            this.cboAlarmType.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
-            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.cboAlarmType.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
-            this.cboAlarmType.Size = new System.Drawing.Size(452, 26);
-            this.cboAlarmType.TabIndex = 1;
-            this.cboAlarmType.SelectedIndexChanged += new System.EventHandler(this.cboAlarmType_SelectedIndexChanged);
-            //
-            // spacer
-            //
-            this.spacer.Dock = System.Windows.Forms.DockStyle.Top;
-            this.spacer.Location = new System.Drawing.Point(16, 74);
-            this.spacer.Name = "spacer";
-            this.spacer.Size = new System.Drawing.Size(608, 10);
-            this.spacer.TabIndex = 1;
-            //
+            // 
             // detailCard
-            //
+            // 
             this.detailCard.Controls.Add(this.lblDetailTitle);
             this.detailCard.Controls.Add(this.lblTarget);
             this.detailCard.Controls.Add(this.cboTarget);
             this.detailCard.Controls.Add(this.lblRemark);
             this.detailCard.Controls.Add(this.txtRemark);
             this.detailCard.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.detailCard.Location = new System.Drawing.Point(16, 84);
+            this.detailCard.Location = new System.Drawing.Point(18, 86);
             this.detailCard.Name = "detailCard";
             this.detailCard.Padding = new System.Windows.Forms.Padding(1);
-            this.detailCard.Size = new System.Drawing.Size(608, 244);
+            this.detailCard.Size = new System.Drawing.Size(604, 240);
             this.detailCard.TabIndex = 2;
-            //
+            // 
             // lblDetailTitle
-            //
+            // 
             this.lblDetailTitle.Dock = System.Windows.Forms.DockStyle.Top;
-            this.lblDetailTitle.Location = new System.Drawing.Point(1, 1);
+            this.lblDetailTitle.Location = new System.Drawing.Point(3, 3);
             this.lblDetailTitle.Name = "lblDetailTitle";
             this.lblDetailTitle.Padding = new System.Windows.Forms.Padding(16, 10, 0, 8);
-            this.lblDetailTitle.Size = new System.Drawing.Size(606, 32);
+            this.lblDetailTitle.Size = new System.Drawing.Size(84, 32);
             this.lblDetailTitle.TabIndex = 0;
             this.lblDetailTitle.Text = "알람 상세 정보";
-            //
+            // 
             // lblTarget
-            //
+            // 
             this.lblTarget.Location = new System.Drawing.Point(18, 50);
             this.lblTarget.Name = "lblTarget";
-            this.lblTarget.Size = new System.Drawing.Size(110, 20);
+            this.lblTarget.Size = new System.Drawing.Size(76, 14);
             this.lblTarget.TabIndex = 1;
             this.lblTarget.Text = "· 결품 자재 코드";
-            //
+            // 
             // cboTarget
-            //
-            this.cboTarget.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+            // 
+            this.cboTarget.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.cboTarget.Location = new System.Drawing.Point(136, 46);
             this.cboTarget.Name = "cboTarget";
             this.cboTarget.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
             this.cboTarget.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
-            this.cboTarget.Size = new System.Drawing.Size(452, 26);
+            this.cboTarget.Size = new System.Drawing.Size(448, 20);
             this.cboTarget.TabIndex = 2;
-            //
+            // 
             // lblRemark
-            //
+            // 
             this.lblRemark.Location = new System.Drawing.Point(18, 88);
             this.lblRemark.Name = "lblRemark";
-            this.lblRemark.Size = new System.Drawing.Size(110, 20);
+            this.lblRemark.Size = new System.Drawing.Size(28, 14);
             this.lblRemark.TabIndex = 3;
             this.lblRemark.Text = "· 비고";
-            //
+            // 
             // txtRemark
-            //
-            this.txtRemark.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            // 
+            this.txtRemark.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtRemark.Location = new System.Drawing.Point(136, 84);
             this.txtRemark.Name = "txtRemark";
-            this.txtRemark.Size = new System.Drawing.Size(452, 142);
+            this.txtRemark.Size = new System.Drawing.Size(448, 138);
             this.txtRemark.TabIndex = 4;
-            //
+            // 
+            // spacer
+            // 
+            this.spacer.Dock = System.Windows.Forms.DockStyle.Top;
+            this.spacer.Location = new System.Drawing.Point(18, 76);
+            this.spacer.Name = "spacer";
+            this.spacer.Size = new System.Drawing.Size(604, 10);
+            this.spacer.TabIndex = 1;
+            // 
+            // typeCard
+            // 
+            this.typeCard.Controls.Add(this.lblAlarmType);
+            this.typeCard.Controls.Add(this.cboAlarmType);
+            this.typeCard.Dock = System.Windows.Forms.DockStyle.Top;
+            this.typeCard.Location = new System.Drawing.Point(18, 14);
+            this.typeCard.Name = "typeCard";
+            this.typeCard.Padding = new System.Windows.Forms.Padding(1);
+            this.typeCard.Size = new System.Drawing.Size(604, 62);
+            this.typeCard.TabIndex = 0;
+            // 
+            // lblAlarmType
+            // 
+            this.lblAlarmType.Location = new System.Drawing.Point(18, 22);
+            this.lblAlarmType.Name = "lblAlarmType";
+            this.lblAlarmType.Size = new System.Drawing.Size(52, 14);
+            this.lblAlarmType.TabIndex = 0;
+            this.lblAlarmType.Text = "· 알람 유형";
+            // 
+            // cboAlarmType
+            // 
+            this.cboAlarmType.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.cboAlarmType.Location = new System.Drawing.Point(136, 18);
+            this.cboAlarmType.Name = "cboAlarmType";
+            this.cboAlarmType.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.cboAlarmType.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
+            this.cboAlarmType.Size = new System.Drawing.Size(448, 20);
+            this.cboAlarmType.TabIndex = 1;
+            this.cboAlarmType.SelectedIndexChanged += new System.EventHandler(this.cboAlarmType_SelectedIndexChanged);
+            // 
             // footerPanel
-            //
+            // 
             this.footerPanel.Controls.Add(this.btnSend);
             this.footerPanel.Controls.Add(this.btnClose);
             this.footerPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
@@ -206,30 +206,46 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.footerPanel.Name = "footerPanel";
             this.footerPanel.Size = new System.Drawing.Size(640, 64);
             this.footerPanel.TabIndex = 2;
-            //
+            // 
             // btnSend
-            //
+            // 
+            this.btnSend.Accent = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
             this.btnSend.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnSend.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnSend.Icon = null;
             this.btnSend.Location = new System.Drawing.Point(528, 16);
+            this.btnSend.LookAndFeel.Style = DevExpress.LookAndFeel.LookAndFeelStyle.Flat;
             this.btnSend.Name = "btnSend";
+            this.btnSend.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
+            this.btnSend.Selected = false;
+            this.btnSend.ShowFocusRectangle = DevExpress.Utils.DefaultBoolean.False;
             this.btnSend.Size = new System.Drawing.Size(96, 32);
             this.btnSend.TabIndex = 0;
             this.btnSend.Text = "전송";
+            this.btnSend.TextAfterIcon = false;
             this.btnSend.Click += new System.EventHandler(this.btnSend_Click);
-            //
+            // 
             // btnClose
-            //
+            // 
+            this.btnClose.Accent = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
             this.btnClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnClose.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnClose.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.btnClose.Icon = null;
             this.btnClose.Location = new System.Drawing.Point(424, 16);
+            this.btnClose.LookAndFeel.Style = DevExpress.LookAndFeel.LookAndFeelStyle.Flat;
             this.btnClose.Name = "btnClose";
+            this.btnClose.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
+            this.btnClose.Selected = false;
+            this.btnClose.ShowFocusRectangle = DevExpress.Utils.DefaultBoolean.False;
             this.btnClose.Size = new System.Drawing.Size(96, 32);
             this.btnClose.TabIndex = 1;
             this.btnClose.Text = "닫기";
+            this.btnClose.TextAfterIcon = false;
             this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
-            //
+            // 
             // AdminAlarmForm
-            //
+            // 
             this.Appearance.Options.UseFont = true;
             this.CancelButton = this.btnClose;
             this.ClientSize = new System.Drawing.Size(640, 456);
@@ -245,22 +261,23 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "관리자 알람 유형 선택";
-            ((System.ComponentModel.ISupportInitialize)(this.footerPanel)).EndInit();
-            this.footerPanel.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.cboAlarmType.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.typeCard)).EndInit();
-            this.typeCard.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.txtRemark.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.cboTarget.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.detailCard)).EndInit();
-            this.detailCard.ResumeLayout(false);
-            this.detailCard.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.bodyPanel)).EndInit();
-            this.bodyPanel.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.headerIcon)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.headerPanel)).EndInit();
             this.headerPanel.ResumeLayout(false);
             this.headerPanel.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.headerIcon)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.bodyPanel)).EndInit();
+            this.bodyPanel.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.detailCard)).EndInit();
+            this.detailCard.ResumeLayout(false);
+            this.detailCard.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.cboTarget.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtRemark.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.typeCard)).EndInit();
+            this.typeCard.ResumeLayout(false);
+            this.typeCard.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.cboAlarmType.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.footerPanel)).EndInit();
+            this.footerPanel.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }

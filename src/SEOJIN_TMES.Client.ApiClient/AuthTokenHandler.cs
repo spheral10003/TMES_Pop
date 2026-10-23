@@ -1,3 +1,4 @@
+using SEOJIN_TMES.Client.Common.Logging;
 using System;
 using System.Net;
 using System.Net.Http;
@@ -63,8 +64,10 @@ namespace SEOJIN_TMES.Client.ApiClient
                 _tokenProvider.SetTokens(result.AccessToken, result.RefreshToken);
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
+                // 갱신 실패는 "세션 만료"로 이어지므로 원래 401 응답을 그대로 돌려준다. 원인은 로그로만 남긴다.
+                AppLog.Warn($"토큰 갱신 실패 - 원래 401 응답을 그대로 돌려준다: {ex.Message}");
                 return false;
             }
             finally

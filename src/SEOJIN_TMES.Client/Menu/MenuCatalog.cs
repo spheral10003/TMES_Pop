@@ -1,4 +1,5 @@
 using SEOJIN_TMES.Client.Common.Languages;
+using SEOJIN_TMES.Client.Forms.Attachment;
 using SEOJIN_TMES.Client.Forms.ProductionStatus;
 using SEOJIN_TMES.Client.Forms.WorkIntegratedStatus;
 using SEOJIN_TMES.Client.Forms.WorkOrderEntry;
@@ -39,6 +40,18 @@ namespace SEOJIN_TMES.Client.Menu
             pop.Icon = AppIcons.Factory;
             pop.Accent = AppTheme.Emerald;
             workManagement.AddChild(pop);
+
+            // 작업지시별 첨부파일 조회 · 다운로드 · 삭제 · 업로드.
+            // TODO: 메뉴 코드(POP04)는 가정값 — 서버 메뉴에 등록된 코드와 맞춰야 사이드바에 보인다.
+            var attachmentSearch = new MenuNode("AttachmentSearch", "POP04", () => Language.Menu_AttachmentSearch, () =>
+            {
+                var screen = new AttachmentSearchScreen();
+                screen.Init();
+                return screen;
+            });
+            attachmentSearch.Icon = AppIcons.Clipboard;
+            attachmentSearch.Accent = AppTheme.Violet;
+            workManagement.AddChild(attachmentSearch);
 
             var workStatusInquiry = new MenuNode("WorkStatusInquiry", () => Language.Menu_WorkStatusInquiry);
             workStatusInquiry.Icon = AppIcons.Chart;

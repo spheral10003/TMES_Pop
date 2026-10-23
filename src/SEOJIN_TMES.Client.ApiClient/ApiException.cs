@@ -39,6 +39,22 @@ namespace SEOJIN_TMES.Client.ApiClient
             return new ApiException((HttpStatusCode)0, null, BuildMessage(method, requestUri, exception), exception);
         }
 
+        /// <summary>
+        /// 성공 응답을 받았지만 본문을 해석하지 못한 경우(HTML 오류 페이지, 필드 형식 불일치 등).
+        /// 응답은 받았으므로 <see cref="IsTransportFailure"/>가 false가 되도록 받은 상태코드를 그대로 담는다.
+        /// </summary>
+        public static ApiException FromInvalidResponse(HttpStatusCode statusCode, string responseBody, string method, string requestUri, Exception exception)
+        {
+            var message = "서버 응답 형식이 올바르지 않습니다. 관리자에게 문의해 주세요.";
+
+            if (!string.IsNullOrEmpty(requestUri))
+                message += $"{Environment.NewLine}({method} {requestUri})";
+
+            message += $"{Environment.NewLine}원인: {RootCause(exception).Message}";
+
+            return new ApiException(statusCode, responseBody, message, exception);
+        }
+
         /// <summary>"무엇이 잘못됐는지(사용자용) + 호출 대상 + 실제 원인(개발자용)" 순서로 만든다.</summary>
         private static string BuildMessage(string method, string requestUri, Exception exception)
         {

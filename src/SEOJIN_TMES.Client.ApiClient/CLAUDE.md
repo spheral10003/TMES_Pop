@@ -26,6 +26,11 @@ var url = "api/v1.0/workorders/search";
 - HttpClient는 **타임아웃도 `TaskCanceledException`으로 던진다.** [ApiClientBase.cs](ApiClientBase.cs)에서
   **호출자가 준 원본 토큰**이 취소되지 않았으면 타임아웃으로 보고 `ApiException`으로 바꾼다
   (핸들러 안에서는 링크 토큰이라 구분할 수 없다). 호출자가 실제로 취소한 경우는 오류가 아니므로 그대로 통과시킨다.
+- 호출 한 건(전송 → 본문 읽기 → 역직렬화)은 `ApiClientBase.ExecuteAsync`가 통째로 감싼다.
+  핸들러 **밖**에서 나는 예외(응답 본문 버퍼링 중 연결 끊김 등)도 여기서 `ApiException`으로 바뀐다.
+  새 헬퍼를 만들 때도 반드시 `ExecuteAsync` 안에서 호출할 것.
+- 성공 응답인데 본문 해석에 실패하면(HTML 오류 페이지, 필드 형식 불일치) `ApiException.FromInvalidResponse`로
+  **받은 상태코드 그대로** 올린다 — 0으로 올리면 "서버에 연결할 수 없습니다"로 잘못 안내된다.
 - 통신 실패와 서버가 준 오류는 `ApiException.IsTransportFailure`(= `StatusCode == 0`)로 구분한다.
   로그인 화면이 이 값으로 "서버에 연결할 수 없습니다" 안내를 따로 띄운다.
 

@@ -975,4 +975,79 @@
   <data name="Upload_DeleteFailed" xml:space="preserve">
     <value>파일 삭제 실패</value>
   </data>
+  <data name="Menu_AttachmentSearch" xml:space="preserve">
+    <value>첨부파일 조회</value>
+  </data>
+  <data name="Attach_Title" xml:space="preserve">
+    <value>첨부파일 조회</value>
+  </data>
+  <data name="Attach_RegDate" xml:space="preserve">
+    <value>등록일자</value>
+  </data>
+  <data name="Attach_ListTitle" xml:space="preserve">
+    <value>목록</value>
+  </data>
+  <data name="Attach_DetailTitle" xml:space="preserve">
+    <value>상세정보</value>
+  </data>
+  <data name="Attach_Files" xml:space="preserve">
+    <value>첨부파일</value>
+  </data>
+  <data name="Attach_FileListTitle" xml:space="preserve">
+    <value>파일 상세목록</value>
+  </data>
+  <data name="Attach_Download" xml:space="preserve">
+    <value>다운로드</value>
+  </data>
+  <data name="Attach_Delete" xml:space="preserve">
+    <value>삭제</value>
+  </data>
+  <data name="Attach_Upload" xml:space="preserve">
+    <value>업로드</value>
+  </data>
+  <data name="Attach_FileTypeImage" xml:space="preserve">
+    <value>이미지</value>
+  </data>
+  <data name="Attach_FileTypeDocument" xml:space="preserve">
+    <value>문서</value>
+  </data>
+  <data name="Attach_SelectOrder" xml:space="preserve">
+    <value>작업지시를 먼저 선택하세요.</value>
+  </data>
+  <data name="Attach_SelectFile" xml:space="preserve">
+    <value>파일을 선택하세요.</value>
+  </data>
+  <data name="Attach_DownloadDone" xml:space="preserve">
+    <value>다운로드가 완료되었습니다.</value>
+  </data>
+  <data name="Attach_DownloadFailed" xml:space="preserve">
+    <value>다운로드에 실패했습니다.</value>
+  </data>
+  <data name="Attach_UploadFilter" xml:space="preserve">
+    <value>이미지|*.png;*.jpg;*.jpeg;*.bmp|PDF|*.pdf|모든 파일|*.*</value>
+  </data>
+  <data name="Col_AttachmentCount" xml:space="preserve">
+    <value>첨부파일</value>
+  </data>
+  <data name="Col_CreatedDate" xml:space="preserve">
+    <value>생성일자</value>
+  </data>
+  <data name="Col_FileName" xml:space="preserve">
+    <value>파일명</value>
+  </data>
+  <data name="Col_FileType" xml:space="preserve">
+    <value>첨부유형</value>
+  </data>
+  <data name="Col_FileSize" xml:space="preserve">
+    <value>파일크기</value>
+  </data>
+  <data name="Col_CreatedBy" xml:space="preserve">
+    <value>작성자</value>
+  </data>
+  <data name="Col_CreatedAt" xml:space="preserve">
+    <value>작성일시</value>
+  </data>
+  <data name="Common_NoData" xml:space="preserve">
+    <value>데이터가 존재하지 않습니다.</value>
+  </data>
 </root>

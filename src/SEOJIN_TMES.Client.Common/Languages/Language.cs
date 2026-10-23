@@ -374,5 +374,32 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string AdminAlarm_SelectType => Get(nameof(AdminAlarm_SelectType));
         public static string AdminAlarm_SelectTarget => Get(nameof(AdminAlarm_SelectTarget));
         public static string AdminAlarm_NoTypes => Get(nameof(AdminAlarm_NoTypes));
+
+        public static string Menu_AttachmentSearch => Get(nameof(Menu_AttachmentSearch));
+        public static string Attach_Title => Get(nameof(Attach_Title));
+        public static string Attach_RegDate => Get(nameof(Attach_RegDate));
+        public static string Attach_ListTitle => Get(nameof(Attach_ListTitle));
+        public static string Attach_DetailTitle => Get(nameof(Attach_DetailTitle));
+        public static string Attach_Files => Get(nameof(Attach_Files));
+        public static string Attach_FileListTitle => Get(nameof(Attach_FileListTitle));
+        public static string Attach_Download => Get(nameof(Attach_Download));
+        public static string Attach_Delete => Get(nameof(Attach_Delete));
+        public static string Attach_Upload => Get(nameof(Attach_Upload));
+        public static string Attach_FileTypeImage => Get(nameof(Attach_FileTypeImage));
+        public static string Attach_FileTypeDocument => Get(nameof(Attach_FileTypeDocument));
+        public static string Attach_SelectOrder => Get(nameof(Attach_SelectOrder));
+        public static string Attach_SelectFile => Get(nameof(Attach_SelectFile));
+        public static string Attach_DownloadDone => Get(nameof(Attach_DownloadDone));
+        public static string Attach_DownloadFailed => Get(nameof(Attach_DownloadFailed));
+        /// <summary>OpenFileDialog.Filter 형식("표시|패턴|...") 그대로 번역한다 — 구분자 '|' 개수를 바꾸지 말 것.</summary>
+        public static string Attach_UploadFilter => Get(nameof(Attach_UploadFilter));
+        public static string Col_AttachmentCount => Get(nameof(Col_AttachmentCount));
+        public static string Col_CreatedDate => Get(nameof(Col_CreatedDate));
+        public static string Col_FileName => Get(nameof(Col_FileName));
+        public static string Col_FileType => Get(nameof(Col_FileType));
+        public static string Col_FileSize => Get(nameof(Col_FileSize));
+        public static string Col_CreatedBy => Get(nameof(Col_CreatedBy));
+        public static string Col_CreatedAt => Get(nameof(Col_CreatedAt));
+        public static string Common_NoData => Get(nameof(Common_NoData));
     }
 }
