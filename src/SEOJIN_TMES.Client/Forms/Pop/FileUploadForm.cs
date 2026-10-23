@@ -23,9 +23,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
     {
         private Point mousePoint;
         private IFileApiClient _fileApi;
-        private string _category;
-        private string _refKey;
+        private PopProcessKey _refKey;
         private long _maxBytes;
+        private readonly ByteToImage _imgCtrl = new ByteToImage();
 
         /// <summary>전송 중에는 창을 닫지 못하게 한다 — 닫히면 Dispose된 창에 결과를 쓰게 된다.</summary>
         private bool _isUploading;
@@ -35,24 +35,23 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// <summary>이번 창에서 서버에 올라간 파일들(서버 응답 그대로).</summary>
         public IReadOnlyList<FileUploadResponse> UploadedFiles => _uploadedFiles;
 
-        public FileUploadForm(string key)
+        public FileUploadForm(PopProcessKey key)
         {
             InitializeComponent();
             _refKey = key;
         }
 
-        private void FileUploadForm_Load(object sender, EventArgs e)
+        private async void FileUploadForm_Load(object sender, EventArgs e)
         {
             Init();
             SetTexts();
             ControlEnabled();
+            await LoadServerFilesAsync();
         }
 
         private void Init()
         {
             _fileApi = Global.Instance.Settings.ApiClients.FileApiClient;
-            _category = "";
-            _refKey = "";
             _maxBytes = (long)Global.Instance.Settings.AppSet.UploadMaxMegaBytes * 1024 * 1024;
         }
 
@@ -61,6 +60,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             lblTitle.Text = Language.Upload_Title;
             btnFileOpen.Text = Language.Upload_FileOpen;
             btnUpload.Text = Language.Upload_Upload;
+            btnDelete.Text = Language.Upload_Delete;
             btnCancle.Text = Language.Common_Cancel;
         }
 
@@ -68,9 +68,41 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         {
             btnFileOpen.Enabled = !_isUploading;
             btnUpload.Enabled = !_isUploading && listFileName.Items.Count > 0;
+            btnDelete.Enabled = !_isUploading && listServerFile.SelectedItems.Count > 0;
             btnCancle.Enabled = !_isUploading;
             lblClose.Enabled = !_isUploading;
             listFileName.Enabled = !_isUploading;
+            listServerFile.Enabled = !_isUploading;
+        }
+
+        /// <summary>서버에 이미 붙어 있는 첨부를 다시 읽는다. 업로드 · 삭제 뒤에도 서버 기준으로 다시 그린다.</summary>
+        private async Task LoadServerFilesAsync()
+        {
+            try
+            {
+                var list = await _fileApi.GetAttachmentsAsync(_refKey);
+                if (IsDisposed || Disposing) return;
+
+                listServerFile.BeginUpdate();
+                listServerFile.Items.Clear();
+                if (list != null)
+                    listServerFile.Items.AddRange(list.Attachments.ToArray());
+                listServerFile.EndUpdate();
+            }
+            catch (ApiException ex)
+            {
+                if (IsDisposed || Disposing) return;
+
+                AppLog.Error($"첨부 조회 실패 - {_refKey?.WorkOrderNo}", ex);
+                AppMessageBox.Error(this, ex.IsTransportFailure
+                    ? Language.Upload_ConnectionError
+                    : $"{Language.Upload_Failed} ({(int)ex.StatusCode})");
+            }
+            finally
+            {
+                if (!IsDisposed && !Disposing)
+                    ControlEnabled();
+            }
         }
 
         /// <summary>파일 하나를 바이너리로 읽는다. 실패 사유는 로그와 안내 창에 함께 쓴다.</summary>
@@ -92,32 +124,96 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             }
         }
 
-        /// <summary>
-        /// 고른 파일이 사진이면 미리보기를 그린다. 읽어 둔 바이트로 그리므로 파일을 다시 열지 않는다.
-        /// Image.FromStream은 스트림이 살아 있어야 쓸 수 있어서, 복사본(new Bitmap)을 만든 뒤 스트림을 닫는다.
-        /// </summary>
-        private void ShowPreview(FileBinary file)
+        /// <summary>미리보기를 비운다. 비트맵은 폼이 소유하므로 바꿀 때마다 이전 것을 정리한다.</summary>
+        private void ClearPreview()
         {
             var old = picPreView.Image;
             picPreView.Image = null;
             old?.Dispose();
+        }
 
+        /// <summary>고른 로컬 파일이 사진이면 미리보기를 그린다. 읽어 둔 바이트로 그리므로 파일을 다시 열지 않는다.</summary>
+        private void ShowPreview(FileBinary file)
+        {
+            ClearPreview();
             if (file == null || !file.IsImage)
+                return;
+
+            ShowPreviewBytes(file.Content, file.FileName);
+        }
+
+        /// <summary>
+        /// 받은 바이트를 그림으로 바꿔 미리보기에 띄운다. PopScreen.LoadImageAsync와 같은 순서다:
+        /// Base64 텍스트면 먼저 디코딩 → OLE 헤더 등 앞부분 제거 → Bitmap 복사본 생성.
+        /// 이미지가 아니면 비워 둔다.
+        /// </summary>
+        private void ShowPreviewBytes(byte[] raw, string fileName)
+        {
+            ClearPreview();
+            if (raw == null || raw.Length == 0)
+                return;
+
+            if (_imgCtrl.TryDecodeBase64(raw, out var decoded))
+                raw = decoded;
+
+            int offset = _imgCtrl.FindImageOffset(raw);
+            if (offset < 0)
+            {
+                AppLog.Warn($"미리보기 실패(이미지 데이터 없음) - {fileName}");
+                return;
+            }
+
+            if (offset > 0)
+            {
+                var trimmed = new byte[raw.Length - offset];
+                Buffer.BlockCopy(raw, offset, trimmed, 0, trimmed.Length);
+                raw = trimmed;
+            }
+
+            try
+            {
+                picPreView.Image = _imgCtrl.BytesToImage(raw);
+            }
+            catch (ArgumentException)
+            {
+                // 시그니처는 맞는데 내용이 깨진 경우 — 미리보기만 건너뛴다.
+                AppLog.Warn($"미리보기 실패(이미지 형식 아님) - {fileName}");
+            }
+        }
+
+        /// <summary>서버 첨부 한 건을 받아 미리보기에 띄운다. 이미지가 아니면 받지 않고 비워 둔다.</summary>
+        private async Task ShowServerPreviewAsync(WorkOrderAttachmentDto item)
+        {
+            ClearPreview();
+            if (item == null || !item.IsImage)
                 return;
 
             try
             {
-                using (var ms = new MemoryStream(file.Content))
-                using (var original = Image.FromStream(ms))
-                {
-                    picPreView.Image = new Bitmap(original);
-                }
+                var file = await _fileApi.DownloadAttachmentAsync(_refKey, item.AttachRef);
+                if (IsDisposed || Disposing) return;
+
+                // 받는 사이 다른 항목을 골랐으면 늦게 온 응답은 버린다 — 지금 선택과 다른 그림이 뜨지 않게.
+                if (!ReferenceEquals(SingleSelectedServerFile(), item))
+                    return;
+
+                ShowPreviewBytes(file?.Content, file?.FileName ?? item.FileName);
             }
-            catch (ArgumentException)
+            catch (ApiException ex)
             {
-                // 확장자는 이미지인데 내용이 깨진 파일 — 미리보기만 건너뛰고 업로드 여부는 서버 판단에 맡긴다.
-                AppLog.Warn($"미리보기 실패(이미지 형식 아님) - {file.FileName}");
+                if (IsDisposed || Disposing) return;
+
+                // 미리보기는 보조 기능이라 안내 창 없이 로그만 남기고 비워 둔다.
+                AppLog.Warn($"첨부 미리보기 다운로드 실패 - {item.FileName}: {ex.Message}");
             }
+        }
+
+        /// <summary>여러 개를 골랐으면(삭제용) 미리보기 대상이 없다.</summary>
+        private WorkOrderAttachmentDto SingleSelectedServerFile()
+        {
+            return listServerFile.SelectedItems.Count == 1
+                ? listServerFile.SelectedItem as WorkOrderAttachmentDto
+                : null;
         }
 
         private void btnFileOpen_Click(object sender, EventArgs e)
@@ -173,53 +269,96 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             _isUploading = true;
             ControlEnabled();
 
-            var total = listFileName.Items.Count;
-            var done = 0;
+            // 목록 전체를 한 요청에 담는다 — 성공/실패가 한 번에 정해지므로 하나씩 빼는 처리는 필요 없다.
+            var files = listFileName.Items.Cast<FileBinary>().ToList();
 
             try
             {
-                // 목록 맨 앞부터 하나씩 보내고, 성공한 파일은 목록에서 뺀다
-                // → 중간에 실패해도 목록에는 "아직 안 올라간 파일"만 남는다.
-                while (listFileName.Items.Count > 0)
-                {
-                    var file = (FileBinary)listFileName.Items[0];
-                    lblTitle.Text = string.Format(Language.Upload_ProgressFormat, done + 1, total, file.FileName);
+                AppLog.Step($"파일 일괄 업로드 시작 - {_refKey.WorkOrderNo}, {files.Count}건 ({files.Sum(f => f.Length):N0} byte)");
+                var result = await _fileApi.UploadManyAsync(files, _refKey);
+                if (IsDisposed || Disposing) return;
 
-                    AppLog.Step($"파일 업로드 시작 - {file.FileName} ({file.Length:N0} byte, {file.ContentType})");
-                    var result = await _fileApi.UploadAsync(file, _category, _refKey);
-                    if (IsDisposed || Disposing) return;
-
-                    AppLog.Step($"파일 업로드 완료 - {file.FileName}, FileId={result?.FileId}");
-                    _uploadedFiles.Add(result);
-                    listFileName.Items.RemoveAt(0);
-                    done++;
-                }
-
-                // 전부 올라갔다 — 결과는 UploadedFiles로 넘기고 창을 자동으로 닫는다.
-                _isUploading = false;
-                DialogResult = DialogResult.OK;
-                Close();
+                AppLog.Step($"파일 일괄 업로드 완료 - {_refKey.WorkOrderNo}, {files.Count}건");
+                if (result != null)
+                    _uploadedFiles.AddRange(result);
+                listFileName.Items.Clear();
+                ShowPreview(null);
             }
             catch (ApiException ex)
             {
                 if (IsDisposed || Disposing) return;
 
-                AppLog.Error($"파일 업로드 실패 - {done}/{total} 완료 후 중단", ex);
+                // 한 요청이라 실패하면 아무것도 안 올라간 것으로 본다 — 목록을 그대로 두고 다시 누르면 된다.
+                AppLog.Error($"파일 일괄 업로드 실패 - {_refKey.WorkOrderNo}, {files.Count}건", ex);
                 AppMessageBox.Error(this, ex.IsTransportFailure
                     ? Language.Upload_ConnectionError
                     : $"{Language.Upload_Failed} ({(int)ex.StatusCode})");
+                return;
             }
             finally
             {
                 if (!IsDisposed && !Disposing)
                 {
                     _isUploading = false;
-                    lblTitle.Text = Language.Upload_Title;
                     if (listFileName.Items.Count > 0 && listFileName.SelectedIndex < 0)
                         listFileName.SelectedIndex = 0;
                     ControlEnabled();
                 }
             }
+
+            // 창은 닫지 않고 서버 목록을 다시 받아, 올라간 파일을 바로 확인 · 삭제할 수 있게 한다.
+            await LoadServerFilesAsync();
+        }
+
+        private async void btnDelete_Click(object sender, EventArgs e)
+        {
+            var targets = listServerFile.SelectedItems.Cast<WorkOrderAttachmentDto>().ToList();
+            if (targets.Count == 0)
+                return;
+
+            if (!AppMessageBox.Confirm(this, string.Format(Language.Upload_DeleteConfirmFormat, targets.Count)))
+                return;
+
+            _isUploading = true;
+            ControlEnabled();
+
+            try
+            {
+                string atchRefs = string.Join(",", targets.Select(t => t.AttachRef));
+                AppLog.Step($"첨부 삭제 시작 - {_refKey.WorkOrderNo}, atchRef={string.Join(",", targets.Select(t => t.AttachRef))}");
+                await _fileApi.DeleteAttachmentsAsync(_refKey, targets.Select(t => t.AttachRef));
+                //await _fileApi.DeleteAttachmentsAsync(_refKey, atchRefs);
+                if (IsDisposed || Disposing) return;
+
+                AppLog.Step($"첨부 삭제 완료 - {_refKey.WorkOrderNo}, {targets.Count}건");
+            }
+            catch (ApiException ex)
+            {
+                if (IsDisposed || Disposing) return;
+
+                AppLog.Error($"첨부 삭제 실패 - {_refKey.WorkOrderNo}", ex);
+                AppMessageBox.Error(this, ex.IsTransportFailure
+                    ? Language.Upload_ConnectionError
+                    : $"{Language.Upload_DeleteFailed} ({(int)ex.StatusCode})");
+                return;
+            }
+            finally
+            {
+                if (!IsDisposed && !Disposing)
+                {
+                    _isUploading = false;
+                    ControlEnabled();
+                }
+            }
+
+            // 삭제 결과는 클라이언트가 목록에서 빼지 않고, 서버 목록을 다시 받아서 그린다.
+            await LoadServerFilesAsync();
+        }
+
+        private async void listServerFile_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            ControlEnabled();
+            await ShowServerPreviewAsync(SingleSelectedServerFile());
         }
 
         private void FileUploadForm_FormClosing(object sender, FormClosingEventArgs e)

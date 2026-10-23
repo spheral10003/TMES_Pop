@@ -963,4 +963,16 @@
   <data name="Upload_Failed" xml:space="preserve">
     <value>파일 전송 실패</value>
   </data>
+  <data name="Col_Description" xml:space="preserve">
+    <value>설명</value>
+  </data>
+  <data name="Upload_Delete" xml:space="preserve">
+    <value>파일 삭제</value>
+  </data>
+  <data name="Upload_DeleteConfirmFormat" xml:space="preserve">
+    <value>선택한 파일 {0}건을 삭제하시겠습니까?</value>
+  </data>
+  <data name="Upload_DeleteFailed" xml:space="preserve">
+    <value>파일 삭제 실패</value>
+  </data>
 </root>

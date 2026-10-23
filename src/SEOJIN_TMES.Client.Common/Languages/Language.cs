@@ -189,6 +189,7 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string WorkEntryConfirm_Move => Get(nameof(WorkEntryConfirm_Move));
         public static string WorkEntryConfirm_SelectProcess => Get(nameof(WorkEntryConfirm_SelectProcess));
         public static string Col_No => Get(nameof(Col_No));
+        public static string Col_Description => Get(nameof(Col_Description));
         public static string Col_WorkOrderNo => Get(nameof(Col_WorkOrderNo));
         public static string Col_ItemCode => Get(nameof(Col_ItemCode));
         public static string Col_SerialNo => Get(nameof(Col_SerialNo));
@@ -272,6 +273,9 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string Upload_ProgressFormat => Get(nameof(Upload_ProgressFormat));
         public static string Upload_ReadFailed => Get(nameof(Upload_ReadFailed));
         public static string Upload_SelectFile => Get(nameof(Upload_SelectFile));
+        public static string Upload_DeleteFailed => Get(nameof(Upload_DeleteFailed));
+        public static string Upload_Delete => Get(nameof(Upload_Delete));
+        public static string Upload_DeleteConfirmFormat => Get(nameof(Upload_DeleteConfirmFormat));
         public static string Upload_Title => Get(nameof(Upload_Title));
         public static string Upload_Upload => Get(nameof(Upload_Upload));
         public static string Col_MaterialCode => Get(nameof(Col_MaterialCode));

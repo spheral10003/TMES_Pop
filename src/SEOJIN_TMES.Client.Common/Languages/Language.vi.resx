@@ -943,7 +943,7 @@
     <value>파일 업로드</value>
   </data>
   <data name="Upload_FileOpen" xml:space="preserve">
-    <value>파일 열기</value>
+    <value>Mở tệp</value>
   </data>
   <data name="Upload_Upload" xml:space="preserve">
     <value>파일 올리기</value>
@@ -961,6 +961,18 @@
     <value>파일 업로드 연결 오류</value>
   </data>
   <data name="Upload_Failed" xml:space="preserve">
-    <value>파일 업로드 실패</value>
+    <value>Truyền tệp thất bại.</value>
+  </data>
+  <data name="Col_Description" xml:space="preserve">
+    <value>설명</value>
+  </data>
+  <data name="Upload_Delete" xml:space="preserve">
+    <value>Xóa tệp</value>
+  </data>
+  <data name="Upload_DeleteConfirmFormat" xml:space="preserve">
+    <value>Bạn có muốn xóa {0} tệp đã chọn không?</value>
+  </data>
+  <data name="Upload_DeleteFailed" xml:space="preserve">
+    <value>Xóa tệp thất bại</value>
   </data>
 </root>

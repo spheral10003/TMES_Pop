@@ -6,6 +6,7 @@ using DevExpress.XtraGrid.Views.Base;
 using DevExpress.XtraGrid.Views.Grid;
 using ImageBoxExtensions;
 using SEOJIN_TMES.Client.ApiClient;
+using SEOJIN_TMES.Client.Common.Imaging;
 using SEOJIN_TMES.Client.Common.Languages;
 using SEOJIN_TMES.Client.Common.Logging;
 using SEOJIN_TMES.Client.Common.Models;
@@ -69,17 +70,11 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private WorkEntryContext _entry;
         private PopProcessKey _key;
         private PopProcessInfoDto _info;
-        private Image _image;
-        private const double ZoomMin = 10;
-        private const double ZoomMax = 800;
-        private const double ZoomStep = 1.25;   // 버튼/휠 1회당 배율
-        private bool _fitMode = true;           // true: 창 크기 변경 시 자동으로 화면 맞춤
-        private double _zoom = 100;             // 현재 배율(%)
-
-        // 드래그 이동(팬)용
-        private bool _dragging;
-        private Point _dragStart;
-        private Point _dragScroll;
+        /// <summary>
+        /// 도면 이미지 뷰어(확대/축소 · 화면 맞춤 · 드래그 이동). 배율 계산과 그림의 소유 · 해제는 이쪽이 맡는다.
+        /// <see cref="Init"/>에서 만든다.
+        /// </summary>
+        private ImageView _viewer;
 
         private byte[] _currentBytes;
         private ByteToImage _imgCtrl = new ByteToImage();
@@ -87,6 +82,13 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private RepositoryItemTextEdit _torqueResultEditor;
         private RepositoryItemComboBox _resultStateEditor;
         private RepositoryItemTextEdit _resultValueEditor;
+        private RepositoryItemTextEdit _resultRemarkEditor;
+
+        /// <summary>[검사 스팩] 탭에서 작업자가 입력할 수 있는 칸.</summary>
+        private readonly HashSet<string> _inspectionInputFields = new HashSet<string>
+        {
+            "ResultState", "ResultValue", "InspectionResultRemark"
+        };
 
         private System.Windows.Forms.Timer _clock;
         private PopTab _activeTab = PopTab.Material;
@@ -183,24 +185,16 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             _apiClient = Global.Instance.Settings.ApiClients;
             _key = BuildKey(_entry);
 
-            // 작업지시가 바뀌면 공정 목록도 다른 것이라, 다음 이동 때 새로 읽게 비워 둔다.
             _processes = new List<RoutingProcessDto>();
             _viewerMessage = Language.Pop_DrawingNone;
 
-            // Ctrl + 휠 확대 / 축소
-            scrollHost.MouseWheel += View_MouseWheel;
-            picView.MouseWheel += View_MouseWheel;
-            picView.MouseEnter += (s, e) => scrollHost.Focus();
-
-            // 마우스 드래그로 이미지 이동
-            picView.MouseDown += PicView_MouseDown;
-            picView.MouseMove += PicView_MouseMove;
-            picView.MouseUp += (s, e) => { _dragging = false; picView.Cursor = Cursors.Default; };
-
-            // 창 크기 변경 시: 맞춤 모드면 다시 맞춤, 아니면 가운데 정렬만 갱신
-            scrollHost.Resize += (s, e) => { if (_fitMode) ZoomToFit(); else LayoutImage(); };
-
-            //StartClock();
+            if (_viewer == null)
+            {
+                _viewer = new ImageView(picView);
+                btnZoomIn.Click += BtnZoomIn_Click;
+                btnZoomOut.Click += BtnZoomOut_Click;
+                btnFit.Click += BtnFit_Click;
+            }
         }
 
         /// <summary>화면의 모든 고정 문구를 현재 언어로 채운다(언어 전환 시 화면을 다시 열면 반영된다).</summary>
@@ -571,19 +565,15 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// "토크 결과값" 칸에 들어온 값이 실수인지 확인하고, 통과하면 소수 둘째 자리에서 올려 저장한다.
+        /// "토크 결과값" · "각도 결과값" 칸에 들어온 값이 실수인지 확인하고, 통과하면 서버에 저장한다.
+        /// 토크는 소수 둘째 자리에서 올려 저장하고, 각도는 입력한 값 그대로 저장한다.
         /// 빈칸(또는 "-")은 "아직 측정하지 않음"(null)으로 되돌린다 — 잘못 넣은 값을 지울 수 있어야 한다.
         /// </summary>
         private async void GridViewBomSpec_ValidatingEditor(object sender, BaseContainerValidateEditorEventArgs e)
         {
-            if (gridViewBomSpec.FocusedColumn?.FieldName != TorqueResultField && gridViewBomSpec.FocusedColumn?.FieldName != AngleResultField)
+            var fieldName = gridViewBomSpec.FocusedColumn?.FieldName;
+            if (fieldName != TorqueResultField && fieldName != AngleResultField)
                 return;
-
-            if (!IsProcessRunning)
-            {
-                AppLog.Info($"[POP] 공정 미시작 - 수정 데이터 버림 ( 상태 {_progressState})");
-                return;
-            }
 
             var text = Convert.ToString(e.Value, CultureInfo.CurrentCulture)?.Trim();
 
@@ -603,31 +593,59 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 return;
             }
 
+            bool isTorque = fieldName == TorqueResultField;
+            decimal value;
+            try
+            {
+                value = isTorque ? CeilTorque((decimal)parsed) : (decimal)parsed;
+            }
+            catch (OverflowException)
+            {
+                // decimal 범위를 넘는 값(1e30 등) — 토크 · 각도 값으로 의미가 없으므로 숫자 오류와 같이 다룬다.
+                e.Valid = false;
+                e.ErrorText = Language.PopTorque_Invalid;
+                return;
+            }
+
             var view = (GridView)sender;
-            int rowHandle = view.FocusedRowHandle;
-            var spec = view.GetRow(rowHandle) as PopBomSpecDto;
+            var spec = view.GetRow(view.FocusedRowHandle) as PopBomSpecDto;
+            if (spec == null)
+                return;
+
+            // e.Value는 await 전에 정해야 한다 — 첫 await에서 이벤트가 끝나 그리드가 그 시점의 값을 셀에 반영한다.
+            e.Value = value;
+
+            // 고친 칸만 새 값으로 바꾸고 다른 쪽은 지금 들고 있는 값을 그대로 보낸다
+            // (예전에는 어느 칸을 고치든 입력값을 토크로 보내고 각도는 목표값으로 덮어써, 각도 입력이 토크로 저장됐다).
+            // 토크만 고쳤는데 각도가 아직 비어 있으면 수동 렌치와 같이 목표 각도를 채운다.
+            decimal? torque = isTorque ? value : spec.TorqueResult;
+            decimal? angle = isTorque ? (spec.AngleResult ?? spec.AngleTarget) : value;
+
+            if (isTorque)
+                spec.AngleResult = angle;
             spec.IsManualInput = true;
-            spec.AngleResult = spec.AngleTarget.Value;
             spec.EquipmentCode = "MAN";
 
             var result = new PopBomSpecResultDto
             {
                 eqpCd = "MAN",
-                torqueRsltVl = CeilTorque((decimal)parsed),
-                angleRsltVl = spec.AngleResult
+                torqueRsltVl = torque,
+                angleRsltVl = angle
             };
 
             try
             {
-                
                 await _apiClient.PopApiClient.SaveBomSpecResultsAsync(_key, result, spec);
-                e.Value = CeilTorque((decimal)parsed);
+                AppLog.Info($"[POP] {(isTorque ? "토크" : "각도")} 결과값 직접 입력 저장 - {spec.BomSpecName}/{spec.InputPosition} " +
+                            $"(토크 {torque}, 각도 {angle})");
             }
-            catch (OverflowException)
+            catch (ApiException ex)
             {
-                // decimal 범위를 넘는 값(1e30 등) — 토크 값으로 의미가 없으므로 숫자 오류와 같이 다룬다.
-                e.Valid = false;
-                e.ErrorText = Language.PopTorque_Invalid;
+                AppLog.Warn($"[POP] 직접 입력 결과 저장 실패 - {spec.BomSpecName}/{spec.InputPosition} : {ex.Message}");
+                if (IsDisposed || Disposing)
+                    return;
+
+                AppMessageBox.Warn(this, ex.Message, Language.Pop_Title);
             }
         }
 
@@ -682,12 +700,31 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
 
         /// <summary>
+        /// 공정이 진행 중(<see cref="IsProcessRunning"/>)일 때만 "토크 결과값" · "각도 결과값" 칸의 편집기를 연다.
+        /// 공정 전 · 중지 · 완료 상태에서 들어온 값은 실적이 아니므로 입력 자체를 막는다 —
+        /// 그래서 ValidatingEditor · CellValueChanged에서는 공정 상태를 다시 확인하지 않는다.
+        /// [입력] 버튼 컬럼도 편집기가 열려야 눌리므로 같은 조건으로 막힌다.
+        /// </summary>
+        private void GridViewBomSpec_ShowingEditor(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (!IsProcessRunning)
+            {
+                e.Cancel = true;
+                return;
+            }
+
+            var fieldName = gridViewBomSpec.FocusedColumn?.FieldName;
+            if (fieldName != TorqueResultField && fieldName != AngleResultField && fieldName != ResultInputField)
+                e.Cancel = true;
+        }
+
+        /// <summary>
         /// 값 변환에 실패했을 때 DevExpress 기본 오류 창 대신 셀 안의 오류 표시로 알린다
         /// (창을 띄우면 작업자가 확인을 누를 때까지 다음 줄로 넘어가지 못한다).
         /// </summary>
         private void GridViewBomSpec_InvalidValueException(object sender, InvalidValueExceptionEventArgs e)
         {
-            if (gridViewBomSpec.FocusedColumn?.FieldName != TorqueResultField || gridViewBomSpec.FocusedColumn?.FieldName != AngleResultField)
+            if (gridViewBomSpec.FocusedColumn?.FieldName != TorqueResultField && gridViewBomSpec.FocusedColumn?.FieldName != AngleResultField)
                 return;
 
             e.ExceptionMode = ExceptionMode.DisplayError;
@@ -699,14 +736,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// </summary>
         private void GridViewBomSpec_CellValueChanged(object sender, CellValueChangedEventArgs e)
         {
-            if (!IsProcessRunning)
-            {
-                AppLog.Info($"[POP] 공정 미시작 - ( 상태 {_progressState})");
+            if (e.Column.FieldName != TorqueResultField && e.Column.FieldName != AngleResultField)
                 return;
-            }
-            
-            if (e.Column.FieldName != TorqueResultField || e.Column.FieldName != AngleResultField)
-            return;
 
             var spec = gridViewBomSpec.GetRow(e.RowHandle) as PopBomSpecDto;
             if (spec == null)
@@ -750,12 +781,28 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
         private void GridViewInspection_ShowingEditor(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (gridViewInspection.FocusedColumn?.FieldName != "ResultValue")
-                return;
-            
-            var spec = gridViewInspection.GetFocusedRow() as PopInspectionSpecDto;
-            if (spec != null && !spec.IsQuantitative)
+            // 공정이 진행 중일 때만 결과를 받는다 — 대기·중지·완료 상태의 입력은 실적에 붙을 곳이 없다.
+            if (!IsProcessRunning)
+            {
                 e.Cancel = true;
+                return;
+            }
+
+            var view = (GridView)sender;
+            var fieldName = view.FocusedColumn?.FieldName;
+            if (fieldName == null || !_inspectionInputFields.Contains(fieldName))
+            {
+                e.Cancel = true;
+                return;
+            }
+
+            // 정성 검사는 결과값이 없다 — 결과상태(합격/불합격)만 받는다.
+            if (fieldName == "ResultValue")
+            {
+                var spec = view.GetFocusedRow() as PopInspectionSpecDto;
+                if (spec != null && !spec.IsQuantitative)
+                    e.Cancel = true;
+            }
         }
 
         /// <summary>"시리얼번호 입력상태" 칸을 클릭하면 &lt;투입자재 정보 입력&gt; 팝업을 연다.</summary>
@@ -1020,7 +1067,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 // Base64 텍스트이면 먼저 디코딩
                 byte[] decoded;
 
-                if (ByteToImage.TryDecodeBase64(raw, out decoded))
+                if (_imgCtrl.TryDecodeBase64(raw, out decoded))
                 {
                     raw = decoded;
                 }
@@ -1038,7 +1085,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private void ShowImage(byte[] data, string source)
         {
             // OLE 헤더 등이 앞에 붙어 있으면 실제 이미지 시작 위치를 찾아 잘라냄
-            int offset = ByteToImage.FindImageOffset(data);
+            int offset = _imgCtrl.FindImageOffset(data);
             if (offset < 0)
             {
                 AppMessageBox.Warn(this, "이미지 데이터를 찾을 수 없습니다.\n(손상되었거나 이미지가 아닌 바이너리입니다.)", Language.Pop_Title);    
@@ -1052,15 +1099,12 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 data = trimmed;
             }
 
-            Image img = ByteToImage.BytesToImage(data);
+            Image img = _imgCtrl.BytesToImage(data);
 
-            Image old = _image;
-            _image = img;
-            picView.Image = img;
-            if (old != null) old.Dispose();
+            // 이전 그림 해제 + 화면 맞춤까지 ImageView가 처리한다(img는 이제 ImageView 소유).
+            _viewer.SetImage(img);
 
             _currentBytes = data;
-            ZoomToFit();
             //lblInfo.Text = string.Format("{0}  |  {1} x {2}  |  {3:N0} bytes{4}",
             //    Path.GetFileName(source), img.Width, img.Height, data.Length,
             //    offset > 0 ? string.Format("  |  헤더 {0} bytes 제거", offset) : "");
@@ -1069,15 +1113,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
         private void ClearImage()
         {
-            Image old = _image;
-            picView.Image = null;
-            picView.Size = new Size(1, 1);
-            _image = null;
-            if (old != null) old.Dispose();
+            // Init 전에 불릴 수 있다(도면 읽기 실패 경로) — 그때는 띄운 그림도 없다.
+            _viewer?.Clear();
 
             _currentBytes = null;
-            _fitMode = true;
-            _zoom = 100;
             //UpdateZoomLabel();
             //lblInfo.Text = "이미지를 열어주세요.";
             //UpdateButtons();
@@ -1309,10 +1348,13 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             gridInspection.DataSource = new List<PopInspectionSpecDto>();
             GridColumns.Apply(gridViewInspection, Language.Col_No,
                 GridColumns.Text("InspectionSpecName", Language.Col_InspectionSpecName, 220),
-                GridColumns.Left("InspectionRemark", Language.Col_InspectionRemark, 340),
+                GridColumns.Left("Description", Language.Col_Description, 300),
                 GridColumns.Text("InspectionMethod", Language.Col_InspectionMethod, 120),
                 GridColumns.Text("ResultState", Language.Col_ResultState, 130),
-                GridColumns.Text("ResultValue", Language.Col_ResultValue, 130));
+                GridColumns.Text("ResultValue", Language.Col_ResultValue, 130),
+                GridColumns.Text("InspectionResultRemark", Language.Col_InspectionRemark, 300)
+                );
+
 
             gridViewInspection.OptionsView.ColumnAutoWidth = true;
 
@@ -1340,6 +1382,16 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             {
                 valueColumn.OptionsColumn.AllowEdit = true;
                 valueColumn.ColumnEdit = _resultValueEditor;
+            }
+
+            _resultRemarkEditor = new RepositoryItemTextEdit();
+            gridInspection.RepositoryItems.Add(_resultRemarkEditor);
+
+            var remarkColumn = gridViewInspection.Columns.ColumnByFieldName("InspectionResultRemark");
+            if (remarkColumn != null)
+            {
+                remarkColumn.OptionsColumn.AllowEdit = true;
+                remarkColumn.ColumnEdit = _resultRemarkEditor;
             }
 
             gridViewInspection.OptionsBehavior.Editable = true;
@@ -1923,12 +1975,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         private async Task<List<RoutingProcessDto>> FetchRoutingProcessesAsync()
-        {
-            //if (UseMock)
-            //{
-            //    await Task.Yield();
-            //    return MockWorkOrderData.GetRoutingProcesses(_key.WorkOrderNo, _key.SerialNo);
-            //}
+        {   
             string cropCode = _entry?.WorkOrder?.CorpCode;
             string workStationRef = _appSet?.CurrentUser?.WorkstationInfo?.WorkstationRef;
             return await _appSet.ApiClients.WorkOrderApiClient.GetRoutingProcessesAsync(cropCode, workStationRef, _key.SerialNo)
@@ -2139,6 +2186,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (_equip != null) UnwireEquipmentEvents();
             CloseDrawing();
 
+            // 이벤트 연결을 끊고 들고 있던 도면 이미지를 해제한다(CloseDrawing 뒤 — 그 안에서 ClearImage를 부를 수 있다).
+            _viewer?.Dispose();
+            _viewer = null;
+
             if (_clock != null)
             {
                 _clock.Stop();
@@ -2183,144 +2234,89 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
         }
 
-        private void View_MouseWheel(object sender, MouseEventArgs e)
-        {
-            if (_image == null || (ModifierKeys & Keys.Control) != Keys.Control) return;
-
-            ZoomBy(e.Delta > 0 ? ZoomStep : 1 / ZoomStep);
-
-            var he = e as HandledMouseEventArgs;
-            if (he != null) he.Handled = true;
-        }
-
-        private void PicView_MouseDown(object sender, MouseEventArgs e)
-        {
-            if (e.Button != MouseButtons.Left || _image == null) return;
-            _dragging = true;
-            _dragStart = Control.MousePosition;
-            _dragScroll = new Point(-scrollHost.AutoScrollPosition.X, -scrollHost.AutoScrollPosition.Y);
-            picView.Cursor = Cursors.SizeAll;
-        }
-
-        private void PicView_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (!_dragging) return;
-            Point p = Control.MousePosition;
-            scrollHost.AutoScrollPosition = new Point(
-                _dragScroll.X - (p.X - _dragStart.X),
-                _dragScroll.Y - (p.Y - _dragStart.Y));
-        }
-
         /// <summary>
         /// 이미지가 없으면 우클릭 메뉴를 띄우지 않는다 — 빈 화면에서 맞춤/원본 크기는 의미가 없다.
         /// 현재 맞춤 모드인지 체크 표시로 알려 준다.
         /// </summary>
         private void MenuView_Opening(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            e.Cancel = _image == null;
-            mnuFit.Checked = _fitMode;
+            e.Cancel = _viewer == null || !_viewer.HasImage;
+            if (!e.Cancel) mnuFit.Checked = _viewer.IsFitMode;
         }
 
-        /// <summary>우클릭 → Image fit. 이후 창 크기가 바뀌어도 계속 맞춘다(_fitMode).</summary>
+        /// <summary>우클릭 → Image fit. 이후 창 크기가 바뀌어도 계속 맞춘다(ImageView.IsFitMode).</summary>
         private void MnuFit_Click(object sender, EventArgs e)
         {
-            ZoomToFit();
+            _viewer?.ZoomToFit();
         }
 
         /// <summary>우클릭 → 원본 크기(100%).</summary>
         private void MnuActual_Click(object sender, EventArgs e)
         {
-            SetZoom(100);
+            _viewer?.ActualSize();
         }
 
-        private void ZoomBy(double factor)
+        private void BtnZoomIn_Click(object sender, EventArgs e)
         {
-            SetZoom(_zoom * factor);
+            _viewer?.ZoomIn();
         }
 
-        // 지정 배율(%)로 설정. 수동 조작이므로 자동 맞춤은 해제
-        private void SetZoom(double percent)
+        private void BtnZoomOut_Click(object sender, EventArgs e)
         {
-            if (_image == null) return;
-            _fitMode = false;
-            ApplyZoom(percent);
+            _viewer?.ZoomOut();
         }
 
-        // 화면 영역에 이미지 전체가 보이도록 배율 계산
-        private void ZoomToFit()
+        private void BtnFit_Click(object sender, EventArgs e)
         {
-            if (_image == null) return;
-            _fitMode = true;
-
-            Rectangle r = scrollHost.ClientRectangle;
-            double w = Math.Max(1, r.Width - 4);
-            double h = Math.Max(1, r.Height - 4);
-            ApplyZoom(Math.Min(w / _image.Width, h / _image.Height) * 100.0);
-        }
-
-        private void ApplyZoom(double percent)
-        {
-            if (_image == null) return;
-            percent = Math.Max(ZoomMin, Math.Min(ZoomMax, percent));
-
-            // 현재 보이는 영역의 중심이 이미지의 어느 비율 위치인지 기억
-            double fx = 0.5, fy = 0.5;
-            if (picView.Width > 0 && picView.Height > 0)
-            {
-                fx = (scrollHost.ClientSize.Width / 2.0 - picView.Left) / picView.Width;
-                fy = (scrollHost.ClientSize.Height / 2.0 - picView.Top) / picView.Height;
-                fx = Math.Max(0, Math.Min(1, fx));
-                fy = Math.Max(0, Math.Min(1, fy));
-            }
-
-            _zoom = percent;
-            LayoutImage();
-
-            // 같은 중심이 유지되도록 스크롤 위치 보정
-            int sx = (int)(fx * picView.Width - scrollHost.ClientSize.Width / 2.0);
-            int sy = (int)(fy * picView.Height - scrollHost.ClientSize.Height / 2.0);
-            if (picView.Width > scrollHost.ClientSize.Width || picView.Height > scrollHost.ClientSize.Height)
-                scrollHost.AutoScrollPosition = new Point(Math.Max(0, sx), Math.Max(0, sy));
-
-            //UpdateZoomLabel();
-        }
-
-        // 현재 배율에 맞게 크기를 정하고, 화면보다 작으면 가운데에 배치
-        private void LayoutImage()
-        {
-            if (_image == null) return;
-
-            int w = Math.Max(1, (int)Math.Round(_image.Width * _zoom / 100.0));
-            int h = Math.Max(1, (int)Math.Round(_image.Height * _zoom / 100.0));
-
-            scrollHost.SuspendLayout();
-            scrollHost.AutoScrollMinSize = new Size(w, h);
-            picView.Size = new Size(w, h);
-
-            int cw = scrollHost.ClientSize.Width;
-            int ch = scrollHost.ClientSize.Height;
-            if (w <= cw || h <= ch)
-            {
-                int x = w < cw ? (cw - w) / 2 : picView.Left;
-                int y = h < ch ? (ch - h) / 2 : picView.Top;
-                picView.Location = new Point(x, y);
-            }
-            scrollHost.ResumeLayout();
+            _viewer?.ZoomToFit();
         }
 
         private async void gridViewInspection_CellValueChanged(object sender, CellValueChangedEventArgs e)
         {
+            var fieldName = e.Column?.FieldName;
+            if (fieldName == null || !_inspectionInputFields.Contains(fieldName))
+                return;
+
+            // ShowingEditor에서 이미 막지만, 편집 도중 서버 상태가 바뀌어 들어온 값은 보내지 않는다.
             if (!IsProcessRunning)
             {
-                AppLog.Info($"[POP] 공정 미시작 - ( 상태 {_progressState})");
+                AppLog.Info($"[POP] 공정 미시작 - 검사 결과 전송 생략 (상태 {_progressState})");
                 return;
             }
 
-            var spec = gridViewInspection.GetRow(e.RowHandle) as PopInspectionSpecDto;
+            var view = (GridView)sender;
+            var spec = view.GetRow(e.RowHandle) as PopInspectionSpecDto;
             if (spec == null)
                 return;
 
-            await _appSet.ApiClients.PopApiClient.SaveInspectionResultsAsync(_key, _inspections);
+            // 바뀐 칸 하나가 아니라 입력 칸 세 개를 모두 보낸다(값이 없으면 빈 문자열).
+            var result = new PopInspectionResult
+            {
+                InspectionItemCode = spec.InspectionItemCode ?? string.Empty,
+                ResultState = spec.ResultState ?? string.Empty,
+                ResultValue = spec.ResultValue ?? string.Empty,
+                InspectionResultRemark = spec.InspectionResultRemark ?? string.Empty
+            };
+
+            try
+            {
+                await _apiClient.PopApiClient.SaveInspectionResultAsync(_key, result);
+                AppLog.Info($"[POP] 검사 결과 전송 - {result.InspectionItemCode} ({fieldName})");
+            }
+            catch (ApiException ex)
+            {
+                AppLog.Warn($"[POP] 검사 결과 전송 실패 - {result.InspectionItemCode}: {ex.Message}");
+                if (IsDisposed || Disposing)
+                    return;
+
+                AppMessageBox.Warn(this, ex.Message, Language.Pop_TabInspection);
+            }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            FileUploadForm form = new FileUploadForm(_key);
+            form.ShowDialog();
         }
     }
 

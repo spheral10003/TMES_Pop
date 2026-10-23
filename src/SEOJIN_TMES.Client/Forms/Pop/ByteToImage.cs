@@ -1,16 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace SEOJIN_TMES.Client.Forms.Pop
 {
     public class ByteToImage
     {
-        public static Image BytesToImage(byte[] data)
+        public Image BytesToImage(byte[] data)
         {
             using (var ms = new MemoryStream(data))
             using (var img = Image.FromStream(ms))
@@ -20,7 +17,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         // Base64 텍스트 판별 및 디코딩 ("data:image/png;base64," 접두어도 처리)
-        public static bool TryDecodeBase64(byte[] raw, out byte[] result)
+        public bool TryDecodeBase64(byte[] raw, out byte[] result)
         {
             result = null;
 
@@ -47,7 +44,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         // 이미지 시그니처(PNG/JPEG/GIF/BMP/TIFF) 시작 위치 탐색. 없으면 -1
-        public static int FindImageOffset(byte[] d)
+        public int FindImageOffset(byte[] d)
         {
             if (d == null || d.Length < 8) return -1;
 
@@ -64,7 +61,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             return -1;
         }
 
-        public static bool IsSignatureAt(byte[] d, int i, bool includeBmp = true)
+        public bool IsSignatureAt(byte[] d, int i, bool includeBmp = true)
         {
             if (i + 4 > d.Length) return false;
 

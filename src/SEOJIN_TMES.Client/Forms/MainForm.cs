@@ -76,8 +76,10 @@ namespace SEOJIN_TMES.Client.Forms
         private readonly Dictionary<string, OpenedScreen> _openScreens = new Dictionary<string, OpenedScreen>();
         private readonly Dictionary<string, string> _breadcrumbs = new Dictionary<string, string>();
         private readonly Dictionary<string, AccordionControlElement> _menuElements = new Dictionary<string, AccordionControlElement>();
+        private readonly HashSet<string> _visibleMenuNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         /// <summary>서버가 알려준 "안 읽은 알림" 개수. 폴링으로 갱신되며 배지 숫자의 근거가 된다.</summary>
         private long _unreadNotificationCount;
+        private bool IsMenuVisible(string menuKey) => _visibleMenuNames.Contains(menuKey);
 
         /// <summary>
         /// 홈 탭의 화면 키. 메뉴에서 오는 키(<see cref="MenuNode.Key"/>)와 겹치면 안 되므로
@@ -137,6 +139,7 @@ namespace SEOJIN_TMES.Client.Forms
 
             RefreshAlertBadge();
             ConnectEquipment();
+            _ = LoadMenusAsync();
             StartNotificationPolling();
             StartSessionCountdown();
             LayoutTopBar();
@@ -673,6 +676,10 @@ namespace SEOJIN_TMES.Client.Forms
 
         // ────────────────────────────── 메뉴 ──────────────────────────────
 
+
+
+
+
         private void Accordion_ElementClick(object sender, ElementClickEventArgs e)
         {
             if (e.Element.Tag is MenuNode node && node.ScreenFactory != null)
@@ -681,12 +688,37 @@ namespace SEOJIN_TMES.Client.Forms
 
         private void BuildMenu()
         {
-            var root = MenuCatalog.BuildRoot();
+            var root = MenuCatalog.BuildRoot(IsMenuVisible);
             _breadcrumbs.Clear();
             _menuElements.Clear();
 
             accordion.Elements.Clear();
             accordion.Elements.Add(BuildAccordionElement(root, string.Empty, 0));
+        }
+
+        private async Task LoadMenusAsync()
+        {
+            try
+            {
+                var menus = await _setting.ApiClients.MenuApiClient.GetMenusAsync();   // menuNm·useYn 비움
+                if (IsDisposed || Disposing) return;
+
+                _visibleMenuNames.Clear();
+                foreach (var menu in menus)
+                    if (menu.IsUsed && !string.IsNullOrWhiteSpace(menu.MenuName))
+                        _visibleMenuNames.Add(menu.MenuName.Trim());
+
+                AppLog.Info($"[메뉴] 서버 메뉴 {menus.Count}건 수신, 표시 {_visibleMenuNames.Count}건: {string.Join(", ", _visibleMenuNames)}");
+                BuildMenu();
+                RefreshMenuHighlight();
+            }
+            catch (ApiException ex) 
+            {
+                AppLog.Warn($"[메뉴] 메뉴 조회 실패: {ex.Message.Replace(Environment.NewLine, " ")}");
+                if (IsDisposed || Disposing) 
+                    return; AppMessageBox.Warn(this, ex.Message, Language.MainForm_Title); 
+            }
+            catch (Exception ex) { AppLog.Error("[메뉴] 메뉴 조회 중 예외", ex); }
         }
 
         /// <summary>

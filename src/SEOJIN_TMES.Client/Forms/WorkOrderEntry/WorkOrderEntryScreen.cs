@@ -108,21 +108,6 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
                 GridColumns.Date("WorkEndDate", Language.Col_ActualEndDate, 120),
                 GridColumns.Text("StatusName", Language.Col_StatusName, 110),
                 GridColumns.Left("Remark", Language.Col_Remark, 200));
-
-            //GridColumns.Apply(gridView, Language.Col_No,
-            //    GridColumns.Text("woNo", Language.Col_WorkOrderNo, 140),
-            //    GridColumns.Text("itemCd", Language.Col_ItemCode, 100),
-            //    GridColumns.Text("sn", Language.Col_SerialNo, 110),
-            //    GridColumns.Number("qty", Language.Col_OrderQty, 110),
-            //    GridColumns.Text("soNo", Language.Col_SalesOrderNo, 110),
-            //    GridColumns.Text("custPoNo", Language.Col_CustomerPoNo, 130),
-            //    GridColumns.Text("fcid", Language.Col_Fcid, 110),
-            //    GridColumns.Date("ppStartDt", Language.Col_PlanStartDate, 120),
-            //    GridColumns.Date("ppEndDt", Language.Col_PlanEndDate, 120),
-            //    GridColumns.Date("workStartDt", Language.Col_ActualStartDate, 120),
-            //    GridColumns.Date("workEndDt", Language.Col_ActualEndDate, 120),
-            //    GridColumns.Text("status", Language.Col_StatusName, 110),
-            //    GridColumns.Left("remark", Language.Col_Remark, 200));
         }
 
         private void Condition_KeyDown(object sender, KeyEventArgs e)
@@ -146,19 +131,11 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             var workOrderNo = txtWorkOrderNo.Text?.Trim();
             var serialNo = txtSerialNo.Text?.Trim();
 
-            //if (string.IsNullOrEmpty(workOrderNo) && string.IsNullOrEmpty(serialNo))
-            //{
-            //    AppMessageBox.Warn(this, Language.WorkEntry_ConditionRequired, Language.WorkEntry_Title);
-            //    txtWorkOrderNo.Focus();
-            //    return;
-            //}
-
-            //using (var busy = BusyOverlay.Show(this, cancelable: true))
-            //{
-                try
-                {
-                    btnSearch.Enabled = false;
-                    List<WorkOrderEntryDto> result;
+            
+            try
+            {
+                btnSearch.Enabled = false;
+                List<WorkOrderEntryDto> result;
                 WorkOrderQuery _query = new WorkOrderQuery
                 {
                     CorpCode = _appSet.CurrentUser?.Server,
@@ -169,44 +146,33 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
                     WorkStationRef = _appSet.CurrentUser?.WorkstationInfo?.WorkstationRef
                 };
                 
-                
-                //if (string.IsNullOrEmpty(workOrderNo) && string.IsNullOrEmpty(serialNo))
-                //    {
-                //        result = await FetchWorkOrdersAsync();
-                //    }
-                //    else
-                //    {
-                //        result = await FetchWorkOrdersAsync(_query, chkWorkStationEnable.Checked);
-                //    }
-
                 result = await FetchWorkOrdersAsync(_query, chkWorkStationEnable.Checked);
-                //var result = await FetchWorkOrdersAsync(workOrderNo, serialNo, busy.Token);
-                //var result = await FetchWorkOrdersAsync(busy.Token);
+                
                 if (IsDisposed || Disposing) return;   // 조회 중 탭을 닫았다
 
-                    grid.DataSource = result;
-                    gridView.BestFitColumns();
+                grid.DataSource = result;
+                gridView.BestFitColumns();
 
-                    if (result.Count == 0)
-                        AppMessageBox.Info(this, Language.WorkEntry_NoResult, Language.WorkEntry_Title);
-                    else
-                        gridView.FocusedRowHandle = 0;
-                }
-                catch (OperationCanceledException)
-                {
-                    // 사용자가 [취소]를 눌렀다 — 오류가 아니므로 조용히 끝낸다.
-                }
-                catch (ApiException ex)
-                {
-                    if (IsDisposed || Disposing) return;
-                    AppMessageBox.Warn(this, ex.Message, Language.WorkEntry_Title);
-                }
-                finally
-                {
-                    if (!IsDisposed && !Disposing)
-                        btnSearch.Enabled = true;
-                }
-            //}
+                if (result.Count == 0)
+                    AppMessageBox.Info(this, Language.WorkEntry_NoResult, Language.WorkEntry_Title);
+                else
+                    gridView.FocusedRowHandle = 0;
+            }
+            catch (OperationCanceledException)
+            {
+                // 사용자가 [취소]를 눌렀다 — 오류가 아니므로 조용히 끝낸다.
+            }
+            catch (ApiException ex)
+            {
+                if (IsDisposed || Disposing) return;
+                AppMessageBox.Warn(this, ex.Message, Language.WorkEntry_Title);
+            }
+            finally
+            {
+                if (!IsDisposed && !Disposing)
+                    btnSearch.Enabled = true;
+            }
+            
         }
 
         /// <summary>

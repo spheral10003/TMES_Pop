@@ -116,6 +116,37 @@ namespace SEOJIN_TMES.Client.ApiClient
         }
 
         /// <summary>
+        /// GET 후 본문을 <b>바이트 그대로</b> 돌려준다(파일 다운로드용).
+        /// JSON 봉투를 벗기는 GetDataAsync와 달리 본문을 해석하지 않는다 — 이미지/문서 바이너리를 깨뜨리지 않기 위해서다.
+        /// </summary>
+        protected async Task<byte[]> GetBytesAsync(string relativeUrl, CancellationToken cancellationToken = default)
+        {
+            using (var response = await SendAsync("GET", relativeUrl, () => HttpClient.GetAsync(relativeUrl, cancellationToken), cancellationToken).ConfigureAwait(false))
+            {
+                await EnsureSuccessAsync(response).ConfigureAwait(false);
+                return await response.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+            }
+        }
+
+        /// <summary>
+        /// 바디(JSON)를 실어 DELETE한다. HttpClient.DeleteAsync는 바디를 받지 못해서 요청 메시지를 직접 만든다.
+        /// 실패는 다른 호출과 똑같이 ApiException으로 올린다.
+        /// </summary>
+        protected async Task DeleteAsync<TRequest>(string relativeUrl, TRequest body, CancellationToken cancellationToken = default)
+        {
+            using (var request = new HttpRequestMessage(HttpMethod.Delete, relativeUrl))
+            {
+                // request를 Dispose하면 Content도 함께 정리된다.
+                request.Content = ToJsonContent(body);
+
+                using (var response = await SendAsync("DELETE", relativeUrl, () => HttpClient.SendAsync(request, cancellationToken), cancellationToken).ConfigureAwait(false))
+                {
+                    await EnsureSuccessAsync(response).ConfigureAwait(false);
+                }
+            }
+        }
+
+        /// <summary>
         /// HttpClient 호출을 감싸 <b>응답 시간 초과</b>를 <see cref="ApiException"/>으로 바꿔 올린다.
         ///
         /// HttpClient는 타임아웃도 취소와 똑같이 TaskCanceledException으로 던진다.

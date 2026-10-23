@@ -248,9 +248,33 @@ namespace SEOJIN_TMES.Client.Common.Models
         /// <summary>결과값. 정량 검사에서만 숫자를 받는다(정성은 비워 둔다).</summary>
         public string ResultValue { get; set; }
 
+        /// <summary>검사 결과 비고 — 작업자가 화면에서 직접 입력한다.</summary>
+        public string InspectionResultRemark { get; set; }
+
         /// <summary>검사방법이 정량인지(결과값 입력을 요구할지) 판단용.</summary>
         public bool IsQuantitative =>
             string.Equals(InspectionMethod, "정량", StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// [검사 스팩] 탭 한 행의 결과 저장 요청 본문.
+    /// 작업자가 바꾼 칸만이 아니라 입력 가능한 세 칸을 항상 함께 보낸다 — 서버가 행 단위로 덮어쓰기 때문에
+    /// 일부만 보내면 나머지 값이 지워질 수 있다. 미입력 칸은 null 대신 빈 문자열로 보낸다.
+    /// TODO: 직렬화 필드명은 가정값 — 서버 스펙 확정 시 [JsonProperty]로 맞출 것.
+    /// </summary>
+    public class PopInspectionResult
+    {
+        /// <summary>검사 항목 코드 — 서버가 어느 행의 결과인지 찾는 키.</summary>
+        public string InspectionItemCode { get; set; }
+
+        /// <summary>결과상태 — 합격/불합격.</summary>
+        public string ResultState { get; set; }
+
+        /// <summary>결과값. 정성 검사는 빈 문자열.</summary>
+        public string ResultValue { get; set; }
+
+        /// <summary>작업자가 적은 검사 결과 비고.</summary>
+        public string InspectionResultRemark { get; set; }
     }
 
     /// <summary>

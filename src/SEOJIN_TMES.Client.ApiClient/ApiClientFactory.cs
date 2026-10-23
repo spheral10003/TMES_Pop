@@ -18,6 +18,7 @@ namespace SEOJIN_TMES.Client.ApiClient
         public IPopApiClient PopApiClient { get; }
         public IWorkStatusApiClient WorkStatusApiClient { get; }
         public IFileApiClient FileApiClient { get; }
+        public IMenuApiClient MenuApiClient { get; }
         public ApiClientFactory(ApiClientOptions options)
         {
             TokenProvider = new TokenProvider();
@@ -36,6 +37,7 @@ namespace SEOJIN_TMES.Client.ApiClient
             PopApiClient = new PopApiClient(authenticatedClient);
             WorkStatusApiClient = new WorkStatusApiClient(authenticatedClient);
             FileApiClient = new FileApiClient(authenticatedClient);
+            MenuApiClient = new MenuApiClient(authenticatedClient);
         }
 
         /// <summary>

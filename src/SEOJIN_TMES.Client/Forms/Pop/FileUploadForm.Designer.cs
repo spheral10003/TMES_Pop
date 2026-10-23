@@ -30,12 +30,14 @@
         {
             this.tlpMain = new System.Windows.Forms.TableLayoutPanel();
             this.pnlCenter = new System.Windows.Forms.Panel();
+            this.listServerFile = new System.Windows.Forms.ListBox();
             this.listFileName = new System.Windows.Forms.ListBox();
             this.picPreView = new System.Windows.Forms.PictureBox();
             this.pnlTitle = new System.Windows.Forms.Panel();
             this.lblClose = new System.Windows.Forms.Label();
             this.lblTitle = new System.Windows.Forms.Label();
             this.pnlBottom = new System.Windows.Forms.Panel();
+            this.btnDelete = new System.Windows.Forms.Button();
             this.btnFileOpen = new System.Windows.Forms.Button();
             this.btnCancle = new System.Windows.Forms.Button();
             this.btnUpload = new System.Windows.Forms.Button();
@@ -66,6 +68,7 @@
             // pnlCenter
             // 
             this.pnlCenter.BackColor = System.Drawing.Color.Lavender;
+            this.pnlCenter.Controls.Add(this.listServerFile);
             this.pnlCenter.Controls.Add(this.listFileName);
             this.pnlCenter.Controls.Add(this.picPreView);
             this.pnlCenter.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -74,6 +77,21 @@
             this.pnlCenter.Name = "pnlCenter";
             this.pnlCenter.Size = new System.Drawing.Size(646, 340);
             this.pnlCenter.TabIndex = 4;
+            // 
+            // listServerFile
+            // 
+            this.listServerFile.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.listServerFile.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.listServerFile.Font = new System.Drawing.Font("Noto Sans KR Medium", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.listServerFile.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
+            this.listServerFile.FormattingEnabled = true;
+            this.listServerFile.ItemHeight = 19;
+            this.listServerFile.Location = new System.Drawing.Point(390, 172);
+            this.listServerFile.Name = "listServerFile";
+            this.listServerFile.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.listServerFile.Size = new System.Drawing.Size(227, 154);
+            this.listServerFile.TabIndex = 2;
+            this.listServerFile.SelectedIndexChanged += new System.EventHandler(this.listServerFile_SelectedIndexChanged);
             // 
             // listFileName
             // 
@@ -85,7 +103,7 @@
             this.listFileName.ItemHeight = 19;
             this.listFileName.Location = new System.Drawing.Point(390, 14);
             this.listFileName.Name = "listFileName";
-            this.listFileName.Size = new System.Drawing.Size(227, 306);
+            this.listFileName.Size = new System.Drawing.Size(227, 135);
             this.listFileName.TabIndex = 1;
             this.listFileName.SelectedIndexChanged += new System.EventHandler(this.listFileName_SelectedIndexChanged);
             // 
@@ -148,6 +166,7 @@
             // pnlBottom
             // 
             this.pnlBottom.BackColor = System.Drawing.Color.Lavender;
+            this.pnlBottom.Controls.Add(this.btnDelete);
             this.pnlBottom.Controls.Add(this.btnFileOpen);
             this.pnlBottom.Controls.Add(this.btnCancle);
             this.pnlBottom.Controls.Add(this.btnUpload);
@@ -157,6 +176,21 @@
             this.pnlBottom.Name = "pnlBottom";
             this.pnlBottom.Size = new System.Drawing.Size(646, 66);
             this.pnlBottom.TabIndex = 3;
+            // 
+            // btnDelete
+            // 
+            this.btnDelete.BackColor = System.Drawing.Color.WhiteSmoke;
+            this.btnDelete.FlatAppearance.MouseOverBackColor = System.Drawing.Color.OrangeRed;
+            this.btnDelete.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnDelete.Font = new System.Drawing.Font("Noto Sans KR Medium", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.btnDelete.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
+            this.btnDelete.Location = new System.Drawing.Point(20, 14);
+            this.btnDelete.Name = "btnDelete";
+            this.btnDelete.Size = new System.Drawing.Size(138, 39);
+            this.btnDelete.TabIndex = 3;
+            this.btnDelete.Text = "Delete";
+            this.btnDelete.UseVisualStyleBackColor = false;
+            this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
             // 
             // btnFileOpen
             // 
@@ -238,5 +272,7 @@
         private System.Windows.Forms.Button btnCancle;
         private System.Windows.Forms.Button btnUpload;
         private System.Windows.Forms.ListBox listFileName;
+        private System.Windows.Forms.ListBox listServerFile;
+        private System.Windows.Forms.Button btnDelete;
     }
 }

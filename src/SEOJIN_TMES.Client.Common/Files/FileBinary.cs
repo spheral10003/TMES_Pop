@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace SEOJIN_TMES.Client.Common.Files
 {
@@ -50,6 +47,9 @@ namespace SEOJIN_TMES.Client.Common.Files
             ContentType = string.IsNullOrWhiteSpace(contentType) ? "application/octet-stream" : contentType;
             Content = content ?? throw new ArgumentNullException(nameof(content));
         }
+
+        /// <summary>ListBox가 항목 글자로 이 값을 쓴다.</summary>
+        public override string ToString() => FileName;
 
         /// <summary>
         /// 파일을 바이너리로 읽는다. 상한을 넘거나 빈 파일이면 읽기 전에 막는다

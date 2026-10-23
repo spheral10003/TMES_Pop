@@ -38,10 +38,10 @@ namespace SEOJIN_TMES.Client.ApiClient
         Task SaveMaterialSerialsAsync(PopMaterialSerialSaveRequest request, PopProcessKey key, string code, CancellationToken cancellationToken = default);
 
         /// <summary>[BOM 스팩] 탭 토크 결과값 저장(설비 수신값 / 수동 렌치 입력값 공통).</summary>
-        //Task SaveBomSpecResultsAsync(PopProcessKey key, List<PopBomSpecDto> specs, CancellationToken cancellationToken = default);
         Task SaveBomSpecResultsAsync(PopProcessKey key, PopBomSpecResultDto result, PopBomSpecDto bom, CancellationToken cancellationToken = default);
-        /// <summary>[검사 스팩] 탭 검사 결과 저장.</summary>
-        Task SaveInspectionResultsAsync(PopProcessKey key, List<PopInspectionSpecDto> specs, CancellationToken cancellationToken = default);
+        
+        /// <summary>[검사 스팩] 탭 한 행의 검사 결과 저장(셀 값이 바뀔 때마다 호출).</summary>
+        Task SaveInspectionResultAsync(PopProcessKey key, PopInspectionResult result, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// 공정 상태 전이 요청 — 시작/중지/생략/이전/다음.
@@ -121,67 +121,51 @@ namespace SEOJIN_TMES.Client.ApiClient
             return response;
         }
 
-        //public Task SaveMaterialSerialsAsync(PopMaterialSerialSaveRequest request, CancellationToken cancellationToken = default) 
-        //{
-        //    var query = BuildQuery(("corpCd", request.Key.CorpCode), ("woNo", request.Key.WorkOrderNo), ("routingGroupRef", request.Key.RoutingGroupRef)); //KeyQuery(request.Key);
-        //    var body = $"{{\"inputtedSerialList\":[\"{request.SerialNumbers[0]}]\"}}";
-        //    return PostAsync($"{PopPrefix}{request.Key.SerialNo}/{request.Key.SubRoutingRef}/bom-input-results/{request.MaterialCode}{query}", body, cancellationToken);
-        //    //return PostAsync(PopPrefix + "materials/serials", request, cancellationToken);
-        //}
-
         public Task SaveMaterialSerialsAsync(PopMaterialSerialSaveRequest request, PopProcessKey key, CancellationToken cancellationToken = default)
         {
             
             var query = PostKeyQuery(key); //BuildQuery(("corpCd", key.CorpCode), ("woNo", key.WorkOrderNo), ("routingGroupRef", key.RoutingGroupRef)); //KeyQuery(request.Key);
-            //var body = $"{{\"inputtedSerialList\":[\"{request.SerialNumbers[0]}]\"}}";
-            //return PostAsync($"{PopPrefix}{key.SerialNo}/{key.SubRoutingRef}/bom-input-results/{request.inputtedItemCd}{query}", request, cancellationToken);
+            
             return PostAsync($"{PopPrefix}{key.SerialNo}/{key.SubRoutingRef}/bom-input-results/{query}", request, cancellationToken);
-            //return PostAsync(PopPrefix + "materials/serials", request, cancellationToken);
+            
         }
         public Task SaveMaterialSerialsAsync(PopMaterialSerialSaveRequest request, PopProcessKey key, string code, CancellationToken cancellationToken = default)
         {
             
             var query = PostKeyQuery(key);
-            //var body = $"{{\"inputtedSerialList\":[\"{request.SerialNumbers[0]}]\"}}";
-            return PostAsync($"{PopPrefix}{key.SerialNo}/{key.SubRoutingRef}/bom-input-results/{code}{query}", request, cancellationToken);
-            //return PostAsync(PopPrefix + "materials/serials", request, cancellationToken);
+            string url = $"{PopPrefix}{key.SerialNo}/{key.SubRoutingRef}/bom-input-results/{code}{query}";
+            return PostAsync(url, request, cancellationToken);
+        
         }
-
-        //public Task SaveBomSpecResultsAsync(PopProcessKey key, List<PopBomSpecDto> specs, CancellationToken cancellationToken = default)
-        //{
-        //    var body = new PopResultSaveRequest<PopBomSpecDto>();
-        //    body.Key = key;
-        //    body.Items = specs;
-        //    return PostAsync($"{PopPrefix}{key.SerialNo}/{key.SubRoutingRef}/bom-spec-results/{code}{query}", body, cancellationToken);
-        //}
-
 
         public Task SaveBomSpecResultsAsync(PopProcessKey key, PopBomSpecResultDto result, PopBomSpecDto bom, CancellationToken cancellationToken = default)
         {
             var query = PostKeyQuery(key);
-
-            return PostAsync($"{PopPrefix}{key.SerialNo}/{key.SubRoutingRef}/bom-spec-results/{bom.MaterialCode}/{bom.InputPosition}{query}", result, cancellationToken);
+            string url = $"{PopPrefix}{key.SerialNo}/{key.SubRoutingRef}/bom-spec-results/{bom.MaterialCode}/{bom.InputPosition}{query}";
+            return PostAsync(url, result, cancellationToken);
         }
 
-        public Task SaveInspectionResultsAsync(PopProcessKey key, List<PopInspectionSpecDto> specs, CancellationToken cancellationToken = default)
+        public Task SaveInspectionResultAsync(PopProcessKey key, PopInspectionResult result, CancellationToken cancellationToken = default)
         {
-            var body = new PopResultSaveRequest<PopInspectionSpecDto>();
-            body.Key = key;
-            body.Items = specs;
-            return PostAsync(PopPrefix + "inspection-specs/results", body, cancellationToken);
+            
+            var query = PostKeyQuery(key);
+            string url = $"{PopPrefix}{key.SerialNo}/{key.SubRoutingRef}/insp-chk-results/{result.InspectionItemCode}{query}";
+            // TODO: 경로는 가정값 — 서버 스펙 확정 시 맞출 것.
+            return PostAsync(url, result, cancellationToken);
         }
 
         public Task<PopProcessInfoDto> ChangeProcessStateAsync(PopProcessKey key, PopProcessAction action, PopProcessActionRequest request = null, CancellationToken cancellationToken = default)
         {
             var query = PostKeyQuery(key);
+            string url = $"{PopPrefix}{key.SerialNo}/{key.SubRoutingRef}/{action.ToString()}{query}";
             //var body = request;
-            
+
             //if(action == PopProcessAction.stop)
             //{
             //    return PostAsync<PopProcessActionRequest, PopProcessInfoDto>($"{PopPrefix}{key.SerialNo}/{key.SubRoutingRef}/{action.ToString()}{query}", request, cancellationToken);
             //}
 
-            return PostAsync<PopProcessActionRequest, PopProcessInfoDto>($"{PopPrefix}{ key.SerialNo}/{ key.SubRoutingRef}/{action.ToString()}{query}", request, cancellationToken);
+            return PostAsync<PopProcessActionRequest, PopProcessInfoDto>(url, request, cancellationToken);
         }
 
         public Task<List<AdminAlarmTypeDto>> GetAdminAlarmTypesAsync(CancellationToken cancellationToken = default) =>

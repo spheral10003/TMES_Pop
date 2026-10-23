@@ -1,9 +1,10 @@
+using SEOJIN_TMES.Client.Common.Languages;
 using SEOJIN_TMES.Client.Forms.ProductionStatus;
 using SEOJIN_TMES.Client.Forms.WorkIntegratedStatus;
-using SEOJIN_TMES.Client.Forms.WorkStatus;
 using SEOJIN_TMES.Client.Forms.WorkOrderEntry;
-using SEOJIN_TMES.Client.Common.Languages;
+using SEOJIN_TMES.Client.Forms.WorkStatus;
 using SEOJIN_TMES.Client.Theme;
+using System;
 
 namespace SEOJIN_TMES.Client.Menu
 {
@@ -18,9 +19,9 @@ namespace SEOJIN_TMES.Client.Menu
     /// </summary>
     public static class MenuCatalog
     {
-        public static MenuNode BuildRoot()
+        public static MenuNode BuildRoot(Func<string, bool> isVisible = null)
         {
-            var root = new MenuNode("MEIS", () => Language.Menu_MEIS);
+            var root = new MenuNode("TMES", () => Language.Menu_MEIS);
             root.Icon = AppIcons.Dashboard;
 
             var workManagement = new MenuNode("WorkManagement", () => Language.Menu_WorkManagement);
