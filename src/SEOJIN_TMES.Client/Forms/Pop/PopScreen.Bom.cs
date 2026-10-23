@@ -183,18 +183,24 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 angleRsltVl = AngleValue
             };
 
+            BeginResultSave();
             try
             {
                 await _apiClient.PopApiClient.SaveBomSpecResultsAsync(_key, result, target);
             }
             catch (ApiException ex)
             {
-                
+
                 AppLog.Warn($"[POP] 설비 토크 결과 저장 실패 - {equipmentId} : {ex.Message}");
+                if (IsDisposed || Disposing) return;
                 AppMessageBox.Warn(this, ex.Message, Language.Pop_Title);
                 return;
             }
-            
+            finally
+            {
+                EndResultSave();
+            }
+
             if (IsDisposed || Disposing) return;
 
             if (_bomSpecs.Count >= _bomSpecSelectedRow)
@@ -207,6 +213,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             }
 
             AppLog.Info($"[POP] 설비 토크 결과값 수신 - {equipmentId} → {target.BomSpecName}/{target.InputPosition} = {TorqueValue}");
+
+            await TryAutoProgressAsync();
         }
 
 

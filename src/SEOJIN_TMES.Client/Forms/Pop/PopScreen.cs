@@ -633,6 +633,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 angleRsltVl = angle
             };
 
+            BeginResultSave();
             try
             {
                 await _apiClient.PopApiClient.SaveBomSpecResultsAsync(_key, result, spec);
@@ -646,7 +647,16 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                     return;
 
                 AppMessageBox.Warn(this, ex.Message, Language.Pop_Title);
+                return;
             }
+            finally
+            {
+                EndResultSave();
+            }
+
+            // 첫 await에서 그리드가 입력값을 행에 반영했으므로, 여기서는 고친 값까지 포함해 완료를 판단한다.
+            if (IsDisposed || Disposing) return;
+            await TryAutoProgressAsync();
         }
 
         private void GridViewBomSpec_FocusedRowChanged(object sender, FocusedRowChangedEventArgs e)
@@ -1217,6 +1227,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                     break;
             }
 
+            // [공정 시작]은 대기(Ready) 공정에서만 누를 수 있다 — 진행 중(자동 시작 포함) · 중지 · 완료 상태에서
+            // 다시 누르면 같은 시작 요청이 또 나가므로 막아 둔다. 수동 이동한 공정은 Ready라 직접 시작할 수 있다.
+            btnStartProcess.Enabled = progressState == "Ready";
         }
 
         private static bool Contains(string text, string keyword) =>
@@ -1716,6 +1729,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 default:
                     break;
             }
+
+            // 시작 · 재시작 직후에도 완료 여부를 본다 — 탭 3개가 모두 비어 있는 공정은 여기서 바로 넘어간다.
+            if (info.Action == PopProcessAction.start || info.Action == PopProcessAction.resume)
+                await TryAutoProgressAsync();
 
             //await RequestProcessActionAsync(info.Action, info.ConfirmMessage, info.MockState);
         }
@@ -2298,6 +2315,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 InspectionResultRemark = spec.InspectionResultRemark ?? string.Empty
             };
 
+            BeginResultSave();
             try
             {
                 await _apiClient.PopApiClient.SaveInspectionResultAsync(_key, result);
@@ -2310,7 +2328,15 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                     return;
 
                 AppMessageBox.Warn(this, ex.Message, Language.Pop_TabInspection);
+                return;
             }
+            finally
+            {
+                EndResultSave();
+            }
+
+            if (IsDisposed || Disposing) return;
+            await TryAutoProgressAsync();
         }
 
         private void button1_Click(object sender, EventArgs e)

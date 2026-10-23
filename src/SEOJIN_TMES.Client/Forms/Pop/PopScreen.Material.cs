@@ -121,15 +121,28 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                     inputtedSerialList = material.SerialNumbers
                 };
 
-                await _appSet.ApiClients.PopApiClient.SaveMaterialSerialsAsync(request, _key, material.MaterialCode);
+                BeginResultSave();
+                try
+                {
+                    await _appSet.ApiClients.PopApiClient.SaveMaterialSerialsAsync(request, _key, material.MaterialCode);
+                }
+                finally
+                {
+                    EndResultSave();
+                }
                 //}
 
+                if (IsDisposed || Disposing) return;
                 AppMessageBox.Success(this, Language.PopSerial_Saved, Language.PopSerial_Title);
             }
             catch (ApiException ex)
             {
+                if (IsDisposed || Disposing) return;
                 AppMessageBox.Warn(this, ex.Message, Language.PopSerial_Title);
+                return;
             }
+
+            await TryAutoProgressAsync();
         }
 
 
