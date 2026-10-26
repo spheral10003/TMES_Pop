@@ -3,7 +3,7 @@
   TMES POP 클라이언트를 지역별 ClickOnce 패키지로 게시한다.
 
 .DESCRIPTION
-  지역: GUMI(구미) · HWASEONG(화성) · YONGIN(용인) · VIETNAM(베트남) · USA(미국)
+  지역: GUMI(구미) · HWASEONG(화성) · YONGIN(용인) · VIETNAM(베트남) · USA(미국) · SEOJIN(서진 Test 서버)
 
   1) deploy/regions/<Region>/ 의 region.props(배포 서버 주소) + App.config 로 Release 게시본을 만든다.
      배포 서버 주소 · API 주소 · 사업장 코드가 비어 있으면 먼저 물어보고 그 지역 파일에 저장한다.
@@ -18,13 +18,14 @@
   .\deploy\Publish-ClickOnce.ps1 -Region GUMI -Configure
   .\deploy\Publish-ClickOnce.ps1 -Region GUMI
   .\deploy\Publish-ClickOnce.ps1 -Region VIETNAM -Version 1.0.1.0 -CopyTo \\deploy-server\wwwroot\pop
+  .\deploy\Publish-ClickOnce.ps1 -Region SEOJIN -CopyTo \\10.200.1.235\C$\TMES\MESClient
   .\deploy\Publish-ClickOnce.ps1 -Region GUMI -DeployBaseUrl https://tmes-gm.texon.co.kr/pop/
 #>
 [CmdletBinding()]
 param(
     # deploy/regions 아래 폴더 이름
     [Parameter(Mandatory = $true)]
-    [ValidateSet('GUMI', 'HWASEONG', 'YONGIN', 'VIETNAM', 'USA')]
+    [ValidateSet('GUMI', 'HWASEONG', 'YONGIN', 'VIETNAM', 'USA', 'SEOJIN')]
     [string]$Region,
 
     # 게시하지 않고 지역 입력값(배포 서버 주소 · API 주소 · 사업장 코드)만 입력/변경한다

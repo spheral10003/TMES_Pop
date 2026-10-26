@@ -31,7 +31,7 @@
 
   <!--
     ClickOnce 배포 설정.
-    지역(구미 · 화성 · 용인 · 베트남 · 미국)별 게시는 deploy/Publish-ClickOnce.ps1 로 한다 — 사용법은 DEPLOY_GUIDE.md.
+    지역(구미 · 화성 · 용인 · 베트남 · 미국 · 서진 Test)별 게시는 deploy/Publish-ClickOnce.ps1 로 한다 — 사용법은 DEPLOY_GUIDE.md.
     아래는 지역과 무관한 공통값이고, -p:Region=<지역> 이 주어지면 deploy/regions/<지역>/region.props 가
     배포 서버 주소 · 제품 이름 · App.config 를 덮어쓴다.
   -->

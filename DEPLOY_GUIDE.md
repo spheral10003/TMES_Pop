@@ -13,7 +13,8 @@ deploy/
 │  ├─ HWASEONG/  화성
 │  ├─ YONGIN/    용인
 │  ├─ VIETNAM/   베트남
-│  └─ USA/       미국
+│  ├─ USA/       미국
+│  └─ SEOJIN/    서진 Test 서버
 │     ├─ region.props           배포 서버 주소(DeployBaseUrl) · 제품 이름
 │     └─ App.config             이 지역 게시본의 SEOJIN_TMES_POP.exe.config
 └─ out/<지역>/                   게시 결과(git 제외) — 이 폴더 내용을 배포 서버에 올린다
@@ -28,6 +29,7 @@ deploy/
 | 용인 | `YONGIN` | TMES POP (용인) | ko-KR | 입력 필요 | 입력 필요 |
 | 베트남 | `VIETNAM` | TMES POP (베트남) | vi-VN | 입력 필요 | 입력 필요 |
 | 미국 | `USA` | TMES POP (미국) | en-US | 입력 필요 | 입력 필요 |
+| 서진 Test 서버 | `SEOJIN` | TMES POP (서진 Test) | ko-KR | `GUM` | `http://10.200.1.235:8090/` (IIS 사이트 MESClient → `C:\TMES\MESClient`) · API `http://10.200.1.237:8080/` |
 
 "입력 필요" 값은 **비워 둔 상태**다. 게시 스크립트가 처음 게시할 때 물어보고 그 지역 파일에 저장한다(아래 3번).
 세 값 중 하나라도 비어 있으면 게시하지 않는다(빌드도 `DeployBaseUrl`이 비면 오류로 멈춘다).
@@ -81,7 +83,7 @@ Visual Studio(MSBuild.exe)가 설치된 PC의 PowerShell에서 저장소 루트 
 .\deploy\Publish-ClickOnce.ps1 -Region YONGIN -DeployBaseUrl https://다른도메인/pop/
 ```
 
-- `-Region`은 `GUMI`, `HWASEONG`, `YONGIN`, `VIETNAM`, `USA` 중 하나(Tab 자동완성). 다른 값은 바로 거부된다.
+- `-Region`은 `GUMI`, `HWASEONG`, `YONGIN`, `VIETNAM`, `USA`, `SEOJIN` 중 하나(Tab 자동완성). 다른 값은 바로 거부된다.
 - 입력한 주소는 `deploy/regions/<지역>/region.props`, `App.config`에 저장되므로 **커밋해 두면** 다른 PC에서도 그대로 게시된다.
   파일을 직접 열어 고쳐도 된다(`[입력 필요]` 주석이 달린 자리).
 
