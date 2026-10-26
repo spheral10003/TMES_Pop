@@ -130,7 +130,6 @@ exe만 복사해도 그림이 따라가고, 현장에서 파일이 지워져 깨
 3. 문구는 `Strings`에 키 추가(7번), 색은 `ApplyTheme()`에서 `AppTheme` 호출(4번)
 4. `Menu/MenuCatalog.cs`에 메뉴 노드 등록
 5. 조회는 `try/catch (ApiException)` + `await` 뒤 `IsDisposed` 확인(6번)
-6. 서버가 아직 없으면 `Mock/`에 목업을 두고 `UseMockData`로 분기
 
 기존 화면 중 [Forms/ProductionStatus/ProductionStatusScreen.cs](Forms/ProductionStatus/ProductionStatusScreen.cs)가
 가장 단순한 표준형이다 — 조회 조건 카드 + 결과 그리드 카드. 새 조회 화면은 이 배치를 따를 것.

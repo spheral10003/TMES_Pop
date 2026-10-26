@@ -1,29 +1,19 @@
-using DevExpress.XtraBars.Navigation;
 using DevExpress.XtraEditors;
-using DevExpress.XtraEditors.Controls;
-using DevExpress.XtraEditors.Repository;
-using DevExpress.XtraGrid.Views.Base;
-using DevExpress.XtraGrid.Views.Grid;
-using ImageBoxExtensions;
 using SEOJIN_TMES.Client.ApiClient;
 using SEOJIN_TMES.Client.Common.Imaging;
 using SEOJIN_TMES.Client.Common.Languages;
 using SEOJIN_TMES.Client.Common.Logging;
 using SEOJIN_TMES.Client.Common.Models;
-using SEOJIN_TMES.Client.Common.Storage;
 using SEOJIN_TMES.Client.Core;
+using SEOJIN_TMES.Client.Equipment.Core;
+using SEOJIN_TMES.Client.Equipment.Nutrunner;
 using SEOJIN_TMES.Client.Forms.Common;
 using SEOJIN_TMES.Client.Forms.WorkOrderEntry;
-using SEOJIN_TMES.Client.Mock;
 using SEOJIN_TMES.Client.Theme;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Globalization;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace SEOJIN_TMES.Client.Forms.Pop
@@ -32,149 +22,71 @@ namespace SEOJIN_TMES.Client.Forms.Pop
     /// TMES &gt; 작업관리 &gt; POP 본 화면 — 진입 화면에서 고른 페이지 공정 하나를 실제로 작업하는 화면.
     ///
     /// 구성:
-    ///  - 상단  : 공정 제어 버튼 7개(이전/다음/생략/중지/시작/공정 목록/관리자 알람) + 작업자 · 현재시각
-    ///            · 시작/중지/생략 : 서버에 상태 전이를 요청하고, 돌아온 진행 상태를 우측 카드와 하단 띠에 반영한다.
-    ///            · 이전/다음      : [공정 목록]과 같은 순서로 옆 공정으로 옮긴다(상태 전이가 아니라 화면 이동).
-    ///  - 좌측  : 작업 표준/도면 표시 영역(연결할 뷰어가 정해지기 전까지는 자리표시자)
+    ///  - 상단  : 공정 제어 버튼(이전/다음/중지/시작/공정 목록/관리자 알람) + 작업자
+    ///            · 시작/중지 : 서버에 상태 전이를 요청하고, 돌아온 진행 상태를 우측 카드와 하단 띠에 반영한다.
+    ///            · 이전/다음 : [공정 목록]과 같은 순서로 옆 공정으로 옮긴다(상태 전이가 아니라 화면 이동).
+    ///  - 좌측  : 작업 표준/도면(공유 폴더의 도면 이미지)
     ///  - 우측  : 진행 중 공정 정보 + 워크스테이션 띠 + 공정 진행 상태 띠
     ///  - 하단  : 탭 4개 — 투입자재 / BOM 스팩 / 검사 스팩 / 연결 장비
     ///
-    /// 탭별 동작:
-    ///  1) 투입자재  : "시리얼번호 입력상태" 셀 클릭 → &lt;투입자재 정보 입력&gt; 팝업에서 시리얼번호 입력
-    ///  2) BOM 스팩  : 기준정보의 토크 스펙을 표시하고, 연결 장비에서 올라온 값을 토크 결과값에 채운다.
-    ///                 "토크 결과값" 칸은 언제든 직접 고쳐 쓸 수 있고(숫자만 받는다),
-    ///                 [수동 렌치]를 켜면 "결과값 입력" 컬럼의 [입력]으로 하한~상한 중간값을 한 번에 채울 수 있다.
-    ///  3) 검사 스팩 : 기준정보의 검사 항목을 표시하고 결과상태/결과값을 직접 입력한다.
-    ///  4) 연결 장비 : 현재 워크스테이션에 물린 장비와 Modbus 연결 상태를 실시간으로 보여 준다.
+    /// 파일 구성:
+    ///  - PopScreen.cs        : 초기화 · 이벤트 핸들러만 둔다. 처리는 <see cref="IPopScreen"/>(<see cref="Screen"/>)로 부른다.
+    ///  - PopScreen.Grid.cs   : 탭 4개 그리드의 구성 · 바인딩 · 그리드 이벤트
+    ///  - PopScreen.Method.cs : 공정 상태 전이 · 공정 이동 · 자동 진행 · 실적 전송 · 설비 · 도면
     ///
     /// 업무 판정(합·불, 상태 전이 가능 여부 등)은 전부 서버가 하고, 이 화면은 표시와 입력 전달만 한다.
-    /// VS 디자이너 호환을 위해 매개변수 없는 생성자만 두고, 실제 의존성은 Initialize()로 주입한다.
     /// </summary>
-    public partial class PopScreen : XtraUserControl, IThemedScreen
+    public partial class PopScreen : XtraUserControl, IThemedScreen, IPopScreen
     {
-        /// <summary>
-        /// 워크스테이션 / 공정 진행 상태 띠 하나의 높이.
-        /// 디자이너의 bannerPanel 높이(<c>= BannerHeight * 2 + 간격 8 + 아래 여백 14</c>)와 함께 맞춰 둘 것.
-        /// </summary>
-        //private const int BannerHeight = 48;
-
-        /// <summary>공정 제어 타일 하나의 폭. 디자이너의 tileProcess 크기와 함께 맞춰 둘 것(7개 × 폭 + 간격 8).</summary>
-        //private const int ProcessTileWidth = 104;
-
-        /// <summary>공정 제어 타일 높이. 디자이너의 tileProcess 높이와 같게 둔다.</summary>
-        //private const int ProcessTileHeight = 45;
-
         private Setting _appSet;
         private Devices _equip;
         private ApiClientFactory _apiClient;
         private WorkEntryContext _entry;
         private PopProcessKey _key;
         private PopProcessInfoDto _info;
+
         /// <summary>
         /// 도면 이미지 뷰어(확대/축소 · 화면 맞춤 · 드래그 이동). 배율 계산과 그림의 소유 · 해제는 이쪽이 맡는다.
         /// <see cref="Init"/>에서 만든다.
         /// </summary>
         private ImageView _viewer;
 
-        private byte[] _currentBytes;
-        private ByteToImage _imgCtrl = new ByteToImage();
-        private RepositoryItemButtonEdit _resultInputEditor;
-        private RepositoryItemTextEdit _torqueResultEditor;
-        private RepositoryItemComboBox _resultStateEditor;
-        private RepositoryItemTextEdit _resultValueEditor;
-        private RepositoryItemTextEdit _resultRemarkEditor;
-
-        /// <summary>[검사 스팩] 탭에서 작업자가 입력할 수 있는 칸.</summary>
-        private readonly HashSet<string> _inspectionInputFields = new HashSet<string>
-        {
-            "ResultState", "ResultValue", "InspectionResultRemark"
-        };
-
-        private System.Windows.Forms.Timer _clock;
-        private PopTab _activeTab = PopTab.Material;
-
-        // <summary>
-        /// 서버가 마지막으로 내려준 공정 진행 상태(WorkStatus: Ready / Progress / Stopped / Finished).
-        /// 장비 데이터를 받을지 버릴지 판단할 때 쓴다 — 상태 판정은 서버 몫이고 여기서는 받은 값을 기억만 한다.
-        /// </summary>
-        private string _progressState;
-        private bool _bomManualEnabled;
-        /// <summary>공정이 시작돼 진행 중인지(서버 상태 = Progress). 중지 · 대기 · 완료 상태에서는 false.</summary>
-        private bool IsProcessRunning =>
-        string.Equals(_progressState, "Progress", StringComparison.OrdinalIgnoreCase);
-
-        /// <summary>탭별 그리드 — <see cref="BuildControlMaps"/>에서 채운다.</summary>
-        private Dictionary<PopTab, Control> _tabGrids;
-
-        /// <summary>탭별 탭 버튼 — <see cref="BuildControlMaps"/>에서 채운다.</summary>
-        //private Dictionary<PopTab, MeisButton> _tabButtons;
-
-        /// <summary>우측 공정 정보 카드의 캡션 라벨 / 입력칸(같은 순서로 짝을 이룬다).</summary>
-        //private LabelControl[] _fieldLabels;
-        //private TextEdit[] _fieldEditors;
-
-        /// <summary>도면 자리표시자에 그릴 안내 문구(불러오는 중 / 도면 없음 / 실패 사유).</summary>
+        /// <summary>도면 자리표시자에 그릴 안내 문구(도면 없음 / 실패 사유).</summary>
         private string _viewerMessage;
 
         /// <summary>
-        /// Phase 1: Tab initialization configuration stored as data structure.
-        /// Each tab's initialization info is managed in one place; adding new tabs only requires adding to this array.
+        /// 서버가 마지막으로 내려준 공정 진행 상태(Ready / Progress / Stopped / Finished).
+        /// 장비 데이터를 받을지 버릴지 판단할 때 쓴다 — 상태 판정은 서버 몫이고 여기서는 받은 값을 기억만 한다.
         /// </summary>
-        private TabInitConfig[] _tabConfigs;
+        private string _progressState;
+
+        /// <summary>서버가 이 공정에서 [수동 렌치]를 허용했는지.</summary>
+        private bool _bomManualEnabled;
+
+        /// <summary>이벤트 핸들러가 처리를 부르는 창구 — 구현이 Grid / Method 중 어디에 있는지 몰라도 되게 한다.</summary>
+        private IPopScreen Screen => this;
+
+        public PopProcessKey Key => _key;
+
+        public bool IsProcessRunning => IsProgressState(StateProgress);
 
         public PopScreen(WorkEntryContext entry = null)
         {
             InitializeComponent();
-            //BuildControlMaps();
             _entry = entry;
         }
 
-        /// <summary>
-        /// 같은 일을 반복하는 컨트롤들을 묶어 둔다 — 탭 전환 · 탭 버튼 · 필드 테마가 이 목록을 돈다.
-        /// 탭이나 필드가 늘면 여기 한 줄만 더하면 된다.
-        /// </summary>
-        //private void BuildControlMaps()
-        //{
-        //    //_tabGrids = new Dictionary<PopTab, Control>
-        //    //{
-        //    //    { PopTab.Material, gridMaterial },
-        //    //    { PopTab.BomSpec, gridBomSpec },
-        //    //    { PopTab.Inspection, gridInspection },
-        //    //    { PopTab.Equipment, gridEquipment }
-        //    //};
+        // ─────────────────────────────────────────────────────────────────────────
+        //  초기화
+        // ─────────────────────────────────────────────────────────────────────────
 
-        //    //_tabButtons = new Dictionary<PopTab, MeisButton>
-        //    //{
-
-        //    //    { PopTab.Material, btnTabMaterial },
-        //    //    { PopTab.BomSpec, btnTabBomSpec },
-        //    //    { PopTab.Inspection, btnTabInspection },
-        //    //    { PopTab.Equipment, btnTabEquipment }
-        //    //};
-
-        //    _fieldLabels = new[]
-        //    {
-        //        lblWorkOrderNo, lblItemCode, lblProductSerialNo, lblRoutingGroup, lblRoutingOperation, lblPageOperation,
-        //        lblPageStartTime, lblPageEndTime, lblPageRunTime, lblPageIdleTime, lblPageWorkTime
-        //    };
-
-        //    _fieldEditors = new[]
-        //    {
-        //        txtWorkOrderNo, txtItemCode, txtProductSerialNo, txtRoutingGroup, txtRoutingOperation, txtPageOperation,
-        //        txtPageStartTime, txtPageEndTime, txtPageRunTime, txtPageIdleTime, txtPageWorkTime
-        //    };
-        //}
-
-        /// <summary>
-        /// POP 진입 화면에서 선택한 작업 대상(<paramref name="entry"/>)을 받아 화면을 구성한다.
-        /// 메뉴에서 바로 열린 경우처럼 대상이 없으면(null) 조회 없이 안내만 하고 빈 화면으로 남는다.
-        /// </summary>
+        /// <summary>전역 설정 · 설비 · API 클라이언트를 받고, 진입 대상으로 조회 키를 만든다.</summary>
         private void Init()
         {
             _appSet = Global.Instance.Settings;
             _equip = Global.Instance.Devices;
             _apiClient = Global.Instance.Settings.ApiClients;
-            _key = BuildKey(_entry);
+            _key = BuildKey();
 
             _processes = new List<RoutingProcessDto>();
             _viewerMessage = Language.Pop_DrawingNone;
@@ -193,14 +105,12 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         {
             btnPrevProcess.Text = Language.Pop_PrevProcess;
             btnNextProcess.Text = Language.Pop_NextProcess;
-            //btnSkipProcess.Text = Language.Pop_SkipProcess;
             btnStopProcess.Text = Language.Pop_StopProcess;
             btnStartProcess.Text = Language.Pop_StartProcess;
             btnProcessList.Text = Language.Pop_ProcessList;
             btnAdminAlarm.Text = Language.Pop_AdminAlarm;
 
             lblWorkerTile.Text = Language.Pop_Worker;
-            //lblTimeCaption.Text = Language.Pop_CurrentTime;
             lblWorker.Text = ResolveWorkerName();
 
             lblInfoTitle.Text = Language.Pop_ProcessInfoTitle;
@@ -241,9 +151,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             AppTheme.CardPanel(bottomCard);
             AppTheme.PlainPanel(mainPanel);
             AppTheme.PlainPanel(fieldPanel);
-            //AppTheme.PlainPanel(bannerPanel);
-            //AppTheme.PlainPanel(tabHeaderPanel);
-            //AppTheme.PlainPanel(tabBodyPanel);
 
             // ⚠️ 손잡이에 BringToFront()를 부르지 말 것.
             // 도킹은 z-순서의 <b>역순</b>으로 처리되므로, 앞으로 끌어올리면 도킹이 가장 늦게 잡힌다.
@@ -252,1344 +159,112 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             RefreshAccordionButtons();
             viewerSurface.BackColor = AppTheme.Card;
 
-            //// 공정 제어는 TileBar 타일 — 색은 동작의 성격을 따른다
-            //// (시작=초록, 중지=빨강, 이동=남보라, 생략=회색, 목록=보라, 알람=주황).
-            ////AppTheme.TileStrip(tileProcess, ProcessTileHeight, ProcessTileWidth);
-            //AppTheme.Tile(btnPrevProcess, AppTheme.Indigo, AppIcons.Reset);
-            //AppTheme.Tile(btnNextProcess, AppTheme.Indigo, AppIcons.Refresh);
-            //AppTheme.Tile(btnSkipProcess, AppTheme.Slate, AppIcons.Close);
-            //AppTheme.Tile(btnStopProcess, AppTheme.Rose, AppIcons.Stop);
-            //AppTheme.Tile(btnStartProcess, AppTheme.Emerald, AppIcons.Play);
-            //AppTheme.Tile(btnProcessList, AppTheme.Violet, AppIcons.Layers);
-            //AppTheme.Tile(btnAdminAlarm, AppTheme.Amber, AppIcons.Bell);
-            
-            //AppTheme.Caption(lblWorkerTile);
-            //AppTheme.Caption(lblTimeCaption);
-            //AppTheme.StatePill(lblWorker, AppTheme.Indigo, new Size(100, 32));
-            //AppTheme.StatePill(lblCurrentTime, AppTheme.Slate, new Size(112, 32));
-            //lblCurrentTime.Appearance.Font = new Font("Consolas", 11F, FontStyle.Bold);
-
-            //AppTheme.SectionTitle(lblInfoTitle, AppTheme.Violet);
-            //ThemeFieldControls();
-
-            //AppTheme.Banner(lblWorkstation, AppTheme.Amber, BannerHeight);
-            //AppTheme.Banner(lblProgressState, AppTheme.Violet, BannerHeight);
-            ApplyProgressState(lblProgressState.Text);   // 테마를 다시 입혀도 상태 색이 보라로 되돌아가지 않도록
-
-            //AppTheme.CheckBox(chkManualWrench);
-
-            
-
-            //ApplyGridTheme();
-            //StyleTabButtons();
+            SetProgressState(_progressState);   // 테마를 다시 입혀도 상태 색이 보라로 되돌아가지 않도록
             viewerSurface.Invalidate();
         }
 
+        /// <summary>시작 · 중지 버튼이 서버에 요청할 동작. 중지 버튼은 서버 상태에 따라 stop ↔ resume으로 바뀐다.</summary>
+        private void InitActionTiles()
+        {
+            btnStartProcess.Tag = PopProcessAction.start;
+            btnStopProcess.Tag = PopProcessAction.stop;
+        }
+
         /// <summary>
-        /// 탭 4개의 그리드에 테마를 입힌다. 테마를 다시 입혀도 그리드 색이 따라오도록 <see cref="ApplyTheme"/>에서 부른다.
-        /// AppTheme.Grid는 모든 그리드를 읽기 전용으로 되돌리므로, 입력이 필요한 두 탭만 다시 열어 준다.
+        /// 설비 목록(서버 기준정보)을 장비 관리자에 등록하고 이벤트를 구독한 뒤 연결을 시작한다.
+        /// 설비 Id는 목록 순번으로 다시 매긴다 — 장비 관리자 안에서만 쓰는 식별자다.
         /// </summary>
-        //private void ApplyGridTheme()
-        //{
-        //    //AppTheme.Grid(gridMaterial, gridViewMaterial, AppTheme.Emerald);
-        //    //AppTheme.Grid(gridBomSpec, gridViewBomSpec, AppTheme.Indigo);
-        //    //AppTheme.Grid(gridInspection, gridViewInspection, AppTheme.Violet);
-        //    //AppTheme.Grid(gridEquipment, gridViewEquipment, AppTheme.Cyan);
+        private void WireEquipmentEvents()
+        {
+            int index = 0;
+            foreach (var eq in _equipments)
+            {
+                // IP · 포트가 비어 있거나 숫자가 아니면 기본값으로 등록해 두고 로그를 남긴다 —
+                // 설비 한 대의 기준정보 오류로 화면 전체가 열리지 않으면 안 된다.
+                if (!int.TryParse(eq.EquipmentPort, out var port))
+                {
+                    AppLog.Warn($"[POP] 설비 포트 형식 오류 - {eq.EquipmentCode}: '{eq.EquipmentPort}' → {DefaultEquipmentPort} 사용");
+                    port = DefaultEquipmentPort;
+                }
 
-        //    gridViewBomSpec.OptionsBehavior.Editable = true;
-        //    gridViewInspection.OptionsBehavior.Editable = true;
-        //}
+                var info = new NutrunnerInfo();
+                info.Id = eq.Id = index++;
+                info.Code = eq.EquipmentCode;
+                info.Ip = string.IsNullOrEmpty(eq.EquipmentIp) ? "0.0.0.0" : eq.EquipmentIp;
+                info.Port = port;
+                info.EventPort = port + 1;
+                info.Name = eq.EquipmentName;
+                info.ModelName = eq.EquipmentModel;
 
-        //private void ThemeFieldControls()
-        //{
-        //    foreach (var label in _fieldLabels)
-        //        AppTheme.Caption(label);
+                _equip.TryAdd(info);
+            }
 
-        //    foreach (var editor in _fieldEditors)
-        //        AppTheme.Editor(editor);
-        //}
+            _equip.Manager.ConnectionChanged += OnConnectionChanged;
+            _equip.Manager.AlarmOccurred += OnErrorOccurred;
+            _equip.Manager.RegisterDataReceived += OnRegisterDataReceived;
+            _equip.Manager.FasteningReceived += OnFasteningReceived;
+            _equip.Manager.StartAll();
+
+            Screen.RefreshEquipmentStates();
+        }
+
+        /// <summary>구독을 먼저 끊고 장비를 멈춘다 — 멈추는 중에 올라온 이벤트가 사라진 화면을 건드리지 않게.</summary>
+        private void UnwireEquipmentEvents()
+        {
+            _equip.Manager.ConnectionChanged -= OnConnectionChanged;
+            _equip.Manager.AlarmOccurred -= OnErrorOccurred;
+            _equip.Manager.RegisterDataReceived -= OnRegisterDataReceived;
+            _equip.Manager.FasteningReceived -= OnFasteningReceived;
+            _equip.Manager.StopAll();
+            _equip.Manager.Dispose();
+        }
 
         // ─────────────────────────────────────────────────────────────────────────
-        //  조회
+        //  화면
         // ─────────────────────────────────────────────────────────────────────────
 
         private async void PopScreen_Load(object sender, EventArgs e)
         {
             // Designer가 Load를 직접 구독하므로 VS 디자이너에서도 호출된다 — 런타임이 아니면 아무것도 하지 않는다.
-            //if (DesignMode || _appSet == null) return;
-
-            //if (_key == null)
-            //{
-            //    AppMessageBox.Warn(this, Language.Pop_NoTargetProcess, Language.Pop_Title);
-            //    return;
-            //}
+            if (DesignMode)
+                return;
 
             try
             {
                 Init();
                 ApplyLanguage();
                 ApplyTheme();
-                ConfigureActionTiles();
-                
-                // 임시 Test 용입니다.
-                ConfigureMaterialGrid();
-                ConfigureBomSpecGrid();
-                ConfigureInspectionGrid();
-                ConfigureEquipmentGrid();
+                InitActionTiles();
+                Screen.InitGrids();
 
-                //ConfigureGridEvent();
-
-                await LoadAllAsync();
+                await Screen.GetProcessInfo();
+                if (IsDisposed || Disposing) return;
 
                 WireEquipmentEvents();
-                RefreshEquipmentStates();
-                MaterialsChk();
-                //InitializeTabConfigs();
-                //await InitializeAllTabsAsync();
-
-                // Set initial active tab
-                //SetActiveTab(PopTab.BomSpec);
-
-
+                await Screen.CheckMaterialSerials();
             }
             catch (Exception ex)
             {
-                AppMessageBox.Warn(this, ex.Message, Language.Pop_Title);
+                HandleError("화면 초기화", ex);
             }
         }
 
-        //private void ConfigureGridEvent()
-        //{
-        //    //gridViewEquipment.RowCellStyle += GridViewEquipment_RowCellStyle;
-        //    //gridViewBomSpec.ValidatingEditor += GridViewBomSpec_ValidatingEditor;
-
-        //}
-
-        /// <summary>
-        /// 진행 중 공정 정보와 도면을 다시 읽는다(진입 시 / 공정 이동 후).
-        /// 탭 4개의 데이터는 여기서 읽지 않고 각 탭의 Init(<c>MaterialInit</c> 등)이 맡는다.
-        /// </summary>
-        private async Task LoadAllAsync()
+        private void PopScreen_Disposed(object sender, EventArgs e)
         {
             try
             {
-                PopScreenData screen = await _appSet.ApiClients.PopApiClient.GetProcessInfoAsync(_key);
-                _info = screen.Process;
-                _materials = screen.Materials;
-                _bomSpecs = screen.BomSpecs;
-                _inspections = screen.InspectionSpecs;
-                _equipments = screen.Equipments;
-                _bomManualEnabled = screen.BomManualEnabled;
-
-                gridMaterial.DataSource = _materials;
-                gridInspection.DataSource = _inspections;
-                gridEquipment.DataSource = _equipments;
-
-                gridViewMaterial.RefreshData();
-                gridViewInspection.RefreshData();
-                gridViewEquipment.RefreshData();
-
-                //gridBomSpec.DataSource = _bomSpecs;
-                //gridViewBomSpec.RefreshData();
-
-                // 바인딩 · 하이라이트 중 포커스가 움직여도 너트러너에 토크를 쓰지 않는다.
-                BeginBomSpecRedraw();
-
-                try
-                {
-                    gridBomSpec.DataSource = _bomSpecs;
-                    gridViewBomSpec.RefreshData();
-                    //ApplyBomSpecHighlighting(_bomSpecs);
-                }
-                finally
-                {
-                    EndBomSpecRedraw();
-                }
-
-                await LoadImageAsync();
-                DisplayProcessInfo();
-            }
-            catch (ApiException ex)
-            {
-                AppMessageBox.Warn(this, ex.Message, Language.Pop_Title);
-                return;
-            }
-
-        }
-
-        /// <summary>
-        /// Phase 1: Initialize tab configuration array.
-        /// This method is called from PopScreen_Load() to set up all tab configs.
-        /// </summary>
-        private void InitializeTabConfigs()
-        {
-            //_tabConfigs = new TabInitConfig[]
-            //{
-            //    new TabInitConfig
-            //    {
-            //        TabType = PopTab.Material,
-            //        GridControl = gridMaterial,
-            //        GridView = gridViewMaterial,
-            //        ThemeColor = AppTheme.Emerald,
-            //        TabName = "Material",
-            //        LoadDataAsync = FetchAndBindMaterialAsync,
-            //        ConfigureColumns = ConfigureMaterialGrid
-            //    },
-            //    new TabInitConfig
-            //    {
-            //        TabType = PopTab.BomSpec,
-            //        GridControl = gridBomSpec,
-            //        GridView = gridViewBomSpec,
-            //        ThemeColor = AppTheme.Indigo,
-            //        TabName = "BOM",
-            //        LoadDataAsync = FetchAndBindBomAsync,
-            //        ConfigureColumns = ConfigureBomSpecGrid
-            //    },
-            //    new TabInitConfig
-            //    {
-            //        TabType = PopTab.Inspection,
-            //        GridControl = gridInspection,
-            //        GridView = gridViewInspection,
-            //        ThemeColor = AppTheme.Violet,
-            //        TabName = "Inspection",
-            //        LoadDataAsync = FetchAndBindInspectionAsync,
-            //        ConfigureColumns = ConfigureInspectionGrid
-            //    }
-                //new TabInitConfig
-                //{
-                //    TabType = PopTab.Equipment,
-                //    GridControl = gridEquipment,
-                //    GridView = gridViewEquipment,
-                //    ThemeColor = AppTheme.Cyan,
-                //    TabName = "Equipment",
-                //    LoadDataAsync = FetchAndBindEquipmentAsync,
-                //    ConfigureColumns = ConfigureEquipmentGrid
-                //}
-            //};
-        }
-
-        /// <summary>
-        /// Phase 1: Unified tab initialization method.
-        /// All tabs are initialized using the same pattern from _tabConfigs array.
-        /// </summary>
-        //private async Task InitializeAllTabsAsync()
-        //{
-        //    foreach (var config in _tabConfigs)
-        //    {
-        //        try
-        //        {
-        //            // Apply theme to grid
-        //            AppTheme.Grid(config.GridControl, config.GridView, config.ThemeColor);
-
-        //            // Configure grid columns
-        //            config.ConfigureColumns();
-
-        //            // Load data
-        //            await config.LoadDataAsync();
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            AppMessageBox.Warn(this, 
-        //                string.Format("Failed to initialize tab '{0}': {1}", config.TabName, ex.Message), 
-        //                Language.Pop_Title);
-        //        }
-        //    }
-        //}
-
-        /// <summary>연결 실패/사용불가 상태는 붉은 글씨로 눈에 띄게 한다(상태 표시일 뿐 판정은 아니다).</summary>
-        private void GridViewEquipment_RowCellStyle(object sender, RowCellStyleEventArgs e)
-        {
-            if (e.Column.FieldName != "CommunicationState" && e.Column.FieldName != "EquipmentState")
-                return;
-
-            var equipment = gridViewEquipment.GetRow(e.RowHandle) as PopEquipmentDto;
-            if (equipment == null)
-                return;
-
-            var connected = equipment.CommunicationState == Language.Pop_CommConnected;
-            e.Appearance.ForeColor = connected ? AppTheme.Emerald : AppTheme.Rose;
-        }
-
-        /// <summary>
-        /// [입력] 버튼 → 그 줄의 토크 하한값과 상한값의 중간값을 토크 결과값에 바로 채운다.
-        ///
-        /// 예전에는 &lt;토크 결과값 입력&gt; 팝업을 띄웠는데, 수동 렌치로 조립할 때는
-        /// 어차피 규격 한가운데를 목표로 조이므로 창을 띄우고 숫자를 다시 치는 과정이 군더더기였다.
-        /// 여기서 내는 값은 <b>입력 편의를 위한 기본값</b>일 뿐이고(합·불 판정은 서버 몫),
-        /// 다르게 넣어야 하면 "토크 결과값" 칸을 눌러 직접 고쳐 쓰면 된다.
-        /// </summary>
-        private void ResultInput_ButtonClick(object sender, ButtonPressedEventArgs e)
-        {
-            if (!chkManualWrench.Checked)
-            {
-                AppMessageBox.Info(this, Language.Pop_ManualWrenchOnly, Language.PopTorque_Title);
-                return;
-            }
-
-            var spec = gridViewBomSpec.GetFocusedRow() as PopBomSpecDto;
-            if (spec == null)
-                return;
-
-            if (spec.TorqueLower == null || spec.TorqueUpper == null)
-            {
-                AppMessageBox.Info(this, Language.Pop_TorqueRangeMissing, Language.PopTorque_Title);
-                return;
-            }
-
-            spec.TorqueResult = CeilTorque((spec.TorqueLower.Value + spec.TorqueUpper.Value) / 2m);
-            spec.AngleResult = spec.AngleTarget.Value;
-            spec.IsManualInput = true;
-            spec.EquipmentCode = "MAN";
-
-            var result = new PopBomSpecResultDto
-            {
-                eqpCd = "MAN",
-                torqueRsltVl = spec.TorqueResult,
-                angleRsltVl = spec.AngleResult
-
-            };
-
-            RefreshBomSpecGrid();
-            AppLog.Info($"[POP] 수동 렌치 중간값 입력 - {spec.BomSpecName}/{spec.InputPosition} = {spec.TorqueResult} " +
-                        $"(하한 {spec.TorqueLower} ~ 상한 {spec.TorqueUpper})");
-        }
-
-        /// <summary>
-        /// "토크 결과값" · "각도 결과값" 칸에 들어온 값이 실수인지 확인하고, 통과하면 서버에 저장한다.
-        /// 토크는 소수 둘째 자리에서 올려 저장하고, 각도는 입력한 값 그대로 저장한다.
-        /// 빈칸(또는 "-")은 "아직 측정하지 않음"(null)으로 되돌린다 — 잘못 넣은 값을 지울 수 있어야 한다.
-        /// </summary>
-        private async void GridViewBomSpec_ValidatingEditor(object sender, BaseContainerValidateEditorEventArgs e)
-        {
-            var fieldName = gridViewBomSpec.FocusedColumn?.FieldName;
-            if (fieldName != TorqueResultField && fieldName != AngleResultField)
-                return;
-
-            var text = Convert.ToString(e.Value, CultureInfo.CurrentCulture)?.Trim();
-
-            if (string.IsNullOrEmpty(text) || text == "-")
-            {
-                e.Value = null;
-                return;
-            }
-
-            // double 로 받아 보고 나서 decimal 로 옮긴다 — 화면 입력은 실수 표기(1e3 · 소수점)를 모두 허용하되,
-            // 저장 값은 자릿수 오차가 없는 decimal 로 유지하기 위함이다(DTO 타입도 decimal?).
-            if (!double.TryParse(text, NumberStyles.Float, CultureInfo.CurrentCulture, out var parsed)
-                || double.IsNaN(parsed) || double.IsInfinity(parsed))
-            {
-                e.Valid = false;
-                e.ErrorText = Language.PopTorque_Invalid;
-                return;
-            }
-
-            bool isTorque = fieldName == TorqueResultField;
-            decimal value;
-            try
-            {
-                value = isTorque ? CeilTorque((decimal)parsed) : (decimal)parsed;
-            }
-            catch (OverflowException)
-            {
-                // decimal 범위를 넘는 값(1e30 등) — 토크 · 각도 값으로 의미가 없으므로 숫자 오류와 같이 다룬다.
-                e.Valid = false;
-                e.ErrorText = Language.PopTorque_Invalid;
-                return;
-            }
-
-            var view = (GridView)sender;
-            var spec = view.GetRow(view.FocusedRowHandle) as PopBomSpecDto;
-            if (spec == null)
-                return;
-
-            // e.Value는 await 전에 정해야 한다 — 첫 await에서 이벤트가 끝나 그리드가 그 시점의 값을 셀에 반영한다.
-            e.Value = value;
-
-            // 고친 칸만 새 값으로 바꾸고 다른 쪽은 지금 들고 있는 값을 그대로 보낸다
-            // (예전에는 어느 칸을 고치든 입력값을 토크로 보내고 각도는 목표값으로 덮어써, 각도 입력이 토크로 저장됐다).
-            // 토크만 고쳤는데 각도가 아직 비어 있으면 수동 렌치와 같이 목표 각도를 채운다.
-            decimal? torque = isTorque ? value : spec.TorqueResult;
-            decimal? angle = isTorque ? (spec.AngleResult ?? spec.AngleTarget) : value;
-
-            if (isTorque)
-                spec.AngleResult = angle;
-            spec.IsManualInput = true;
-            spec.EquipmentCode = "MAN";
-
-            var result = new PopBomSpecResultDto
-            {
-                eqpCd = "MAN",
-                torqueRsltVl = torque,
-                angleRsltVl = angle
-            };
-
-            BeginResultSave();
-            try
-            {
-                await _apiClient.PopApiClient.SaveBomSpecResultsAsync(_key, result, spec);
-                AppLog.Info($"[POP] {(isTorque ? "토크" : "각도")} 결과값 직접 입력 저장 - {spec.BomSpecName}/{spec.InputPosition} " +
-                            $"(토크 {torque}, 각도 {angle})");
-            }
-            catch (ApiException ex)
-            {
-                AppLog.Warn($"[POP] 직접 입력 결과 저장 실패 - {spec.BomSpecName}/{spec.InputPosition} : {ex.Message}");
-                if (IsDisposed || Disposing)
-                    return;
-
-                AppMessageBox.Warn(this, ex.Message, Language.Pop_Title);
-                return;
-            }
-            finally
-            {
-                EndResultSave();
-            }
-
-            // 첫 await에서 그리드가 입력값을 행에 반영했으므로, 여기서는 고친 값까지 포함해 완료를 판단한다.
-            if (IsDisposed || Disposing) return;
-            await TryAutoProgressAsync();
-        }
-
-        private void GridViewBomSpec_FocusedRowChanged(object sender, FocusedRowChangedEventArgs e)
-        {
-            // 바인딩 · RefreshData로 다시 그리는 중에 생긴 포커스 이동은 작업자가 고른 것이 아니다.
-            if (IsBomSpecRedrawing)
-                return;
-            if (!IsProcessRunning)
-            {
-                AppLog.Info($"[POP] 공정 미시작 - ( 상태 {_progressState})");
-                return;
-            }
-            if (e.FocusedRowHandle < 0)
-                return;
-
-            //var value = gridViewBomSpec.GetRowCellValue(e.FocusedRowHandle, TorqueResultField);
-
-            var spec = gridViewBomSpec.GetRow(e.FocusedRowHandle) as PopBomSpecDto;
-
-            if (spec?.TorqueTarget == null)
-                    return;
-            _bomSpecSelectedRow = e.FocusedRowHandle;
-            AppLog.Info($"[POP] FocusedRow - ( value {_bomSpecSelectedRow})");
-            // 목표 토크는 서버 기준정보 값을 그대로 쓴다(클라이언트가 계산하지 않는다).
-            if (WriteTorqueToEquipment(spec.TorqueTarget.Value) == null)
-                AppMessageBox.Warn(this, "사용 할 수 있는 너트러너가 없습니다.", Language.Pop_Title);
-            //AppMessageBox.Warn(this, Language.PopTorque_NoEquipment, Language.Pop_Title);
-
-        }
-
-        private void GridViewBomSpec_RowClick(object sender, RowClickEventArgs e)
-        {
-            if (!IsProcessRunning)
-            {
-                AppLog.Info($"[POP] 공정 미시작 - ( 상태 {_progressState})");
-                return;
-            }
-            if (e.RowHandle < 0)
-                return;
-            
-            // 클릭한 Row 처리
-            //var row = gridViewBomSpec.GetRow(e.RowHandle);
-            _bomSpecSelectedRow = e.RowHandle;
-            AppLog.Info($"[POP] 선택한 Row - ( Row 값 {_bomSpecSelectedRow})");
-            //var spec = gridViewBomSpec.GetRow(e.RowHandle) as PopBomSpecDto;
-
-            // WriteRegister
-            //spec.TorqueTarget;
-
-        }
-
-
-        /// <summary>
-        /// 공정이 진행 중(<see cref="IsProcessRunning"/>)일 때만 "토크 결과값" · "각도 결과값" 칸의 편집기를 연다.
-        /// 공정 전 · 중지 · 완료 상태에서 들어온 값은 실적이 아니므로 입력 자체를 막는다 —
-        /// 그래서 ValidatingEditor · CellValueChanged에서는 공정 상태를 다시 확인하지 않는다.
-        /// [입력] 버튼 컬럼도 편집기가 열려야 눌리므로 같은 조건으로 막힌다.
-        /// </summary>
-        private void GridViewBomSpec_ShowingEditor(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            if (!IsProcessRunning)
-            {
-                e.Cancel = true;
-                return;
-            }
-
-            var fieldName = gridViewBomSpec.FocusedColumn?.FieldName;
-            if (fieldName != TorqueResultField && fieldName != AngleResultField && fieldName != ResultInputField)
-                e.Cancel = true;
-        }
-
-        /// <summary>
-        /// 값 변환에 실패했을 때 DevExpress 기본 오류 창 대신 셀 안의 오류 표시로 알린다
-        /// (창을 띄우면 작업자가 확인을 누를 때까지 다음 줄로 넘어가지 못한다).
-        /// </summary>
-        private void GridViewBomSpec_InvalidValueException(object sender, InvalidValueExceptionEventArgs e)
-        {
-            if (gridViewBomSpec.FocusedColumn?.FieldName != TorqueResultField && gridViewBomSpec.FocusedColumn?.FieldName != AngleResultField)
-                return;
-
-            e.ExceptionMode = ExceptionMode.DisplayError;
-            e.ErrorText = Language.PopTorque_Invalid;
-        }
-
-        /// <summary>
-        /// 작업자가 직접 고친 줄은 수동 입력으로 표시한다 — 서버가 입력 경로(설비/사람)를 구분해 저장한다.
-        /// </summary>
-        private void GridViewBomSpec_CellValueChanged(object sender, CellValueChangedEventArgs e)
-        {
-            if (e.Column.FieldName != TorqueResultField && e.Column.FieldName != AngleResultField)
-                return;
-
-            var spec = gridViewBomSpec.GetRow(e.RowHandle) as PopBomSpecDto;
-            if (spec == null)
-                return;
-
-            spec.IsManualInput = true;
-            spec.EquipmentCode = "MAN";
-            AppLog.Info($"[POP] 토크 결과값 직접 입력 - {spec.BomSpecName}/{spec.InputPosition} = {spec.TorqueResult}");
-        }
-
-        /// <summary>
-        /// TorqueResult 필드의 특정 셀 색상을 변경합니다.
-        /// 토크 값이 범위를 벗어나면 셀의 글자 색상을 Rose(빨강)로 표시합니다.
-        /// </summary>
-        private void GridViewBomSpec_RowStyle(object sender, RowStyleEventArgs e)
-        {
-            //if (e.RowHandle != _bomSpecSelectedRow)
-            //    return;
-            if (e.RowHandle < 0) return;
-            var target = gridViewBomSpec.GetRow(e.RowHandle) as PopBomSpecDto;
-            
-            if (target == null) return;
-            if (target.TorqueResult == null && target.AngleResult == null) return;
-
-            AppLog.Info($"RowStyle {target.TorqueResult}");
-
-
-            bool torqueOk = target.TorqueResult >= target.TorqueLower && target.TorqueResult <= target.TorqueUpper;
-            bool angleOk = target.AngleResult >= target.AngleLower && target.AngleResult <= target.AngleUpper;
-
-
-            if (!(torqueOk && angleOk))
-            {
-                e.Appearance.BackColor = AppTheme.Rose;
-                //e.Appearance.ForeColor = Color.White;   // 글자가 안 보이면 지정
-                e.HighPriority = true;                  // 선택/포커스 행 색상보다 우선 적용
-            }
-
-            AppLog.Info($"RowStyle 결과에 따른 색상 변경");
-        }
-
-        private void GridViewInspection_ShowingEditor(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            // 공정이 진행 중일 때만 결과를 받는다 — 대기·중지·완료 상태의 입력은 실적에 붙을 곳이 없다.
-            if (!IsProcessRunning)
-            {
-                e.Cancel = true;
-                return;
-            }
-
-            var view = (GridView)sender;
-            var fieldName = view.FocusedColumn?.FieldName;
-            if (fieldName == null || !_inspectionInputFields.Contains(fieldName))
-            {
-                e.Cancel = true;
-                return;
-            }
-
-            // 정성 검사는 결과값이 없다 — 결과상태(합격/불합격)만 받는다.
-            if (fieldName == "ResultValue")
-            {
-                var spec = view.GetFocusedRow() as PopInspectionSpecDto;
-                if (spec != null && !spec.IsQuantitative)
-                    e.Cancel = true;
-            }
-        }
-
-        /// <summary>"시리얼번호 입력상태" 칸을 클릭하면 &lt;투입자재 정보 입력&gt; 팝업을 연다.</summary>
-        private async void GridViewMaterial_RowCellClick(object sender, RowCellClickEventArgs e)
-        {
-            if (e.Column == null || e.Column.FieldName != "SerialInputStateText")
-                return;
-
-            var material = gridViewMaterial.GetRow(e.RowHandle) as PopInputMaterialDto;
-            if (material == null)
-                return;
-
-            if (!material.SerialCheckRequired)
-            {
-                AppMessageBox.Info(this, Language.Pop_SerialNotRequired, Language.PopSerial_Title);
-                return;
-            }
-
-            List<string> serials;
-            using (var form = new MaterialSerialForm())
-            {
-                form.Initialize(material);
-                form.CenterOn(this);
-                if (form.ShowDialog(this) != DialogResult.OK)
-                    return;
-
-                serials = form.SerialNumbers;
-            }
-
-            material.SerialNumbers = serials;
-            gridViewMaterial.RefreshData();
-
-            await SaveMaterialSerialsAsync(material);
-        }
-
-        /// <summary>
-        /// Phase 2: Generic data loading and binding method.
-        /// Centralized error handling and logging for all tab data loading.
-        /// Replaces: LoadMaterialAsync(), LoadBomAsync(), LoadInspectionAsync(), LoadEquipAsync()
-        /// </summary>
-        private async Task<List<T>> LoadAndBindGridAsync<T>(
-            DevExpress.XtraGrid.GridControl grid,
-            Func<Task<List<T>>> fetcher, string tabName) 
-            where T : class
-        {
-            try
-            {
-                var data = await fetcher();
-                if (data == null)
-                    data = new List<T>();
-
-                grid.DataSource = data;
-                AppLog.Info($"Tab '{tabName}' data loaded successfully: {data.Count} items");
-
-                return data;
-            }
-            catch (ApiException ex)
-            {
-                AppLog.Error($"Tab '{tabName}' data loading failed: {ex.Message}", ex);
-                AppMessageBox.Warn(this, ex.Message, Language.Pop_Title);
-                return new List<T>();
+                if (_equip != null)
+                    UnwireEquipmentEvents();
             }
             catch (Exception ex)
             {
-                AppLog.Error($"Tab '{tabName}' unexpected error", ex);
-                AppMessageBox.Error(this, ex.Message, Language.Pop_Title);
-                return new List<T>();
-            }
-        }
-
-        /// <summary>
-        /// Phase 2: Material tab data fetch and bind.
-        /// Replaces: Material.cs의 LoadMaterialAsync()
-        /// </summary>
-        //private async Task FetchAndBindMaterialAsync()
-        //{
-        //    _materials = await LoadAndBindGridAsync(
-        //        gridMaterial,
-        //        FetchMaterialsAsync,
-        //        "Material"
-        //    );
-        //}
-
-        /// <summary>
-        /// Phase 2: BOM tab data fetch and bind with additional highlighting logic.
-        /// Replaces: Bom.cs의 LoadBomAsync() (특수 로직 유지)
-        /// </summary>
-        //private async Task FetchAndBindBomAsync()
-        //{
-        //    // LoadAndBindGridAsync 안에서 DataSource를 넣으므로 조회 · 바인딩 전체를 감싼다.
-        //    BeginBomSpecRedraw();
-        //    try
-        //    {
-        //        _bomSpecs = await LoadAndBindGridAsync(
-        //            gridBomSpec,
-        //            FetchBomSpecsAsync,
-        //            "BOM"
-        //        );
-
-        //        // Apply BOM-specific highlighting for torque results
-        //        ApplyBomSpecHighlighting(_bomSpecs);
-        //    }
-        //    finally
-        //    {
-        //        EndBomSpecRedraw();
-        //    }
-        //}
-
-        /// <summary>
-        /// Phase 2: Inspection tab data fetch and bind.
-        /// Replaces: Inspection.cs의 LoadInspectionAsync()
-        /// </summary>
-        //private async Task FetchAndBindInspectionAsync()
-        //{
-        //    _inspections = await LoadAndBindGridAsync(
-        //        gridInspection,
-        //        FetchInspectionsAsync,
-        //        "Inspection"
-        //    );
-        //}
-
-        /// <summary>
-        /// Phase 2: Equipment tab data fetch and bind with equipment state refresh.
-        /// Replaces: Equipment.cs의 LoadEquipAsync()
-        /// </summary>
-        //private async Task FetchAndBindEquipmentAsync()
-        //{
-        //    //_equipments = await LoadAndBindGridAsync(
-        //    //    gridEquipment,
-        //    //    FetchEquipmentsAsync,
-        //    //    "Equipment"
-        //    //);
-
-        //    // Refresh equipment connection states
-        //    RefreshEquipmentStates();
-        //}
-
-        ///// <summary>
-        ///// Helper method for BOM tab: Highlight torque results outside specification range.
-        ///// Extracted from original LoadBomAsync() method in Bom.cs.
-        ///// </summary>
-        //private void ApplyBomSpecHighlighting(List<PopBomSpecDto> specs)
-        //{
-        //    if (specs == null || specs.Count == 0)
-        //        return;
-
-        //    for (int i = 0; i < gridViewBomSpec.RowCount; i++)
-        //    {
-        //        var target = gridViewBomSpec.GetRow(i) as PopBomSpecDto;
-        //        if (target == null)
-        //            continue;
-
-        //        if (decimal.TryParse(target.TorqueResult?.ToString(), out decimal value))
-        //        {
-        //            decimal.TryParse(target.TorqueLower?.ToString(), out decimal min);
-        //            decimal.TryParse(target.TorqueUpper?.ToString(), out decimal max);
-
-        //            if (value < min || value > max)
-        //            {
-        //                gridViewBomSpec.Columns["TorqueResult"].AppearanceCell.ForeColor = AppTheme.Rose;
-                        
-
-        //            }
-        //            else
-        //            {
-        //                gridViewBomSpec.FocusedRowHandle = i;
-        //            }
-        //        }
-        //    }
-        //}
-
-        // 
-        //  작업 표준 / 도면 (공유 폴더의 도면 이미지 → picView)
-        // ─────────────────────────────────────────────────────────────────────────
-
-        private async Task LoadImageAsync()
-        {
-            try
-            {
-                ClearImage();
-                string path;
-                
-                if ( string.IsNullOrEmpty( _appSet.AppSet.DocumentShare.RootPath))
-                {
-                    ShowViewerMessage(Language.Pop_DrawingNone);
-                    return;
-                }
-                
-                if (_info.DrawingFilePath == null)
-                {
-                    ShowViewerMessage(Language.Pop_DrawingNone);
-                    return;
-                }
-
-                _info.DrawingFilePath = _info.DrawingFilePath.Replace('/', '\\').TrimStart('\\');
-                path = Path.Combine(_appSet.AppSet.DocumentShare.RootPath, _info.DrawingFilePath);
-                
-                byte[] raw = File.ReadAllBytes(path);
-
-                // Base64 텍스트이면 먼저 디코딩
-                byte[] decoded;
-
-                if (_imgCtrl.TryDecodeBase64(raw, out decoded))
-                {
-                    raw = decoded;
-                }
-                
-                ShowImage(raw, path);
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-            
-        }
-
-        private void ShowImage(byte[] data, string source)
-        {
-            // OLE 헤더 등이 앞에 붙어 있으면 실제 이미지 시작 위치를 찾아 잘라냄
-            int offset = _imgCtrl.FindImageOffset(data);
-            if (offset < 0)
-            {
-                AppMessageBox.Warn(this, "이미지 데이터를 찾을 수 없습니다.\n(손상되었거나 이미지가 아닌 바이너리입니다.)", Language.Pop_Title);    
-                return;
+                // 닫히는 중이라 창은 띄우지 않는다.
+                AppLog.Error("[POP] 설비 연결 해제 중 예외", ex);
             }
 
-            if (offset > 0)
-            {
-                byte[] trimmed = new byte[data.Length - offset];
-                Buffer.BlockCopy(data, offset, trimmed, 0, trimmed.Length);
-                data = trimmed;
-            }
-
-            Image img = _imgCtrl.BytesToImage(data);
-
-            // 이전 그림 해제 + 화면 맞춤까지 ImageView가 처리한다(img는 이제 ImageView 소유).
-            _viewer.SetImage(img);
-
-            _currentBytes = data;
-            //lblInfo.Text = string.Format("{0}  |  {1} x {2}  |  {3:N0} bytes{4}",
-            //    Path.GetFileName(source), img.Width, img.Height, data.Length,
-            //    offset > 0 ? string.Format("  |  헤더 {0} bytes 제거", offset) : "");
-            
-        }
-
-        private void ClearImage()
-        {
-            // Init 전에 불릴 수 있다(도면 읽기 실패 경로) — 그때는 띄운 그림도 없다.
-            _viewer?.Clear();
-
-            _currentBytes = null;
-            //UpdateZoomLabel();
-            //lblInfo.Text = "이미지를 열어주세요.";
-            //UpdateButtons();
-        }
-
-        /// <summary>도면 자리표시자에 안내 문구를 띄운다.</summary>
-        private void ShowViewerMessage(string message)
-        {
-            _viewerMessage = message;
-            viewerSurface.Invalidate();
-        }
-
-        /// <summary>&lt;진행 중 공정 정보&gt;를 우측 카드에 채운다. 워크스테이션은 로그인 세션 값으로 보완한다.</summary>
-        private void DisplayProcessInfo()
-        {
-            var info = _info ?? new PopProcessInfoDto();
-
-            txtWorkOrderNo.Text = info.WorkOrderNo;
-            txtItemCode.Text = info.ItemCode;
-            txtProductSerialNo.Text = info.SerialNo;
-            txtRoutingGroup.Text = info.RoutingGroup;
-            txtRoutingOperation.Text = info.RoutingOperation;
-            txtPageOperation.Text = info.PageOperation;
-            txtPageStartTime.Text = FormatTime(info.PageStartTime);
-            txtPageEndTime.Text = FormatTime(info.PageEndTime);
-            txtPageRunTime.Text = FormatDuration(info.RunTime);
-            txtPageIdleTime.Text = FormatDuration(info.IdleTime);
-            txtPageWorkTime.Text = FormatDuration(info.WorkTime);
-
-            // 서버가 워크스테이션을 내려주지 않으면 로그인할 때 고른 워크스테이션을 그대로 보여 준다.
-            var workstation = info.WorkstationDisplay;
-            if (string.IsNullOrWhiteSpace(workstation) || workstation == "()")
-                workstation = _appSet?.CurrentUser?.Workstation;
-
-            lblWorkstation.Text = workstation;
-            ApplyProgressState(info.ProgressState);
-        }
-
-        /// <summary>
-        /// 하단 진행 상태 띠를 서버가 준 문구로 갱신하고, 멀리서도 구분되게 색을 함께 바꾼다.
-        /// 상태 <b>판정</b>은 서버 몫이고 여기서는 받은 문구를 색으로 옮기기만 한다 —
-        /// 모르는 문구가 오면 기본색(보라)으로 두고 글자만 보여 준다.
-        /// </summary>
-        private void ApplyProgressState(string progressState)
-        {
-            _progressState = progressState;
-            lblProgressState.Text = progressState;
-
-            Color accent;
-            if (Contains(progressState, "Progress")) accent = AppTheme.Emerald;
-            else if (Contains(progressState, "Stopped")) accent = AppTheme.Rose;
-            else if (Contains(progressState, "Finished")) accent = AppTheme.Amber;
-            else if (Contains(progressState, "Ready")) accent = AppTheme.Slate;
-            else accent = AppTheme.Violet;
-
-            lblProgressState.BackColor = accent;
-
-            switch (progressState)
-            {
-                case "Finished":
-                case "Progress":
-                    btnStartProcess.Text = Language.Pop_EndProcess;
-                    break;
-                case "Stopped":
-                    btnStartProcess.Text = Language.Pop_EndProcess;
-                    btnStopProcess.Text = Language.Pop_RestartProcess;
-                    btnStopProcess.Tag = new ProcessActionInfo(PopProcessAction.resume, Language.Pop_ConfirmStop, MockPopData.StateStopped);
-                    break;
-                case "Ready":
-                    btnStartProcess.Text = Language.Pop_StartProcess;
-                    btnStopProcess.Text = Language.Pop_StopProcess;
-                    btnStartProcess.Tag = new ProcessActionInfo(PopProcessAction.start, Language.Pop_ConfirmStart, MockPopData.StateRunning);
-                    btnStopProcess.Tag = new ProcessActionInfo(PopProcessAction.stop, Language.Pop_ConfirmStop, MockPopData.StateStopped);
-                    break;
-            }
-
-            // [공정 시작]은 대기(Ready) 공정에서만 누를 수 있다 — 진행 중(자동 시작 포함) · 중지 · 완료 상태에서
-            // 다시 누르면 같은 시작 요청이 또 나가므로 막아 둔다. 수동 이동한 공정은 Ready라 직접 시작할 수 있다.
-            btnStartProcess.Enabled = progressState == "Ready";
-        }
-
-        private static bool Contains(string text, string keyword) =>
-            !string.IsNullOrEmpty(text) && text.IndexOf(keyword, StringComparison.OrdinalIgnoreCase) >= 0;
-
-        private async Task<PopScreenData> FetchProcessInfoAsync()
-        {
-            //if (UseMock)
-            //{
-            //    await Task.Yield();
-            //    return MockPopData.GetProcessInfo(_key);
-            //}
-            
-            return await _appSet.ApiClients.PopApiClient.GetProcessInfoAsync(_key);
-        }
-
-        /// <summary>
-        /// 탭 그리드 하나의 데이터를 읽어 바인딩한다. 조회에 실패하면 사유를 알리고
-        /// 지금 들고 있던 목록(<paramref name="current"/>)을 그대로 돌려준다(화면도 이전 그대로 둔다).
-        /// </summary>
-        private async Task<List<T>> LoadGridAsync<T>(DevExpress.XtraGrid.GridControl grid, Func<Task<List<T>>> fetch, List<T> current)
-        {
-            try
-            {
-                var data = await fetch();
-                grid.DataSource = data;
-                return data;
-            }
-            catch (ApiException ex)
-            {
-                AppMessageBox.Warn(this, ex.Message, Language.Pop_Title);
-                return current;
-            }
-        }
-
-        //private bool UseMock => _appSet != null && _appSet.AppSet.UseMockData;
-
-        // ─────────────────────────────────────────────────────────────────────────
-        //  그리드 구성
-        // ─────────────────────────────────────────────────────────────────────────
-
-        // 탭 그리드(투입자재 / BOM 스팩 / 검사 스팩)의 컬럼 구성. 각 탭 Init에서 호출한다.
-        // [연결 장비] 그리드는 장비 이벤트와 묶여 있어 PopScreen.Equipment.cs에 둔다.
-
-        private void ConfigureMaterialGrid()
-        {
-            // PopInputMaterialDto.SerialNumbers(컬렉션 속성)를 그리드가 마스터-디테일로 오인해
-            // 행 왼쪽에 [+] 펼침 버튼을 만든다. 이 화면에는 하위 목록이 없으므로 꺼 둔다.
-            gridViewMaterial.OptionsDetail.EnableMasterViewMode = false;
-
-            gridMaterial.DataSource = new List<PopInputMaterialDto>();
-            GridColumns.Apply(gridViewMaterial, Language.Col_No,
-                GridColumns.Text("MaterialCode", Language.Col_MaterialCode, 200),
-                GridColumns.Number("InputQty", Language.Col_InputQty, 110),
-                GridColumns.Text("InputUnit", Language.Col_InputUnit, 100),
-                GridColumns.Text("InputPosition", Language.Col_InputPosition, 110),
-                GridColumns.Text("SerialCheckText", Language.Col_SerialCheck, 170),
-                GridColumns.Text("SerialInputStateText", Language.Col_SerialInputState, 180));
-
-            gridViewMaterial.OptionsView.ColumnAutoWidth = true;
-
-            // 클릭할 수 있는 셀임을 알 수 있게 손가락 커서로 바꾼다.
-            var stateColumn = gridViewMaterial.Columns.ColumnByFieldName("SerialInputStateText");
-            if (stateColumn != null)
-                stateColumn.OptionsColumn.AllowFocus = true;
-
-            gridViewMaterial.Appearance.HorzLine.BackColor = Color.FromArgb(230, 233, 241);
-            gridViewMaterial.Appearance.HorzLine.Options.UseBackColor = true;
-            gridViewMaterial.Appearance.VertLine.BackColor = Color.FromArgb(230, 233, 241);
-            gridViewMaterial.Appearance.VertLine.Options.UseBackColor = true;
-        }
-
-        /// <summary>
-        /// [BOM 스팩] 탭. 마지막의 "결과값 입력" 컬럼은 데이터에 없는 화면 전용 컬럼이며,
-        /// 수동 렌치를 켰을 때만 보인다([입력] 버튼 → 하한~상한 중간값을 그 줄에 채운다).
-        /// "토크 결과값" 컬럼은 작업자가 직접 고쳐 쓸 수 있다.
-        /// </summary>
-        private void ConfigureBomSpecGrid()
-        {
-            gridBomSpec.DataSource = new List<PopBomSpecDto>();
-            EnsureResultInputColumn();
-
-            GridColumns.Apply(gridViewBomSpec, Language.Col_No,
-                GridColumns.Text("MaterialCode", Language.Col_MaterialCode, 180),
-                GridColumns.Text("InputPosition", Language.Col_InputPosition, 100),
-                GridColumns.Text("BomSpecName", Language.Col_BomSpecName, 140),
-                GridColumns.Text("SpecType", Language.Col_SpecType, 120),
-                GridColumns.Text("TorqueLower", Language.Col_TorqueLower, 120),
-                GridColumns.Text("TorqueUpper", Language.Col_TorqueUpper, 120),
-                GridColumns.Text("TorqueTarget", Language.Col_TorqueTarget, 120),
-                GridColumns.Text("TorqueUnit", Language.Col_TorqueUnit, 100),
-                GridColumns.Text("TorqueResult", Language.Col_TorqueResult, 130),
-                GridColumns.Text("AngleLower", Language.Col_AngleLower, 120),
-                GridColumns.Text("AngleUpper", Language.Col_AngleUpper, 120),
-                GridColumns.Text("AngleTarget", Language.Col_AngleTarget, 120),
-                GridColumns.Text("AngleUnit", Language.Col_AngleUnit, 100),
-                GridColumns.Text("AngleResult", Language.Col_AngleResult, 130),
-                GridColumns.Text("EquipmentCode", "결과동작", 130),
-                GridColumns.Text(ResultInputField, Language.Pop_ResultInputColumn, 120));
-
-            gridViewBomSpec.OptionsView.ColumnAutoWidth = true;
-
-            // 셀을 클릭해 포커스를 주기 전에도 [입력] 버튼이 모든 줄에 보이도록 한다
-            // (버튼 에디터를 쓰는 컬럼이 "결과값 입력" 하나뿐이라 뷰 전체에 걸어도 무방하다).
-            gridViewBomSpec.OptionsView.ShowButtonMode = DevExpress.XtraGrid.Views.Base.ShowButtonModeEnum.ShowAlways;
-
-            NumericFormat(gridViewBomSpec, "TorqueLower", "TorqueUpper", "TorqueTarget", "TorqueResult", "AngleLower", "AngleUpper", "AngleTarget", "AngleResult");
-
-            EnableTorqueResultEditing();
-
-            foreach (DevExpress.XtraGrid.Columns.GridColumn column in gridViewBomSpec.Columns)
-            {
-                column.OptionsColumn.AllowEdit =
-                    column.FieldName == ResultInputField || column.FieldName == TorqueResultField || column.FieldName == AngleResultField; ;
-
-            }
-
-            gridViewBomSpec.OptionsBehavior.Editable = true;
-            SetResultInputColumnVisible(false);
-
-            gridViewBomSpec.Appearance.HorzLine.BackColor = Color.FromArgb(230, 233, 241);
-            gridViewBomSpec.Appearance.HorzLine.Options.UseBackColor = true;
-            gridViewBomSpec.Appearance.VertLine.BackColor = Color.FromArgb(230, 233, 241);
-            gridViewBomSpec.Appearance.VertLine.Options.UseBackColor = true;
-        }
-
-        private void ConfigureInspectionGrid()
-        {
-            gridInspection.DataSource = new List<PopInspectionSpecDto>();
-            GridColumns.Apply(gridViewInspection, Language.Col_No,
-                GridColumns.Text("InspectionSpecName", Language.Col_InspectionSpecName, 220),
-                GridColumns.Left("Description", Language.Col_Description, 300),
-                GridColumns.Text("InspectionMethod", Language.Col_InspectionMethod, 120),
-                GridColumns.Text("ResultState", Language.Col_ResultState, 130),
-                GridColumns.Text("ResultValue", Language.Col_ResultValue, 130),
-                GridColumns.Text("InspectionResultRemark", Language.Col_InspectionRemark, 300)
-                );
-
-
-            gridViewInspection.OptionsView.ColumnAutoWidth = true;
-
-            _resultStateEditor = new RepositoryItemComboBox();
-            _resultStateEditor.TextEditStyle = TextEditStyles.DisableTextEditor;
-            _resultStateEditor.Items.Add(Language.Pop_ResultPass);
-            _resultStateEditor.Items.Add(Language.Pop_ResultFail);
-            gridInspection.RepositoryItems.Add(_resultStateEditor);
-
-            _resultValueEditor = new RepositoryItemTextEdit();
-            gridInspection.RepositoryItems.Add(_resultValueEditor);
-
-            foreach (DevExpress.XtraGrid.Columns.GridColumn column in gridViewInspection.Columns)
-                column.OptionsColumn.AllowEdit = false;
-
-            var stateColumn = gridViewInspection.Columns.ColumnByFieldName("ResultState");
-            if (stateColumn != null)
-            {
-                stateColumn.OptionsColumn.AllowEdit = true;
-                stateColumn.ColumnEdit = _resultStateEditor;
-            }
-
-            var valueColumn = gridViewInspection.Columns.ColumnByFieldName("ResultValue");
-            if (valueColumn != null)
-            {
-                valueColumn.OptionsColumn.AllowEdit = true;
-                valueColumn.ColumnEdit = _resultValueEditor;
-            }
-
-            _resultRemarkEditor = new RepositoryItemTextEdit();
-            gridInspection.RepositoryItems.Add(_resultRemarkEditor);
-
-            var remarkColumn = gridViewInspection.Columns.ColumnByFieldName("InspectionResultRemark");
-            if (remarkColumn != null)
-            {
-                remarkColumn.OptionsColumn.AllowEdit = true;
-                remarkColumn.ColumnEdit = _resultRemarkEditor;
-            }
-
-            gridViewInspection.OptionsBehavior.Editable = true;
-
-            gridViewInspection.Appearance.HorzLine.BackColor = Color.FromArgb(230, 233, 241);
-            gridViewInspection.Appearance.HorzLine.Options.UseBackColor = true;
-            gridViewInspection.Appearance.VertLine.BackColor = Color.FromArgb(230, 233, 241);
-            gridViewInspection.Appearance.VertLine.Options.UseBackColor = true;
-            
-            
-            
-        }
-
-        private void ConfigureEquipmentGrid()
-        {
-            gridEquipment.DataSource = new List<PopEquipmentDto>();
-            GridColumns.Apply(gridViewEquipment, Language.Col_No,
-                GridColumns.Text("EquipmentCode", Language.Col_EquipmentCode, 160),
-                GridColumns.Text("EquipmentName", Language.Col_EquipmentName, 150),
-                GridColumns.Left("EquipmentRemark", Language.Col_EquipmentRemark, 260),
-                GridColumns.Text("EquipmentType", Language.Col_EquipmentType, 130),
-                GridColumns.Text("CommunicationState", Language.Col_CommunicationState, 130),
-                GridColumns.Text("EquipmentState", Language.Col_EquipmentState, 130),
-                GridColumns.Text("RangeLower", Language.Col_RangeLower, 150),
-                GridColumns.Text("RangeUpper", Language.Col_RangeUpper, 150));
-
-            gridViewEquipment.OptionsView.ColumnAutoWidth = true;
-            NumericFormat(gridViewEquipment, "RangeLower", "RangeUpper");
-
-            gridViewEquipment.Appearance.HorzLine.BackColor = Color.FromArgb(230, 233, 241);
-            gridViewEquipment.Appearance.HorzLine.Options.UseBackColor = true;
-            gridViewEquipment.Appearance.VertLine.BackColor = Color.FromArgb(230, 233, 241);
-            gridViewEquipment.Appearance.VertLine.Options.UseBackColor = true;
-        }
-
-
-
-
-        /// <summary>소수 한 자리 기준(1.0 / 4.25)으로 보여 주는 숫자 컬럼 서식.</summary>
-        private static void NumericFormat(GridView view, params string[] fieldNames)
-        {
-            foreach (var fieldName in fieldNames)
-            {
-                var column = view.Columns.ColumnByFieldName(fieldName);
-                if (column == null)
-                    continue;
-
-                column.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
-                column.DisplayFormat.FormatString = "0.0##";
-                column.AppearanceCell.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
-                column.AppearanceCell.Options.UseTextOptions = true;
-            }
-        }
-
-        /// <summary>
-        /// 값이 비어 있는 숫자 칸은 "-"로 표시한다(목업 표기와 동일).
-        /// 토크 결과값만은 소수 둘째 자리까지 올려서 보여 준다 —
-        /// 설비에서 올라온 원본 값은 그대로 두고 <b>표기만</b> 맞추는 것이라,
-        /// 서버로 올라가는 측정값은 손대지 않는다(작업자가 직접 넣은 값은 입력 시점에 이미 올림돼 있다).
-        /// </summary>
-        private void Numeric_CustomColumnDisplayText(object sender, CustomColumnDisplayTextEventArgs e)
-        {
-            if (e.Value == null)
-            {
-                if (e.Column.FieldName != ResultInputField)
-                    e.DisplayText = "-";
-                return;
-            }
-
-            if (e.Column.FieldName == TorqueResultField && e.Value is decimal torque)
-                e.DisplayText = CeilTorque(torque).ToString("0.00", CultureInfo.CurrentCulture);
-        }
-
-        /// <summary>
-        /// 토크 값을 소수 둘째 자리에서 <b>올림</b>한다(4.561 → 4.57, 2.0 → 2.00).
-        /// 판정이 아니라 표기·입력 자릿수를 맞추기 위한 것으로, 합·불 판정은 서버가 원본 값으로 한다.
-        /// </summary>
-        private static decimal CeilTorque(decimal value)
-        {
-            var scale = 1m;
-            for (var i = 0; i < TorqueDecimals; i++)
-                scale *= 10m;
-
-            // 음수도 "0에서 먼 쪽"이 아니라 수직선 위쪽으로 올린다(Math.Ceiling과 같은 방향).
-            return Math.Ceiling(value * scale) / scale;
-        }
-
-        // ─────────────────────────────────────────────────────────────────────────
-        //  하단 탭 전환
-        // ─────────────────────────────────────────────────────────────────────────
-
-        /// <summary>탭 버튼 4개가 함께 쓰는 핸들러 — 누른 버튼에 대응하는 탭으로 바꾼다.</summary>
-        //private void TabButton_Click(object sender, EventArgs e)
-        //{
-        //    //foreach (var pair in _tabButtons)
-        //    //{
-        //    //    if (ReferenceEquals(pair.Value, sender))
-        //    //    {
-        //    //        SetActiveTab(pair.Key);
-        //    //        return;
-        //    //    }
-        //    //}
-        //}
-
-        /// <summary>
-        /// 탭을 바꾼다 — 그리드 하나만 보이게 하고, 그 탭에서만 쓰는 도구(수동 렌치/결과 저장)를 함께 켠다.
-        /// </summary>
-        //private void SetActiveTab(PopTab tab)
-        //{
-        //    _activeTab = tab;
-
-        //    foreach (var pair in _tabGrids)
-        //        pair.Value.Visible = pair.Key == tab;
-
-        //    chkManualWrench.Visible = tab == PopTab.BomSpec;
-        //    btnSaveResults.Visible = tab == PopTab.BomSpec || tab == PopTab.Inspection;
-
-        //    //StyleTabButtons();
-        //}
-
-        //private void StyleTabButtons()
-        //{
-        //    //foreach (var pair in _tabButtons)
-        //    //    StyleTabButton(pair.Value, pair.Key == _activeTab);
-        //}
-
-        /// <summary>선택된 탭은 연한 초록 칩, 나머지는 기본(흰 바탕 + 회색 테두리)으로 그린다.</summary>
-        //private static void StyleTabButton(MeisButton button, bool active)
-        //{
-        //    button.Accent = AppTheme.Emerald;
-        //    button.Selected = active;
-        //}
-
-        /// <summary>수동 렌치를 켜면 "결과값 입력" 컬럼([입력] 버튼)이 나타난다.</summary>
-        private void chkManualWrench_CheckedChanged(object sender, EventArgs e)
-        {
-            SetResultInputColumnVisible(chkManualWrench.Checked);
-        }
-
-        private async void btnSaveResults_Click(object sender, EventArgs e)
-        {
-            gridViewBomSpec.CloseEditor();
-            gridViewBomSpec.UpdateCurrentRow();
-            gridViewInspection.CloseEditor();
-            gridViewInspection.UpdateCurrentRow();
-
-            // 저장은 서버 상태를 바꾸는 처리라 [취소]를 주지 않는다 —
-            // 중간에 끊으면 무엇이 반영되고 무엇이 안 됐는지 화면에서 알 수 없다.
-            //using (BusyOverlay.Show(this))
-            //{
-                try
-                {
-                    btnSaveResults.Enabled = false;
-
-                    //if (!UseMock)
-                    //{
-                        //if (_activeTab == PopTab.BomSpec)
-                        //    await _appSet.ApiClients.PopApiClient.SaveBomSpecResultsAsync(_key, _bomSpecs);
-                        //else if (_activeTab == PopTab.Inspection)
-                        //    await _appSet.ApiClients.PopApiClient.SaveInspectionResultsAsync(_key, _inspections);
-                    //}
-
-                    if (IsDisposed || Disposing) return;   // 저장 중 탭을 닫았다
-                    AppMessageBox.Success(this, Language.Pop_SavedResult, Language.Pop_Title);
-                }
-                catch (ApiException ex)
-                {
-                    if (IsDisposed || Disposing) return;
-                    AppMessageBox.Warn(this, ex.Message, Language.Pop_Title);
-                }
-                finally
-                {
-                    if (!IsDisposed && !Disposing)
-                        btnSaveResults.Enabled = true;
-                }
-            //}
-        }
-
-        // ─────────────────────────────────────────────────────────────────────────
-        //  아코디언 — 우측 공정 정보 / 하단 탭을 접어 도면을 크게 본다
-        // ─────────────────────────────────────────────────────────────────────────
-
-        /// <summary>접었을 때 남기는 우측 패널 폭 = 세로 손잡이 띠의 폭.</summary>
-        private const int InfoCollapsedWidth = 26;
-
-        /// <summary>
-        /// 펼쳤을 때 우측 패널 폭(디자이너의 infoCard 폭과 같게 둘 것).
-        /// 손잡이 띠(26px)가 왼쪽을 차지하므로 <b>내용 영역 560 + 손잡이 26</b>이다 —
-        /// 손잡이를 넣으면서 이 값을 그대로 두었더니 우측 입력칸이 잘렸다.
-        /// </summary>
-        //private const int InfoExpandedWidth = 586;
-        private const int InfoExpandedWidth = 417;
-        /// <summary>펼쳤을 때 하단 영역 높이(디자이너의 bottomCard 높이와 같게 둘 것).</summary>
-        //private const int BottomExpandedHeight = 320;
-        private const int BottomExpandedHeight = 192;
-
-        private bool _infoExpanded = true;
-        private bool _bottomExpanded = true;
-
-        private void btnInfoAccordion_Click(object sender, EventArgs e) => SetInfoExpanded(!_infoExpanded);
-
-        private void btnTabsAccordion_Click(object sender, EventArgs e) => SetBottomExpanded(!_bottomExpanded);
-
-        /// <summary>
-        /// 우측 &lt;진행 중 공정 정보&gt;를 접었다 편다.
-        ///
-        /// 도면(viewerCard)은 <c>Dock = Fill</c>이라 <b>옆 패널 폭만 줄이면 그만큼 자동으로 넓어진다</b> —
-        /// 도면 크기를 직접 계산해 넣지 말 것(창 크기가 바뀌면 어긋난다).
-        /// 접어도 손잡이는 남겨야 하므로 폭을 0으로 만들지 않고 <see cref="InfoCollapsedWidth"/>만 남긴다.
-        /// </summary>
-        private void SetInfoExpanded(bool expanded)
-        {
-            _infoExpanded = expanded;
-
-            // 여러 컨트롤을 연달아 바꾸면 그때마다 다시 배치되어 화면이 깜빡인다.
-            mainPanel.SuspendLayout();
-            try
-            {
-                lblInfoTitle.Visible = expanded;
-                fieldPanel.Visible = expanded;
-                //bannerPanel.Visible = expanded;
-
-                infoCard.Width = expanded ? InfoExpandedWidth : InfoCollapsedWidth;
-                spacerMain.Visible = expanded;
-            }
-            finally
-            {
-                mainPanel.ResumeLayout(true);
-            }
-
-            // 자리를 옮기지 않은 컨트롤은 레이아웃만으로는 다시 그려지지 않아 잔상이 남는다.
-            mainPanel.Invalidate(true);
-            RefreshAccordionButtons();
-        }
-
-        /// <summary>
-        /// 하단 탭 영역을 접었다 편다. 접어도 <b>탭 줄(tabHeaderPanel)은 그대로 남긴다</b> —
-        /// 어떤 탭을 보고 있었는지 유지되고, 다시 펴는 손잡이도 그 줄에 있다.
-        /// </summary>
-        private void SetBottomExpanded(bool expanded)
-        {
-            _bottomExpanded = expanded;
-
-            SuspendLayout();
-            try
-            {
-                //tabBodyPanel.Visible = expanded;
-
-                // 접었을 때 높이 = 탭 줄 + 카드 안쪽 여백(위/아래).
-                bottomCard.Height = expanded
-                    ? BottomExpandedHeight
-                    : bottomCard.Padding.Vertical + 4 + pnlTabHead.Height;
-            }
-            finally
-            {
-                ResumeLayout(true);
-            }
-
-            Invalidate(true);
-            RefreshAccordionButtons();
-        }
-
-        /// <summary>
-        /// 손잡이 버튼의 화살표와 색을 지금 상태에 맞춘다.
-        /// 화살표는 <b>누르면 일어날 일</b>을 가리킨다 — 펼쳐져 있으면 접는 방향(▶ / ▼)이다.
-        /// </summary>
-        /// <summary>
-        /// 손잡이의 방향·이름·색을 지금 상태에 맞춘다.
-        /// 이름을 함께 보여 주는 이유는, 화살표만 있으면 <b>무엇이 접혀 있는지</b> 알 수 없기 때문이다.
-        /// </summary>
-        private void RefreshAccordionButtons()
-        {
-            btnInfoAccordion.Edge = AccordionEdge.Left;
-            btnInfoAccordion.Accent = AppTheme.Violet;
-            btnInfoAccordion.Text = Language.Pop_ProcessInfoTitle;
-            btnInfoAccordion.Expanded = _infoExpanded;
-
-            btnTabsAccordion.Edge = AccordionEdge.Bottom;
-            btnTabsAccordion.Accent = AppTheme.Cyan;
-            btnTabsAccordion.Text = Language.Pop_ToggleTabs;
-            btnTabsAccordion.Expanded = _bottomExpanded;
+            // 들고 있던 도면 이미지를 해제한다.
+            _viewer?.Dispose();
+            _viewer = null;
         }
 
         // ─────────────────────────────────────────────────────────────────────────
@@ -1597,420 +272,136 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         // ─────────────────────────────────────────────────────────────────────────
 
         /// <summary>
-        /// [공정 시작] · [공정 중지] · [공정 생략] 타일이 함께 쓰는 핸들러.
-        /// 세 버튼은 "확인 문구 → 서버에 상태 전이 요청"까지 똑같고 넘기는 값만 다르므로,
-        /// 값은 타일의 Tag(<see cref="ProcessActionInfo"/>)에서 읽는다(<see cref="ConfigureActionTiles"/>에서 채움).
+        /// [공정 시작] · [공정 중지/재시작] 공용 핸들러. 요청할 동작은 버튼 Tag에서 읽는다.
+        /// 버튼 문구는 여기서 바꾸지 않는다 — 요청 뒤 서버가 다시 내려준 진행 상태로 <see cref="SetProgressState"/>가 그린다.
         /// </summary>
         private async void ProcessAction_Click(object sender, EventArgs e)
         {
-            var btn = sender as Button;
-            var info = btn?.Tag as ProcessActionInfo;
-            if (info == null)
+            if (!((sender as Control)?.Tag is PopProcessAction action))
                 return;
 
-            // 취소했거나 서버가 거절했으면 버튼 문구/Tag를 그대로 둔다.
-            if (!await RequestProcessActionAsync(info.Action, info.ConfirmMessage, info.MockState))
-                return;
-
-            switch (info.Action)
+            try
             {
-                case PopProcessAction.start:
-                    btnStartProcess.Text = Language.Pop_EndProcess;
-                    break;
-                case PopProcessAction.stop:
-                    btnStopProcess.Text = Language.Pop_RestartProcess;
-                    btnStopProcess.Tag = new ProcessActionInfo(PopProcessAction.resume, Language.Pop_ConfirmStop, MockPopData.StateStopped);
-                    break;
-                case PopProcessAction.resume:
-                    btnStopProcess.Text = Language.Pop_StopProcess;
-                    btnStopProcess.Tag = new ProcessActionInfo(PopProcessAction.stop, Language.Pop_ConfirmStop, MockPopData.StateRunning);
-                    break;
-                case PopProcessAction.Previous:
-                case PopProcessAction.Next:
-                    btnStartProcess.Text = Language.Pop_StartProcess;
-                    btnStopProcess.Text = Language.Pop_StopProcess;
-                    break;
-                default:
-                    break;
+                if (!await Screen.SetProcessAction(action))
+                    return;
+
+                // 시작 · 재시작 직후에도 완료 여부를 본다 — 탭 3개가 모두 비어 있는 공정은 바로 넘어간다.
+                if (action == PopProcessAction.start || action == PopProcessAction.resume)
+                    await Screen.TryAutoProgress();
             }
-
-            // 시작 · 재시작 직후에도 완료 여부를 본다 — 탭 3개가 모두 비어 있는 공정은 여기서 바로 넘어간다.
-            if (info.Action == PopProcessAction.start || info.Action == PopProcessAction.resume)
-                await TryAutoProgressAsync();
-
-            //await RequestProcessActionAsync(info.Action, info.ConfirmMessage, info.MockState);
-        }
-
-        /// <summary>시작/중지/생략 타일이 요청할 동작과 확인 문구를 Tag에 실어 둔다.</summary>
-        private void ConfigureActionTiles()
-        {
-            btnStartProcess.Tag = new ProcessActionInfo(PopProcessAction.start, Language.Pop_ConfirmStart, MockPopData.StateRunning);
-            btnStopProcess.Tag = new ProcessActionInfo(PopProcessAction.stop, Language.Pop_ConfirmStop, MockPopData.StateStopped);
-            //btnSkipProcess.Tag = new ProcessActionInfo(PopProcessAction.Skip, Language.Pop_ConfirmSkip, MockPopData.StateSkipped);
-        }
-
-        /// <summary>공정 상태 전이 타일 하나가 요청할 내용.</summary>
-        private sealed class ProcessActionInfo
-        {
-            public ProcessActionInfo(PopProcessAction action, string confirmMessage, string mockState)
+            catch (Exception ex)
             {
-                Action = action;
-                ConfirmMessage = confirmMessage;
-                MockState = mockState;
+                HandleError("공정 상태 전이", ex);
             }
-
-            public PopProcessAction Action { get; }
-            public string ConfirmMessage { get; }
-            public string MockState { get; }
         }
 
-        private async void btnPrevProcess_Click(object sender, EventArgs e) =>
-            await MoveByProcessListAsync(-1, Language.Pop_ConfirmPrevious, Language.Pop_FirstProcess);
+        private async void btnPrevProcess_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                await Screen.MoveProcess(-1);
+            }
+            catch (Exception ex)
+            {
+                HandleError("이전 공정 이동", ex);
+            }
+        }
 
         private async void btnNextProcess_Click(object sender, EventArgs e)
         {
-            await MoveByProcessListAsync(+1, Language.Pop_ConfirmNext, Language.Pop_LastProcess);
-        }
-            
-        /// <summary>
-        /// 공정 상태 전이([공정 시작] · [공정 중지] · [공정 생략])를 서버에 요청한다.
-        /// 전이 가능 여부와 시간 집계는 서버가 판단하고, 클라이언트는 응답으로 받은
-        /// &lt;진행 중 공정 정보&gt;를 그대로 다시 그린다.
-        /// </summary>
-        /// <param name="mockState">
-        /// 목업 모드에서 옮겨 갈 상태. 서버가 없으니 <see cref="MockPopData"/>가 대신 상태를 기억해
-        /// 화면 흐름(시작 → 중지 → 재시작 → 생략)을 그대로 확인할 수 있게 한다.
-        /// </param>
-        private async Task<bool> RequestProcessActionAsync(PopProcessAction action, string confirmMessage, string mockState)
-        {
-            if (_key == null)
-            {
-                AppMessageBox.Warn(this, Language.Pop_NoTargetProcess, Language.Pop_Title);
-                return false;
-            }
-
-            //if (!AppMessageBox.Confirm(this, confirmMessage, Language.Pop_Title))
-            //    return;
-
-            PopProcessActionRequest request = null;
-
-            if (action == PopProcessAction.Previous || action == PopProcessAction.Next)
-            {
-
-            }
-
-            if (action == PopProcessAction.stop)
-            {
-                using (var form = new StopIssueForm())
-                {
-                    if (form.ShowDialog(this) != DialogResult.OK)
-                    {
-                        // [취소] / Esc / X — 중지 요청을 보내지 않고 끝낸다.
-                        AppLog.Info("[POP] 공정 중지 취소 - 사유 선택 창에서 취소");
-                        return false;
-                    }
-
-                    // using을 벗어나면 Dispose되므로 블록 안에서 값을 꺼내 둔다.
-                    request = new PopProcessActionRequest()
-                    {
-                        dttmCd = form.StopType.ToString(),   // "PD01" ~ "PD09"
-                        remark = form.Remark
-                    };
-
-                    AppLog.Info($"[POP] 공정 중지 사유 - [{form.SelectedIndex}] {request.dttmCd} : {request.remark}");
-                }
-
-            }
-
             try
             {
-                //if (UseMock)
-                //{
-                //    await Task.Yield();
-                //    _info = MockPopData.ApplyProcessAction(_key, mockState);
-                //    AppLog.Info($"[POP] (목업) 공정 상태 전이 - {action} → {_info.ProgressState}");
-                //}
-                //else
-                //{
-
-                await _appSet.ApiClients.PopApiClient.ChangeProcessStateAsync(_key, action, request);
-                await LoadAllAsync();
-                //_info
-                if (IsDisposed || Disposing) return false;
-
-                AppLog.Info($"[POP] 공정 상태 전이 - {action} → {_info?.ProgressState}");
-                DisplayProcessInfo();
-                return true;
-                
+                await Screen.MoveProcess(+1);
             }
-            catch (ApiException ex)
+            catch (Exception ex)
             {
-                if (IsDisposed || Disposing) return false;
-                AppMessageBox.Warn(this, ex.Message, Language.Pop_Title);
-                return false;
+                HandleError("다음 공정 이동", ex);
             }
         }
 
-        // ─────────────────────────────────────────────────────────────────────────
-        //  공정 이동 (이전 / 다음 / 공정 목록)
-        // ─────────────────────────────────────────────────────────────────────────
-
-        /// <summary>
-        /// [공정 목록]에 뜨는 라우팅 공정들. [이전 공정] · [다음 공정]도 <b>이 순서</b>를 따라 움직이므로
-        /// 목록과 버튼이 서로 다른 곳으로 가는 일이 없다.
-        /// </summary>
-        private List<RoutingProcessDto> _processes = new List<RoutingProcessDto>();
-
-        /// <summary>
-        /// [이전 공정] / [다음 공정] — 공정 목록에서 지금 공정의 <paramref name="offset"/>칸 옆으로 옮긴다.
-        /// 목록의 끝이면 <paramref name="edgeMessage"/>로 알리고 아무것도 하지 않는다.
-        ///
-        /// 이동은 상태 전이가 아니라 <b>보고 있는 공정을 바꾸는 것</b>이라,
-        /// [공정 목록]에서 골라 옮기는 것과 똑같이 조회 키만 바꾸고 화면을 다시 읽는다.
-        /// </summary>
-        private async Task MoveByProcessListAsync(int offset, string confirmMessage, string edgeMessage)
-        {
-            if (_key == null)
-            {
-                AppMessageBox.Warn(this, Language.Pop_NoTargetProcess, Language.Pop_Title);
-                return;
-            }
-
-            if (!await EnsureProcessesAsync())
-                return;
-
-            var current = CurrentProcessIndex();
-            if (current < 0)
-            {
-                // 목록에 없는 공정을 보고 있다 — 어디가 "옆"인지 정할 수 없으므로 목록에서 직접 고르게 한다.
-                //AppMessageBox.Info(this, Language.Pop_ProcessNotInList, Language.Pop_Title);
-                return;
-            }
-
-            var target = current + offset;
-            if (target < 0 || target >= _processes.Count)
-            {
-                //AppMessageBox.Info(this, edgeMessage, Language.Pop_Title);
-                return;
-            }
-
-            //if (!AppMessageBox.Confirm(this, confirmMessage, Language.Pop_Title))
-            //    return;
-
-            await MoveToProcessAsync(_processes[target]);
-        }
-
-        /// <summary>공정 목록에서 지금 보고 있는 공정의 위치. 없으면 -1.</summary>
-        private int CurrentProcessIndex()
-        {
-            return _processes.FindIndex(process =>
-                Same(process.SubRoutingReference, _key.SubRoutingRef));
-                //&& Same(process.RoutingName, _key.RoutingOperation)
-                //&& Same(process.PageName, _key.PageOperation));
-        }
-
-        private static bool Same(string left, string right) =>
-            string.Equals(left, right, StringComparison.OrdinalIgnoreCase);
-
-        /// <summary>고른 공정으로 조회 키를 옮기고 화면 전체(공정 정보 + 탭 4개 + 도면)를 다시 읽는다.</summary>
-        private async Task MoveToProcessAsync(RoutingProcessDto process)
-        {
-            _entry.Process = process;
-            _key = BuildKey(_entry);
-            //_key.RoutingGroup = process.RoutingGroup;
-            //_key.RoutingOperation = process.RoutingName;
-            //_key.PageOperation = process.PageName;
-
-            AppLog.Step($"[POP] 공정 이동 - {_key.RoutingOperation}/{_key.PageOperation}");
-            await LoadAllAsync();
-        }
-
-        /// <summary>
-        /// 공정 목록을 확보한다(이미 읽어 뒀으면 그대로 쓴다).
-        /// 조회에 실패하거나 목록이 비면 사유를 알리고 false를 돌려준다.
-        /// </summary>
-        private async Task<bool> EnsureProcessesAsync()
-        {
-            if (_processes.Count > 0)
-                return true;
-
-            try
-            {
-                btnPrevProcess.Enabled = false;
-                btnNextProcess.Enabled = false;
-                btnProcessList.Enabled = false;
-                _processes = await FetchRoutingProcessesAsync();
-            }
-            catch (ApiException ex)
-            {
-                AppMessageBox.Warn(this, ex.Message, Language.WorkEntryConfirm_Title);
-                return false;
-            }
-            finally
-            {
-                btnPrevProcess.Enabled = true;
-                btnNextProcess.Enabled = true;
-                btnProcessList.Enabled = true;
-            }
-
-            if (_processes.Count == 0)
-            {
-                AppMessageBox.Warn(this, Language.Pop_NoProcessList, Language.WorkEntryConfirm_Title);
-                return false;
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// [공정 목록] — 화면에 보이는 작업지시번호를 키로 공정(라우팅) 목록을 조회해
-        /// 기존 &lt;작업 진입 확인&gt; 팝업을 그대로 띄우고, [이동]으로 고른 공정으로 화면을 다시 읽는다.
-        /// </summary>
         private async void btnProcessList_Click(object sender, EventArgs e)
         {
-            if (_key == null)
+            try
             {
-                AppMessageBox.Warn(this, Language.Pop_NoTargetProcess, Language.Pop_Title);
-                return;
+                await Screen.ShowProcessList();
             }
-
-            if (!await EnsureProcessesAsync())
-                return;
-
-            RoutingProcessDto selected;
-            using (var confirm = new WorkEntryConfirmForm())
+            catch (Exception ex)
             {
-                confirm.Initialize(ResolveWorkOrder(), _processes);
-                confirm.CenterOn(this);
-                if (confirm.ShowDialog(this) != DialogResult.OK)
-                    return;
-
-                selected = confirm.SelectedProcess;
+                HandleError("공정 목록", ex);
             }
-
-            if (selected == null)
-                return;
-
-            await MoveToProcessAsync(selected);
-            AppMessageBox.Info(this, Language.Pop_ProcessMoved, Language.Pop_Title);
         }
 
-        private async Task<List<RoutingProcessDto>> FetchRoutingProcessesAsync()
-        {   
-            string cropCode = _entry?.WorkOrder?.CorpCode;
-            string workStationRef = _appSet?.CurrentUser?.WorkstationInfo?.WorkstationRef;
-            return await _appSet.ApiClients.WorkOrderApiClient.GetRoutingProcessesAsync(cropCode, workStationRef, _key.SerialNo)
-                   ?? new List<RoutingProcessDto>();
-        }
-
-        /// <summary>
-        /// &lt;작업 진입 확인&gt; 팝업 제목에 쓸 작업지시.
-        /// 진입 화면을 거쳐 왔으면 그 값을 쓰고, 아니면 화면에 보이는 작업지시번호로 최소한만 채운다.
-        /// </summary>
-        private WorkOrderEntryDto ResolveWorkOrder()
-        {
-            if (_entry?.WorkOrder != null)
-                return _entry.WorkOrder;
-
-            var stub = new WorkOrderEntryDto();
-            stub.WorkOrderNo = _key.WorkOrderNo;
-            stub.SerialNo = _key.SerialNo;
-            return stub;
-        }
-
-        /// <summary>
-        /// [관리자 알람] — &lt;관리자 알람 유형 선택&gt; 팝업을 띄우고, 고른 내용에
-        /// 현재 공정/작업자 정보를 붙여 서버로 보낸다.
-        /// 대상(결품 자재/이상 장비)은 지금 화면에 떠 있는 투입자재·연결 장비 목록에서 고르게 한다.
-        /// </summary>
         private async void btnAdminAlarm_Click(object sender, EventArgs e)
         {
-            List<AdminAlarmTypeDto> alarmTypes;
             try
             {
-                btnAdminAlarm.Enabled = false;
-                alarmTypes = await FetchAdminAlarmTypesAsync();
+                await Screen.ShowAdminAlarm();
             }
-            catch (ApiException ex)
+            catch (Exception ex)
             {
-                AppMessageBox.Warn(this, ex.Message, Language.AdminAlarm_Title);
-                return;
+                HandleError("관리자 알람", ex);
             }
-            finally
-            {
-                btnAdminAlarm.Enabled = true;
-            }
-
-            if (alarmTypes.Count == 0)
-            {
-                AppMessageBox.Warn(this, Language.AdminAlarm_NoTypes, Language.AdminAlarm_Title);
-                return;
-            }
-
-            PopAdminAlarmRequest request;
-            using (var form = new AdminAlarmForm())
-            {
-                form.Initialize(alarmTypes, _materials, _equipments);
-                form.CenterOn(this);
-                if (form.ShowDialog(this) != DialogResult.OK)
-                    return;
-
-                request = form.Request;
-            }
-
-            if (request == null)
-                return;
-
-            request.Key = _key;
-            request.UserId = _appSet?.CurrentUser?.UserId;
-
-            try
-            {
-                //if (!UseMock)
-                await _appSet.ApiClients.PopApiClient.NotifyAdministratorAsync(request);
-
-                AppLog.Info($"[POP] 관리자 알람 전송 - {request.AlarmTypeName}/{request.TargetCode} : {request.Remark}");
-                AppMessageBox.Success(this, Language.Pop_AdminAlarmSent, Language.AdminAlarm_Title);
-            }
-            catch (ApiException ex)
-            {
-                AppMessageBox.Warn(this, ex.Message, Language.AdminAlarm_Title);
-            }
-        }
-
-        private async Task<List<AdminAlarmTypeDto>> FetchAdminAlarmTypesAsync()
-        {
-            //if (UseMock)
-            //{
-            //    await Task.Yield();
-            //    return MockPopData.GetAdminAlarmTypes();
-            //}
-
-            return await _appSet.ApiClients.PopApiClient.GetAdminAlarmTypesAsync()
-                   ?? new List<AdminAlarmTypeDto>();
         }
 
         // ─────────────────────────────────────────────────────────────────────────
-        //  기타 (시계 / 도면 자리표시자 / 유틸)
+        //  하단 탭
         // ─────────────────────────────────────────────────────────────────────────
 
-        /// <summary>상단 우측 현재시각을 1초마다 갱신한다.</summary>
-        private void StartClock()
+        /// <summary>[수동 렌치]는 BOM · 검사 탭에서, 서버가 허용한 공정일 때만 보인다.</summary>
+        private void tabSpec_SelectedPageChanged(object sender, DevExpress.XtraTab.TabPageChangedEventArgs e)
         {
-            //lblCurrentTime.Text = DateTime.Now.ToString("HH:mm:ss");
+            switch (e.Page.Name)
+            {
+                case "pageInspec":
+                case "pageBom":
+                    chkManualWrench.Visible = _bomManualEnabled;
+                    break;
 
-            _clock = new System.Windows.Forms.Timer();
-            _clock.Interval = 1000;
-            _clock.Tick += Clock_Tick;
-            _clock.Start();
+                case "pageEquip":
+                case "pageMaterial":
+                    chkManualWrench.Visible = false;
+                    break;
+            }
         }
 
-        private void Clock_Tick(object sender, EventArgs e)
+        /// <summary>수동 렌치를 켜면 "결과값 입력" 컬럼([입력] 버튼)이 나타난다.</summary>
+        private void chkManualWrench_CheckedChanged(object sender, EventArgs e)
         {
-            //lblCurrentTime.Text = DateTime.Now.ToString("HH:mm:ss");
+            SetResultInputColumnVisible(chkManualWrench.Checked);
         }
 
-        /// <summary>크기가 바뀌면 자리표시자 전체를 다시 그린다(Init에서 주석으로 설명한 잔상 문제 때문).</summary>
+        /// <summary>
+        /// 편집 중인 셀을 확정한다. 실적은 셀을 고칠 때마다 이미 서버에 보냈으므로 여기서 다시 보내지 않는다.
+        /// </summary>
+        private void btnSaveResults_Click(object sender, EventArgs e)
+        {
+            gridViewBomSpec.CloseEditor();
+            gridViewBomSpec.UpdateCurrentRow();
+            gridViewInspection.CloseEditor();
+            gridViewInspection.UpdateCurrentRow();
+
+            AppMessageBox.Success(this, Language.Pop_SavedResult, Language.Pop_Title);
+        }
+
+        // ─────────────────────────────────────────────────────────────────────────
+        //  아코디언 — 우측 공정 정보 / 하단 탭을 접어 도면을 크게 본다
+        // ─────────────────────────────────────────────────────────────────────────
+
+        private void btnInfoAccordion_Click(object sender, EventArgs e)
+        {
+            SetInfoExpanded(!_infoExpanded);
+        }
+
+        private void btnTabsAccordion_Click(object sender, EventArgs e)
+        {
+            SetBottomExpanded(!_bottomExpanded);
+        }
+
+        // ─────────────────────────────────────────────────────────────────────────
+        //  도면 뷰어
+        // ─────────────────────────────────────────────────────────────────────────
+
+        /// <summary>크기가 바뀌면 자리표시자 전체를 다시 그린다(일부만 다시 그리면 잔상이 남는다).</summary>
         private void ViewerSurface_Resize(object sender, EventArgs e)
         {
             viewerSurface.Invalidate();
@@ -2018,7 +409,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
         /// <summary>
         /// 도면이 떠 있지 않을 때 보이는 자리표시자 — 화면 설계서와 같은 대각선 상자를 그리고,
-        /// 가운데에 현재 상태(<see cref="_viewerMessage"/>: 불러오는 중 / 도면 없음 / 실패 사유)를 적는다.
+        /// 가운데에 현재 상태(<see cref="_viewerMessage"/>: 도면 없음 / 실패 사유)를 적는다.
         /// 도면 이미지가 열리면 <c>picView</c>가 이 면을 덮으므로 이 그림은 보이지 않는다.
         /// </summary>
         private void ViewerSurface_Paint(object sender, PaintEventArgs e)
@@ -2067,93 +458,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             }
         }
 
-        /// <summary>진입 화면에서 받은 작업 대상을 조회 키로 바꾼다. 대상이 없으면 null.</summary>
-        private PopProcessKey BuildKey(WorkEntryContext entry)
-        {
-            if (entry?.WorkOrder == null || entry.Process == null)
-                return null;
-
-            var key = new PopProcessKey();
-            key.WorkOrderNo = _entry.WorkOrder.WorkOrderNo;
-            key.SerialNo = _entry.WorkOrder.SerialNo;
-            key.RoutingGroup = _entry.Process.RoutingGroup;
-            key.RoutingGroupRef = _entry.Process.RoutingGroupRef;
-            key.RoutingOperation = _entry.Process.RoutingName;
-            key.PageOperation = _entry.Process.PageName;
-            key.SubRoutingRef = _entry.Process.SubRoutingReference;
-            key.CorpCode = _entry.Process.CorpCode;
-            key.WorkstationRef = _appSet.CurrentUser.WorkstationInfo.WorkstationRef;
-            return key;
-        }
-
-        /// <summary>상단에 표시할 작업자 — 프로필 이름이 없으면 로그인 아이디를 쓴다.</summary>
-        private string ResolveWorkerName()
-        {
-            var user = _appSet?.CurrentUser;
-            if (user == null)
-                return string.Empty;
-
-            return string.IsNullOrWhiteSpace(user.UserName) ? user.UserId : user.UserName;
-        }
-
-        private static string FormatTime(DateTime? value) =>
-            value?.ToString("HH:mm:ss") ?? string.Empty;
-
-        private static string FormatDuration(TimeSpan? value) =>
-            value?.ToString(@"hh\:mm\:ss", CultureInfo.InvariantCulture) ?? string.Empty;
-
-        private void PopScreen_Disposed(object sender, EventArgs e)
-        {
-            if (_equip != null) UnwireEquipmentEvents();
-
-            // 이벤트 연결을 끊고 들고 있던 도면 이미지를 해제한다.
-            _viewer?.Dispose();
-            _viewer = null;
-
-            if (_clock != null)
-            {
-                _clock.Stop();
-                _clock.Tick -= Clock_Tick;
-                _clock.Dispose();
-                _clock = null;
-            }
-
-        }
-
-        private void InvokeIfRequired(Action action)
-        {
-            if (IsDisposed) return;
-            if (InvokeRequired) BeginInvoke(action);
-            else action();
-        }
-
-        private void tabSpec_SelectedPageChanged(object sender, DevExpress.XtraTab.TabPageChangedEventArgs e)
-        {
-            switch (e.Page.Name)
-            {
-                case "pageInspec":
-                    chkManualWrench.Visible = _bomManualEnabled;
-                    //btnSaveResults.Visible = false;
-                    _activeTab = PopTab.Inspection;
-                    break;
-
-                case "pageBom":
-                    chkManualWrench.Visible = _bomManualEnabled;
-                    //btnSaveResults.Visible = false;
-                    _activeTab = PopTab.BomSpec;
-                    break;
-
-                case "pageEquip":
-                case "pageMaterial":
-                    chkManualWrench.Visible = false;
-                    //btnSaveResults.Visible = false;
-                    _activeTab = PopTab.Material;
-                    break;
-                
-            }
-
-        }
-
         /// <summary>
         /// 이미지가 없으면 우클릭 메뉴를 띄우지 않는다 — 빈 화면에서 맞춤/원본 크기는 의미가 없다.
         /// 현재 맞춤 모드인지 체크 표시로 알려 준다.
@@ -2191,85 +495,92 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             _viewer?.ZoomToFit();
         }
 
-        private async void gridViewInspection_CellValueChanged(object sender, CellValueChangedEventArgs e)
+        // ─────────────────────────────────────────────────────────────────────────
+        //  설비 이벤트 — 장비 관리자의 수신 스레드에서 올라오므로 화면 스레드로 넘겨 처리한다
+        // ─────────────────────────────────────────────────────────────────────────
+
+        private void OnFasteningReceived(object sender, NutrunnerFasteningEventArgs e)
         {
-            var fieldName = e.Column?.FieldName;
-            if (fieldName == null || !_inspectionInputFields.Contains(fieldName))
-                return;
+            InvokeIfRequired(HandleFastening, e);
+        }
 
-            // ShowingEditor에서 이미 막지만, 편집 도중 서버 상태가 바뀌어 들어온 값은 보내지 않는다.
-            if (!IsProcessRunning)
-            {
-                AppLog.Info($"[POP] 공정 미시작 - 검사 결과 전송 생략 (상태 {_progressState})");
-                return;
-            }
+        private void OnRegisterDataReceived(object sender, NutrunnerRegisterEventArgs e)
+        {
+            InvokeIfRequired(HandleRegisterData, e);
+        }
 
-            var view = (GridView)sender;
-            var spec = view.GetRow(e.RowHandle) as PopInspectionSpecDto;
-            if (spec == null)
-                return;
+        private void OnConnectionChanged(object sender, EquipmentConnectionEventArgs e)
+        {
+            InvokeIfRequired(HandleConnectionChanged, e);
+        }
 
-            // 바뀐 칸 하나가 아니라 입력 칸 세 개를 모두 보낸다(값이 없으면 빈 문자열).
-            var result = new PopInspectionResult
-            {
-                InspectionItemCode = spec.InspectionItemCode ?? string.Empty,
-                ResultState = spec.ResultState ?? string.Empty,
-                ResultValue = spec.ResultValue ?? string.Empty,
-                InspectionResultRemark = spec.InspectionResultRemark ?? string.Empty
-            };
+        /// <summary>알람은 로그만 남긴다 — 화면을 건드리지 않으므로 스레드를 옮기지 않는다.</summary>
+        private void OnErrorOccurred(object sender, AlarmEventArgs e)
+        {
+            AppLog.Warn($"[ALARM] [{e.OccurredAt} / {e.Code}] {e.Message}");
+        }
 
-            BeginResultSave();
+        /// <summary>체결 결과 한 건 — 원본을 로그로 남기고 토크 · 각도(Angle3)를 BOM 스팩에 채운다.</summary>
+        private async void HandleFastening(NutrunnerFasteningEventArgs e)
+        {
             try
             {
-                await _apiClient.PopApiClient.SaveInspectionResultAsync(_key, result);
-                AppLog.Info($"[POP] 검사 결과 전송 - {result.InspectionItemCode} ({fieldName})");
-            }
-            catch (ApiException ex)
-            {
-                AppLog.Warn($"[POP] 검사 결과 전송 실패 - {result.InspectionItemCode}: {ex.Message}");
-                if (IsDisposed || Disposing)
-                    return;
+                FasteningData data = e.Data;
 
-                AppMessageBox.Warn(this, ex.Message, Language.Pop_TabInspection);
-                return;
-            }
-            finally
-            {
-                EndResultSave();
-            }
+                AppLog.Info("────────────────────────");
+                AppLog.Info($"[ID {e.Code}] Fastening");
+                AppLog.Info($"[ToolId] : {data.ToolId}");
+                AppLog.Info($"[FastenTime] : {data.FastenTime}");
+                AppLog.Info($"[Preset] : {data.Preset}");
+                AppLog.Info($"[TargetTorque] : {data.TargetTorqueValue:0.00}");
+                AppLog.Info($"[Torque] : {data.TorqueValue:0.00}");
+                AppLog.Info($"[Speed] : {data.Speed}");
+                AppLog.Info($"[Angle1] : {data.Angle1}");
+                AppLog.Info($"[Angle2] : {data.Angle2}");
+                AppLog.Info($"[Angle3] : {data.Angle3}");
+                AppLog.Info($"[RemainScrew] : {data.RemainScrew}");
+                AppLog.Info($"[Error] : {data.Error}");
+                AppLog.Info($"[Direction] : {data.Direction}");
+                AppLog.Info($"[EventStatus] : {data.EventStatus}");
+                AppLog.Info($"[SnugAngle] : {data.SnugAngle}");
+                AppLog.Info($"[Barcode] : {data.Barcode}");
 
-            if (IsDisposed || Disposing) return;
-            await TryAutoProgressAsync();
+                await Screen.SetTorqueFromEquipment(e.Code, (decimal)data.TorqueValue, (decimal)data.Angle3);
+            }
+            catch (Exception ex)
+            {
+                HandleError("설비 체결 결과 처리", ex);
+            }
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void HandleRegisterData(NutrunnerRegisterEventArgs e)
         {
-            FileUploadForm form = new FileUploadForm(_key);
-            form.ShowDialog();
+            if (!e.Success)
+                return;
+
+            Screen.RefreshEquipmentStates();
+
+            ushort address = e.StartAddress;
+            foreach (ushort value in e.Data)
+                AppLog.Warn($"[ID {e.Code}][{address++:D4}] : {value}");
         }
-    }
 
-    /// <summary>
-    /// Phase 1: Encapsulates tab initialization configuration.
-    /// Used to centralize tab setup logic and enable data-driven tab management.
-    /// </summary>
-    internal class TabInitConfig
-    {
-        public PopTab TabType { get; set; }
-        public DevExpress.XtraGrid.GridControl GridControl { get; set; }
-        public SEOJIN_TMES.Client.Forms.Common.MeisGridView GridView { get; set; }
-        public System.Drawing.Color ThemeColor { get; set; }
-        public string TabName { get; set; }
-        public System.Func<System.Threading.Tasks.Task> LoadDataAsync { get; set; }
-        public System.Action ConfigureColumns { get; set; }
-    }
+        private void HandleConnectionChanged(EquipmentConnectionEventArgs e)
+        {
+            AppLog.Info($"[ID {e.Code}] {(e.IsConnected ? "연결 됨" : "연결 끊김")}");
+            Screen.RefreshEquipmentStates();
+        }
 
-    /// <summary>POP 본 화면 하단의 탭.</summary>
-    internal enum PopTab
-    {
-        Material,
-        BomSpec,
-        Inspection,
-        Equipment
+        /// <summary>설비 수신 스레드에서 올라온 처리를 화면 스레드로 넘긴다. 화면이 이미 닫혔으면 버린다.</summary>
+        private void InvokeIfRequired<T>(Action<T> action, T args)
+        {
+            if (IsDisposed || Disposing)
+                return;
+
+            if (InvokeRequired)
+                BeginInvoke(action, args);
+            else
+                action(args);
+        }
     }
 }

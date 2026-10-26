@@ -32,7 +32,7 @@ deploy/
 "입력 필요" 값은 **비워 둔 상태**다. 게시 스크립트가 처음 게시할 때 물어보고 그 지역 파일에 저장한다(아래 3번).
 세 값 중 하나라도 비어 있으면 게시하지 않는다(빌드도 `DeployBaseUrl`이 비면 오류로 멈춘다).
 
-게시본 App.config는 지역 공통으로 `UseMockData=false`, `LogApiResponseBody=false`,
+게시본 App.config는 지역 공통으로 `LogApiResponseBody=false`,
 `DocumentShare`(도면 공유 폴더)는 비움, `Equipments`(설비 목록)는 `[]` — 지역 공유 폴더가 정해지면 해당 App.config에 채운다.
 
 - `SEOJIN_TMES.Client.csproj`는 `-p:Region=<지역>`이 있을 때만 `regions/<지역>/region.props`를 불러와

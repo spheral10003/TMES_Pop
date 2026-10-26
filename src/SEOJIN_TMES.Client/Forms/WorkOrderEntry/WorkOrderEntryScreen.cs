@@ -8,7 +8,6 @@ using SEOJIN_TMES.Client.Core;
 using SEOJIN_TMES.Client.Forms.Common;
 using SEOJIN_TMES.Client.Forms.Pop;
 using SEOJIN_TMES.Client.Forms.WorkStatus;
-using SEOJIN_TMES.Client.Mock;
 using SEOJIN_TMES.Client.Theme;
 using System;
 using System.Collections.Generic;
@@ -175,10 +174,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             
         }
 
-        /// <summary>
-        /// 조회 결과를 가져온다. 목업 모드(App.config의 UseMockData=true)면 서버를 호출하지 않고
-        /// 화면 설계서 샘플 데이터를 돌려준다 — 서버 없이도 화면/컬럼/서식을 그대로 확인하기 위한 임시 경로다.
-        /// </summary>
+        /// <summary>조회 결과를 서버에서 가져온다.</summary>
         private async Task<List<WorkOrderEntryDto>> FetchWorkOrdersAsync(WorkOrderQuery query, bool workStationEnable, CancellationToken cancellationToken = default)
         {
             return await _appSet.ApiClients.WorkOrderApiClient.SearchWorkOrdersAsync(query, workStationEnable, cancellationToken)
@@ -249,18 +245,9 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             OpenPopScreen(new WorkEntryContext(selected, process));
         }
 
-        /// <summary>
-        /// 선택한 작업지시의 공정(라우팅) 목록을 가져온다.
-        /// 목업 모드면 서버 대신 <see cref="MockWorkOrderData"/>의 샘플 공정을 돌려준다.
-        /// </summary>
+        /// <summary>선택한 작업지시의 공정(라우팅) 목록을 서버에서 가져온다.</summary>
         private async Task<List<RoutingProcessDto>> FetchRoutingProcessesAsync(string corpCode, string workStationRef, string serialNo, CancellationToken cancellationToken)
         {
-            //if (_appSet.AppSet.UseMockData)
-            //{
-            //    await Task.Yield();
-            //    return MockWorkOrderData.GetRoutingProcesses(workOrderNo, serialNo);
-            //}
-
             return await _appSet.ApiClients.WorkOrderApiClient.GetRoutingProcessesAsync(corpCode, workStationRef, serialNo, cancellationToken)
                    ?? new List<RoutingProcessDto>();
         }

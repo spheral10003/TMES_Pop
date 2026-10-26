@@ -7,7 +7,6 @@ using SEOJIN_TMES.Client.Common.Models;
 using SEOJIN_TMES.Client.Composition;
 using SEOJIN_TMES.Client.Core;
 using SEOJIN_TMES.Client.Forms.Common;
-using SEOJIN_TMES.Client.Mock;
 using SEOJIN_TMES.Client.Theme;
 using System;
 using System.Collections.Generic;
@@ -287,12 +286,6 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
 
         private async Task<List<WorkOrderEntryDto>> FetchWorkOrdersAsync(WorkOrderQuery query, CancellationToken cancellationToken)
         {
-            //if (_appSet.UseMockData)
-            //{
-            //    await Task.Yield();
-            //    return MockWorkStatusData.SearchWorkOrders(query);
-            //}
-
             return await _apiClients.WorkStatusApiClient.SearchWorkOrdersAsync(query, cancellationToken)
                    ?? new List<WorkOrderEntryDto>();
         }
@@ -327,12 +320,6 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
 
         private async Task<List<WorkProgressDto>> FetchProgressAsync(string corpCode, string workStationRef, string serialNo)
         {
-            //if (_appSet.AppSet.UseMockData)
-            //{
-            //    await Task.Yield();
-            //    return MockWorkStatusData.GetWorkProgress(workOrderNo, serialNo);
-            //}
-
             return await _apiClients.WorkStatusApiClient.GetWorkProgressAsync(corpCode, workStationRef, serialNo)
                    ?? new List<WorkProgressDto>();
         }

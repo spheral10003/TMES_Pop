@@ -48,7 +48,6 @@ src/
     Images/                      브랜드 이미지 원본 (로고, 로그인 일러스트, 상단 바 아이콘, flag/ 국기)
     Menu/                        3-Depth 메뉴 트리 정의 (MenuCatalog, MenuNode)
     Localization/                다국어 리소스 (Strings.resx=한국어 기본, .en=영어, .vi=베트남어)
-    Mock/                        서버 없이 화면 확인용 목업 데이터 (App.config의 UseMockData=true일 때만 사용)
     Composition/                 컴포지션 루트 보조 (App.config 로더, ClientContext)
     Program.cs                   진입점: 설정 로드 → API/설비 조립 → 로그인 → 메인화면
     App.config                   ApiBaseUrl, 설비(Host/Port) 목록 등 환경설정
@@ -232,17 +231,6 @@ POP 화면 (PopScreen) — 같은 탭의 내용만 바뀌고, 탭 제목은 "POP
 - 팝업에서 페이지 공정을 고르지 않고 [이동]을 누르면 안내만 하고 창은 유지한다.
 - POP 본 화면은 메뉴에서 직접 열리지 않는다(진입 화면을 거친다). 작업 대상 없이 열리는 경우도 대비해 `PopScreen.Initialize(context)` 오버로드는 그대로 남겨 뒀다.
 
-**목업 데이터로 진입 흐름 확인** — 서버 API가 아직 없어서, 목업 모드를 켜면 [조회] → [작업] → &lt;작업 진입 확인&gt; → POP까지 화면 설계서 샘플 데이터로 끝까지 돌려볼 수 있다.
-
-| 항목 | 내용 |
-| --- | --- |
-| 켜고 끄기 | `App.config`의 **`UseMockData`** (현재 `true`. 서버가 붙으면 `false`로 되돌리면 원래의 REST 호출 경로로 돌아간다) |
-| 샘플 데이터 | [Mock/MockWorkOrderData.cs](src/SEOJIN_TMES.Client/Mock/MockWorkOrderData.cs) — 작업 지시 정보 8건 (`WO_260701-01` ~ `WO_260705-01`, 시리얼 `SN-260701-0001` ~, 상태 진행중/대기/완료/보류) + 각 지시의 공정 목록 |
-| 조회 동작 | 작업지시번호 / 시리얼번호를 **부분 일치(대소문자 무시)** 로 거른다. 둘 다 입력하면 AND. 예: `WO_2607` → 8건, `WO_260701` → 2건, `0703` → 2건 |
-| 공정(라우팅) | 품목 계열로 그룹이 갈린다 — `ITM-A/B` → `MAIN-01`/`MAIN-02` 5공정, `ITM-C/D` → `SUB-01`/`SUB-02` 4공정. 라우팅 공정 `OP10`~, 페이지 공정 `0010`~ |
-| 공정 진행 상태 | 작업지시 상태를 따라간다 — 완료 지시는 전 공정 **완료**, 진행중 지시는 앞 2공정 완료 + 3번째 **진행중** + 나머지 대기, 대기/보류 지시는 전 공정 **대기** |
-| 적용 범위 | 진입 화면의 [조회]와 [작업](공정 목록) + POP 본 화면의 공정 정보/탭 4개. 설비 Modbus 통신은 목업 모드와 무관하게 늘 실제 설비를 탄다 |
-
 ## POP 본 화면 — 진행 중 공정 정보 + 하단 4개 탭
 
 진입 화면에서 [이동]으로 고른 **페이지 공정 한 건**을 실제로 작업하는 화면이다.
@@ -256,12 +244,14 @@ POP 화면 (PopScreen) — 같은 탭의 내용만 바뀌고, 탭 제목은 "POP
 
 | 파일 | 역할 |
 | --- | --- |
-| [Forms/Pop/PopScreen.cs](src/SEOJIN_TMES.Client/Forms/Pop/PopScreen.cs) | 본 화면 전체(상단 버튼 · 공정 정보 · 탭 4개 · 설비 이벤트 수신) |
+| [Forms/Pop/PopScreen.cs](src/SEOJIN_TMES.Client/Forms/Pop/PopScreen.cs) | 본 화면의 초기화 · 이벤트 핸들러(상단 버튼 · 탭 전환 · 도면 뷰어 · 설비 이벤트 수신). 처리는 `IPopScreen`으로 부른다 |
+| [Forms/Pop/IPopScreen.cs](src/SEOJIN_TMES.Client/Forms/Pop/IPopScreen.cs) | 본 화면이 하는 일의 계약(그리드 · 공정 · 실적 · 설비 · 도면) |
+| [Forms/Pop/PopScreen.Grid.cs](src/SEOJIN_TMES.Client/Forms/Pop/PopScreen.Grid.cs) | 탭 4개 그리드의 컬럼 구성 · 바인딩 · 그리드 이벤트 |
+| [Forms/Pop/PopScreen.Method.cs](src/SEOJIN_TMES.Client/Forms/Pop/PopScreen.Method.cs) | 공정 상태 전이 · 공정 이동 · 자동 진행 · 실적 전송 · 너트러너 토크 설정 · 도면 · 아코디언 |
 | [Forms/Pop/MaterialSerialForm.cs](src/SEOJIN_TMES.Client/Forms/Pop/MaterialSerialForm.cs) | &lt;투입자재 정보 입력&gt; 팝업. 결과는 `SerialNumbers`로 받는다 |
 | [Forms/Pop/TorqueInputForm.cs](src/SEOJIN_TMES.Client/Forms/Pop/TorqueInputForm.cs) | &lt;토크 결과값 입력&gt; 팝업(수동 렌치). 결과는 `Value`로 받는다 |
 | [Models/PopWorkDto.cs](src/SEOJIN_TMES.Client.Common/Models/PopWorkDto.cs) | 공정 정보 / 투입자재 / BOM 스팩 / 검사 스팩 / 연결 장비 DTO + 조회 키(`PopProcessKey`) |
 | [IPopApiClient.cs](src/SEOJIN_TMES.Client.ApiClient/IPopApiClient.cs) | POP 전용 REST 클라이언트(조회 5종 + 저장 3종 + 상태 전이 + 관리자 알람) |
-| [Mock/MockPopData.cs](src/SEOJIN_TMES.Client/Mock/MockPopData.cs) | 화면 설계서 샘플 데이터(목업 모드용) |
 | [Storage/DocumentShareClient.cs](src/SEOJIN_TMES.Client.Common/Storage/DocumentShareClient.cs) | SMB 공유 폴더에서 도면 PDF를 읽어 오는 클라이언트 |
 | [Storage/SmbConnection.cs](src/SEOJIN_TMES.Client.Common/Storage/SmbConnection.cs) | 공유 폴더 자격증명 연결(mpr.dll WNetAddConnection2) |
 
@@ -363,7 +353,6 @@ MEIS &gt; 작업 현황 조회 &gt; **작업 조회 현황**. 작업지시를 �
 | [Forms/WorkStatus/ItemPickerForm.cs](src/SEOJIN_TMES.Client/Forms/WorkStatus/ItemPickerForm.cs) | &lt;생산품목 선택&gt; 팝업. 결과는 `SelectedItem`으로 받는다 |
 | [Models/WorkStatusDto.cs](src/SEOJIN_TMES.Client.Common/Models/WorkStatusDto.cs) | 조회 조건(`WorkStatusQuery`) · 진행 현황(`WorkProgressDto`) · 품목(`ItemDto`) |
 | [IWorkStatusApiClient.cs](src/SEOJIN_TMES.Client.ApiClient/IWorkStatusApiClient.cs) | 조건 조회 + 진행 현황 + 품목 검색 |
-| [Mock/MockWorkStatusData.cs](src/SEOJIN_TMES.Client/Mock/MockWorkStatusData.cs) | 화면 설계서 샘플 데이터(목업 모드용) |
 
 **서버 API**(경로는 모두 **가정값**):
 
@@ -427,7 +416,6 @@ MEIS &gt; 작업통합 개요 &gt; **작업통합 현황 조회**. "이 시리�
 | --- | --- |
 | [WorkIntegratedStatusScreen.cs](src/SEOJIN_TMES.Client/Forms/WorkIntegratedStatus/WorkIntegratedStatusScreen.cs) | 조회 조건 + 작업 통합 개요 트리 + 엑셀 내보내기 |
 | [Models/WorkIntegratedDto.cs](src/SEOJIN_TMES.Client.Common/Models/WorkIntegratedDto.cs) | 트리 한 줄(`WorkIntegratedNodeDto`) + 줄 종류 상수(`WorkIntegratedNodeKind`) |
-| [Mock/MockWorkIntegratedData.cs](src/SEOJIN_TMES.Client/Mock/MockWorkIntegratedData.cs) | 화면 설계서 샘플 계층(목업 모드용) |
 
 **서버 API**(경로는 **가정값**): `GET api/v1.0/production/work-integrated-overview?serialNo=`
 

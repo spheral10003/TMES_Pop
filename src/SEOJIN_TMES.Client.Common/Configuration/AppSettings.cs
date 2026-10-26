@@ -25,12 +25,6 @@ namespace SEOJIN_TMES.Client.Common.Configuration
         //public List<EquipmentEndpoint> Equipments { get; set; } = new List<EquipmentEndpoint>();
 
         /// <summary>
-        /// 서버 API 대신 목업 데이터를 사용할지 여부(화면 확인용). App.config의 <c>UseMockData</c>로 켠다.
-        /// 현재는 POP 진입 화면의 [조회]에만 적용된다. 운영 배포에서는 반드시 false로 둘 것.
-        /// </summary>
-        public bool UseMockData { get; set; }
-
-        /// <summary>
         /// 안 읽은 알림 개수 폴링 주기(초). 상단 종 아이콘 배지 숫자를 이 간격으로 갱신한다.
         /// 0 이하로 두면 폴링을 하지 않는다(서버가 없을 때 호출을 아예 막고 싶은 경우).
         /// </summary>

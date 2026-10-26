@@ -6,7 +6,6 @@ using SEOJIN_TMES.Client.Common.Models;
 using SEOJIN_TMES.Client.Composition;
 using SEOJIN_TMES.Client.Core;
 using SEOJIN_TMES.Client.Forms.Common;
-using SEOJIN_TMES.Client.Mock;
 using SEOJIN_TMES.Client.Theme;
 using System;
 using System.Collections.Generic;
@@ -167,12 +166,6 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
 
         private async Task<List<ItemResponse>> FetchItemsAsync(ItemQuery query, CancellationToken cancellationToken = default)
         {
-            //if (_appSet.UseMockData)
-            //{
-            //    await Task.Yield();
-            //    return MockWorkStatusData.SearchItems(keyword);
-            //}
-
             return await _apiClients.WorkStatusApiClient.SearchItemsAsync(query, cancellationToken)
                    ?? new List<ItemResponse>();
         }

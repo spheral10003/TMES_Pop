@@ -225,12 +225,6 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
 
         private async Task<List<WorkIntegratedDto>> FetchOverviewAsync(string corpCd, string serialNo, CancellationToken cancellationToken)
         {
-            //if (_appSet.UseMockData)
-            //{
-            //    await Task.Yield();
-            //    return MockWorkIntegratedData.GetOverview(serialNo);
-            //}
-
             return await _apiClients.ProductionApiClient.GetWorkIntegratedOverviewAsync(corpCd, serialNo, cancellationToken)
                    ?? new List<WorkIntegratedDto>();
         }

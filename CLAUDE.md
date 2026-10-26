@@ -53,7 +53,13 @@ SEOJIN_TMES.Client ──┬─→ SEOJIN_TMES.Client.ApiClient ──┐
 - **사용자에게 띄우는 창은 `AppMessageBox`만.** `MessageBox` / `XtraMessageBox` 직접 호출 금지.
 - 환경마다 달라지는 값(서버 주소, 설비 IP/포트, 공유 폴더, 타임아웃, 폴링 주기)은 코드에 박지 않고
   `src/SEOJIN_TMES.Client/App.config`에 둔다. 새 설정을 넣을 때는 App.config 주석에 **의미와 기본값**을 함께 적는다.
-- `Mock/`은 `App.config`의 `UseMockData=true`일 때만 쓰인다. 운영 경로에 목업 분기를 새로 만들지 말 것.
+- **메서드 이름 규칙**
+  - API에서 값을 받아 오는 메서드는 `Get`, API로 값을 보내거나 받은 값을 적용하는 메서드는 `Set`(`Load` · `Fetch` · `Apply` 대신).
+  - 파일이나 파일의 값을 읽는 메서드는 `Load`, 파일에 저장하는 메서드는 `Save`.
+  - `Task` / `async`를 써도 메서드 이름에 `Async`를 붙이지 않는다.
+  - private 필드는 `_camelCase`, public 멤버는 `PascalCase`.
+- **async void 이벤트 핸들러는 반드시 예외를 잡아 `AppLog`로 남긴다** — 새면 앱이 그대로 종료된다.
+- **목업(Mock) 데이터를 쓰지 않는다.** 화면 데이터는 전부 서버 API로 받는다 — 목업 클래스나 목업 분기를 새로 만들지 말 것.
 - 솔루션에서 **공통으로 쓰는 메서드 · 클래스는 되도록 `SEOJIN_TMES.Client.Common`에 모아서 관리**한다.
   프로젝트 경계(위 참고)상 Common은 다른 세 프로젝트가 공유하는 최하위 계층이므로, 여러 프로젝트에서 쓰일 코드는
   처음부터 Common에 두거나 나중에 발견하면 그쪽으로 옮긴다.

@@ -498,9 +498,6 @@
   <data name="Pop_NextProcess" xml:space="preserve">
     <value>Next</value>
   </data>
-  <data name="Pop_SkipProcess" xml:space="preserve">
-    <value>Skip</value>
-  </data>
   <data name="Pop_StopProcess" xml:space="preserve">
     <value>Stop</value>
   </data>
@@ -594,29 +591,8 @@
   <data name="Pop_ProcessMoved" xml:space="preserve">
     <value>Moved to the selected process.</value>
   </data>
-  <data name="Pop_FirstProcess" xml:space="preserve">
-    <value>This is the first process in the list.</value>
-  </data>
   <data name="Pop_LastProcess" xml:space="preserve">
     <value>This is the last process in the list.</value>
-  </data>
-  <data name="Pop_ProcessNotInList" xml:space="preserve">
-    <value>The current process was not found in the process list. Please pick one from [Process List].</value>
-  </data>
-  <data name="Pop_ConfirmStart" xml:space="preserve">
-    <value>Start this process?</value>
-  </data>
-  <data name="Pop_ConfirmStop" xml:space="preserve">
-    <value>Stop this process?</value>
-  </data>
-  <data name="Pop_ConfirmSkip" xml:space="preserve">
-    <value>Skip this process?</value>
-  </data>
-  <data name="Pop_ConfirmPrevious" xml:space="preserve">
-    <value>Move to the previous process?</value>
-  </data>
-  <data name="Pop_ConfirmNext" xml:space="preserve">
-    <value>Move to the next process?</value>
   </data>
   <data name="Pop_AdminAlarmSent" xml:space="preserve">
     <value>The alarm has been sent to the administrator.</value>

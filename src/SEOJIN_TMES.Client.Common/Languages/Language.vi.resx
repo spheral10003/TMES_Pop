@@ -498,9 +498,6 @@
   <data name="Pop_NextProcess" xml:space="preserve">
     <value>Sau</value>
   </data>
-  <data name="Pop_SkipProcess" xml:space="preserve">
-    <value>Bỏ qua</value>
-  </data>
   <data name="Pop_StopProcess" xml:space="preserve">
     <value>Dừng</value>
   </data>
@@ -594,29 +591,8 @@
   <data name="Pop_ProcessMoved" xml:space="preserve">
     <value>Đã chuyển đến công đoạn đã chọn.</value>
   </data>
-  <data name="Pop_FirstProcess" xml:space="preserve">
-    <value>Đây là công đoạn đầu tiên trong danh sách.</value>
-  </data>
   <data name="Pop_LastProcess" xml:space="preserve">
     <value>Đây là công đoạn cuối cùng trong danh sách.</value>
-  </data>
-  <data name="Pop_ProcessNotInList" xml:space="preserve">
-    <value>Không tìm thấy công đoạn hiện tại trong danh sách. Hãy chọn từ [Danh sách công đoạn].</value>
-  </data>
-  <data name="Pop_ConfirmStart" xml:space="preserve">
-    <value>Bắt đầu công đoạn này?</value>
-  </data>
-  <data name="Pop_ConfirmStop" xml:space="preserve">
-    <value>Dừng công đoạn này?</value>
-  </data>
-  <data name="Pop_ConfirmSkip" xml:space="preserve">
-    <value>Bỏ qua công đoạn này?</value>
-  </data>
-  <data name="Pop_ConfirmPrevious" xml:space="preserve">
-    <value>Chuyển đến công đoạn trước?</value>
-  </data>
-  <data name="Pop_ConfirmNext" xml:space="preserve">
-    <value>Chuyển đến công đoạn sau?</value>
   </data>
   <data name="Pop_AdminAlarmSent" xml:space="preserve">
     <value>Đã gửi cảnh báo đến người quản lý.</value>

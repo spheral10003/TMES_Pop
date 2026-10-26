@@ -32,9 +32,6 @@ namespace SEOJIN_TMES.Client.Composition
             if (int.TryParse(ConfigurationManager.AppSettings["LogApiResponseBodyMaxLength"], out var bodyMaxLength))
                 settings.LogApiResponseBodyMaxLength = bodyMaxLength;
 
-            if (bool.TryParse(ConfigurationManager.AppSettings["UseMockData"], out var useMockData))
-                settings.UseMockData = useMockData;
-
             if (int.TryParse(ConfigurationManager.AppSettings["NotificationPollingSeconds"], out var pollingSeconds))
                 settings.NotificationPollingSeconds = pollingSeconds;
 

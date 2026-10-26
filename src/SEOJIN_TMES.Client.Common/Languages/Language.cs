@@ -215,7 +215,6 @@ namespace SEOJIN_TMES.Client.Common.Languages
         // POP 본 화면 (진행 중 공정 정보 + 하단 4개 탭)
         public static string Pop_PrevProcess => Get(nameof(Pop_PrevProcess));
         public static string Pop_NextProcess => Get(nameof(Pop_NextProcess));
-        public static string Pop_SkipProcess => Get(nameof(Pop_SkipProcess));
         public static string Pop_StopProcess => Get(nameof(Pop_StopProcess));
         public static string Pop_StartProcess => Get(nameof(Pop_StartProcess));
         public static string Pop_ProcessList => Get(nameof(Pop_ProcessList));
@@ -247,14 +246,7 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string Pop_SerialNotRequired => Get(nameof(Pop_SerialNotRequired));
         public static string Pop_NoProcessList => Get(nameof(Pop_NoProcessList));
         public static string Pop_ProcessMoved => Get(nameof(Pop_ProcessMoved));
-        public static string Pop_FirstProcess => Get(nameof(Pop_FirstProcess));
         public static string Pop_LastProcess => Get(nameof(Pop_LastProcess));
-        public static string Pop_ProcessNotInList => Get(nameof(Pop_ProcessNotInList));
-        public static string Pop_ConfirmStart => Get(nameof(Pop_ConfirmStart));
-        public static string Pop_ConfirmStop => Get(nameof(Pop_ConfirmStop));
-        public static string Pop_ConfirmSkip => Get(nameof(Pop_ConfirmSkip));
-        public static string Pop_ConfirmPrevious => Get(nameof(Pop_ConfirmPrevious));
-        public static string Pop_ConfirmNext => Get(nameof(Pop_ConfirmNext));
         public static string Pop_AdminAlarmSent => Get(nameof(Pop_AdminAlarmSent));
         public static string Pop_ManualWrenchOnly => Get(nameof(Pop_ManualWrenchOnly));
         public static string Pop_NoTargetProcess => Get(nameof(Pop_NoTargetProcess));

@@ -498,9 +498,6 @@
   <data name="Pop_NextProcess" xml:space="preserve">
     <value>다음 공정</value>
   </data>
-  <data name="Pop_SkipProcess" xml:space="preserve">
-    <value>공정 생략</value>
-  </data>
   <data name="Pop_StopProcess" xml:space="preserve">
     <value>공정 중지</value>
   </data>
@@ -594,29 +591,8 @@
   <data name="Pop_ProcessMoved" xml:space="preserve">
     <value>선택한 공정으로 이동했습니다.</value>
   </data>
-  <data name="Pop_FirstProcess" xml:space="preserve">
-    <value>공정 목록의 첫 번째 공정입니다.</value>
-  </data>
   <data name="Pop_LastProcess" xml:space="preserve">
     <value>공정 목록의 마지막 공정입니다.</value>
-  </data>
-  <data name="Pop_ProcessNotInList" xml:space="preserve">
-    <value>지금 보고 있는 공정을 공정 목록에서 찾을 수 없습니다. [공정 목록]에서 직접 선택하세요.</value>
-  </data>
-  <data name="Pop_ConfirmStart" xml:space="preserve">
-    <value>공정을 시작하시겠습니까?</value>
-  </data>
-  <data name="Pop_ConfirmStop" xml:space="preserve">
-    <value>공정을 중지하시겠습니까?</value>
-  </data>
-  <data name="Pop_ConfirmSkip" xml:space="preserve">
-    <value>이 공정을 생략하시겠습니까?</value>
-  </data>
-  <data name="Pop_ConfirmPrevious" xml:space="preserve">
-    <value>이전 공정으로 이동하시겠습니까?</value>
-  </data>
-  <data name="Pop_ConfirmNext" xml:space="preserve">
-    <value>다음 공정으로 이동하시겠습니까?</value>
   </data>
   <data name="Pop_AdminAlarmSent" xml:space="preserve">
     <value>관리자에게 알람을 보냈습니다.</value>

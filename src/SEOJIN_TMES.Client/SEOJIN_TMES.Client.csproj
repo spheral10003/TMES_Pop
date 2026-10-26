@@ -249,19 +249,10 @@
     솔루션 탐색기에서 PopScreen.cs 아래로 묶어 본체 · 디자이너와 한 덩어리로 보이게 한다(빌드와는 무관).
   -->
   <ItemGroup>
-    <Compile Update="Forms\Pop\PopScreen.Material.cs">
+    <Compile Update="Forms\Pop\PopScreen.Grid.cs">
       <DependentUpon>PopScreen.cs</DependentUpon>
     </Compile>
-    <Compile Update="Forms\Pop\PopScreen.Bom.cs">
-      <DependentUpon>PopScreen.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Forms\Pop\PopScreen.Inspection.cs">
-      <DependentUpon>PopScreen.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Forms\Pop\PopScreen.Equipment.cs">
-      <DependentUpon>PopScreen.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Forms\Pop\PopScreen.AutoProcess.cs">
+    <Compile Update="Forms\Pop\PopScreen.Method.cs">
       <DependentUpon>PopScreen.cs</DependentUpon>
     </Compile>
   </ItemGroup>
