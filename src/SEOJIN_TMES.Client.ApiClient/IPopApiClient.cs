@@ -40,8 +40,11 @@ namespace SEOJIN_TMES.Client.ApiClient
         /// <summary>[BOM 스팩] 탭 토크 결과값 저장(설비 수신값 / 수동 렌치 입력값 공통).</summary>
         Task SaveBomSpecResultsAsync(PopProcessKey key, PopBomSpecResultDto result, PopBomSpecDto bom, CancellationToken cancellationToken = default);
         
-        /// <summary>[검사 스팩] 탭 한 행의 검사 결과 저장(셀 값이 바뀔 때마다 호출).</summary>
-        Task SaveInspectionResultAsync(PopProcessKey key, PopInspectionResult result, CancellationToken cancellationToken = default);
+        /// <summary>
+        /// [검사 스팩] 탭 한 행의 검사 결과 저장(셀 값이 바뀔 때마다 호출).
+        /// <paramref name="inspectionItemCode"/>는 URL 경로에만 쓰고 Body(<paramref name="result"/>)에는 담지 않는다.
+        /// </summary>
+        Task SaveInspectionResultAsync(PopProcessKey key, string inspectionItemCode, PopInspectionResult result, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// 공정 상태 전이 요청 — 시작/중지/생략/이전/다음.
@@ -145,11 +148,11 @@ namespace SEOJIN_TMES.Client.ApiClient
             return PostAsync(url, result, cancellationToken);
         }
 
-        public Task SaveInspectionResultAsync(PopProcessKey key, PopInspectionResult result, CancellationToken cancellationToken = default)
+        public Task SaveInspectionResultAsync(PopProcessKey key, string inspectionItemCode, PopInspectionResult result, CancellationToken cancellationToken = default)
         {
-            
+
             var query = PostKeyQuery(key);
-            string url = $"{PopPrefix}{key.SerialNo}/{key.SubRoutingRef}/insp-chk-results/{result.InspectionItemCode}{query}";
+            string url = $"{PopPrefix}{key.SerialNo}/{key.SubRoutingRef}/insp-chk-results/{inspectionItemCode}{query}";
             // TODO: 경로는 가정값 — 서버 스펙 확정 시 맞출 것.
             return PostAsync(url, result, cancellationToken);
         }

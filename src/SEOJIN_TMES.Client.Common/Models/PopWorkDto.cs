@@ -286,25 +286,24 @@ namespace SEOJIN_TMES.Client.Common.Models
 
     /// <summary>
     /// [검사 스팩] 탭 한 행의 결과 저장 요청 본문.
-    /// 정량 검사는 판정(<see cref="ResultState"/>)과 결과값(<see cref="ResultValue"/>) 두 개를,
-    /// 정성 검사는 판정만 보낸다 — 정성은 <see cref="ResultValue"/>를 null로 두면 Body에서 빠진다.
+    /// 정량 검사는 판정(<see cref="ResultState"/>) · 결과값(<see cref="ResultValue"/>) · 비고를,
+    /// 정성 검사는 판정 · 비고를 보낸다 — 정성은 <see cref="ResultValue"/>를 null로 두면 Body에서 빠진다.
+    ///
+    /// 검사 항목 코드는 이 클래스에 두지 않는다 — 저장 URL 경로(<c>insp-chk-results/{코드}</c>)로만 보내고
+    /// Body에는 담지 않기 위해서다(IPopApiClient.SaveInspectionResultAsync가 인자로 따로 받는다).
     /// TODO: 직렬화 필드명은 가정값 — 서버 스펙 확정 시 [JsonProperty]로 맞출 것.
     /// </summary>
     public class PopInspectionResult
     {
-        /// <summary>
-        /// 검사 항목 코드 — 서버가 어느 행의 결과인지 찾는 키.
-        /// 저장 URL 경로(<c>insp-chk-results/{코드}</c>)에 이미 들어가므로 Body에는 넣지 않는다.
-        /// </summary>
-        [JsonIgnore]
-        public string InspectionItemCode { get; set; }
-
         /// <summary>판정(결과상태) — OK / NG 만 보낸다.</summary>
         public string ResultState { get; set; }
 
         /// <summary>결과값. 정량 검사에서만 보내고, 정성 검사는 null이라 Body에서 빠진다.</summary>
         [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string ResultValue { get; set; }
+
+        /// <summary>작업자가 적은 검사 결과 비고. 정량 · 정성 모두 보낸다(미입력은 빈 문자열).</summary>
+        public string InspectionResultRemark { get; set; }
     }
 
     /// <summary>

@@ -686,7 +686,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// 검사 스팩 한 줄의 결과를 서버에 보낸다 — 정량 검사는 판정 · 결과값 두 개, 정성 검사는 판정만.
+        /// 검사 스팩 한 줄의 결과를 서버에 보낸다 — 정량 검사는 판정 · 결과값 · 비고, 정성 검사는 판정 · 비고.
+        /// 검사 항목 코드는 URL 경로로만 보내고 Body에는 담지 않는다.
         /// 공정이 진행 중이 아니면 보내지 않는다 — 편집 도중 서버 상태가 바뀐 경우를 막는다.
         /// </summary>
         public async Task SetInspectionResult(PopInspectionSpecDto spec, string fieldName)
@@ -697,22 +698,24 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 return;
             }
 
+            var itemCode = spec.InspectionItemCode ?? string.Empty;
+
             var result = new PopInspectionResult();
-            result.InspectionItemCode = spec.InspectionItemCode ?? string.Empty;
             result.ResultState = spec.ResultState ?? string.Empty;
 
             // 정성 검사는 결과값이 없다 — null로 두면 Body에서 빠진다(PopInspectionResult 참고).
             result.ResultValue = spec.IsQuantitative ? spec.ResultValue ?? string.Empty : null;
+            result.InspectionResultRemark = spec.InspectionResultRemark ?? string.Empty;
 
             BeginResultSave();
             try
             {
-                await _apiClient.PopApiClient.SaveInspectionResultAsync(_key, result);
-                AppLog.Info($"[POP] 검사 결과 전송 - {result.InspectionItemCode} ({fieldName})");
+                await _apiClient.PopApiClient.SaveInspectionResultAsync(_key, itemCode, result);
+                AppLog.Info($"[POP] 검사 결과 전송 - {itemCode} ({fieldName})");
             }
             catch (ApiException ex)
             {
-                AppLog.Warn($"[POP] 검사 결과 전송 실패 - {result.InspectionItemCode}: {ex.Message}");
+                AppLog.Warn($"[POP] 검사 결과 전송 실패 - {itemCode}: {ex.Message}");
                 if (IsDisposed || Disposing) return;
 
                 AppMessageBox.Warn(this, ex.Message, Language.Pop_TabInspection);
