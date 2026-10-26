@@ -35,6 +35,9 @@ namespace SEOJIN_TMES.Client.Composition
             if (int.TryParse(ConfigurationManager.AppSettings["NotificationPollingSeconds"], out var pollingSeconds))
                 settings.NotificationPollingSeconds = pollingSeconds;
 
+            if (bool.TryParse(ConfigurationManager.AppSettings["IsTestServer"], out var isTestServer))
+                settings.IsTestServer = isTestServer;
+
             //var equipmentsJson = ConfigurationManager.AppSettings["Equipments"];
             //if (!string.IsNullOrWhiteSpace(equipmentsJson))
             //{

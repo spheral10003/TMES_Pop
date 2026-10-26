@@ -27,8 +27,15 @@ namespace SEOJIN_TMES.Client.Theme
         private const string LoginIllustrationResource = "SEOJIN_TMES.Client.Images.login_icon.png";
         private const string BrandLogoResource = "SEOJIN_TMES.Client.Images.texon_logo.svg";
 
-        /// <summary>창·작업 표시줄 아이콘. exe 아이콘(csproj의 ApplicationIcon)과 같은 파일이다.</summary>
-        private const string AppIconResource = "SEOJIN_TMES.Client.Images.texon.ico";
+        /// <summary>창·작업 표시줄 아이콘 — 운용 서버. exe 아이콘(csproj의 ApplicationIcon)과 같은 파일이다.</summary>
+        private const string AppIconResource = "SEOJIN_TMES.Client.Images.TMES.ico";
+
+        /// <summary>창·작업 표시줄 아이콘 — 테스트 서버(App.config의 IsTestServer=true).</summary>
+        private const string TestAppIconResource = "SEOJIN_TMES.Client.Images.TMES_TEST.ico";
+
+        /// <summary>프로그램 아이콘의 큰 버전(256×256). 접힌 사이드바의 로고로 줄여 쓴다.</summary>
+        private const string AppLogoResource = "SEOJIN_TMES.Client.Images.TMES_256.png";
+        private const string TestAppLogoResource = "SEOJIN_TMES.Client.Images.TMES_TEST_256.png";
 
         /// <summary>상단 바 아이콘(원본은 640×640 단색 실루엣 + 투명 배경).</summary>
         public const string IconBell = "SEOJIN_TMES.Client.Images.bell-regular.png";
@@ -56,6 +63,7 @@ namespace SEOJIN_TMES.Client.Theme
 
         private static Image _loginIllustration;
         private static Icon _appIcon;
+        private static Icon _testAppIcon;
         private static SvgImage _brandSignature;
         private static Color _brandSignatureColor;
         private static SvgImage _brandMark;
@@ -67,17 +75,40 @@ namespace SEOJIN_TMES.Client.Theme
         /// 그쪽은 빌드할 때 실행 파일에 박히고, 이쪽은 실행 중에 각 Form의 <c>Icon</c>에 넣는 값이다.
         /// 둘 중 하나만 지정하면 탐색기와 작업 표시줄의 그림이 서로 달라진다.
         ///
+        /// 테스트 서버로 띄우면 다른 아이콘(TMES_TEST.ico)을 써서 작업 표시줄에서도 운용 서버와 구분되게 한다.
+        /// exe 아이콘은 빌드 때 고정이라 운용 아이콘 그대로다.
+        ///
         /// 아이콘은 앱이 끝날 때까지 재사용하므로 한 번 만들어 캐시한다.
         /// </summary>
-        public static Icon AppIcon()
+        /// <param name="testServer">App.config의 IsTestServer 값.</param>
+        public static Icon AppIcon(bool testServer)
         {
-            if (_appIcon == null)
+            if (testServer)
             {
-                using (var stream = OpenResource(AppIconResource))
-                    _appIcon = new Icon(stream);
+                if (_testAppIcon == null)
+                    _testAppIcon = LoadIcon(TestAppIconResource);
+
+                return _testAppIcon;
             }
 
+            if (_appIcon == null)
+                _appIcon = LoadIcon(AppIconResource);
+
             return _appIcon;
+        }
+
+        /// <summary>
+        /// 프로그램 아이콘의 큰 그림(256×256)을 <paramref name="size"/>×<paramref name="size"/>로 줄인 로고.
+        /// 접힌 사이드바(64px)처럼 좁은 자리에 쓴다. 원본이 정사각형이라 비율이 그대로 유지된다.
+        /// </summary>
+        /// <param name="testServer">App.config의 IsTestServer 값 — 테스트 서버면 TMES_TEST_256.png.</param>
+        public static Image AppLogo(bool testServer, int size) =>
+            Raster(testServer ? TestAppLogoResource : AppLogoResource, new Size(size, size), Color.Empty);
+
+        private static Icon LoadIcon(string resourceName)
+        {
+            using (var stream = OpenResource(resourceName))
+                return new Icon(stream);
         }
 
         /// <summary>로그인 화면 좌측에 놓는 일러스트(스마트팩토리 아이소메트릭, 배경 투명).</summary>

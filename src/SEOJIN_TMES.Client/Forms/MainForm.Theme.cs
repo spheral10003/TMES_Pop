@@ -17,6 +17,12 @@ namespace SEOJIN_TMES.Client.Forms
         private const int SidebarWidth = 240;
         private const int SidebarCollapsedWidth = 64;
 
+        /// <summary>접힌 사이드바(64px)의 로고 한 변(px). 256px 원본을 이 크기로 줄여 쓴다.</summary>
+        private const int CollapsedLogoSize = 40;
+
+        /// <summary>테스트 서버로 띄웠는지(App.config의 IsTestServer). 아이콘 · 상단 바 색 · 접힌 메뉴 로고가 따라간다.</summary>
+        private bool IsTestServer => _setting?.AppSet?.IsTestServer == true;
+
         /// <summary>언어 콤보 국기 아이콘 한 변(px). 원본 24×24를 상단 바 글자 높이에 맞춰 줄인다.</summary>
         private const int LanguageFlagSize = 20;
 
@@ -59,7 +65,8 @@ namespace SEOJIN_TMES.Client.Forms
             // 이 창은 제목 줄이 없어(FormBorderStyle.None) 창 좌상단에는 안 보이지만,
             // 작업 표시줄·Alt+Tab에는 그대로 쓰이므로 반드시 지정해야 한다.
             // (Designer가 아니라 여기서 넣는 이유는 프로젝트 CLAUDE.md 1번 — 디자이너에 커스텀 static 호출 금지.)
-            Icon = AppImages.AppIcon();
+            // 테스트 서버(App.config의 IsTestServer)면 TMES_TEST.ico — 작업 표시줄에서도 운용 서버와 구분된다.
+            Icon = AppImages.AppIcon(IsTestServer);
 
             lblBrand.Text = "MEIS POP";
             lblBrandSub.Text = "MANUFACTURING SYSTEM";
@@ -80,6 +87,7 @@ namespace SEOJIN_TMES.Client.Forms
             AppTheme.Sidebar(sidePanel);
             AppTheme.BrandPanel(brandPanel);
             AppTheme.Accordion(accordion);
+            AppTheme.AccordionCollapsed(accordion, _sidebarCollapsed);   // 접힌 채로 테마를 다시 입혀도 남색 유지
             AppTheme.SidebarVersion(lblVersion);
 
             // 브랜드 블록은 회사 로고 하나로 채운다(제품명 두 줄은 로고에 자리를 내주고 숨긴다).
@@ -89,9 +97,16 @@ namespace SEOJIN_TMES.Client.Forms
 
             brandIcon.SizeMode = SvgImageSizeMode.Squeeze;   // 원본 비율(약 4.2:1) 유지
             brandIcon.BackColor = Color.Transparent;
+
+            // 접힌 메뉴 로고(PNG)는 AppImages가 자리 크기로 미리 줄여 주므로 그대로 그린다.
+            brandLogo.Properties.SizeMode = DevExpress.XtraEditors.Controls.PictureSizeMode.Clip;
+            brandLogo.Properties.PictureAlignment = ContentAlignment.MiddleCenter;
+            brandLogo.Properties.Appearance.BackColor = AppTheme.SidebarBrand;
+            brandLogo.Properties.Appearance.Options.UseBackColor = true;
             ApplyBrandLogo();
 
-            AppTheme.TopBarPanel(panelTop);
+            // 상단 바 = 메인 화면의 상태 표시줄. 테스트 서버면 주황(#EB6E1D), 운용 서버면 기본 파랑.
+            AppTheme.TopBarPanel(panelTop, IsTestServer);
             AppTheme.Breadcrumb(lblBreadcrumb);
             AppTheme.ContentSurface(mainArea);
             AppTheme.ContentSurface(rightPanel);

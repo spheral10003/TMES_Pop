@@ -46,6 +46,12 @@ namespace SEOJIN_TMES.Client.Theme
         public static readonly Color SidebarHover = Color.FromArgb(205, 231, 248);
         public static readonly Color SidebarSelected = Color.FromArgb(169, 214, 245); // #A9D6F5
 
+        /// <summary>
+        /// 접힌 사이드바(아이콘만 보이는 메뉴) 배경. 폭이 좁아 글자 없이 아이콘만 남으므로
+        /// 펼친 상태의 파스텔 톤 대신 짙은 남색으로 칠해 "접혀 있음"이 한눈에 보이게 한다.
+        /// </summary>
+        public static readonly Color SidebarCollapsed = Color.FromArgb(31, 59, 87); // #1F3B57
+
         // ── 포인트 컬러 ──
         public static readonly Color Indigo = Color.FromArgb(79, 70, 229);   // #4F46E5
         public static readonly Color Violet = Color.FromArgb(124, 58, 237);  // #7C3AED
@@ -101,6 +107,13 @@ namespace SEOJIN_TMES.Client.Theme
         /// (본문용 TextPrimary/TextMuted를 쓰면 파란 바탕에 묻힌다).
         /// </summary>
         public static Color TopBar => Color.FromArgb(34, 94, 168);
+
+        /// <summary>
+        /// 테스트 서버로 띄웠을 때의 상단 바 배경(<c>#EB6E1D</c>, App.config의 IsTestServer=true).
+        /// 운용 서버의 파랑과 확연히 달라야 현장에서 테스트 환경에 실적을 넣는 실수를 막는다.
+        /// 위에 얹히는 흰 글자·아이콘(<see cref="TopBarFore"/>)이 그대로 읽히는 진하기다.
+        /// </summary>
+        public static readonly Color TestServerTopBar = Color.FromArgb(235, 110, 29); // #EB6E1D
 
         /// <summary>상단 바 위의 글자·아이콘 색.</summary>
         public static Color TopBarFore => Color.White;
@@ -226,6 +239,20 @@ namespace SEOJIN_TMES.Client.Theme
             StyleAccordionElement(accordion.Appearance.ItemWithContainer, SidebarTextMuted, BodyFont);
         }
 
+        /// <summary>
+        /// 메뉴 접힘/펼침에 맞춰 메뉴 배경을 바꾼다 — 접히면 <see cref="SidebarCollapsed"/> 단색,
+        /// 펼치면 <see cref="Accordion"/>이 입히는 기본 그라데이션으로 되돌린다.
+        /// </summary>
+        public static void AccordionCollapsed(AccordionControl accordion, bool collapsed)
+        {
+            var back = accordion.Appearance.AccordionControl;
+
+            back.BackColor = collapsed ? SidebarCollapsed : SidebarTop;
+            back.BackColor2 = collapsed ? SidebarCollapsed : SidebarBottom;
+            back.GradientMode = LinearGradientMode.Vertical;
+            back.Options.UseBackColor = true;
+        }
+
         private static void StyleAccordionElement(AccordionControlElementAppearances appearances, Color fore, Font font)
         {
             // 밝은 사이드바라 hover/pressed 글자도 흰색이 아니라 진한 색이어야 읽힌다.
@@ -271,10 +298,11 @@ namespace SEOJIN_TMES.Client.Theme
         }
 
         /// <summary>상단바(밝은 배경 + 아래쪽 구분선 느낌).</summary>
-        public static void TopBarPanel(PanelControl panel)
+        /// <param name="testServer">테스트 서버면 <see cref="TestServerTopBar"/>(주황)로 칠한다.</param>
+        public static void TopBarPanel(PanelControl panel, bool testServer = false)
         {
             panel.BorderStyle = BorderStyles.NoBorder;
-            panel.Appearance.BackColor = TopBar;
+            panel.Appearance.BackColor = testServer ? TestServerTopBar : TopBar;
             panel.Appearance.Options.UseBackColor = true;
             panel.Padding = new Padding(0, 0, 0, 1);
         }

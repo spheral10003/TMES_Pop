@@ -74,7 +74,7 @@ namespace SEOJIN_TMES.Client.Forms
             _loginCulture = GetCulture(_setting.AppSet.DefaultCulture);
 
             // 로그인 창이 앱의 첫 창이라, 작업 표시줄에 처음 뜨는 아이콘이 이 값이다.
-            Icon = AppImages.AppIcon();
+            Icon = AppImages.AppIcon(_setting.AppSet.IsTestServer);
             ShowIcon = true;   // FixedDialog는 기본으로 제목 줄 아이콘을 감춘다
 
             SetLanguageList();

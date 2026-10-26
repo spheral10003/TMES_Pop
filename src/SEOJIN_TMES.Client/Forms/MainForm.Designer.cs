@@ -32,6 +32,7 @@ namespace SEOJIN_TMES.Client.Forms
             this.lblBrandSub = new DevExpress.XtraEditors.LabelControl();
             this.lblBrand = new DevExpress.XtraEditors.LabelControl();
             this.brandIcon = new DevExpress.XtraEditors.SvgImageBox();
+            this.brandLogo = new DevExpress.XtraEditors.PictureEdit();
             this.mainArea = new DevExpress.XtraEditors.PanelControl();
             this.rightPanel = new DevExpress.XtraEditors.PanelControl();
             this.contentHost = new DevExpress.XtraEditors.PanelControl();
@@ -54,6 +55,7 @@ namespace SEOJIN_TMES.Client.Forms
             ((System.ComponentModel.ISupportInitialize)(this.brandPanel)).BeginInit();
             this.brandPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.brandIcon)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.brandLogo.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.mainArea)).BeginInit();
             this.mainArea.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.rightPanel)).BeginInit();
@@ -99,6 +101,7 @@ namespace SEOJIN_TMES.Client.Forms
             this.brandPanel.Controls.Add(this.lblBrandSub);
             this.brandPanel.Controls.Add(this.lblBrand);
             this.brandPanel.Controls.Add(this.brandIcon);
+            this.brandPanel.Controls.Add(this.brandLogo);
             this.brandPanel.Dock = System.Windows.Forms.DockStyle.Top;
             this.brandPanel.Location = new System.Drawing.Point(2, 2);
             this.brandPanel.Name = "brandPanel";
@@ -127,7 +130,19 @@ namespace SEOJIN_TMES.Client.Forms
             this.brandIcon.Name = "brandIcon";
             this.brandIcon.Size = new System.Drawing.Size(36, 36);
             this.brandIcon.TabIndex = 0;
-            // 
+            //
+            // brandLogo — 메뉴를 접었을 때만 보이는 로고(PNG). 그림은 MainForm.cs의 ApplyBrandLogo()에서 넣는다.
+            //
+            this.brandLogo.Location = new System.Drawing.Point(12, 17);
+            this.brandLogo.Name = "brandLogo";
+            this.brandLogo.Properties.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder;
+            this.brandLogo.Properties.ShowMenu = false;
+            this.brandLogo.Properties.ReadOnly = true;
+            this.brandLogo.Size = new System.Drawing.Size(40, 40);
+            this.brandLogo.TabIndex = 3;
+            this.brandLogo.TabStop = false;
+            this.brandLogo.Visible = false;
+            //
             // mainArea
             // 
             this.mainArea.Controls.Add(this.rightPanel);
@@ -294,6 +309,7 @@ namespace SEOJIN_TMES.Client.Forms
             this.brandPanel.ResumeLayout(false);
             this.brandPanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.brandIcon)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.brandLogo.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.mainArea)).EndInit();
             this.mainArea.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.rightPanel)).EndInit();
@@ -312,6 +328,7 @@ namespace SEOJIN_TMES.Client.Forms
         private DevExpress.XtraEditors.PanelControl sidePanel;
         private DevExpress.XtraEditors.PanelControl brandPanel;
         private DevExpress.XtraEditors.SvgImageBox brandIcon;
+        private DevExpress.XtraEditors.PictureEdit brandLogo;
         private DevExpress.XtraEditors.LabelControl lblBrand;
         private DevExpress.XtraEditors.LabelControl lblBrandSub;
         private DevExpress.XtraEditors.LabelControl lblVersion;

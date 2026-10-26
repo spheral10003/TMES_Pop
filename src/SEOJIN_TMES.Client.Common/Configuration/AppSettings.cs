@@ -19,6 +19,14 @@ namespace SEOJIN_TMES.Client.Common.Configuration
         public int LogApiResponseBodyMaxLength { get; set; } = 20000;
         public string DefaultCulture { get; set; } = "ko-KR";
         public string ServerName { get; set; } = "GUM";
+
+        /// <summary>
+        /// 테스트 서버로 붙는 실행인지(true) 운용 서버인지(false, 기본값).
+        /// 현장에서 두 환경을 헷갈리지 않도록 화면 모양만 바꾼다 — 프로그램 아이콘(TMES_TEST.ico),
+        /// 메인 화면 상단 바 색(#EB6E1D), 접힌 메뉴의 로고(TMES_TEST_256.png).
+        /// 실제로 붙을 서버는 이 값이 아니라 <see cref="ApiBaseUrl"/>이 정하므로 둘을 함께 맞출 것.
+        /// </summary>
+        public bool IsTestServer { get; set; } = false;
         public int UploadMaxMegaBytes { get; set; } = 10;
         /// <summary>자동 로그아웃까지의 세션 유지 시간(분). 메인 화면 우측 상단 카운트다운의 시작 값이다.</summary>
         public int SessionTimeoutMinutes { get; set; } = 300;

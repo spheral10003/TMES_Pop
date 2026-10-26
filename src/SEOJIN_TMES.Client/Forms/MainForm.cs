@@ -438,21 +438,26 @@ namespace SEOJIN_TMES.Client.Forms
 
         /// <summary>
         /// 사이드바 폭에 맞는 로고를 브랜드 블록에 놓는다.
-        /// 펼친 상태(240px)는 로고 전체를, 접은 상태(64px)는 가로로 긴 로고가 들어가지 않으므로
-        /// 심벌(초록 지구본)만 잘라 낸 것을 쓴다. 두 경우 모두 brandPanel(높이 74) 안에서 세로 가운데다.
+        /// 펼친 상태(240px)는 지금 쓰는 TEXON 로고 전체(SVG)를, 접은 상태(64px)는 가로로 긴 로고가 들어가지 않으므로
+        /// 프로그램 아이콘의 큰 그림(TMES_256.png / 테스트 서버면 TMES_TEST_256.png)을 줄여 쓴다.
+        /// 두 경우 모두 brandPanel(높이 74) 안에서 가운데다.
+        ///
+        /// SvgImageBox(brandIcon)는 PNG를 그릴 수 없어서, 접힌 로고는 별도의 brandLogo(PictureEdit)에 담고
+        /// 상태에 따라 둘 중 하나만 보이게 한다.
         /// </summary>
         private void ApplyBrandLogo()
         {
-            // 접힘/펼침에 따라 그림과 크기가 함께 바뀐다.
-            //
             // 폭은 sidePanel 기준으로 계산한다 — brandPanel은 Dock=Top이라 이 시점에 아직
             // 예전 폭을 들고 있을 수 있어, brandPanel.Width로 재면 접었을 때 로고가 줄지 않는다.
             var width = _sidebarCollapsed ? SidebarCollapsedWidth : SidebarWidth;
 
+            Control logo;
             if (_sidebarCollapsed)
             {
-                brandIcon.SvgImage = AppImages.BrandMark();
-                brandIcon.Size = new Size(36, 26);
+                // 256px 원본을 자리 크기로 미리 줄여 넣는다(고품질 축소 결과는 AppImages가 캐시한다).
+                brandLogo.Image = AppImages.AppLogo(IsTestServer, CollapsedLogoSize);
+                brandLogo.Size = new Size(CollapsedLogoSize, CollapsedLogoSize);
+                logo = brandLogo;
             }
             else
             {
@@ -460,14 +465,18 @@ namespace SEOJIN_TMES.Client.Forms
                 // 사이드바가 밝아졌으므로 흰색으로 빼거나 다른 색으로 물들이지 않는다.
                 brandIcon.SvgImage = AppImages.BrandSignature(Color.Black);
                 brandIcon.Size = new Size(196, 46);
+                logo = brandIcon;
             }
 
-            brandIcon.Location = new Point(
-                Math.Max(0, (width - brandIcon.Width) / 2),
-                Math.Max(0, (brandPanel.Height - brandIcon.Height) / 2));
+            brandLogo.Visible = _sidebarCollapsed;
+            brandIcon.Visible = !_sidebarCollapsed;
+
+            logo.Location = new Point(
+                Math.Max(0, (width - logo.Width) / 2),
+                Math.Max(0, (brandPanel.Height - logo.Height) / 2));
 
             // 그림과 크기를 함께 바꿨으므로 다시 그리게 한다(크기만 바뀌면 갱신이 늦을 수 있다).
-            brandIcon.Invalidate();
+            logo.Invalidate();
         }
 
         private void btnMenuToggle_Click(object sender, EventArgs e)
@@ -487,6 +496,9 @@ namespace SEOJIN_TMES.Client.Forms
             accordion.OptionsMinimizing.State = _sidebarCollapsed
                 ? AccordionControlState.Minimized
                 : AccordionControlState.Normal;
+
+            // 접히면 메뉴 배경을 남색(#1F3B57)으로, 펼치면 원래 그라데이션으로 되돌린다.
+            AppTheme.AccordionCollapsed(accordion, _sidebarCollapsed);
         }
 
         /// <summary>종 아이콘 → 알림 팝업. 닫은 뒤에는 배지 숫자를 바로 다시 맞춘다(읽음 처리 반영).</summary>
