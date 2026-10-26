@@ -690,6 +690,15 @@
   <data name="Col_ResultValue" xml:space="preserve">
     <value>Giá trị</value>
   </data>
+  <data name="Col_InspectionLower" xml:space="preserve">
+    <value>Giá trị tối thiểu</value>
+  </data>
+  <data name="Col_InspectionUpper" xml:space="preserve">
+    <value>Giá trị tối đa</value>
+  </data>
+  <data name="Col_InspectionTarget" xml:space="preserve">
+    <value>Giá trị mục tiêu</value>
+  </data>
   <data name="Col_EquipmentCode" xml:space="preserve">
     <value>Mã thiết bị</value>
   </data>

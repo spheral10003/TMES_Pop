@@ -182,15 +182,20 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 GridColumns.Left("Description", Language.Col_Description, 300),
                 GridColumns.Text("InspectionMethod", Language.Col_InspectionMethod, 120),
                 GridColumns.Text("ResultState", Language.Col_ResultState, 130),
+                GridColumns.Text("InspectionLower", Language.Col_InspectionLower, 110),
+                GridColumns.Text("InspectionUpper", Language.Col_InspectionUpper, 110),
+                GridColumns.Text("InspectionTarget", Language.Col_InspectionTarget, 110),
                 GridColumns.Text("ResultValue", Language.Col_ResultValue, 130),
                 GridColumns.Text("InspectionResultRemark", Language.Col_InspectionRemark, 300));
 
             gridViewInspection.OptionsView.ColumnAutoWidth = true;
+            NumericFormat(gridViewInspection, "InspectionLower", "InspectionUpper", "InspectionTarget");
 
             _resultStateEditor = new RepositoryItemComboBox();
             _resultStateEditor.TextEditStyle = TextEditStyles.DisableTextEditor;
-            _resultStateEditor.Items.Add(Language.Pop_ResultPass);
-            _resultStateEditor.Items.Add(Language.Pop_ResultFail);
+            // 판정은 OK / NG 코드만 쓴다 — 고른 값이 그대로 서버로 나가므로 번역 문구를 넣지 않는다.
+            _resultStateEditor.Items.Add(PopInspectionSpecDto.ResultOk);
+            _resultStateEditor.Items.Add(PopInspectionSpecDto.ResultNg);
             gridInspection.RepositoryItems.Add(_resultStateEditor);
 
             _resultValueEditor = new RepositoryItemTextEdit();

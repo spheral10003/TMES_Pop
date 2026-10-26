@@ -251,8 +251,21 @@ namespace SEOJIN_TMES.Client.Common.Models
         /// <summary>검사방법 — 정량/정성.</summary>
         public string InspectionMethod { get; set; }
 
-        /// <summary>결과상태 — 합격/불합격. 미입력이면 비어 있다.</summary>
+        /// <summary>판정 값 — 서버 코드 그대로 쓴다(합격 OK / 불합격 NG). 화면 콤보와 저장 Body가 같은 값을 쓴다.</summary>
+        public const string ResultOk = "OK";
+        public const string ResultNg = "NG";
+
+        /// <summary>결과상태 — <see cref="ResultOk"/> / <see cref="ResultNg"/>. 미입력이면 비어 있다.</summary>
         public string ResultState { get; set; }
+
+        /// <summary>최소값(서버 lsl). 정량 검사의 기준 범위이며 정성 검사는 비어 있다.</summary>
+        public decimal? InspectionLower { get; set; }
+
+        /// <summary>최대값(서버 usl).</summary>
+        public decimal? InspectionUpper { get; set; }
+
+        /// <summary>타겟값(서버 target).</summary>
+        public decimal? InspectionTarget { get; set; }
 
         /// <summary>결과값. 정량 검사에서만 숫자를 받는다(정성은 비워 둔다).</summary>
         public string ResultValue { get; set; }
@@ -267,23 +280,25 @@ namespace SEOJIN_TMES.Client.Common.Models
 
     /// <summary>
     /// [검사 스팩] 탭 한 행의 결과 저장 요청 본문.
-    /// 작업자가 바꾼 칸만이 아니라 입력 가능한 세 칸을 항상 함께 보낸다 — 서버가 행 단위로 덮어쓰기 때문에
-    /// 일부만 보내면 나머지 값이 지워질 수 있다. 미입력 칸은 null 대신 빈 문자열로 보낸다.
+    /// 정량 검사는 판정(<see cref="ResultState"/>)과 결과값(<see cref="ResultValue"/>) 두 개를,
+    /// 정성 검사는 판정만 보낸다 — 정성은 <see cref="ResultValue"/>를 null로 두면 Body에서 빠진다.
     /// TODO: 직렬화 필드명은 가정값 — 서버 스펙 확정 시 [JsonProperty]로 맞출 것.
     /// </summary>
     public class PopInspectionResult
     {
-        /// <summary>검사 항목 코드 — 서버가 어느 행의 결과인지 찾는 키.</summary>
+        /// <summary>
+        /// 검사 항목 코드 — 서버가 어느 행의 결과인지 찾는 키.
+        /// 저장 URL 경로(<c>insp-chk-results/{코드}</c>)에 이미 들어가므로 Body에는 넣지 않는다.
+        /// </summary>
+        [JsonIgnore]
         public string InspectionItemCode { get; set; }
 
-        /// <summary>결과상태 — 합격/불합격.</summary>
+        /// <summary>판정(결과상태) — OK / NG 만 보낸다.</summary>
         public string ResultState { get; set; }
 
-        /// <summary>결과값. 정성 검사는 빈 문자열.</summary>
+        /// <summary>결과값. 정량 검사에서만 보내고, 정성 검사는 null이라 Body에서 빠진다.</summary>
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
         public string ResultValue { get; set; }
-
-        /// <summary>작업자가 적은 검사 결과 비고.</summary>
-        public string InspectionResultRemark { get; set; }
     }
 
     /// <summary>

@@ -107,6 +107,9 @@ namespace SEOJIN_TMES.Client.Common.Models
         [JsonProperty("inspItemNm")] public string InspItemNm { get; set; }
         [JsonProperty("indctLoc")] public string IndctLoc { get; set; }        // 투입위치
         [JsonProperty("inspDataType")] public string InspDataType { get; set; } // QLT 정성 / QNT 정량
+        [JsonProperty("lsl")] public decimal? Lsl { get; set; }                  // 최소값 — 정량 검사만
+        [JsonProperty("target")] public decimal? Target { get; set; }            // 타겟값
+        [JsonProperty("usl")] public decimal? Usl { get; set; }                  // 최대값
         [JsonProperty("jgmtRslt")] public string JgmtRslt { get; set; }         // OK / NG
         [JsonProperty("inspRsltVl")] public string InspRsltVl { get; set; }
         [JsonProperty("inspRemark")] public string InspRemark { get; set; }
@@ -206,7 +209,13 @@ namespace SEOJIN_TMES.Client.Common.Models
                     InputPosition = i.IndctLoc,
                     InspectionRemark = i.InspRemark,
                     InspectionMethod = i.InspDataType == "QNT" ? "정량" : "정성",
-                    ResultState = i.JgmtRslt == "OK" ? "합격" : i.JgmtRslt == "NG" ? "불합격" : "",
+                    InspectionLower = i.Lsl,
+                    InspectionTarget = i.Target,
+                    InspectionUpper = i.Usl,
+                    // 판정은 서버 코드(OK / NG)를 그대로 쓴다 — 화면 표시도 저장 Body도 같은 값이다.
+                    ResultState = i.JgmtRslt == PopInspectionSpecDto.ResultOk || i.JgmtRslt == PopInspectionSpecDto.ResultNg
+                        ? i.JgmtRslt
+                        : "",
                     ResultValue = i.InspDataType == "QNT" ? i.InspRsltVl : null
                 }).ToList(),
 

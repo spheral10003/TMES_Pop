@@ -690,6 +690,15 @@
   <data name="Col_ResultValue" xml:space="preserve">
     <value>Value</value>
   </data>
+  <data name="Col_InspectionLower" xml:space="preserve">
+    <value>Min</value>
+  </data>
+  <data name="Col_InspectionUpper" xml:space="preserve">
+    <value>Max</value>
+  </data>
+  <data name="Col_InspectionTarget" xml:space="preserve">
+    <value>Target</value>
+  </data>
   <data name="Col_EquipmentCode" xml:space="preserve">
     <value>Equipment Code</value>
   </data>

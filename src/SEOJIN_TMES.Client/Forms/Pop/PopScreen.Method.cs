@@ -686,7 +686,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// 검사 스팩 한 줄의 입력 칸 세 개(결과상태 · 결과값 · 비고)를 모두 서버에 보낸다(값이 없으면 빈 문자열).
+        /// 검사 스팩 한 줄의 결과를 서버에 보낸다 — 정량 검사는 판정 · 결과값 두 개, 정성 검사는 판정만.
         /// 공정이 진행 중이 아니면 보내지 않는다 — 편집 도중 서버 상태가 바뀐 경우를 막는다.
         /// </summary>
         public async Task SetInspectionResult(PopInspectionSpecDto spec, string fieldName)
@@ -700,8 +700,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             var result = new PopInspectionResult();
             result.InspectionItemCode = spec.InspectionItemCode ?? string.Empty;
             result.ResultState = spec.ResultState ?? string.Empty;
-            result.ResultValue = spec.ResultValue ?? string.Empty;
-            result.InspectionResultRemark = spec.InspectionResultRemark ?? string.Empty;
+
+            // 정성 검사는 결과값이 없다 — null로 두면 Body에서 빠진다(PopInspectionResult 참고).
+            result.ResultValue = spec.IsQuantitative ? spec.ResultValue ?? string.Empty : null;
 
             BeginResultSave();
             try

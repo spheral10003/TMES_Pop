@@ -690,6 +690,15 @@
   <data name="Col_ResultValue" xml:space="preserve">
     <value>결과값</value>
   </data>
+  <data name="Col_InspectionLower" xml:space="preserve">
+    <value>최소값</value>
+  </data>
+  <data name="Col_InspectionUpper" xml:space="preserve">
+    <value>최대값</value>
+  </data>
+  <data name="Col_InspectionTarget" xml:space="preserve">
+    <value>타겟값</value>
+  </data>
   <data name="Col_EquipmentCode" xml:space="preserve">
     <value>장비코드</value>
   </data>
