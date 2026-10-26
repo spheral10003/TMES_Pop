@@ -24,12 +24,14 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
         ///   ┌ pnlSearch     : 등록일자(필수) 범위 / 시리얼번호 / 작업지시번호 + [조회]
         ///   └ splitMain
         ///       ├ Panel1    : 목록 — 작업지시 검색 결과(행을 고르면 우측 첨부가 그 지시로 바뀐다)
-        ///       └ Panel2    : 상세정보 — [다운로드][삭제][업로드] / 파일 상세목록 그리드
+        ///       └ Panel2    : 파일 상세목록 — 제목 줄 오른쪽 끝에 [다운로드][삭제][업로드] / 파일 상세목록 그리드
         ///
         /// 도킹은 나중에 Add된 컨트롤이 먼저 처리되므로 Add 순서를 바꾸지 말 것
         /// (root: splitMain → pnlSpacer → pnlSearch,
         ///  Panel1: gridOrders → pnlOrderLine → lblOrderTitle,
-        ///  Panel2: gridFiles → pnlFileLine → lblFileTitle → pnlAttach → lblDetailTitle).
+        ///  Panel2: btnUpload → btnDelete → btnDownload → gridFiles → pnlFileLine → lblFileTitle).
+        /// Panel2의 버튼 세 개는 도킹하지 않고 Top | Right로 고정해 lblFileTitle 줄 위에 얹는다 —
+        /// 먼저 Add해야 z-순서가 앞이 되어 제목 라벨에 가려지지 않는다.
         /// </summary>
         private void InitializeComponent()
         {
@@ -65,12 +67,9 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             this.colCreatedAt = new DevExpress.XtraGrid.Columns.GridColumn();
             this.pnlFileLine = new System.Windows.Forms.Panel();
             this.lblFileTitle = new System.Windows.Forms.Label();
-            this.pnlAttach = new System.Windows.Forms.Panel();
             this.btnUpload = new System.Windows.Forms.Button();
             this.btnDelete = new System.Windows.Forms.Button();
             this.btnDownload = new System.Windows.Forms.Button();
-            this.lblAttach = new System.Windows.Forms.Label();
-            this.lblDetailTitle = new System.Windows.Forms.Label();
             this.pnlSearch.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitMain)).BeginInit();
             this.splitMain.Panel1.SuspendLayout();
@@ -81,7 +80,6 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             ((System.ComponentModel.ISupportInitialize)(this.gridFiles)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridViewFiles)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.repoFileTypeText)).BeginInit();
-            this.pnlAttach.SuspendLayout();
             this.SuspendLayout();
             // 
             // pnlSearch
@@ -234,11 +232,12 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             // splitMain.Panel2
             // 
             this.splitMain.Panel2.BackColor = System.Drawing.Color.White;
+            this.splitMain.Panel2.Controls.Add(this.btnUpload);
+            this.splitMain.Panel2.Controls.Add(this.btnDelete);
+            this.splitMain.Panel2.Controls.Add(this.btnDownload);
             this.splitMain.Panel2.Controls.Add(this.gridFiles);
             this.splitMain.Panel2.Controls.Add(this.pnlFileLine);
             this.splitMain.Panel2.Controls.Add(this.lblFileTitle);
-            this.splitMain.Panel2.Controls.Add(this.pnlAttach);
-            this.splitMain.Panel2.Controls.Add(this.lblDetailTitle);
             this.splitMain.Panel2.Padding = new System.Windows.Forms.Padding(8, 0, 0, 0);
             this.splitMain.Size = new System.Drawing.Size(1424, 450);
             this.splitMain.SplitterDistance = 708;
@@ -373,14 +372,14 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             // gridFiles
             // 
             this.gridFiles.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gridFiles.Location = new System.Drawing.Point(8, 250);
+            this.gridFiles.Location = new System.Drawing.Point(8, 30);
             this.gridFiles.LookAndFeel.Style = DevExpress.LookAndFeel.LookAndFeelStyle.Flat;
             this.gridFiles.LookAndFeel.UseDefaultLookAndFeel = false;
             this.gridFiles.MainView = this.gridViewFiles;
             this.gridFiles.Name = "gridFiles";
             this.gridFiles.RepositoryItems.AddRange(new DevExpress.XtraEditors.Repository.RepositoryItem[] {
             this.repoFileTypeText});
-            this.gridFiles.Size = new System.Drawing.Size(705, 200);
+            this.gridFiles.Size = new System.Drawing.Size(705, 420);
             this.gridFiles.TabIndex = 4;
             this.gridFiles.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
             this.gridViewFiles});
@@ -507,7 +506,7 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             // 
             this.pnlFileLine.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(74)))), ((int)(((byte)(85)))), ((int)(((byte)(120)))));
             this.pnlFileLine.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pnlFileLine.Location = new System.Drawing.Point(8, 248);
+            this.pnlFileLine.Location = new System.Drawing.Point(8, 28);
             this.pnlFileLine.Name = "pnlFileLine";
             this.pnlFileLine.Size = new System.Drawing.Size(705, 2);
             this.pnlFileLine.TabIndex = 3;
@@ -517,26 +516,13 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             this.lblFileTitle.Dock = System.Windows.Forms.DockStyle.Top;
             this.lblFileTitle.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold);
             this.lblFileTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(34)))), ((int)(((byte)(34)))), ((int)(((byte)(34)))));
-            this.lblFileTitle.Location = new System.Drawing.Point(8, 220);
+            this.lblFileTitle.Location = new System.Drawing.Point(8, 0);
             this.lblFileTitle.Name = "lblFileTitle";
             this.lblFileTitle.Size = new System.Drawing.Size(705, 28);
             this.lblFileTitle.TabIndex = 2;
             this.lblFileTitle.Text = "■ 파일 상세목록";
             this.lblFileTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // pnlAttach
-            // 
-            this.pnlAttach.BackColor = System.Drawing.Color.White;
-            this.pnlAttach.Controls.Add(this.btnUpload);
-            this.pnlAttach.Controls.Add(this.btnDelete);
-            this.pnlAttach.Controls.Add(this.btnDownload);
-            this.pnlAttach.Controls.Add(this.lblAttach);
-            this.pnlAttach.Dock = System.Windows.Forms.DockStyle.Top;
-            this.pnlAttach.Location = new System.Drawing.Point(8, 28);
-            this.pnlAttach.Name = "pnlAttach";
-            this.pnlAttach.Size = new System.Drawing.Size(705, 38);
-            this.pnlAttach.TabIndex = 1;
-            // 
+            //
             // btnUpload
             // 
             this.btnUpload.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -547,7 +533,7 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             this.btnUpload.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnUpload.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold);
             this.btnUpload.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(51)))), ((int)(((byte)(51)))));
-            this.btnUpload.Location = new System.Drawing.Point(618, 6);
+            this.btnUpload.Location = new System.Drawing.Point(635, 1);
             this.btnUpload.Name = "btnUpload";
             this.btnUpload.Size = new System.Drawing.Size(76, 26);
             this.btnUpload.TabIndex = 2;
@@ -565,7 +551,7 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             this.btnDelete.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnDelete.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold);
             this.btnDelete.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(51)))), ((int)(((byte)(51)))));
-            this.btnDelete.Location = new System.Drawing.Point(536, 6);
+            this.btnDelete.Location = new System.Drawing.Point(553, 1);
             this.btnDelete.Name = "btnDelete";
             this.btnDelete.Size = new System.Drawing.Size(76, 26);
             this.btnDelete.TabIndex = 1;
@@ -583,37 +569,14 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             this.btnDownload.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnDownload.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold);
             this.btnDownload.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(51)))), ((int)(((byte)(51)))));
-            this.btnDownload.Location = new System.Drawing.Point(454, 6);
+            this.btnDownload.Location = new System.Drawing.Point(471, 1);
             this.btnDownload.Name = "btnDownload";
             this.btnDownload.Size = new System.Drawing.Size(76, 26);
             this.btnDownload.TabIndex = 0;
             this.btnDownload.Text = "다운로드";
             this.btnDownload.UseVisualStyleBackColor = false;
             this.btnDownload.Click += new System.EventHandler(this.btnDownload_Click);
-            // 
-            // lblAttach
-            // 
-            this.lblAttach.AutoSize = true;
-            this.lblAttach.Font = new System.Drawing.Font("맑은 고딕", 9F);
-            this.lblAttach.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(51)))), ((int)(((byte)(51)))));
-            this.lblAttach.Location = new System.Drawing.Point(20, 11);
-            this.lblAttach.Name = "lblAttach";
-            this.lblAttach.Size = new System.Drawing.Size(64, 15);
-            this.lblAttach.TabIndex = 0;
-            this.lblAttach.Text = "• 첨부파일";
-            // 
-            // lblDetailTitle
-            // 
-            this.lblDetailTitle.Dock = System.Windows.Forms.DockStyle.Top;
-            this.lblDetailTitle.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold);
-            this.lblDetailTitle.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(34)))), ((int)(((byte)(34)))), ((int)(((byte)(34)))));
-            this.lblDetailTitle.Location = new System.Drawing.Point(8, 0);
-            this.lblDetailTitle.Name = "lblDetailTitle";
-            this.lblDetailTitle.Size = new System.Drawing.Size(705, 28);
-            this.lblDetailTitle.TabIndex = 0;
-            this.lblDetailTitle.Text = "■ 상세정보";
-            this.lblDetailTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
+            //
             // AttachmentSearchScreen
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
@@ -637,8 +600,6 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             ((System.ComponentModel.ISupportInitialize)(this.gridFiles)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridViewFiles)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.repoFileTypeText)).EndInit();
-            this.pnlAttach.ResumeLayout(false);
-            this.pnlAttach.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -666,9 +627,6 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
         private DevExpress.XtraGrid.Columns.GridColumn colSerialNo;
         private DevExpress.XtraGrid.Columns.GridColumn colAttachmentCount;
         private DevExpress.XtraGrid.Columns.GridColumn colCreatedDate;
-        private System.Windows.Forms.Label lblDetailTitle;
-        private System.Windows.Forms.Panel pnlAttach;
-        private System.Windows.Forms.Label lblAttach;
         private System.Windows.Forms.Button btnDownload;
         private System.Windows.Forms.Button btnDelete;
         private System.Windows.Forms.Button btnUpload;

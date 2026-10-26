@@ -963,12 +963,6 @@
   <data name="Attach_ListTitle" xml:space="preserve">
     <value>List</value>
   </data>
-  <data name="Attach_DetailTitle" xml:space="preserve">
-    <value>Details</value>
-  </data>
-  <data name="Attach_Files" xml:space="preserve">
-    <value>Attachments</value>
-  </data>
   <data name="Attach_FileListTitle" xml:space="preserve">
     <value>File Details</value>
   </data>

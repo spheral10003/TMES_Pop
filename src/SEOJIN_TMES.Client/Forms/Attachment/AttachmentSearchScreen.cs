@@ -76,9 +76,7 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             btnSearch.Text = Language.Common_Search;
 
             lblOrderTitle.Text = "■ " + Language.Attach_ListTitle;
-            lblDetailTitle.Text = "■ " + Language.Attach_DetailTitle;
             lblFileTitle.Text = "■ " + Language.Attach_FileListTitle;
-            lblAttach.Text = "• " + Language.Attach_Files;
             btnDownload.Text = Language.Attach_Download;
             btnDelete.Text = Language.Attach_Delete;
             btnUpload.Text = Language.Attach_Upload;
@@ -100,7 +98,7 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
         }
 
         /// <summary>
-        /// 문구 길이에 맞춰 조회 조건 · 첨부 버튼 줄을 다시 배치한다.
+        /// 문구 길이에 맞춰 조회 조건과 첨부 버튼(다운로드 · 삭제 · 업로드)을 다시 배치한다.
         /// Designer 위치는 한국어 기준이라, 영어 · 베트남어처럼 긴 문구는 그대로 두면 라벨이 입력칸을 덮는다.
         /// </summary>
         private void ArrangeByTextWidth()
@@ -116,13 +114,14 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             x = PlaceAfter(lblSerialNo, txtSerialNo, x, labelGap) + groupGap;
             PlaceAfter(lblWorkOrderNo, txtWorkOrderNo, x, labelGap);
 
-            // 버튼은 문구가 넘치지 않게 넓힌다.
-            int left = Math.Max(110, lblAttach.Left + lblAttach.PreferredWidth + 16);
-            foreach (var button in new[] { btnDownload, btnDelete, btnUpload })
+            // 버튼은 문구가 넘치지 않게 넓히고, 파일 상세목록 제목 줄의 오른쪽 끝부터 [업로드] → [삭제] → [다운로드] 순으로 채운다.
+            // Designer에서 Top | Right로 고정해 두었으므로 여기서 한 번 맞추면 창 크기가 바뀌어도 오른쪽 끝에 붙어 있다.
+            int right = btnUpload.Right;
+            foreach (var button in new[] { btnUpload, btnDelete, btnDownload })
             {
                 button.Width = Math.Max(76, TextRenderer.MeasureText(button.Text, button.Font).Width + 20);
-                button.Left = left;
-                left = button.Right + 6;
+                button.Left = right - button.Width;
+                right = button.Left - 6;
             }
         }
 

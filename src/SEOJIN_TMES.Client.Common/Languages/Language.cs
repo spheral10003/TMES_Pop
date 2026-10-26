@@ -371,8 +371,6 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string Attach_Title => Get(nameof(Attach_Title));
         public static string Attach_RegDate => Get(nameof(Attach_RegDate));
         public static string Attach_ListTitle => Get(nameof(Attach_ListTitle));
-        public static string Attach_DetailTitle => Get(nameof(Attach_DetailTitle));
-        public static string Attach_Files => Get(nameof(Attach_Files));
         public static string Attach_FileListTitle => Get(nameof(Attach_FileListTitle));
         public static string Attach_Download => Get(nameof(Attach_Download));
         public static string Attach_Delete => Get(nameof(Attach_Delete));

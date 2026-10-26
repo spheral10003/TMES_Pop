@@ -963,12 +963,6 @@
   <data name="Attach_ListTitle" xml:space="preserve">
     <value>목록</value>
   </data>
-  <data name="Attach_DetailTitle" xml:space="preserve">
-    <value>상세정보</value>
-  </data>
-  <data name="Attach_Files" xml:space="preserve">
-    <value>첨부파일</value>
-  </data>
   <data name="Attach_FileListTitle" xml:space="preserve">
     <value>파일 상세목록</value>
   </data>

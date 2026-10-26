@@ -963,12 +963,6 @@
   <data name="Attach_ListTitle" xml:space="preserve">
     <value>Danh sách</value>
   </data>
-  <data name="Attach_DetailTitle" xml:space="preserve">
-    <value>Thông tin chi tiết</value>
-  </data>
-  <data name="Attach_Files" xml:space="preserve">
-    <value>Tệp đính kèm</value>
-  </data>
   <data name="Attach_FileListTitle" xml:space="preserve">
     <value>Danh sách tệp chi tiết</value>
   </data>
