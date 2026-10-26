@@ -22,7 +22,7 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
     ///
     /// 흐름:
     ///  1) 등록일자 범위(필수) · 시리얼번호 · 작업지시번호로 [조회] → 좌측 [목록]
-    ///  2) 목록에서 한 건을 고르면 → 우측 첨부파일 이름 목록 · [파일 상세목록]이 그 작업지시 것으로 바뀐다(자동 조회)
+    ///  2) 목록에서 한 건을 클릭하면 → 우측 [파일 상세목록]에 그 작업지시의 첨부가 바로 표시된다(자동 조회)
     ///  3) 우측에서 [다운로드] · [삭제] · [업로드]로 첨부를 다룬다. 업로드 · 삭제 뒤에는 서버 목록을 다시 받는다.
     ///
     /// FileUploadForm과 같은 API(IFileApiClient)를 쓰되 미리보기는 없다.
@@ -39,14 +39,8 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
         /// <summary>우측에 첨부를 띄우고 있는 작업지시. 늦게 도착한 응답이 다른 지시의 첨부를 덮지 않게 비교할 때 쓴다.</summary>
         private WorkOrderEntryDto _currentOrder;
 
-        /// <summary>우측 이름 목록과 상세 그리드가 함께 물고 있는 첨부 목록(같은 순서).</summary>
-        private List<FileUploadResponse> _files = new List<FileUploadResponse>();
-
         /// <summary>조회 · 업로드 · 삭제 · 다운로드 중에는 버튼을 막는다 — 중복 요청이 서버 상태를 꼬이게 한다.</summary>
         private bool _isBusy;
-
-        /// <summary>이름 목록 ↔ 그리드 선택을 맞추는 중인지. 서로의 변경 이벤트가 되돌아와 무한 반복되는 것을 막는다.</summary>
-        private bool _syncingSelection;
 
         public AttachmentSearchScreen()
         {
@@ -120,7 +114,7 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             x = PlaceAfter(lblSerialNo, txtSerialNo, x, labelGap) + groupGap;
             PlaceAfter(lblWorkOrderNo, txtWorkOrderNo, x, labelGap);
 
-            // 버튼은 문구가 넘치지 않게 넓히고, 이름 목록은 버튼 줄 왼쪽 끝에 맞춘다.
+            // 버튼은 문구가 넘치지 않게 넓힌다.
             int left = Math.Max(110, lblAttach.Left + lblAttach.PreferredWidth + 16);
             foreach (var button in new[] { btnDownload, btnDelete, btnUpload })
             {
@@ -128,8 +122,6 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
                 button.Left = left;
                 left = button.Right + 6;
             }
-            listFiles.Left = btnDownload.Left;
-            listFiles.Width = pnlAttach.ClientSize.Width - listFiles.Left - 6;
         }
 
         /// <summary>라벨을 x에 두고 입력칸을 그 오른쪽에 붙인다. 입력칸의 오른쪽 끝을 돌려준다.</summary>
@@ -233,7 +225,7 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             }
         }
 
-        /// <summary>작업지시를 고를 때마다 우측 첨부를 그 지시 것으로 바꾼다.</summary>
+        /// <summary>작업지시를 클릭(또는 키보드로 이동)할 때마다 우측 파일 상세목록을 그 지시의 첨부로 바꾼다.</summary>
         private async void gridViewOrders_FocusedRowChanged(object sender, FocusedRowChangedEventArgs e)
         {
             await LoadFilesAsync(gridViewOrders.GetRow(e.FocusedRowHandle) as WorkOrderEntryDto);
@@ -306,25 +298,11 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             return key;
         }
 
+        /// <summary>받은 첨부 목록을 파일 상세목록 그리드에 바로 붙인다.</summary>
         private void BindFiles(List<FileUploadResponse> files)
         {
-            _files = files ?? new List<FileUploadResponse>();
-
-            _syncingSelection = true;
-            try
-            {
-                listFiles.BeginUpdate();
-                listFiles.Items.Clear();
-                listFiles.Items.AddRange(_files.Cast<object>().ToArray());
-                listFiles.EndUpdate();
-
-                gridFiles.DataSource = _files;
-                gridViewFiles.ClearSelection();
-            }
-            finally
-            {
-                _syncingSelection = false;
-            }
+            gridFiles.DataSource = files ?? new List<FileUploadResponse>();
+            gridViewFiles.ClearSelection();
             ControlEnabled();
         }
 
@@ -333,62 +311,13 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             BindFiles(new List<FileUploadResponse>());
         }
 
-        #endregion
-
-        #region 선택 동기화 (이름 목록 ↔ 파일 상세목록)
-
-        private void listFiles_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (_syncingSelection)
-                return;
-
-            _syncingSelection = true;
-            try
-            {
-                gridViewFiles.BeginSelection();
-                gridViewFiles.ClearSelection();
-                foreach (int index in listFiles.SelectedIndices)
-                    gridViewFiles.SelectRow(gridViewFiles.GetRowHandle(index));
-                gridViewFiles.EndSelection();
-
-                if (listFiles.SelectedIndex >= 0)
-                    gridViewFiles.FocusedRowHandle = gridViewFiles.GetRowHandle(listFiles.SelectedIndex);
-            }
-            finally
-            {
-                _syncingSelection = false;
-            }
-            ControlEnabled();
-        }
-
+        /// <summary>그리드에서 고른 행이 바뀌면 [다운로드] · [삭제] 사용 여부를 다시 정한다.</summary>
         private void gridViewFiles_SelectionChanged(object sender, DevExpress.Data.SelectionChangedEventArgs e)
         {
-            if (_syncingSelection)
-            {
-                return;
-            }
-
-            _syncingSelection = true;
-            try
-            {
-                listFiles.BeginUpdate();
-                listFiles.ClearSelected();
-                foreach (var file in SelectedFiles())
-                {
-                    int index = _files.IndexOf(file);
-                    if (index >= 0)
-                        listFiles.SetSelected(index, true);
-                }
-                listFiles.EndUpdate();
-            }
-            finally
-            {
-                _syncingSelection = false;
-            }
             ControlEnabled();
         }
 
-        /// <summary>다운로드 · 삭제 대상. 그리드에서 고른 행(이름 목록 선택도 그리드로 옮겨 온다).</summary>
+        /// <summary>다운로드 · 삭제 대상 — 파일 상세목록에서 고른 행.</summary>
         private List<FileUploadResponse> SelectedFiles()
         {
             return gridViewFiles.GetSelectedRows()

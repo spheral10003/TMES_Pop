@@ -24,7 +24,7 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
         ///   ┌ pnlSearch     : 등록일자(필수) 범위 / 시리얼번호 / 작업지시번호 + [조회]
         ///   └ splitMain
         ///       ├ Panel1    : 목록 — 작업지시 검색 결과(행을 고르면 우측 첨부가 그 지시로 바뀐다)
-        ///       └ Panel2    : 상세정보 — 첨부파일 이름 목록 + [다운로드][삭제][업로드] / 파일 상세목록 그리드
+        ///       └ Panel2    : 상세정보 — [다운로드][삭제][업로드] / 파일 상세목록 그리드
         ///
         /// 도킹은 나중에 Add된 컨트롤이 먼저 처리되므로 Add 순서를 바꾸지 말 것
         /// (root: splitMain → pnlSpacer → pnlSearch,
@@ -66,7 +66,6 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             this.pnlFileLine = new System.Windows.Forms.Panel();
             this.lblFileTitle = new System.Windows.Forms.Label();
             this.pnlAttach = new System.Windows.Forms.Panel();
-            this.listFiles = new System.Windows.Forms.ListBox();
             this.btnUpload = new System.Windows.Forms.Button();
             this.btnDelete = new System.Windows.Forms.Button();
             this.btnDownload = new System.Windows.Forms.Button();
@@ -526,7 +525,6 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             // pnlAttach
             // 
             this.pnlAttach.BackColor = System.Drawing.Color.White;
-            this.pnlAttach.Controls.Add(this.listFiles);
             this.pnlAttach.Controls.Add(this.btnUpload);
             this.pnlAttach.Controls.Add(this.btnDelete);
             this.pnlAttach.Controls.Add(this.btnDownload);
@@ -534,25 +532,8 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             this.pnlAttach.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlAttach.Location = new System.Drawing.Point(8, 28);
             this.pnlAttach.Name = "pnlAttach";
-            this.pnlAttach.Size = new System.Drawing.Size(705, 192);
+            this.pnlAttach.Size = new System.Drawing.Size(705, 38);
             this.pnlAttach.TabIndex = 1;
-            // 
-            // listFiles
-            // 
-            this.listFiles.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.listFiles.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(250)))), ((int)(((byte)(250)))), ((int)(((byte)(252)))));
-            this.listFiles.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.listFiles.Font = new System.Drawing.Font("맑은 고딕", 9F);
-            this.listFiles.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(51)))), ((int)(((byte)(51)))));
-            this.listFiles.IntegralHeight = false;
-            this.listFiles.ItemHeight = 15;
-            this.listFiles.Location = new System.Drawing.Point(23, 38);
-            this.listFiles.Name = "listFiles";
-            this.listFiles.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.listFiles.Size = new System.Drawing.Size(671, 142);
-            this.listFiles.TabIndex = 3;
-            this.listFiles.SelectedIndexChanged += new System.EventHandler(this.listFiles_SelectedIndexChanged);
             // 
             // btnUpload
             // 
@@ -689,7 +670,6 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
         private System.Windows.Forms.Button btnDownload;
         private System.Windows.Forms.Button btnDelete;
         private System.Windows.Forms.Button btnUpload;
-        private System.Windows.Forms.ListBox listFiles;
         private System.Windows.Forms.Label lblFileTitle;
         private System.Windows.Forms.Panel pnlFileLine;
         private DevExpress.XtraGrid.GridControl gridFiles;
