@@ -80,8 +80,10 @@ namespace SEOJIN_TMES.Client.Common.Models
         public string Remark { get; set; }
 
         /// <summary>
-        /// 작업지시에 붙은 첨부파일 개수(첨부파일 조회 화면). 서버가 센 값을 그대로 표시한다.
-        /// TODO: 필드명(atchCnt)은 <b>가정값</b>이다 — 서버 스펙이 확정되면 맞출 것.
+        /// 작업지시에 붙은 첨부파일 개수(첨부파일 조회 화면).
+        /// 지금 목록 API(md/work-orders/overview)는 이 값을 내려주지 않아서, 화면이 지시별 첨부 목록을 받아 건수를 채운다.
+        /// 서버가 내려주면 그 값을 그대로 쓰고 화면은 다시 조회하지 않는다.
+        /// TODO: 필드명(atchCnt)은 <b>가정값</b>이다 — 서버에 필드가 추가되면 이름을 맞출 것.
         /// </summary>
         [JsonProperty("atchCnt")]
         public int? AttachmentCount { get; set; }

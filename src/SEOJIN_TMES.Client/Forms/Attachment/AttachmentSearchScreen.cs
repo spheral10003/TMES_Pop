@@ -23,6 +23,7 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
     /// 흐름:
     ///  1) 등록일자 범위 · 시리얼번호 · 작업지시번호로 [조회] → 좌측 [목록]
     ///     등록일자는 체크한 칸만 조건으로 보낸다. 날짜를 하나도 체크하지 않으면 시리얼번호 · 작업지시번호 중 하나는 필수다.
+    ///     목록을 띄운 뒤 지시마다 첨부 목록을 받아 "첨부파일" 열에 건수를 채운다(목록 API가 건수를 주지 않는다).
     ///  2) 목록에서 한 건을 클릭하면 → 우측 [파일 상세목록]에 그 작업지시의 첨부가 바로 표시된다(자동 조회)
     ///  3) 우측에서 [다운로드] · [삭제] · [업로드]로 첨부를 다룬다. 업로드 · 삭제 뒤에는 서버 목록을 다시 받는다.
     ///
@@ -184,48 +185,91 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             _isBusy = true;
             ControlEnabled();
 
-            using (var busy = BusyOverlay.Show(this, cancelable: true))
+            List<WorkOrderEntryDto> result = null;
+            try
             {
+                result = await _appSet.ApiClients.WorkStatusApiClient.SearchWorkOrdersAsync(_query)
+                         ?? new List<WorkOrderEntryDto>();
+                if (IsDisposed || Disposing) return;   // 조회 중 탭을 닫았다
+
+                // 새 결과이므로 이전 지시의 첨부는 비운다(같은 지시라도 다시 읽는다).
+                ClearFiles();
+                gridOrders.DataSource = result;
+
+                if (result.Count == 0)
+                {
+                    AppMessageBox.Info(this, Language.WorkEntry_NoResult, Language.Attach_Title);
+                    return;
+                }
+
+                // 이미 0번 행에 포커스가 있으면 FocusedRowChanged가 안 걸리므로 직접 한 번 부른다.
+                gridViewOrders.FocusedRowHandle = 0;
+                await LoadFilesAsync(gridViewOrders.GetFocusedRow() as WorkOrderEntryDto);
+            }
+            catch (ApiException ex)
+            {
+                if (IsDisposed || Disposing) return;
+
+                AppLog.Error("첨부파일 조회 화면 - 작업지시 조회 실패", ex);
+                AppMessageBox.Warn(this, ex.Message, Language.Attach_Title);
+                return;
+            }
+            finally
+            {
+                if (!IsDisposed && !Disposing)
+                {
+                    _isBusy = false;
+                    ControlEnabled();
+                }
+            }
+
+            // 버튼 잠금을 푼 뒤에 채운다 — 건수를 다 받을 때까지 작업자를 기다리게 하지 않는다.
+            if (result != null && result.Count > 0)
+                await GetAttachmentCounts(result);
+        }
+
+        /// <summary>
+        /// 조회 결과의 작업지시마다 첨부 목록을 받아 "첨부파일" 열(AttachmentCount)에 건수를 채운다.
+        /// 목록 API(md/work-orders/overview)가 건수를 내려주지 않아서 지시마다 첨부 API를 한 번씩 부른다.
+        ///  - 이미 건수가 있는 지시(서버가 내려줬거나, 클릭해서 첨부를 받은 지시)는 건너뛴다.
+        ///  - 그사이 다시 조회해 목록이 바뀌면 멈춘다 — 이전 결과에 건수를 채울 이유가 없다.
+        ///  - 한 건이 실패하면 그 칸만 비워 두고 계속한다. 통신 자체가 안 되면 남은 호출도 실패하므로 멈춘다.
+        /// </summary>
+        private async Task GetAttachmentCounts(List<WorkOrderEntryDto> orders)
+        {
+            foreach (var order in orders)
+            {
+                if (IsDisposed || Disposing || !ReferenceEquals(gridOrders.DataSource, orders))
+                    return;
+
+                if (order.AttachmentCount.HasValue)
+                    continue;
+
                 try
                 {
-                    var result = await _appSet.ApiClients.WorkStatusApiClient.SearchWorkOrdersAsync(_query, busy?.Token ?? default)
-                                 ?? new List<WorkOrderEntryDto>();
-                    if (IsDisposed || Disposing) return;   // 조회 중 탭을 닫았다
+                    var result = await _fileApi.GetAttachmentsAsync(KeyOf(order));
+                    if (IsDisposed || Disposing) return;
 
-                    // 새 결과이므로 이전 지시의 첨부는 비운다(같은 지시라도 다시 읽는다).
-                    ClearFiles();
-                    gridOrders.DataSource = result;
-
-                    if (result.Count == 0)
-                    {
-                        AppMessageBox.Info(this, Language.WorkEntry_NoResult, Language.Attach_Title);
-                        return;
-                    }
-
-                    // 이미 0번 행에 포커스가 있으면 FocusedRowChanged가 안 걸리므로 직접 한 번 부른다.
-                    gridViewOrders.FocusedRowHandle = 0;
-                    await LoadFilesAsync(gridViewOrders.GetFocusedRow() as WorkOrderEntryDto);
-                }
-                catch (OperationCanceledException)
-                {
-                    // 사용자가 [취소]를 눌렀다 — 오류가 아니므로 조용히 끝낸다.
+                    SetAttachmentCount(order, result?.Attachments?.Count ?? 0);
                 }
                 catch (ApiException ex)
                 {
-                    if (IsDisposed || Disposing) return;
-
-                    AppLog.Error("첨부파일 조회 화면 - 작업지시 조회 실패", ex);
-                    AppMessageBox.Warn(this, ex.Message, Language.Attach_Title);
-                }
-                finally
-                {
-                    if (!IsDisposed && !Disposing)
-                    {
-                        _isBusy = false;
-                        ControlEnabled();
-                    }
+                    AppLog.Warn($"첨부 건수 조회 실패 - {order.WorkOrderNo} : {ex.Message}");
+                    if (ex.IsTransportFailure)
+                        return;
                 }
             }
+        }
+
+        /// <summary>작업지시 한 줄의 첨부 건수를 바꾸고 그 행만 다시 그린다.</summary>
+        private void SetAttachmentCount(WorkOrderEntryDto order, int count)
+        {
+            order.AttachmentCount = count;
+
+            var orders = gridOrders.DataSource as List<WorkOrderEntryDto>;
+            int index = orders?.IndexOf(order) ?? -1;
+            if (index >= 0)
+                gridViewOrders.RefreshRow(gridViewOrders.GetRowHandle(index));
         }
 
         /// <summary>
@@ -283,11 +327,15 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
                 var result = await _fileApi.GetAttachmentsAsync(KeyOf(order));
                 if (IsDisposed || Disposing) return;
 
-                // 받는 사이 다른 지시를 골랐으면 늦게 온 응답은 버린다.
+                // 받은 목록으로 그 지시의 건수도 맞춘다 — 업로드 · 삭제 뒤에도 "첨부파일" 열이 따라온다.
+                var attachments = result?.Attachments ?? new List<WorkOrderAttachmentDto>();
+                SetAttachmentCount(order, attachments.Count);
+
+                // 받는 사이 다른 지시를 골랐으면 늦게 온 응답은 파일 목록에 그리지 않는다.
                 if (!ReferenceEquals(_currentOrder, order))
                     return;
 
-                BindFiles((result?.Attachments ?? new List<WorkOrderAttachmentDto>()).Select(ToFileResponse).ToList());
+                BindFiles(attachments.Select(ToFileResponse).ToList());
             }
             catch (ApiException ex)
             {
@@ -389,30 +437,27 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
 
             var key = KeyOf(order);
             var failed = new List<string>();
-            using (BusyOverlay.Show(this))
+            for (int i = 0; i < targets.Count; i++)
             {
-                for (int i = 0; i < targets.Count; i++)
+                var target = targets[i];
+                try
                 {
-                    var target = targets[i];
-                    try
-                    {
-                        var file = await _fileApi.DownloadAttachmentAsync(key, target.AttachRef);
-                        if (IsDisposed || Disposing) return;
+                    var file = await _fileApi.DownloadAttachmentAsync(key, target.AttachRef);
+                    if (IsDisposed || Disposing) return;
 
-                        File.WriteAllBytes(savePaths[i], file?.Content ?? new byte[0]);
-                        AppLog.Step($"첨부 다운로드 - {order.WorkOrderNo}, {target.DisplayName} → {savePaths[i]}");
-                    }
-                    catch (ApiException ex)
-                    {
-                        if (IsDisposed || Disposing) return;
-                        AppLog.Error($"첨부 다운로드 실패 - {target.DisplayName}", ex);
-                        failed.Add(target.DisplayName);
-                    }
-                    catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
-                    {
-                        AppLog.Error($"첨부 저장 실패 - {savePaths[i]}", ex);
-                        failed.Add(target.DisplayName);
-                    }
+                    File.WriteAllBytes(savePaths[i], file?.Content ?? new byte[0]);
+                    AppLog.Step($"첨부 다운로드 - {order.WorkOrderNo}, {target.DisplayName} → {savePaths[i]}");
+                }
+                catch (ApiException ex)
+                {
+                    if (IsDisposed || Disposing) return;
+                    AppLog.Error($"첨부 다운로드 실패 - {target.DisplayName}", ex);
+                    failed.Add(target.DisplayName);
+                }
+                catch (Exception ex) when (ex is IOException || ex is UnauthorizedAccessException)
+                {
+                    AppLog.Error($"첨부 저장 실패 - {savePaths[i]}", ex);
+                    failed.Add(target.DisplayName);
                 }
             }
 
@@ -547,34 +592,31 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             _isBusy = true;
             ControlEnabled();
 
-            using (BusyOverlay.Show(this))
+            try
             {
-                try
-                {
-                    AppLog.Step($"파일 일괄 업로드 시작 - {order.WorkOrderNo}, {files.Count}건 ({files.Sum(f => f.Length):N0} byte)");
-                    List<FileUploadResponse> uploaded = await _fileApi.UploadManyAsync(files, KeyOf(order));
-                    if (IsDisposed || Disposing) return;
+                AppLog.Step($"파일 일괄 업로드 시작 - {order.WorkOrderNo}, {files.Count}건 ({files.Sum(f => f.Length):N0} byte)");
+                List<FileUploadResponse> uploaded = await _fileApi.UploadManyAsync(files, KeyOf(order));
+                if (IsDisposed || Disposing) return;
 
-                    AppLog.Step($"파일 일괄 업로드 완료 - {order.WorkOrderNo}, {uploaded?.Count ?? files.Count}건");
-                }
-                catch (ApiException ex)
-                {
-                    if (IsDisposed || Disposing) return;
+                AppLog.Step($"파일 일괄 업로드 완료 - {order.WorkOrderNo}, {uploaded?.Count ?? files.Count}건");
+            }
+            catch (ApiException ex)
+            {
+                if (IsDisposed || Disposing) return;
 
-                    // 한 요청이라 실패하면 아무것도 안 올라간 것으로 본다.
-                    AppLog.Error($"파일 일괄 업로드 실패 - {order.WorkOrderNo}, {files.Count}건", ex);
-                    AppMessageBox.Error(this, ex.IsTransportFailure
-                        ? Language.Upload_ConnectionError
-                        : $"{Language.Upload_Failed} ({(int)ex.StatusCode})", Language.Attach_Title);
-                    return;
-                }
-                finally
+                // 한 요청이라 실패하면 아무것도 안 올라간 것으로 본다.
+                AppLog.Error($"파일 일괄 업로드 실패 - {order.WorkOrderNo}, {files.Count}건", ex);
+                AppMessageBox.Error(this, ex.IsTransportFailure
+                    ? Language.Upload_ConnectionError
+                    : $"{Language.Upload_Failed} ({(int)ex.StatusCode})", Language.Attach_Title);
+                return;
+            }
+            finally
+            {
+                if (!IsDisposed && !Disposing)
                 {
-                    if (!IsDisposed && !Disposing)
-                    {
-                        _isBusy = false;
-                        ControlEnabled();
-                    }
+                    _isBusy = false;
+                    ControlEnabled();
                 }
             }
 
