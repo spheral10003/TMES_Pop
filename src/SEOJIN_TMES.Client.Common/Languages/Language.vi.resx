@@ -861,8 +861,8 @@
   <data name="AdminAlarm_Grade" xml:space="preserve">
     <value>Cấp cảnh báo</value>
   </data>
-  <data name="AdminAlarm_Name" xml:space="preserve">
-    <value>Tên cảnh báo</value>
+  <data name="AdminAlarm_Unit" xml:space="preserve">
+    <value>mục</value>
   </data>
   <data name="AdminAlarm_ListTitle" xml:space="preserve">
     <value>Mã cảnh báo / Nội dung xử lý</value>

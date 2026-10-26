@@ -62,6 +62,12 @@ namespace SEOJIN_TMES.Client.Theme
         public static readonly Color Rose = Color.FromArgb(244, 63, 94);     // #F43F5E
         public static readonly Color Slate = Color.FromArgb(71, 85, 105);    // #475569
 
+        // 알람 등급 색 — 대시보드 등급 카드 시안(P1 빨강 · P2 주황 · P3 올리브 · P4 파랑)과 맞춘다.
+        public static readonly Color AlarmP1 = Color.FromArgb(220, 68, 55);  // #DC4437
+        public static readonly Color AlarmP2 = Color.FromArgb(234, 134, 0);  // #EA8600
+        public static readonly Color AlarmP3 = Color.FromArgb(164, 158, 0);  // #A49E00
+        public static readonly Color AlarmP4 = Color.FromArgb(37, 117, 214); // #2575D6
+
         // ── 콘솔(설비 로그) 색 ──
         public static readonly Color ConsoleBack = Color.FromArgb(23, 23, 43);
         public static readonly Color ConsoleFore = Color.FromArgb(134, 239, 172);
@@ -152,6 +158,9 @@ namespace SEOJIN_TMES.Client.Theme
 
         /// <summary>POP 화면의 워크스테이션/공정 상태 띠처럼 멀리서도 읽혀야 하는 큰 글자.</summary>
         public static Font BannerFont => new Font(FontFamily, 14F, FontStyle.Bold);
+
+        /// <summary>카드 타일의 큰 값(건수) — 카드에서 가장 먼저 읽혀야 하는 숫자.</summary>
+        public static Font CardValueFont => new Font(FontFamily, 20F, FontStyle.Bold);
 
         /// <summary>
         /// 전역 스킨 + SVG 팔레트를 적용한다(DevExpress 벡터 스킨 기능).
@@ -504,47 +513,29 @@ namespace SEOJIN_TMES.Client.Theme
             item.Padding = new Padding(8);
         }
 
-        /// <summary>
-        /// 고르는 타일 묶음(TileControl) — <see cref="TileStrip"/>과 달리 <b>선택 상태가 있다.</b>
-        /// 누른 타일에 테두리를 둘러 "지금 무엇을 골랐는지"가 보이게 하고, 끌어서 순서를 바꾸는 기능은 끈다.
-        /// </summary>
-        public static void PickerTiles(TileControl tiles, int itemSize)
-        {
-            tiles.LookAndFeel.UseDefaultLookAndFeel = false;
-            tiles.LookAndFeel.Style = LookAndFeelStyle.Flat;
-            tiles.BackColor = Card;
-            tiles.AllowDrag = false;
-            tiles.AllowSelectedItem = true;
-            tiles.AllowSelectedItemBorder = true;
-            tiles.SelectionColor = Indigo;
-            tiles.ItemSize = itemSize;
-            tiles.IndentBetweenItems = 10;
-            tiles.Padding = new Padding(12);
-        }
-
-        /// <summary>
-        /// 알람 타일 하나 — 등급 색을 채우고 hover/press는 <see cref="Tile"/>과 같은 규칙으로 밝게/어둡게.
-        /// 글자 배치는 각 요소(<see cref="TileItemElement"/>)가 정하므로 여기서는 색과 기본 글꼴만 입힌다.
-        /// </summary>
-        public static void AlarmTile(TileItem item, Color back)
-        {
-            item.ItemSize = TileItemSize.Wide;
-            Paint(item.AppearanceItem.Normal, back, Color.White, BodyFont);
-            Paint(item.AppearanceItem.Hovered, ControlPaint.Light(back, 0.18f), Color.White, BodyFont);
-            Paint(item.AppearanceItem.Pressed, ControlPaint.Dark(back, 0.08f), Color.White, BodyFont);
-            Paint(item.AppearanceItem.Selected, ControlPaint.Dark(back, 0.08f), Color.White, BodyFont);
-        }
-
-        /// <summary>
-        /// 알람 등급(P1~P4)의 색 — 급할수록 눈에 띄는 색. 모르는 등급은 정보(P4)와 같은 회색으로 둔다.
-        /// </summary>
+        /// <summary>알람 등급(P1~P4)의 카드 색. 모르는 등급은 회색으로 둔다.</summary>
         public static Color AlarmGradeColor(string grade)
         {
             switch (grade)
             {
-                case "P1": return Rose;
-                case "P2": return Amber;
-                case "P3": return Teal;
+                case "P1": return AlarmP1;
+                case "P2": return AlarmP2;
+                case "P3": return AlarmP3;
+                case "P4": return AlarmP4;
+                default: return Slate;
+            }
+        }
+
+        /// <summary>알람 구분(EQP/QLT/MAT/PRD/EHS/SYS)의 카드 색 — 구분끼리 한눈에 갈리도록 서로 다른 색을 준다.</summary>
+        public static Color AlarmTypeColor(string type)
+        {
+            switch (type)
+            {
+                case "EQP": return Indigo;
+                case "QLT": return Violet;
+                case "MAT": return Cyan;
+                case "PRD": return Emerald;
+                case "EHS": return Rose;
                 default: return Slate;
             }
         }

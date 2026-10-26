@@ -861,8 +861,8 @@
   <data name="AdminAlarm_Grade" xml:space="preserve">
     <value>알람 등급</value>
   </data>
-  <data name="AdminAlarm_Name" xml:space="preserve">
-    <value>알람 명</value>
+  <data name="AdminAlarm_Unit" xml:space="preserve">
+    <value>건</value>
   </data>
   <data name="AdminAlarm_ListTitle" xml:space="preserve">
     <value>알람 코드 / 조치 내용</value>

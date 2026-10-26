@@ -861,8 +861,8 @@
   <data name="AdminAlarm_Grade" xml:space="preserve">
     <value>Alarm Grade</value>
   </data>
-  <data name="AdminAlarm_Name" xml:space="preserve">
-    <value>Alarm Name</value>
+  <data name="AdminAlarm_Unit" xml:space="preserve">
+    <value>items</value>
   </data>
   <data name="AdminAlarm_ListTitle" xml:space="preserve">
     <value>Alarm Code / Action</value>

@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DevExpress.XtraEditors;
 using SEOJIN_TMES.Client.ApiClient;
 using SEOJIN_TMES.Client.Common.Languages;
 using SEOJIN_TMES.Client.Common.Logging;
@@ -16,10 +16,15 @@ namespace SEOJIN_TMES.Client.Forms.Pop
     /// <summary>
     /// &lt;알람 조회 / 등록&gt; 팝업 — POP 본 화면의 [알림] 버튼(btnAdminAlarm)으로 연다.
     ///
-    /// 이상 알람 유형 기준정보(<c>md/abnormal-alarm-types</c>)를 조회해 <b>타일</b>로 깔고,
-    /// 작업자가 타일을 눌러 알람 코드와 조치 내용을 고른 뒤 비고를 적어 [등록]한다.
+    /// 고르는 것도, 조회 결과를 보여 주는 것도 전부 <b>카드 타일(<see cref="CardTile"/>)</b>로 한다.
+    ///  1) [알람 구분] 타일(설비/품질/자재/생산/안전·환경/시스템)을 누르면
+    ///  2) 그 구분의 [알람 등급] 타일(P1 긴급 ~ P4 정보)이 생기고, 등급을 누르면
+    ///  3) 그 구분 · 등급의 [알람 코드 / 조치 내용] 타일이 깔린다. 하나를 고르고 비고를 적어 [등록]한다.
+    ///
+    /// 알람 유형 기준정보(<c>md/abnormal-alarm-types</c>)는 창이 뜰 때 한 번(그리고 [조회] 때) 통째로 읽고,
+    /// 구분 · 등급 타일의 건수는 그 목록을 묶어 보여 주기만 한다(서버 값을 가공하는 판정·집계가 아니다).
     /// 등록(<c>pop/{sn}/{subRpRef}/abnormal-alarms</c>)까지 이 창이 맡는다 —
-    /// 실패하면 창을 닫지 않고 안내만 해서, 고른 내용을 다시 고르지 않고 재시도할 수 있게 한다.
+    /// 실패하면 창을 닫지 않고 안내만 해서, 고른 내용 그대로 다시 시도할 수 있게 한다.
     ///
     /// 일반 .NET Form이며 Windows 제목 줄 대신 pnlTitle(패널) + lblTitle(라벨)이 제목 줄 역할을 한다.
     /// VS 디자이너 호환을 위해 매개변수 없는 생성자만 두고, 실제 내용은 Initialize()로 넣는다.
@@ -30,9 +35,18 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private readonly string[] _alarmTypes = { "EQP", "QLT", "MAT", "PRD", "EHS", "SYS" };
         private readonly string[] _alarmGrades = { "P1", "P2", "P3", "P4" };
 
+        private readonly Size _typeTileSize = new Size(182, 104);
+        private readonly Size _gradeTileSize = new Size(240, 104);
+        private readonly Size _codeTileSize = new Size(272, 104);
+        private readonly Padding _tileMargin = new Padding(0, 0, 10, 10);
+
         private ApiClientFactory _apiClient;
         private PopProcessKey _key;
-        private AbnormalAlarmTypeDto _selected;
+        private List<AbnormalAlarmTypeDto> _alarms = new List<AbnormalAlarmTypeDto>();
+
+        private string _selectedType;
+        private string _selectedGrade;
+        private AbnormalAlarmTypeDto _selectedAlarm;
 
         public AdminAlarmForm()
         {
@@ -47,56 +61,34 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
             Text = Language.AdminAlarm_Title;
             lblTitle.Text = Language.AdminAlarm_Title;
-            lblType.Text = Language.AdminAlarm_Type;
-            lblGrade.Text = Language.AdminAlarm_Grade;
-            lblName.Text = Language.AdminAlarm_Name;
-            lblListTitle.Text = Language.AdminAlarm_ListTitle;
+            lblTypeTitle.Text = Language.AdminAlarm_Type;
+            lblGradeTitle.Text = Language.AdminAlarm_Grade;
+            lblCodeTitle.Text = Language.AdminAlarm_ListTitle;
             lblRemark.Text = Language.Col_Remark;
             btnSearch.Text = Language.Common_Search;
             btnSend.Text = Language.AdminAlarm_Send;
             btnClose.Text = Language.Common_Close;
 
-            FillCodeCombo(cboType, _alarmTypes);
-            FillCodeCombo(cboGrade, _alarmGrades);
-
             ApplyTheme();
             DialogChrome.Apply(this, pnlTitle);
+            ShowTypeTiles();
         }
 
         private void ApplyTheme()
         {
             AppTheme.TitleBar(pnlTitle, lblTitle, AppTheme.Amber);
-            pnlSearch.BackColor = AppTheme.Card;
             pnlBody.BackColor = AppTheme.Surface;
             pnlRemark.BackColor = AppTheme.Surface;
             pnlFooter.BackColor = AppTheme.Surface;
 
-            foreach (var label in new[] { lblType, lblGrade, lblName, lblRemark })
+            foreach (var label in new[] { lblTypeTitle, lblGradeTitle, lblCodeTitle, lblRemark })
             {
                 label.ForeColor = AppTheme.TextPrimary;
-                label.Font = AppTheme.BodyBoldFont;
+                label.Font = AppTheme.SectionFont;
             }
-            lblListTitle.ForeColor = AppTheme.Amber;
-            lblListTitle.Font = AppTheme.SectionFont;
 
-            AppTheme.Editor(cboType);
-            AppTheme.Editor(cboGrade);
-            AppTheme.Editor(txtName);
             AppTheme.Editor(txtRemark);
-            AppTheme.PickerTiles(tileAlarms, 96);
-
             btnSearch.Icon = AppIcons.Search;
-        }
-
-        /// <summary>콤보 맨 앞에 [전체]를 두고 코드별 항목을 채운다. [전체]는 조건 없이 조회한다는 뜻이다.</summary>
-        private void FillCodeCombo(ComboBoxEdit combo, string[] codes)
-        {
-            combo.Properties.Items.Clear();
-            combo.Properties.Items.Add(new CodeItem(null, Language.Common_All));
-            foreach (var code in codes)
-                combo.Properties.Items.Add(new CodeItem(code, CodeText(code)));
-
-            combo.SelectedIndex = 0;
         }
 
         /// <summary>알람 구분 · 등급 코드의 표시 문구. 모르는 코드는 서버가 준 코드를 그대로 보여 준다.</summary>
@@ -133,38 +125,26 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         //  조회
         // ─────────────────────────────────────────────────────────────────────────
 
-        /// <summary>창이 뜨자마자 전체(사용 중인 코드)를 한 번 조회해 타일을 채운다.</summary>
+        /// <summary>창이 뜨자마자 한 번 조회해 타일의 건수를 채운다.</summary>
         private async void AdminAlarmForm_Shown(object sender, EventArgs e) => await GetAlarmTypes();
 
         private async void btnSearch_Click(object sender, EventArgs e) => await GetAlarmTypes();
 
-        private async void txtName_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyCode != Keys.Enter)
-                return;
-
-            e.SuppressKeyPress = true;
-            await GetAlarmTypes();
-        }
-
         /// <summary>
-        /// 조회 조건으로 알람 유형을 읽어 타일을 다시 깐다. 회사 코드는 지금 공정의 것을 쓰고,
-        /// 등록할 수 있는 코드만 보이도록 사용 여부는 항상 Y로 건다.
+        /// 지금 공정의 회사 코드로 사용 중인(useYn=Y) 알람 유형을 전부 읽는다.
+        /// 다시 조회해도 고르던 구분 · 등급은 유지하고 타일만 새 목록으로 다시 깐다.
         /// </summary>
         private async Task GetAlarmTypes()
         {
             var query = new AbnormalAlarmTypeQuery();
             query.CorpCode = _key?.CorpCode;
-            query.AlarmType = (cboType.SelectedItem as CodeItem)?.Code;
-            query.AlarmGrade = (cboGrade.SelectedItem as CodeItem)?.Code;
-            query.AlarmTypeName = txtName.Text?.Trim();
             query.UseYn = "Y";
 
-            List<AbnormalAlarmTypeDto> alarmTypes;
+            List<AbnormalAlarmTypeDto> alarms;
             btnSearch.Enabled = false;
             try
             {
-                alarmTypes = await _apiClient.PopApiClient.GetAbnormalAlarmTypes(query);
+                alarms = await _apiClient.PopApiClient.GetAbnormalAlarmTypes(query);
             }
             catch (ApiException ex)
             {
@@ -182,63 +162,147 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
             if (IsDisposed || Disposing) return;
 
-            FillTiles(alarmTypes);
-            if (alarmTypes.Count == 0)
+            _alarms = alarms ?? new List<AbnormalAlarmTypeDto>();
+            ShowTypeTiles();
+
+            if (_alarms.Count == 0)
                 AppMessageBox.Warn(this, Language.AdminAlarm_NoTypes, Language.AdminAlarm_Title);
         }
 
-        /// <summary>알람 하나당 타일 하나. 다시 조회하면 고른 알람도 비운다(목록에 없을 수 있다).</summary>
-        private void FillTiles(List<AbnormalAlarmTypeDto> alarmTypes)
+        // ─────────────────────────────────────────────────────────────────────────
+        //  타일 — 구분 → 등급 → 알람 코드
+        // ─────────────────────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// [알람 구분] 타일 6장 — 구분별 알람 코드 건수와, 그 안의 등급별 건수를 보조 문구로 보여 준다.
+        /// 고른 구분이 있으면 그 아래 단계(등급 · 코드)도 이어서 다시 그린다.
+        /// </summary>
+        private void ShowTypeTiles()
         {
-            _selected = null;
-            tileAlarms.BeginUpdate();
-            try
+            ClearTiles(flowTypes);
+            foreach (var type in _alarmTypes)
             {
-                tileGroupAlarms.Items.Clear();
-                foreach (var alarm in alarmTypes)
-                    tileGroupAlarms.Items.Add(CreateTile(alarm));
+                var inType = _alarms.Where(a => a.AlarmType == type).ToList();
+
+                var tile = CreateTile(_typeTileSize, AppTheme.AlarmTypeColor(type));
+                tile.Tag = type;
+                tile.Title = CodeText(type);
+                tile.Value = inType.Count.ToString();
+                tile.Unit = Language.AdminAlarm_Unit;
+                tile.SubText = string.Join(" · ", _alarmGrades.Select(g => g + " " + inType.Count(a => a.AlarmGrade == g)));
+                tile.Selected = type == _selectedType;
+                tile.Click += TypeTile_Click;
+                flowTypes.Controls.Add(tile);
             }
-            finally
+
+            ShowGradeTiles();
+        }
+
+        private void TypeTile_Click(object sender, EventArgs e)
+        {
+            _selectedType = (string)((CardTile)sender).Tag;
+            _selectedGrade = null;
+            MarkSelected(flowTypes, sender);
+            ShowGradeTiles();
+        }
+
+        /// <summary>구분을 고르면 생기는 [알람 등급] 타일 4장(P1 긴급 ~ P4 정보) — 그 구분 안의 등급별 건수.</summary>
+        private void ShowGradeTiles()
+        {
+            ClearTiles(flowGrades);
+            var type = _selectedType;
+            lblGradeTitle.Visible = type != null;
+            flowGrades.Visible = type != null;
+
+            if (type != null)
             {
-                tileAlarms.EndUpdate();
+                foreach (var grade in _alarmGrades)
+                {
+                    var tile = CreateTile(_gradeTileSize, AppTheme.AlarmGradeColor(grade));
+                    tile.Tag = grade;
+                    tile.Title = grade + " " + CodeText(grade);
+                    tile.Value = _alarms.Count(a => a.AlarmType == type && a.AlarmGrade == grade).ToString();
+                    tile.Unit = Language.AdminAlarm_Unit;
+                    tile.SubText = CodeText(type) + " (" + type + ")";
+                    tile.Selected = grade == _selectedGrade;
+                    tile.Click += GradeTile_Click;
+                    flowGrades.Controls.Add(tile);
+                }
             }
+
+            ShowCodeTiles();
+        }
+
+        private void GradeTile_Click(object sender, EventArgs e)
+        {
+            _selectedGrade = (string)((CardTile)sender).Tag;
+            MarkSelected(flowGrades, sender);
+            ShowCodeTiles();
         }
 
         /// <summary>
-        /// 타일 한 장 — 좌상단에 코드 · 구분, 가운데에 알람 명(조치 내용), 우하단에 등급.
-        /// 바탕색은 등급 색이라 급한 알람이 먼저 눈에 들어온다.
+        /// 등급까지 고르면 깔리는 [알람 코드 / 조치 내용] 타일 — 제목은 알람 코드, 큰 글자는 알람 명(조치 내용).
+        /// 목록이 바뀌면 고른 알람도 비운다(새 목록에 없을 수 있다).
         /// </summary>
-        private TileItem CreateTile(AbnormalAlarmTypeDto alarm)
+        private void ShowCodeTiles()
         {
-            var item = new TileItem();
-            item.Tag = alarm;
-            AppTheme.AlarmTile(item, AppTheme.AlarmGradeColor(alarm.AlarmGrade));
+            ClearTiles(flowCodes);
+            _selectedAlarm = null;
 
-            var code = new TileItemElement();
-            code.Text = alarm.AlarmTypeCode + "  ·  " + CodeText(alarm.AlarmType);
-            code.TextAlignment = TileItemContentAlignment.TopLeft;
-            code.Appearance.Normal.Font = AppTheme.SmallFont;
-            item.Elements.Add(code);
+            var type = _selectedType;
+            var grade = _selectedGrade;
+            var visible = type != null && grade != null;
+            lblCodeTitle.Visible = visible;
+            flowCodes.Visible = visible;
+            if (type == null || grade == null)
+                return;
 
-            var name = new TileItemElement();
-            name.Text = alarm.AlarmTypeName;
-            name.TextAlignment = TileItemContentAlignment.MiddleLeft;
-            name.Appearance.Normal.Font = AppTheme.TitleFont;
-            item.Elements.Add(name);
-
-            var grade = new TileItemElement();
-            grade.Text = alarm.AlarmGrade + " " + CodeText(alarm.AlarmGrade);
-            grade.TextAlignment = TileItemContentAlignment.BottomRight;
-            grade.Appearance.Normal.Font = AppTheme.BodyBoldFont;
-            item.Elements.Add(grade);
-
-            return item;
+            var gradeColor = AppTheme.AlarmGradeColor(grade);
+            foreach (var alarm in _alarms.Where(a => a.AlarmType == type && a.AlarmGrade == grade))
+            {
+                var tile = CreateTile(_codeTileSize, gradeColor);
+                tile.Tag = alarm;
+                tile.Title = alarm.AlarmTypeCode;
+                tile.Value = alarm.AlarmTypeName;
+                tile.CompactValue = true;
+                tile.SubText = CodeText(alarm.AlarmType) + " · " + alarm.AlarmGrade + " " + CodeText(alarm.AlarmGrade);
+                tile.Click += CodeTile_Click;
+                flowCodes.Controls.Add(tile);
+            }
         }
 
-        private void tileAlarms_ItemClick(object sender, TileItemEventArgs e)
+        private void CodeTile_Click(object sender, EventArgs e)
         {
-            _selected = e.Item?.Tag as AbnormalAlarmTypeDto;
-            tileAlarms.SelectedItem = e.Item;
+            _selectedAlarm = ((CardTile)sender).Tag as AbnormalAlarmTypeDto;
+            MarkSelected(flowCodes, sender);
+        }
+
+        private CardTile CreateTile(Size size, Color accent)
+        {
+            var tile = new CardTile();
+            tile.Size = size;
+            tile.Margin = _tileMargin;
+            tile.Accent = accent;
+            return tile;
+        }
+
+        /// <summary>같은 줄에서 누른 타일 하나만 고른 상태로 둔다.</summary>
+        private void MarkSelected(FlowLayoutPanel flow, object clicked)
+        {
+            foreach (Control control in flow.Controls)
+            {
+                if (control is CardTile tile)
+                    tile.Selected = ReferenceEquals(tile, clicked);
+            }
+        }
+
+        /// <summary>타일을 비운다. Controls.Clear()는 컨트롤을 Dispose하지 않아 핸들·글꼴이 남으므로 하나씩 Dispose한다.</summary>
+        private void ClearTiles(FlowLayoutPanel flow)
+        {
+            flow.SuspendLayout();
+            while (flow.Controls.Count > 0)
+                flow.Controls[0].Dispose();
+            flow.ResumeLayout();
         }
 
         // ─────────────────────────────────────────────────────────────────────────
@@ -251,15 +315,15 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// </summary>
         private async void btnSend_Click(object sender, EventArgs e)
         {
-            if (_selected == null)
+            if (_selectedAlarm == null)
             {
                 AppMessageBox.Warn(this, Language.AdminAlarm_SelectAlarm, Language.AdminAlarm_Title);
                 return;
             }
 
             var request = new AbnormalAlarmRequest();
-            request.AlarmType = _selected.AlarmType;
-            request.AlarmTypeCode = _selected.AlarmTypeCode;
+            request.AlarmType = _selectedAlarm.AlarmType;
+            request.AlarmTypeCode = _selectedAlarm.AlarmTypeCode;
             var remark = txtRemark.Text?.Trim();
             request.Remark = string.IsNullOrEmpty(remark) ? null : remark;
 
@@ -293,21 +357,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         {
             DialogResult = DialogResult.Cancel;
             Close();
-        }
-
-        /// <summary>조회 조건 콤보 항목 — 서버로 보낼 코드와 화면에 보일 문구 한 쌍. 코드가 null이면 [전체].</summary>
-        private class CodeItem
-        {
-            public CodeItem(string code, string text)
-            {
-                Code = code;
-                Text = text;
-            }
-
-            public string Code { get; }
-            public string Text { get; }
-
-            public override string ToString() => Text;
         }
     }
 }
