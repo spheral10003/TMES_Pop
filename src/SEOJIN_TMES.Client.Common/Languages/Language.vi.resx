@@ -624,6 +624,15 @@
   <data name="Pop_CommUnused" xml:space="preserve">
     <value>Không sử dụng</value>
   </data>
+  <data name="Pop_ReconnectColumn" xml:space="preserve">
+    <value>Kết nối lại</value>
+  </data>
+  <data name="Pop_ReconnectButton" xml:space="preserve">
+    <value>Kết nối lại</value>
+  </data>
+  <data name="Pop_ReconnectFailed" xml:space="preserve">
+    <value>Không thể bắt đầu kết nối lại thiết bị.</value>
+  </data>
   <data name="Pop_EquipmentUsable" xml:space="preserve">
     <value>Sẵn sàng</value>
   </data>

@@ -115,7 +115,7 @@ namespace SEOJIN_TMES.Client.Common.Models
         /// <summary>투입 단위 (예: EA).</summary>
         public string InputUnit { get; set; }
 
-        /// <summary>투입 위치.</summary>
+        /// <summary>투입 위치(서버 indctLoc).</summary>
         public string InputPosition { get; set; }
 
         /// <summary>시리얼번호 검사 대상 여부.</summary>
@@ -169,8 +169,14 @@ namespace SEOJIN_TMES.Client.Common.Models
         /// <summary>투입자재 코드.</summary>
         public string MaterialCode { get; set; }
 
-        /// <summary>투입위치.</summary>
+        /// <summary>투입위치(서버 indctLoc). 화면 표시용이다.</summary>
         public string InputPosition { get; set; }
+
+        /// <summary>
+        /// BOM 스팩 순번(서버 seq). 결과 저장 URL에서 행을 찾는 키로 쓴다 —
+        /// 예전에는 이 값을 <see cref="InputPosition"/>에 담았는데, 투입위치를 따로 받으면서 분리했다.
+        /// </summary>
+        public int Seq { get; set; }
 
         /// <summary>BOM 스팩명 (예: 토크작업01).</summary>
         public string BomSpecName { get; set; }
@@ -235,6 +241,9 @@ namespace SEOJIN_TMES.Client.Common.Models
         public string InspectionItemCode { get; set; }
         /// <summary>검사 스팩명.</summary>
         public string InspectionSpecName { get; set; }
+
+        /// <summary>투입위치(서버 indctLoc).</summary>
+        public string InputPosition { get; set; }
 
         /// <summary>검사 스팩 비고(작업자 안내 문구).</summary>
         public string InspectionRemark { get; set; }

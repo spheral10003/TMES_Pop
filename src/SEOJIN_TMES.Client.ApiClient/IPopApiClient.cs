@@ -141,7 +141,7 @@ namespace SEOJIN_TMES.Client.ApiClient
         public Task SaveBomSpecResultsAsync(PopProcessKey key, PopBomSpecResultDto result, PopBomSpecDto bom, CancellationToken cancellationToken = default)
         {
             var query = PostKeyQuery(key);
-            string url = $"{PopPrefix}{key.SerialNo}/{key.SubRoutingRef}/bom-spec-results/{bom.MaterialCode}/{bom.InputPosition}{query}";
+            string url = $"{PopPrefix}{key.SerialNo}/{key.SubRoutingRef}/bom-spec-results/{bom.MaterialCode}/{bom.Seq}{query}";
             return PostAsync(url, result, cancellationToken);
         }
 

@@ -27,6 +27,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private const string TorqueResultField = "TorqueResult";
         private const string AngleResultField = "AngleResult";
 
+        /// <summary>[연결 장비] 탭의 "재연결" 컬럼(데이터에 없는 화면 전용 컬럼)의 필드명.</summary>
+        private const string ReconnectField = "__Reconnect";
+
         /// <summary>[투입자재] 탭에서 클릭하면 시리얼 입력 팝업이 열리는 칸.</summary>
         private const string SerialInputStateField = "SerialInputStateText";
 
@@ -58,6 +61,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private RepositoryItemComboBox _resultStateEditor;
         private RepositoryItemTextEdit _resultValueEditor;
         private RepositoryItemTextEdit _resultRemarkEditor;
+        private RepositoryItemButtonEdit _reconnectEditor;
+
+        /// <summary>재연결 대상이 아닌 줄의 "재연결" 칸에 끼우는 빈 에디터(버튼을 그리지 않는다).</summary>
+        private RepositoryItemTextEdit _reconnectBlankEditor;
 
         /// <summary>[검사 스팩] 탭에서 작업자가 입력할 수 있는 칸.</summary>
         private readonly HashSet<string> _inspectionInputFields = new HashSet<string>
@@ -171,6 +178,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             gridInspection.DataSource = new List<PopInspectionSpecDto>();
             GridColumns.Apply(gridViewInspection, Language.Col_No,
                 GridColumns.Text("InspectionSpecName", Language.Col_InspectionSpecName, 220),
+                GridColumns.Text("InputPosition", Language.Col_InputPosition, 110),
                 GridColumns.Left("Description", Language.Col_Description, 300),
                 GridColumns.Text("InspectionMethod", Language.Col_InspectionMethod, 120),
                 GridColumns.Text("ResultState", Language.Col_ResultState, 130),
@@ -203,9 +211,15 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             SetGridLineColor(gridViewInspection);
         }
 
+        /// <summary>
+        /// [연결 장비] 탭. 마지막의 "재연결" 컬럼은 데이터에 없는 화면 전용 컬럼이며,
+        /// 연결이 끊긴(연결 실패) 장비 줄에만 [재연결] 버튼이 보인다.
+        /// </summary>
         private void InitEquipmentGrid()
         {
             gridEquipment.DataSource = new List<PopEquipmentDto>();
+            EnsureReconnectColumn();
+
             GridColumns.Apply(gridViewEquipment, Language.Col_No,
                 GridColumns.Text("EquipmentCode", Language.Col_EquipmentCode, 160),
                 GridColumns.Text("EquipmentName", Language.Col_EquipmentName, 150),
@@ -214,12 +228,56 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 GridColumns.Text("CommunicationState", Language.Col_CommunicationState, 130),
                 GridColumns.Text("EquipmentState", Language.Col_EquipmentState, 130),
                 GridColumns.Text("RangeLower", Language.Col_RangeLower, 150),
-                GridColumns.Text("RangeUpper", Language.Col_RangeUpper, 150));
+                GridColumns.Text("RangeUpper", Language.Col_RangeUpper, 150),
+                GridColumns.Text(ReconnectField, Language.Pop_ReconnectColumn, 120));
 
             gridViewEquipment.OptionsView.ColumnAutoWidth = true;
+            gridViewEquipment.OptionsView.ShowButtonMode = ShowButtonModeEnum.ShowAlways;
             NumericFormat(gridViewEquipment, "RangeLower", "RangeUpper");
 
+            // 값 입력은 없지만 [재연결] 버튼이 눌리려면 셀 에디터가 열려야 한다 — 편집 허용 컬럼은 "재연결" 하나뿐이다.
+            foreach (DevExpress.XtraGrid.Columns.GridColumn column in gridViewEquipment.Columns)
+                column.OptionsColumn.AllowEdit = column.FieldName == ReconnectField;
+
+            gridViewEquipment.OptionsBehavior.Editable = true;
+
+            // 재연결 대상인 줄에만 버튼을 끼우고, 그 외 줄은 에디터 자체를 열지 않는다.
+            gridViewEquipment.CustomRowCellEdit += GridViewEquipment_CustomRowCellEdit;
+            gridViewEquipment.ShowingEditor += GridViewEquipment_ShowingEditor;
+
             SetGridLineColor(gridViewEquipment);
+        }
+
+        /// <summary>"재연결" 컬럼과 [재연결] 버튼 에디터를 준비한다(이미 있으면 재사용).</summary>
+        private void EnsureReconnectColumn()
+        {
+            if (_reconnectEditor == null)
+            {
+                _reconnectEditor = new RepositoryItemButtonEdit();
+                _reconnectEditor.TextEditStyle = TextEditStyles.HideTextEditor;
+                _reconnectEditor.Buttons.Clear();
+
+                var button = new EditorButton(ButtonPredefines.Glyph);
+                button.Caption = Language.Pop_ReconnectButton;
+                _reconnectEditor.Buttons.Add(button);
+                _reconnectEditor.ButtonClick += Reconnect_ButtonClick;
+
+                gridEquipment.RepositoryItems.Add(_reconnectEditor);
+
+                _reconnectBlankEditor = new RepositoryItemTextEdit();
+                _reconnectBlankEditor.ReadOnly = true;
+                gridEquipment.RepositoryItems.Add(_reconnectBlankEditor);
+            }
+
+            var column = gridViewEquipment.Columns.ColumnByFieldName(ReconnectField);
+            if (column == null)
+            {
+                column = gridViewEquipment.Columns.AddField(ReconnectField);
+                column.UnboundType = DevExpress.Data.UnboundColumnType.String;
+                column.OptionsColumn.AllowSort = DevExpress.Utils.DefaultBoolean.False;
+            }
+
+            column.ColumnEdit = _reconnectEditor;
         }
 
         /// <summary>탭 4개 그리드가 같은 행 · 열 구분선 색을 쓰게 한다.</summary>
@@ -743,6 +801,72 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
             var connected = equipment.CommunicationState == Language.Pop_CommConnected;
             e.Appearance.ForeColor = connected ? AppTheme.Emerald : AppTheme.Rose;
+        }
+
+        /// <summary>
+        /// 재연결 대상 = 너트러너로 등록돼 있는데 연결이 끊긴(연결 실패) 장비.
+        /// 등록되지 않은 장비는 <see cref="RefreshEquipmentStates"/>가 상태를 채우지 않으므로 여기에 걸리지 않는다.
+        /// </summary>
+        private bool CanReconnect(PopEquipmentDto? equipment)
+        {
+            return equipment != null && equipment.CommunicationState == Language.Pop_CommFailed;
+        }
+
+        private void GridViewEquipment_CustomRowCellEdit(object sender, CustomRowCellEditEventArgs e)
+        {
+            if (e.Column.FieldName != ReconnectField)
+                return;
+
+            var equipment = gridViewEquipment.GetRow(e.RowHandle) as PopEquipmentDto;
+            if (CanReconnect(equipment))
+                e.RepositoryItem = _reconnectEditor;
+            else
+                e.RepositoryItem = _reconnectBlankEditor;
+        }
+
+        private void GridViewEquipment_ShowingEditor(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (gridViewEquipment.FocusedColumn?.FieldName != ReconnectField)
+            {
+                e.Cancel = true;
+                return;
+            }
+
+            if (!CanReconnect(gridViewEquipment.GetFocusedRow() as PopEquipmentDto))
+                e.Cancel = true;
+        }
+
+        /// <summary>
+        /// [재연결] → 그 장비의 통신 시퀀스를 다시 시작한다.
+        /// 시퀀스는 재연결을 3회 실패하면 스스로 멈추므로, 끊긴 장비를 다시 붙이려면 시퀀스를 새로 띄워야 한다
+        /// (<c>Start</c>가 남은 스레드를 정리하고 재시도 횟수를 0으로 돌린 뒤 바로 접속을 시도한다).
+        /// 결과(연결 성공/실패)는 ConnectionChanged를 타고 <see cref="RefreshEquipmentStates"/>로 이 그리드에 반영된다.
+        /// </summary>
+        private void Reconnect_ButtonClick(object sender, ButtonPressedEventArgs e)
+        {
+            var equipment = gridViewEquipment.GetFocusedRow() as PopEquipmentDto;
+            if (equipment == null || !CanReconnect(equipment) || _equip?.Manager == null)
+                return;
+
+            gridViewEquipment.CloseEditor();
+
+            try
+            {
+                if (!_equip.Manager.TryGet(equipment.EquipmentCode, out INutrunner nutrunner) || nutrunner == null)
+                {
+                    AppMessageBox.Warn(this, Language.Pop_ReconnectFailed, Language.Pop_Title);
+                    return;
+                }
+
+                AppLog.Info($"[POP] 장비 재연결 시도 - {equipment.EquipmentCode}");
+                _equip.Manager.Start(nutrunner.Id);
+            }
+            catch (Exception ex)
+            {
+                HandleError("장비 재연결", ex);
+            }
+
+            RefreshEquipmentStates();
         }
     }
 }

@@ -624,6 +624,15 @@
   <data name="Pop_CommUnused" xml:space="preserve">
     <value>Not used</value>
   </data>
+  <data name="Pop_ReconnectColumn" xml:space="preserve">
+    <value>Reconnect</value>
+  </data>
+  <data name="Pop_ReconnectButton" xml:space="preserve">
+    <value>Reconnect</value>
+  </data>
+  <data name="Pop_ReconnectFailed" xml:space="preserve">
+    <value>Could not start reconnecting the equipment.</value>
+  </data>
   <data name="Pop_EquipmentUsable" xml:space="preserve">
     <value>Available</value>
   </data>

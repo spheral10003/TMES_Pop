@@ -64,6 +64,7 @@ namespace SEOJIN_TMES.Client.Common.Models
         [JsonProperty("inputItemNm")] public string InputItemNm { get; set; }
         [JsonProperty("usageQty")] public decimal UsageQty { get; set; }
         [JsonProperty("unit")] public string Unit { get; set; }
+        [JsonProperty("indctLoc")] public string IndctLoc { get; set; }        // 투입위치
         [JsonProperty("serialVrfcYn")] public string SerialVrfcYn { get; set; }
         [JsonProperty("inputtedSerials")] public string InputtedSerials { get; set; } // 구분자 형식은 서버 확인 필요
     }
@@ -92,6 +93,7 @@ namespace SEOJIN_TMES.Client.Common.Models
         [JsonProperty("angleUsl")] public decimal? AngleUsl { get; set; }
         [JsonProperty("angleUnit")] public string AngleUnit { get; set; }
         [JsonProperty("seq")] public int Seq { get; set; }
+        [JsonProperty("indctLoc")] public string IndctLoc { get; set; }        // 투입위치
         [JsonProperty("inptMth")] public string InptMth { get; set; }          // EQP / 그 외=수동
         [JsonProperty("torqueRsltVl")] public decimal? TorqueRsltVl { get; set; }
         [JsonProperty("angleRsltVl")] public decimal? AngleRsltVl { get; set; }
@@ -103,6 +105,7 @@ namespace SEOJIN_TMES.Client.Common.Models
     {
         [JsonProperty("inspItemCd")] public string InspItemCode { get; set; }
         [JsonProperty("inspItemNm")] public string InspItemNm { get; set; }
+        [JsonProperty("indctLoc")] public string IndctLoc { get; set; }        // 투입위치
         [JsonProperty("inspDataType")] public string InspDataType { get; set; } // QLT 정성 / QNT 정량
         [JsonProperty("jgmtRslt")] public string JgmtRslt { get; set; }         // OK / NG
         [JsonProperty("inspRsltVl")] public string InspRsltVl { get; set; }
@@ -165,6 +168,7 @@ namespace SEOJIN_TMES.Client.Common.Models
                     ItemCode = m.InputItemCd,
                     InputQty = (int)m.UsageQty,
                     InputUnit = m.Unit,
+                    InputPosition = m.IndctLoc,
                     SerialCheckRequired = m.SerialVrfcYn == "Y",
                     SerialNumbers = string.IsNullOrWhiteSpace(m.InputtedSerials)
                         ? new List<string>()
@@ -175,7 +179,8 @@ namespace SEOJIN_TMES.Client.Common.Models
                 BomSpecs = bomList.Select(b => new PopBomSpecDto
                 {
                     MaterialCode = b.InputItemCd,
-                    InputPosition = b.Seq.ToString(),
+                    Seq = b.Seq,
+                    InputPosition = b.IndctLoc,
                     BomSpecName = $"토크작업{b.Seq:00}",
                     SpecType = "토크 작업",
                     TorqueLower = b.TorqueLsl,
@@ -198,6 +203,7 @@ namespace SEOJIN_TMES.Client.Common.Models
                 {
                     InspectionItemCode = i.InspItemCode,
                     InspectionSpecName = i.InspItemNm,
+                    InputPosition = i.IndctLoc,
                     InspectionRemark = i.InspRemark,
                     InspectionMethod = i.InspDataType == "QNT" ? "정량" : "정성",
                     ResultState = i.JgmtRslt == "OK" ? "합격" : i.JgmtRslt == "NG" ? "불합격" : "",
