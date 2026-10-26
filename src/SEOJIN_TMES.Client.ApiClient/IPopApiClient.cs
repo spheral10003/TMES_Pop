@@ -52,14 +52,17 @@ namespace SEOJIN_TMES.Client.ApiClient
         /// </summary>
         Task<PopProcessInfoDto> ChangeProcessStateAsync(PopProcessKey key, PopProcessAction action, PopProcessActionRequest request = null, CancellationToken cancellationToken = default);
 
-        /// <summary>&lt;관리자 알람 유형 선택&gt; 팝업의 알람 유형 목록(기준정보).</summary>
-        Task<List<AdminAlarmTypeDto>> GetAdminAlarmTypesAsync(CancellationToken cancellationToken = default);
+        /// <summary>
+        /// 이상 알람 유형 기준정보 조회 — &lt;알람 조회 / 등록&gt; 팝업의 타일 목록.
+        /// 회사 코드만 필수이고, 비운 조건은 쿼리에서 빠져 전체로 조회된다.
+        /// </summary>
+        Task<List<AbnormalAlarmTypeDto>> GetAbnormalAlarmTypes(AbnormalAlarmTypeQuery query, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// 관리자 알람 전송 — 알람 유형·대상·비고에 현재 공정/작업자 정보를 붙여 서버에 알린다.
-        /// 누구에게 어떻게 통지할지(알림/문자/방송 등)는 서버가 정한다.
+        /// 이상 알람 등록 — 지금 공정(시리얼 + 서브 라우팅)에 고른 알람을 올린다.
+        /// 누구에게 어떻게 통지할지는 서버가 정한다.
         /// </summary>
-        Task NotifyAdministratorAsync(PopAdminAlarmRequest request, CancellationToken cancellationToken = default);
+        Task SetAbnormalAlarm(PopProcessKey key, AbnormalAlarmRequest request, CancellationToken cancellationToken = default);
     }
 
     /// <summary>POP 상단 버튼이 서버에 요청하는 공정 상태 전이 종류.</summary>
@@ -164,11 +167,27 @@ namespace SEOJIN_TMES.Client.ApiClient
             return PostAsync<PopProcessActionRequest, PopProcessInfoDto>(url, request, cancellationToken);
         }
 
-        public Task<List<AdminAlarmTypeDto>> GetAdminAlarmTypesAsync(CancellationToken cancellationToken = default) =>
-            GetAsync<List<AdminAlarmTypeDto>>(PopPrefix + "md/abnormal-alarm-types", cancellationToken);
+        public async Task<List<AbnormalAlarmTypeDto>> GetAbnormalAlarmTypes(AbnormalAlarmTypeQuery query, CancellationToken cancellationToken = default)
+        {
+            var condition = BuildQuery(
+                ("corpCd", query?.CorpCode),
+                ("alrmType", query?.AlarmType),
+                ("alrmTypeCd", query?.AlarmTypeCode),
+                ("alrmTypeNm", query?.AlarmTypeName),
+                ("alrmGrd", query?.AlarmGrade),
+                ("useYn", query?.UseYn));
 
-        public Task NotifyAdministratorAsync(PopAdminAlarmRequest request, CancellationToken cancellationToken = default) =>
-            PostAsync(PopPrefix + "admin-alarm", request, cancellationToken);
+            // 봉투({"data":[...]}) 유무가 확정되지 않아 두 형태를 모두 받는다.
+            return await GetDataAsync<List<AbnormalAlarmTypeDto>>($"{ApiPrefix}md/abnormal-alarm-types{condition}", cancellationToken)
+                   ?? new List<AbnormalAlarmTypeDto>();
+        }
+
+        public Task SetAbnormalAlarm(PopProcessKey key, AbnormalAlarmRequest request, CancellationToken cancellationToken = default)
+        {
+            var query = BuildQuery(("corpCd", key.CorpCode), ("woNo", key.WorkOrderNo), ("wkstnRef", key.WorkstationRef));
+            string url = $"{PopPrefix}{key.SerialNo}/{key.SubRoutingRef}/abnormal-alarms{query}";
+            return PostAsync(url, request, cancellationToken);
+        }
 
         /// <summary>탭 조회 API가 공통으로 쓰는 조건 쿼리(작업지시 + 시리얼 + 라우팅 + 페이지 공정).</summary>
         private static string KeyQuery(PopProcessKey key)
@@ -202,28 +221,6 @@ namespace SEOJIN_TMES.Client.ApiClient
         public string remark { get; set; }
         //public PopProcessKey Key { get; set; }
         //public string Action { get; set; }
-    }
-
-    /// <summary>관리자 알람 요청 본문 — &lt;관리자 알람 유형 선택&gt; 팝업에서 입력한 내용 + 현재 공정/작업자.</summary>
-    public class PopAdminAlarmRequest
-    {
-        /// <summary>알람이 발생한 공정(작업지시 + 라우팅 + 페이지 공정).</summary>
-        public PopProcessKey Key { get; set; }
-
-        /// <summary>알람을 보낸 작업자 아이디.</summary>
-        public string UserId { get; set; }
-
-        /// <summary>알람 유형 코드(기준정보의 <see cref="AdminAlarmTypeDto.Code"/>).</summary>
-        public string AlarmTypeCode { get; set; }
-
-        /// <summary>알람 유형 명 — 서버 로그/알림 문구에 그대로 쓸 수 있게 함께 보낸다.</summary>
-        public string AlarmTypeName { get; set; }
-
-        /// <summary>대상 코드. 자재 결품이면 자재 코드, 설비 이상이면 장비 코드. 대상이 없는 유형이면 null.</summary>
-        public string TargetCode { get; set; }
-
-        /// <summary>작업자가 적은 비고.</summary>
-        public string Remark { get; set; }
     }
 
     public enum PopProcessStopType

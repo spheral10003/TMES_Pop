@@ -852,84 +852,29 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         // ─────────────────────────────────────────────────────────────────────────
 
         /// <summary>
-        /// [관리자 알람] — &lt;관리자 알람 유형 선택&gt; 팝업을 띄우고, 고른 내용에
-        /// 현재 공정/작업자 정보를 붙여 서버로 보낸다.
-        /// 대상(결품 자재/이상 장비)은 지금 화면에 떠 있는 투입자재 · 연결 장비 목록에서 고르게 한다.
+        /// [알림] — &lt;알람 조회 / 등록&gt; 팝업을 띄운다. 알람 조회와 등록은 팝업이 지금 공정 키로 직접 하고,
+        /// 등록에 성공해 닫혔을 때만 완료를 알린다. 진행 중인 공정이 없으면 올릴 곳이 없으므로 열지 않는다.
         /// </summary>
-        public async Task ShowAdminAlarm()
+        public Task ShowAdminAlarm()
         {
-            var alarmTypes = await GetAdminAlarmTypes();
-            if (alarmTypes == null || IsDisposed || Disposing)
-                return;
-
-            if (alarmTypes.Count == 0)
+            if (_key == null)
             {
-                AppMessageBox.Warn(this, Language.AdminAlarm_NoTypes, Language.AdminAlarm_Title);
-                return;
+                AppMessageBox.Warn(this, Language.Pop_NoTargetProcess, Language.AdminAlarm_Title);
+                return Task.CompletedTask;
             }
 
-            PopAdminAlarmRequest request;
             using (var form = new AdminAlarmForm())
             {
-                form.Initialize(alarmTypes, _materials, _equipments);
+                form.Initialize(_apiClient, _key);
                 form.CenterOn(this);
                 if (form.ShowDialog(this) != DialogResult.OK)
-                    return;
-
-                request = form.Request;
+                    return Task.CompletedTask;
             }
 
-            if (request == null)
-                return;
+            if (!IsDisposed && !Disposing)
+                AppMessageBox.Success(this, Language.Pop_AdminAlarmSent, Language.AdminAlarm_Title);
 
-            request.Key = _key;
-            request.UserId = _appSet?.CurrentUser?.UserId;
-
-            await SetAdminAlarm(request);
-        }
-
-        /// <summary>알람 유형 목록(기준정보). 조회에 실패하면 알리고 null.</summary>
-        private async Task<List<AdminAlarmTypeDto>> GetAdminAlarmTypes()
-        {
-            btnAdminAlarm.Enabled = false;
-            try
-            {
-                return await _apiClient.PopApiClient.GetAdminAlarmTypesAsync()
-                       ?? new List<AdminAlarmTypeDto>();
-            }
-            catch (ApiException ex)
-            {
-                AppLog.Warn($"[POP] 관리자 알람 유형 조회 실패 - {ex.Message}");
-                if (!IsDisposed && !Disposing)
-                    AppMessageBox.Warn(this, ex.Message, Language.AdminAlarm_Title);
-                return null;
-            }
-            finally
-            {
-                if (!IsDisposed && !Disposing)
-                    btnAdminAlarm.Enabled = true;
-            }
-        }
-
-        private async Task SetAdminAlarm(PopAdminAlarmRequest request)
-        {
-            try
-            {
-                await _apiClient.PopApiClient.NotifyAdministratorAsync(request);
-            }
-            catch (ApiException ex)
-            {
-                AppLog.Warn($"[POP] 관리자 알람 전송 실패 - {request.AlarmTypeName}/{request.TargetCode} : {ex.Message}");
-                if (IsDisposed || Disposing) return;
-
-                AppMessageBox.Warn(this, ex.Message, Language.AdminAlarm_Title);
-                return;
-            }
-
-            AppLog.Info($"[POP] 관리자 알람 전송 - {request.AlarmTypeName}/{request.TargetCode} : {request.Remark}");
-            if (IsDisposed || Disposing) return;
-
-            AppMessageBox.Success(this, Language.Pop_AdminAlarmSent, Language.AdminAlarm_Title);
+            return Task.CompletedTask;
         }
 
         // ─────────────────────────────────────────────────────────────────────────

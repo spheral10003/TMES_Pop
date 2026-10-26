@@ -505,6 +505,63 @@ namespace SEOJIN_TMES.Client.Theme
         }
 
         /// <summary>
+        /// 고르는 타일 묶음(TileControl) — <see cref="TileStrip"/>과 달리 <b>선택 상태가 있다.</b>
+        /// 누른 타일에 테두리를 둘러 "지금 무엇을 골랐는지"가 보이게 하고, 끌어서 순서를 바꾸는 기능은 끈다.
+        /// </summary>
+        public static void PickerTiles(TileControl tiles, int itemSize)
+        {
+            tiles.LookAndFeel.UseDefaultLookAndFeel = false;
+            tiles.LookAndFeel.Style = LookAndFeelStyle.Flat;
+            tiles.BackColor = Card;
+            tiles.AllowDrag = false;
+            tiles.AllowSelectedItem = true;
+            tiles.AllowSelectedItemBorder = true;
+            tiles.SelectionColor = Indigo;
+            tiles.ItemSize = itemSize;
+            tiles.IndentBetweenItems = 10;
+            tiles.Padding = new Padding(12);
+        }
+
+        /// <summary>
+        /// 알람 타일 하나 — 등급 색을 채우고 hover/press는 <see cref="Tile"/>과 같은 규칙으로 밝게/어둡게.
+        /// 글자 배치는 각 요소(<see cref="TileItemElement"/>)가 정하므로 여기서는 색과 기본 글꼴만 입힌다.
+        /// </summary>
+        public static void AlarmTile(TileItem item, Color back)
+        {
+            item.ItemSize = TileItemSize.Wide;
+            Paint(item.AppearanceItem.Normal, back, Color.White, BodyFont);
+            Paint(item.AppearanceItem.Hovered, ControlPaint.Light(back, 0.18f), Color.White, BodyFont);
+            Paint(item.AppearanceItem.Pressed, ControlPaint.Dark(back, 0.08f), Color.White, BodyFont);
+            Paint(item.AppearanceItem.Selected, ControlPaint.Dark(back, 0.08f), Color.White, BodyFont);
+        }
+
+        /// <summary>
+        /// 알람 등급(P1~P4)의 색 — 급할수록 눈에 띄는 색. 모르는 등급은 정보(P4)와 같은 회색으로 둔다.
+        /// </summary>
+        public static Color AlarmGradeColor(string grade)
+        {
+            switch (grade)
+            {
+                case "P1": return Rose;
+                case "P2": return Amber;
+                case "P3": return Teal;
+                default: return Slate;
+            }
+        }
+
+        /// <summary>
+        /// 일반 .NET 폼(<see cref="Form"/>)의 제목 줄을 대신하는 색 띠 — 패널 + 라벨.
+        /// 창틀 제거·끌어서 이동은 <see cref="Forms.Common.DialogChrome.Apply"/>가 맡는다.
+        /// </summary>
+        public static void TitleBar(Panel panel, Label title, Color accent)
+        {
+            panel.BackColor = accent;
+            title.BackColor = Color.Transparent;
+            title.ForeColor = Color.White;
+            title.Font = SectionFont;
+        }
+
+        /// <summary>
         /// 조회 조건 폼(LayoutControl) — 라벨 열 정렬·간격·리사이즈를 컨트롤이 맡는다.
         ///
         /// DevExpress <see cref="LayoutControl"/>을 쓰면 조건이 늘거나 창 폭이 바뀌어도

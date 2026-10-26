@@ -39,9 +39,9 @@ namespace SEOJIN_TMES.Client.Forms.Common
         /// 팝업에서 Windows 제목 줄을 없애고 헤더를 제목 줄처럼 쓰게 한다.
         /// 각 팝업의 <c>Initialize()</c> 끝(테마를 다 입힌 뒤)에서 부른다.
         /// </summary>
-        /// <param name="form">팝업 폼.</param>
+        /// <param name="form">팝업 폼(XtraForm · 일반 .NET Form 모두).</param>
         /// <param name="header">제목 줄을 대신할 색 띠. 이 위를 끌면 창이 움직인다.</param>
-        public static void Apply(XtraForm form, Control header)
+        public static void Apply(Form form, Control header)
         {
             // 테두리 스타일을 바꾸면 바깥 크기(Size)는 그대로인 채 안쪽(ClientSize)이 제목 줄·테두리만큼
             // 넓어진다 — 디자이너에서 잡아 둔 내부 배치가 그만큼 어긋나므로 원래 값으로 되돌린다.
@@ -72,7 +72,7 @@ namespace SEOJIN_TMES.Client.Forms.Common
             foreach (Control child in header.Controls)
             {
                 // 버튼은 제 역할이 있다(헤더의 닫기 X 등).
-                if (child is SimpleButton)
+                if (child is SimpleButton || child is Button)
                     continue;
 
                 Subscribe(child);

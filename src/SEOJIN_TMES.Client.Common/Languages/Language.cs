@@ -368,12 +368,22 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string ItemPicker_SelectItem => Get(nameof(ItemPicker_SelectItem));
         public static string AdminAlarm_Title => Get(nameof(AdminAlarm_Title));
         public static string AdminAlarm_Type => Get(nameof(AdminAlarm_Type));
-        public static string AdminAlarm_DetailTitle => Get(nameof(AdminAlarm_DetailTitle));
-        public static string AdminAlarm_Target => Get(nameof(AdminAlarm_Target));
+        public static string AdminAlarm_Grade => Get(nameof(AdminAlarm_Grade));
+        public static string AdminAlarm_Name => Get(nameof(AdminAlarm_Name));
+        public static string AdminAlarm_ListTitle => Get(nameof(AdminAlarm_ListTitle));
         public static string AdminAlarm_Send => Get(nameof(AdminAlarm_Send));
-        public static string AdminAlarm_SelectType => Get(nameof(AdminAlarm_SelectType));
-        public static string AdminAlarm_SelectTarget => Get(nameof(AdminAlarm_SelectTarget));
+        public static string AdminAlarm_SelectAlarm => Get(nameof(AdminAlarm_SelectAlarm));
         public static string AdminAlarm_NoTypes => Get(nameof(AdminAlarm_NoTypes));
+        public static string AlarmType_EQP => Get(nameof(AlarmType_EQP));
+        public static string AlarmType_QLT => Get(nameof(AlarmType_QLT));
+        public static string AlarmType_MAT => Get(nameof(AlarmType_MAT));
+        public static string AlarmType_PRD => Get(nameof(AlarmType_PRD));
+        public static string AlarmType_EHS => Get(nameof(AlarmType_EHS));
+        public static string AlarmType_SYS => Get(nameof(AlarmType_SYS));
+        public static string AlarmGrade_P1 => Get(nameof(AlarmGrade_P1));
+        public static string AlarmGrade_P2 => Get(nameof(AlarmGrade_P2));
+        public static string AlarmGrade_P3 => Get(nameof(AlarmGrade_P3));
+        public static string AlarmGrade_P4 => Get(nameof(AlarmGrade_P4));
 
         public static string Menu_AttachmentSearch => Get(nameof(Menu_AttachmentSearch));
         public static string Attach_Title => Get(nameof(Attach_Title));

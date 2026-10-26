@@ -595,7 +595,7 @@
     <value>This is the last process in the list.</value>
   </data>
   <data name="Pop_AdminAlarmSent" xml:space="preserve">
-    <value>The alarm has been sent to the administrator.</value>
+    <value>The alarm has been registered.</value>
   </data>
   <data name="Pop_ManualWrenchOnly" xml:space="preserve">
     <value>Turn on Manual Wrench to enter the result directly.</value>
@@ -853,28 +853,58 @@
     <value>Select an item.</value>
   </data>
   <data name="AdminAlarm_Title" xml:space="preserve">
-    <value>Administrator Alarm</value>
+    <value>Alarm Inquiry / Registration</value>
   </data>
   <data name="AdminAlarm_Type" xml:space="preserve">
     <value>Alarm Type</value>
   </data>
-  <data name="AdminAlarm_DetailTitle" xml:space="preserve">
-    <value>Alarm Details</value>
+  <data name="AdminAlarm_Grade" xml:space="preserve">
+    <value>Alarm Grade</value>
   </data>
-  <data name="AdminAlarm_Target" xml:space="preserve">
-    <value>Target Code</value>
+  <data name="AdminAlarm_Name" xml:space="preserve">
+    <value>Alarm Name</value>
+  </data>
+  <data name="AdminAlarm_ListTitle" xml:space="preserve">
+    <value>Alarm Code / Action</value>
   </data>
   <data name="AdminAlarm_Send" xml:space="preserve">
-    <value>Send</value>
+    <value>Register</value>
   </data>
-  <data name="AdminAlarm_SelectType" xml:space="preserve">
-    <value>Select an alarm type.</value>
-  </data>
-  <data name="AdminAlarm_SelectTarget" xml:space="preserve">
-    <value>Select the alarm target.</value>
+  <data name="AdminAlarm_SelectAlarm" xml:space="preserve">
+    <value>Select an alarm to register.</value>
   </data>
   <data name="AdminAlarm_NoTypes" xml:space="preserve">
-    <value>No administrator alarm types are registered.</value>
+    <value>No alarm codes found.</value>
+  </data>
+  <data name="AlarmType_EQP" xml:space="preserve">
+    <value>Equipment</value>
+  </data>
+  <data name="AlarmType_QLT" xml:space="preserve">
+    <value>Quality</value>
+  </data>
+  <data name="AlarmType_MAT" xml:space="preserve">
+    <value>Material</value>
+  </data>
+  <data name="AlarmType_PRD" xml:space="preserve">
+    <value>Production</value>
+  </data>
+  <data name="AlarmType_EHS" xml:space="preserve">
+    <value>EHS</value>
+  </data>
+  <data name="AlarmType_SYS" xml:space="preserve">
+    <value>System</value>
+  </data>
+  <data name="AlarmGrade_P1" xml:space="preserve">
+    <value>Urgent</value>
+  </data>
+  <data name="AlarmGrade_P2" xml:space="preserve">
+    <value>Major</value>
+  </data>
+  <data name="AlarmGrade_P3" xml:space="preserve">
+    <value>Minor</value>
+  </data>
+  <data name="AlarmGrade_P4" xml:space="preserve">
+    <value>Info</value>
   </data>
   <data name="Col_Unit" xml:space="preserve">
     <value>Unit</value>

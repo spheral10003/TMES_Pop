@@ -347,42 +347,57 @@ namespace SEOJIN_TMES.Client.Common.Models
     }
 
     /// <summary>
-    /// &lt;관리자 알람 유형 선택&gt; 팝업의 알람 유형 하나(기준정보).
-    /// 유형마다 함께 보내야 하는 대상이 달라서(<see cref="TargetKind"/>) 팝업의 상세 입력 영역이 바뀐다.
+    /// 이상 알람 유형 기준정보 한 건 — <c>GET api/v1.0/md/abnormal-alarm-types</c> 응답 항목.
+    /// &lt;알람 조회 / 등록&gt; 팝업에서 타일 하나로 보여 주고, 고른 타일의 유형·코드를 그대로 등록에 쓴다.
+    /// 응답 필드명은 조회 조건(쿼리) 이름과 같다고 보고 맞췄다 — 서버 응답이 다르면 JsonProperty를 고칠 것.
     /// </summary>
-    public class AdminAlarmTypeDto
+    public class AbnormalAlarmTypeDto
     {
-        /// <summary>알람 유형 코드(서버 전송용).</summary>
-        public string Code { get; set; }
+        [JsonProperty("corpCd")] public string CorpCode { get; set; }
 
-        /// <summary>알람 유형 명(콤보에 표시).</summary>
-        public string Name { get; set; }
+        /// <summary>알람 구분 — EQP(설비) / QLT(품질) / MAT(자재) / PRD(생산) / EHS(안전·환경) / SYS(시스템).</summary>
+        [JsonProperty("alrmType")] public string AlarmType { get; set; }
 
-        /// <summary>
-        /// 이 유형이 요구하는 대상 종류.
-        /// <see cref="AdminAlarmTargetKind.Material"/>이면 투입자재 목록에서,
-        /// <see cref="AdminAlarmTargetKind.Equipment"/>이면 연결 장비 목록에서 대상을 고르게 한다.
-        /// </summary>
-        public AdminAlarmTargetKind TargetKind { get; set; }
+        /// <summary>알람 코드(예: ALM001).</summary>
+        [JsonProperty("alrmTypeCd")] public string AlarmTypeCode { get; set; }
 
-        /// <summary>대상 입력란에 붙일 라벨(예: 결품 자재 코드). 비어 있으면 화면 기본 문구를 쓴다.</summary>
-        public string TargetCaption { get; set; }
+        /// <summary>알람 명 — 타일에 크게 보이는 조치 내용.</summary>
+        [JsonProperty("alrmTypeNm")] public string AlarmTypeName { get; set; }
 
-        /// <summary>콤보에는 유형 명만 보여 준다.</summary>
-        public override string ToString() => Name;
+        /// <summary>알람 등급 — P1(긴급) / P2(주요) / P3(경미) / P4(정보).</summary>
+        [JsonProperty("alrmGrd")] public string AlarmGrade { get; set; }
+
+        [JsonProperty("useYn")] public string UseYn { get; set; }
     }
 
-    /// <summary>관리자 알람 유형이 함께 요구하는 대상의 종류.</summary>
-    public enum AdminAlarmTargetKind
+    /// <summary>
+    /// 이상 알람 유형 조회 조건. 회사 코드만 필수이고, 나머지는 비워 두면 그 조건 없이(전체) 조회한다.
+    /// </summary>
+    public class AbnormalAlarmTypeQuery
     {
-        /// <summary>대상 없음 — 비고만 적어 보낸다.</summary>
-        None,
+        public string CorpCode { get; set; }
+        public string AlarmType { get; set; }
+        public string AlarmTypeCode { get; set; }
+        public string AlarmTypeName { get; set; }
+        public string AlarmGrade { get; set; }
+        public string UseYn { get; set; }
+    }
 
-        /// <summary>투입자재 한 건(예: 자재 결품).</summary>
-        Material,
+    /// <summary>
+    /// 이상 알람 등록 본문 — <c>POST api/v1.0/pop/{sn}/{subRpRef}/abnormal-alarms</c>.
+    /// 공정·작업지시는 URL 경로와 쿼리로 가므로 본문에는 알람 구분·코드·비고만 담는다.
+    /// </summary>
+    public class AbnormalAlarmRequest
+    {
+        [JsonProperty("alrmType")] public string AlarmType { get; set; }
 
-        /// <summary>연결 장비 한 대(예: 설비 이상).</summary>
-        Equipment
+        [JsonProperty("alrmTypeCd")] public string AlarmTypeCode { get; set; }
+
+        /// <summary>
+        /// 작업자가 직접 적은 비고. 등록 스펙(alrmType · alrmTypeCd)에 없는 필드라 서버가 받는 이름이 확정되면 맞출 것 —
+        /// 공정 중지 요청이 같은 서버에 <c>remark</c>로 보내고 있어 그 이름을 따랐다. 비어 있으면 아예 보내지 않는다.
+        /// </summary>
+        [JsonProperty("remark", NullValueHandling = NullValueHandling.Ignore)] public string Remark { get; set; }
     }
 
     /// <summary>

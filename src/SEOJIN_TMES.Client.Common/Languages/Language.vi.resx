@@ -595,7 +595,7 @@
     <value>Đây là công đoạn cuối cùng trong danh sách.</value>
   </data>
   <data name="Pop_AdminAlarmSent" xml:space="preserve">
-    <value>Đã gửi cảnh báo đến người quản lý.</value>
+    <value>Đã đăng ký cảnh báo.</value>
   </data>
   <data name="Pop_ManualWrenchOnly" xml:space="preserve">
     <value>Hãy bật Cờ lê thủ công để nhập kết quả trực tiếp.</value>
@@ -853,28 +853,58 @@
     <value>Hãy chọn một sản phẩm.</value>
   </data>
   <data name="AdminAlarm_Title" xml:space="preserve">
-    <value>Cảnh báo cho quản lý</value>
+    <value>Tra cứu / Đăng ký cảnh báo</value>
   </data>
   <data name="AdminAlarm_Type" xml:space="preserve">
     <value>Loại cảnh báo</value>
   </data>
-  <data name="AdminAlarm_DetailTitle" xml:space="preserve">
-    <value>Chi tiết cảnh báo</value>
+  <data name="AdminAlarm_Grade" xml:space="preserve">
+    <value>Cấp cảnh báo</value>
   </data>
-  <data name="AdminAlarm_Target" xml:space="preserve">
-    <value>Mã đối tượng</value>
+  <data name="AdminAlarm_Name" xml:space="preserve">
+    <value>Tên cảnh báo</value>
+  </data>
+  <data name="AdminAlarm_ListTitle" xml:space="preserve">
+    <value>Mã cảnh báo / Nội dung xử lý</value>
   </data>
   <data name="AdminAlarm_Send" xml:space="preserve">
-    <value>Gửi</value>
+    <value>Đăng ký</value>
   </data>
-  <data name="AdminAlarm_SelectType" xml:space="preserve">
-    <value>Hãy chọn loại cảnh báo.</value>
-  </data>
-  <data name="AdminAlarm_SelectTarget" xml:space="preserve">
-    <value>Hãy chọn đối tượng cảnh báo.</value>
+  <data name="AdminAlarm_SelectAlarm" xml:space="preserve">
+    <value>Hãy chọn cảnh báo cần đăng ký.</value>
   </data>
   <data name="AdminAlarm_NoTypes" xml:space="preserve">
-    <value>Chưa có loại cảnh báo nào được đăng ký.</value>
+    <value>Không tìm thấy mã cảnh báo.</value>
+  </data>
+  <data name="AlarmType_EQP" xml:space="preserve">
+    <value>Thiết bị</value>
+  </data>
+  <data name="AlarmType_QLT" xml:space="preserve">
+    <value>Chất lượng</value>
+  </data>
+  <data name="AlarmType_MAT" xml:space="preserve">
+    <value>Vật tư</value>
+  </data>
+  <data name="AlarmType_PRD" xml:space="preserve">
+    <value>Sản xuất</value>
+  </data>
+  <data name="AlarmType_EHS" xml:space="preserve">
+    <value>An toàn/Môi trường</value>
+  </data>
+  <data name="AlarmType_SYS" xml:space="preserve">
+    <value>Hệ thống</value>
+  </data>
+  <data name="AlarmGrade_P1" xml:space="preserve">
+    <value>Khẩn cấp</value>
+  </data>
+  <data name="AlarmGrade_P2" xml:space="preserve">
+    <value>Quan trọng</value>
+  </data>
+  <data name="AlarmGrade_P3" xml:space="preserve">
+    <value>Nhẹ</value>
+  </data>
+  <data name="AlarmGrade_P4" xml:space="preserve">
+    <value>Thông tin</value>
   </data>
   <data name="Col_Unit" xml:space="preserve">
     <value>Đơn vị</value>
