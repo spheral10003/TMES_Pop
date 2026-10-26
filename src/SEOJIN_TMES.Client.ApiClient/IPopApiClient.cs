@@ -153,7 +153,6 @@ namespace SEOJIN_TMES.Client.ApiClient
 
             var query = PostKeyQuery(key);
             string url = $"{PopPrefix}{key.SerialNo}/{key.SubRoutingRef}/insp-chk-results/{inspectionItemCode}{query}";
-            // TODO: 경로는 가정값 — 서버 스펙 확정 시 맞출 것.
             return PostAsync(url, result, cancellationToken);
         }
 

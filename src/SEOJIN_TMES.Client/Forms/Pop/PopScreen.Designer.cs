@@ -35,7 +35,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PopScreen));
-            ImageBoxExtensions.DefaultGifAnimator defaultGifAnimator1 = new ImageBoxExtensions.DefaultGifAnimator();
+            ImageBoxExtensions.DefaultGifAnimator defaultGifAnimator2 = new ImageBoxExtensions.DefaultGifAnimator();
             this.btnPrevProcess = new System.Windows.Forms.Button();
             this.spacerTop = new System.Windows.Forms.Panel();
             this.mainPanel = new DevExpress.XtraEditors.PanelControl();
@@ -270,7 +270,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 
             // picView
             // 
-            this.picView.Animator = defaultGifAnimator1;
+            this.picView.Animator = defaultGifAnimator2;
             this.picView.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.picView.ContextMenuStrip = this.menuView;
             this.picView.Dock = System.Windows.Forms.DockStyle.Fill;
