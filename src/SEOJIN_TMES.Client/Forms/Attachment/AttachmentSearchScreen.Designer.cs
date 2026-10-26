@@ -170,7 +170,8 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             this.dtpTo.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
             this.dtpTo.Location = new System.Drawing.Point(246, 11);
             this.dtpTo.Name = "dtpTo";
-            this.dtpTo.Size = new System.Drawing.Size(118, 23);
+            this.dtpTo.ShowCheckBox = true;
+            this.dtpTo.Size = new System.Drawing.Size(136, 23);
             this.dtpTo.TabIndex = 2;
             // 
             // lblDateTilde
@@ -191,7 +192,8 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             this.dtpFrom.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
             this.dtpFrom.Location = new System.Drawing.Point(105, 11);
             this.dtpFrom.Name = "dtpFrom";
-            this.dtpFrom.Size = new System.Drawing.Size(118, 23);
+            this.dtpFrom.ShowCheckBox = true;
+            this.dtpFrom.Size = new System.Drawing.Size(136, 23);
             this.dtpFrom.TabIndex = 1;
             // 
             // lblRegDate

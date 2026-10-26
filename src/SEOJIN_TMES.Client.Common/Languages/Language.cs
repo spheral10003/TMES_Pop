@@ -385,6 +385,7 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string Attach_DownloadFailed => Get(nameof(Attach_DownloadFailed));
         /// <summary>OpenFileDialog.Filter 형식("표시|패턴|...") 그대로 번역한다 — 구분자 '|' 개수를 바꾸지 말 것.</summary>
         public static string Attach_UploadFilter => Get(nameof(Attach_UploadFilter));
+        public static string Attach_ConditionRequired => Get(nameof(Attach_ConditionRequired));
         public static string Col_AttachmentCount => Get(nameof(Col_AttachmentCount));
         public static string Col_CreatedDate => Get(nameof(Col_CreatedDate));
         public static string Col_FileName => Get(nameof(Col_FileName));

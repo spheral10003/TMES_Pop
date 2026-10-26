@@ -21,7 +21,8 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
     /// MEIS &gt; 작업관리 &gt; 첨부파일 조회.
     ///
     /// 흐름:
-    ///  1) 등록일자 범위(필수) · 시리얼번호 · 작업지시번호로 [조회] → 좌측 [목록]
+    ///  1) 등록일자 범위 · 시리얼번호 · 작업지시번호로 [조회] → 좌측 [목록]
+    ///     등록일자는 체크한 칸만 조건으로 보낸다. 날짜를 하나도 체크하지 않으면 시리얼번호 · 작업지시번호 중 하나는 필수다.
     ///  2) 목록에서 한 건을 클릭하면 → 우측 [파일 상세목록]에 그 작업지시의 첨부가 바로 표시된다(자동 조회)
     ///  3) 우측에서 [다운로드] · [삭제] · [업로드]로 첨부를 다룬다. 업로드 · 삭제 뒤에는 서버 목록을 다시 받는다.
     ///
@@ -68,7 +69,7 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
         /// </summary>
         private void ApplyTexts()
         {
-            lblRegDate.Text = "· " + Language.Attach_RegDate + "(*)";
+            lblRegDate.Text = "· " + Language.Attach_RegDate;
             lblSerialNo.Text = "· " + Language.Col_SerialNo;
             lblWorkOrderNo.Text = "· " + Language.Col_WorkOrderNo;
             btnSearch.Text = Language.Common_Search;
@@ -160,23 +161,25 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             await SearchAsync();
         }
 
-        /// <summary>작업지시 목록을 조회한다. 등록일자는 필수이며, 시작이 종료보다 늦으면 안내 후 중단한다.</summary>
+        /// <summary>
+        /// 작업지시 목록을 조회한다. 조회 조건(<see cref="IsSearchConditionValid"/>)이 맞지 않으면 안내만 하고 API를 부르지 않는다.
+        /// 등록일자는 체크한 칸만 보내고, 체크하지 않은 칸은 조건에서 뺀다(null).
+        /// </summary>
         private async Task SearchAsync()
         {
-            var from = dtpFrom.Value.Date;
-            var to = dtpTo.Value.Date;
-            if (from > to)
-            {
-                AppMessageBox.Warn(this, Language.WorkStatus_DateReversed, Language.Attach_Title);
-                dtpFrom.Focus();
+            DateTime? from = dtpFrom.Checked ? dtpFrom.Value.Date : (DateTime?)null;
+            DateTime? to = dtpTo.Checked ? dtpTo.Value.Date : (DateTime?)null;
+            var serialNo = txtSerialNo.Text?.Trim();
+            var workOrderNo = txtWorkOrderNo.Text?.Trim();
+
+            if (!IsSearchConditionValid(from, to, serialNo, workOrderNo))
                 return;
-            }
 
             _query.CorpCode = _appSet.CurrentUser?.Server;
             _query.OrderDateFrom = from;
             _query.OrderDateTo = to;
-            _query.WorkOrderNo = txtWorkOrderNo.Text?.Trim();
-            _query.SerialNo = txtSerialNo.Text?.Trim();
+            _query.WorkOrderNo = workOrderNo;
+            _query.SerialNo = serialNo;
 
             _isBusy = true;
             ControlEnabled();
@@ -223,6 +226,33 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// 조회 조건을 확인한다. 맞지 않으면 사유를 알리고 해당 입력칸으로 포커스를 옮긴 뒤 false.
+        ///  - 등록일자를 하나도 체크하지 않았으면 시리얼번호 · 작업지시번호 중 하나는 있어야 한다
+        ///    (조건 없이 전체를 조회하면 결과가 지나치게 많아진다).
+        ///  - 등록일자가 있으면 시리얼번호 · 작업지시번호는 비워도 된다.
+        ///  - 시작 · 종료를 모두 체크했으면 시작이 종료보다 늦으면 안 된다.
+        /// </summary>
+        private bool IsSearchConditionValid(DateTime? from, DateTime? to, string serialNo, string workOrderNo)
+        {
+            if (from.HasValue && to.HasValue && from.Value > to.Value)
+            {
+                AppMessageBox.Warn(this, Language.WorkStatus_DateReversed, Language.Attach_Title);
+                dtpFrom.Focus();
+                return false;
+            }
+
+            bool hasDate = from.HasValue || to.HasValue;
+            if (!hasDate && string.IsNullOrEmpty(serialNo) && string.IsNullOrEmpty(workOrderNo))
+            {
+                AppMessageBox.Warn(this, Language.Attach_ConditionRequired, Language.Attach_Title);
+                txtSerialNo.Focus();
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>작업지시를 클릭(또는 키보드로 이동)할 때마다 우측 파일 상세목록을 그 지시의 첨부로 바꾼다.</summary>

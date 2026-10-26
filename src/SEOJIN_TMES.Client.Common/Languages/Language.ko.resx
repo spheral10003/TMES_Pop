@@ -1002,6 +1002,9 @@
   <data name="Attach_UploadFilter" xml:space="preserve">
     <value>이미지|*.png;*.jpg;*.jpeg;*.bmp|PDF|*.pdf|모든 파일|*.*</value>
   </data>
+  <data name="Attach_ConditionRequired" xml:space="preserve">
+    <value>등록일자를 지정하지 않으면 시리얼번호 또는 작업지시번호 중 하나는 입력해야 합니다.</value>
+  </data>
   <data name="Col_AttachmentCount" xml:space="preserve">
     <value>첨부파일</value>
   </data>

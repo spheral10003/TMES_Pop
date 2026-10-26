@@ -1002,6 +1002,9 @@
   <data name="Attach_UploadFilter" xml:space="preserve">
     <value>Hình ảnh|*.png;*.jpg;*.jpeg;*.bmp|PDF|*.pdf|Tất cả tệp|*.*</value>
   </data>
+  <data name="Attach_ConditionRequired" xml:space="preserve">
+    <value>Nếu không chọn ngày đăng ký, hãy nhập số sê-ri hoặc số lệnh sản xuất.</value>
+  </data>
   <data name="Col_AttachmentCount" xml:space="preserve">
     <value>Tệp đính kèm</value>
   </data>
