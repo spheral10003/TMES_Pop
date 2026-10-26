@@ -24,7 +24,7 @@ deploy/
 
 | 지역 | 폴더 | 바로가기 이름 | 기본 언어 | 사업장 코드(ServerName) | 배포 서버 주소 · API 주소 |
 | --- | --- | --- | --- | --- | --- |
-| 구미 | `GUMI` | TMES POP (구미) | ko-KR | `GUM` | 입력 필요 |
+| 구미 | `GUMI` | TMES POP (구미) | ko-KR | `GUM` | `http://172.16.150.11/mes_client/` (구미 Test 서버 TMES-TEST, IIS 가상 디렉터리 → `D:\TMES\mes_client`) · API `http://172.16.150.11:8080/` · 공유 `\\172.16.150.11\attach\` |
 | 화성 | `HWASEONG` | TMES POP (화성) | ko-KR | 입력 필요 | 입력 필요 |
 | 용인 | `YONGIN` | TMES POP (용인) | ko-KR | 입력 필요 | 입력 필요 |
 | 베트남 | `VIETNAM` | TMES POP (베트남) | vi-VN | 입력 필요 | 입력 필요 |
@@ -34,8 +34,14 @@ deploy/
 "입력 필요" 값은 **비워 둔 상태**다. 게시 스크립트가 처음 게시할 때 물어보고 그 지역 파일에 저장한다(아래 3번).
 세 값 중 하나라도 비어 있으면 게시하지 않는다(빌드도 `DeployBaseUrl`이 비면 오류로 멈춘다).
 
-게시본 App.config는 지역 공통으로 `LogApiResponseBody=false`,
-`DocumentShare`(도면 공유 폴더)는 비움, `Equipments`(설비 목록)는 `[]` — 지역 공유 폴더가 정해지면 해당 App.config에 채운다.
+`DocumentShare`(도면 공유 폴더)도 지역마다 다르므로 스크립트가 함께 묻는다 —
+**서버 주소 · 폴더**(합쳐서 `\\서버\폴더\`로 저장, 필수)와 **계정 · 비밀번호**(비우면 현재 윈도우 계정).
+계정 · 비밀번호는 공유 폴더 경로가 비어 있을 때나 `-Configure`일 때만 묻고, 비밀번호는 가려서 입력받는다.
+
+> **주의:** 계정 · 비밀번호를 넣으면 게시본 `SEOJIN_TMES_POP.exe.config.deploy`에 평문으로 들어가
+> 배포 웹 서버에서 **누구나 내려받을 수 있다.** 되도록 비워 두고 현장 PC 윈도우 계정에 공유 권한을 주는 편이 낫다.
+
+게시본 App.config는 지역 공통으로 `LogApiResponseBody=false`, `Equipments`(설비 목록)는 `[]`.
 
 - `SEOJIN_TMES.Client.csproj`는 `-p:Region=<지역>`이 있을 때만 `regions/<지역>/region.props`를 불러와
   배포 주소 · App.config를 바꾼다. Region 없이 빌드(F5, 일반 빌드)하면 지금처럼 개발용 `src/SEOJIN_TMES.Client/App.config`를 쓴다.
@@ -68,6 +74,11 @@ Visual Studio(MSBuild.exe)가 설치된 PC의 PowerShell에서 저장소 루트 
 #     저장: DeployBaseUrl = https://tmes-gm-test.texon.co.kr/pop/  (region.props)
 #   GUMI API 서버 주소 (예: http://10.200.1.237:8080/): ...
 #   GUMI 사업장 코드 corpCd (예: GUM) [현재: GUM, Enter=유지]:
+#   GUMI 도면 공유 폴더 서버 주소 (예: 172.16.150.11): ...
+#   GUMI 도면 공유 폴더 경로 (예: sjapp\attach): ...
+#   GUMI 도면 공유 폴더 계정 (비우면 현재 윈도우 계정): ...
+#   GUMI 도면 공유 폴더 비밀번호: ********
+#     저장: SharePassword = ****  (App.config)
 
 # ② 게시 — 버전 자동(배포 서버 최신 버전 + 1), 결과는 deploy\out\GUMI
 #    값이 비어 있으면 ①처럼 먼저 물어본 뒤 게시한다.
