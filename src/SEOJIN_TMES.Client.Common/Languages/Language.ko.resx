@@ -699,6 +699,12 @@
   <data name="Col_InspectionTarget" xml:space="preserve">
     <value>타겟값</value>
   </data>
+  <data name="Pop_InspectionQuantitative" xml:space="preserve">
+    <value>정량</value>
+  </data>
+  <data name="Pop_InspectionQualitative" xml:space="preserve">
+    <value>정성</value>
+  </data>
   <data name="Col_EquipmentCode" xml:space="preserve">
     <value>장비코드</value>
   </data>

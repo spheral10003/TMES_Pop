@@ -699,6 +699,12 @@
   <data name="Col_InspectionTarget" xml:space="preserve">
     <value>Giá trị mục tiêu</value>
   </data>
+  <data name="Pop_InspectionQuantitative" xml:space="preserve">
+    <value>Định lượng</value>
+  </data>
+  <data name="Pop_InspectionQualitative" xml:space="preserve">
+    <value>Định tính</value>
+  </data>
   <data name="Col_EquipmentCode" xml:space="preserve">
     <value>Mã thiết bị</value>
   </data>

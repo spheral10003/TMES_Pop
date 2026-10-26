@@ -248,7 +248,13 @@ namespace SEOJIN_TMES.Client.Common.Models
         /// <summary>검사 스팩 비고(작업자 안내 문구).</summary>
         public string InspectionRemark { get; set; }
 
-        /// <summary>검사방법 — 정량/정성.</summary>
+        /// <summary>정량 검사의 서버 코드. 이 값이 아니면 모두 정성으로 본다.</summary>
+        public const string MethodQuantitative = "QNT";
+
+        /// <summary>
+        /// 검사방법 — 서버가 준 코드 그대로(QNT 정량 / 그 외 정성).
+        /// 화면의 "정량/정성" 문구는 그리드가 화면 언어로 바꿔 보여 주므로 여기에는 번역 문구를 넣지 않는다.
+        /// </summary>
         public string InspectionMethod { get; set; }
 
         /// <summary>판정 값 — 서버 코드 그대로 쓴다(합격 OK / 불합격 NG). 화면 콤보와 저장 Body가 같은 값을 쓴다.</summary>
@@ -273,9 +279,9 @@ namespace SEOJIN_TMES.Client.Common.Models
         /// <summary>검사 결과 비고 — 작업자가 화면에서 직접 입력한다.</summary>
         public string InspectionResultRemark { get; set; }
 
-        /// <summary>검사방법이 정량인지(결과값 입력을 요구할지) 판단용.</summary>
+        /// <summary>검사방법이 정량(QNT)인지 — 결과값 입력 · 전송 여부를 가른다.</summary>
         public bool IsQuantitative =>
-            string.Equals(InspectionMethod, "정량", StringComparison.OrdinalIgnoreCase);
+            string.Equals(InspectionMethod, MethodQuantitative, StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>

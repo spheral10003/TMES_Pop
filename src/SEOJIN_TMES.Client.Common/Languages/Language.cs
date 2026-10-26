@@ -293,6 +293,8 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string Col_InspectionLower => Get(nameof(Col_InspectionLower));
         public static string Col_InspectionUpper => Get(nameof(Col_InspectionUpper));
         public static string Col_InspectionTarget => Get(nameof(Col_InspectionTarget));
+        public static string Pop_InspectionQuantitative => Get(nameof(Pop_InspectionQuantitative));
+        public static string Pop_InspectionQualitative => Get(nameof(Pop_InspectionQualitative));
         public static string Col_EquipmentCode => Get(nameof(Col_EquipmentCode));
         public static string Col_EquipmentName => Get(nameof(Col_EquipmentName));
         public static string Col_EquipmentRemark => Get(nameof(Col_EquipmentRemark));

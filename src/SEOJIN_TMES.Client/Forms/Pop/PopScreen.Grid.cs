@@ -191,6 +191,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             gridViewInspection.OptionsView.ColumnAutoWidth = true;
             NumericFormat(gridViewInspection, "InspectionLower", "InspectionUpper", "InspectionTarget");
 
+            // 검사방법은 서버 코드(QNT/QLT)로 들고 있고, 보여 줄 때만 화면 언어의 정량/정성으로 바꾼다.
+            gridViewInspection.CustomColumnDisplayText += GridViewInspection_CustomColumnDisplayText;
+
             _resultStateEditor = new RepositoryItemComboBox();
             _resultStateEditor.TextEditStyle = TextEditStyles.DisableTextEditor;
             // 판정은 OK / NG 코드만 쓴다 — 고른 값이 그대로 서버로 나가므로 번역 문구를 넣지 않는다.
@@ -761,13 +764,23 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 return;
             }
 
-            // 정성 검사는 결과값이 없다 — 결과상태(합격/불합격)만 받는다.
+            // 정성 검사는 결과값이 없다 — 결과상태(OK/NG)만 받는다.
             if (fieldName == "ResultValue")
             {
                 var spec = view.GetFocusedRow() as PopInspectionSpecDto;
                 if (spec != null && !spec.IsQuantitative)
                     e.Cancel = true;
             }
+        }
+
+        /// <summary>검사방법 코드를 화면 언어로 표시한다 — QNT면 정량, 그 외는 정성.</summary>
+        private void GridViewInspection_CustomColumnDisplayText(object sender, CustomColumnDisplayTextEventArgs e)
+        {
+            if (e.Column?.FieldName != "InspectionMethod" || e.ListSourceRowIndex < 0)
+                return;
+
+            var quantitative = string.Equals(e.Value as string, PopInspectionSpecDto.MethodQuantitative, StringComparison.OrdinalIgnoreCase);
+            e.DisplayText = quantitative ? Language.Pop_InspectionQuantitative : Language.Pop_InspectionQualitative;
         }
 
         private async void gridViewInspection_CellValueChanged(object sender, CellValueChangedEventArgs e)
@@ -779,6 +792,14 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             var spec = ((GridView)sender).GetRow(e.RowHandle) as PopInspectionSpecDto;
             if (spec == null)
                 return;
+
+            // 정량 검사는 판정과 결과값을 함께 보내야 한다 — 결과값이 비어 있으면 아직 보내지 않고,
+            // 결과값이 들어오는 순간(이 이벤트가 다시 올라올 때) 판정과 함께 보낸다.
+            if (spec.IsQuantitative && string.IsNullOrWhiteSpace(spec.ResultValue))
+            {
+                AppLog.Info($"[POP] 정량 검사 결과값 미입력 - 전송 보류 ({spec.InspectionItemCode}, {fieldName})");
+                return;
+            }
 
             try
             {

@@ -699,6 +699,12 @@
   <data name="Col_InspectionTarget" xml:space="preserve">
     <value>Target</value>
   </data>
+  <data name="Pop_InspectionQuantitative" xml:space="preserve">
+    <value>Quantitative</value>
+  </data>
+  <data name="Pop_InspectionQualitative" xml:space="preserve">
+    <value>Qualitative</value>
+  </data>
   <data name="Col_EquipmentCode" xml:space="preserve">
     <value>Equipment Code</value>
   </data>

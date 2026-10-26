@@ -208,7 +208,8 @@ namespace SEOJIN_TMES.Client.Common.Models
                     InspectionSpecName = i.InspItemNm,
                     InputPosition = i.IndctLoc,
                     InspectionRemark = i.InspRemark,
-                    InspectionMethod = i.InspDataType == "QNT" ? "정량" : "정성",
+                    // 서버 코드(QNT / QLT)를 그대로 둔다 — 정량/정성 문구는 그리드가 화면 언어로 바꿔 보여 준다.
+                    InspectionMethod = i.InspDataType,
                     InspectionLower = i.Lsl,
                     InspectionTarget = i.Target,
                     InspectionUpper = i.Usl,
@@ -216,7 +217,7 @@ namespace SEOJIN_TMES.Client.Common.Models
                     ResultState = i.JgmtRslt == PopInspectionSpecDto.ResultOk || i.JgmtRslt == PopInspectionSpecDto.ResultNg
                         ? i.JgmtRslt
                         : "",
-                    ResultValue = i.InspDataType == "QNT" ? i.InspRsltVl : null
+                    ResultValue = i.InspDataType == PopInspectionSpecDto.MethodQuantitative ? i.InspRsltVl : null
                 }).ToList(),
 
                 Equipments = data.EquipmentList.Select(e => new PopEquipmentDto
