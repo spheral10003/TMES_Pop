@@ -63,51 +63,105 @@ $propsPath  = Join-Path $regionDir 'region.props'
 $configPath = Join-Path $regionDir 'App.config'
 $utf8NoBom  = New-Object Text.UTF8Encoding $false
 
+$sharePattern = '(<add key="DocumentShare" value=")([^"]*)(")'
 $fields = @(
     @{ Name = 'DeployBaseUrl'; Label = '배포 서버 주소 (예: https://tmes-gm-test.texon.co.kr/pop/)'; Path = $propsPath;  Pattern = '(<DeployBaseUrl[^>]*>)([^<]*)(</DeployBaseUrl>)'; Url = $true }
     @{ Name = 'ApiBaseUrl';    Label = 'API 서버 주소 (예: http://10.200.1.237:8080/)';               Path = $configPath; Pattern = '(<add key="ApiBaseUrl" value=")([^"]*)(")';       Url = $true }
     @{ Name = 'ServerName';    Label = '사업장 코드 corpCd (예: GUM)';                                 Path = $configPath; Pattern = '(<add key="ServerName" value=")([^"]*)(")';       Url = $false }
+    # 도면 공유 폴더(DocumentShare JSON). RootPath 는 서버 주소 + 폴더로 나눠 물어보고 \\서버\폴더\ 로 합쳐 저장한다.
+    @{ Name = 'ShareServer';   Label = '도면 공유 폴더 서버 주소 (예: 172.16.150.11)';                Path = $configPath; Pattern = $sharePattern; Json = 'RootPath'; Part = 'Server' }
+    @{ Name = 'ShareFolder';   Label = '도면 공유 폴더 경로 (예: sjapp\attach)';                     Path = $configPath; Pattern = $sharePattern; Json = 'RootPath'; Part = 'Folder' }
+    @{ Name = 'ShareUser';     Label = '도면 공유 폴더 계정 (비우면 현재 윈도우 계정)';             Path = $configPath; Pattern = $sharePattern; Json = 'UserName'; Optional = $true }
+    @{ Name = 'SharePassword'; Label = '도면 공유 폴더 비밀번호';                                     Path = $configPath; Pattern = $sharePattern; Json = 'Password'; Optional = $true; Secret = $true }
 )
 
-function Get-RegionValue($f) {
+function Get-RawValue($f) {
     $m = [regex]::Match([IO.File]::ReadAllText($f.Path), $f.Pattern)
     if (-not $m.Success) { throw "$($f.Path) 에서 $($f.Name) 자리를 찾지 못했다." }
-    $m.Groups[2].Value.Replace('&amp;', '&')
+    [Net.WebUtility]::HtmlDecode($m.Groups[2].Value)
 }
 
-function Set-RegionValue($f, [string]$value) {
+function Set-RawValue($f, [string]$value) {
     $text    = [IO.File]::ReadAllText($f.Path)
     $escaped = [Security.SecurityElement]::Escape($value)
     $text    = [regex]::Replace($text, $f.Pattern, { param($m) $m.Groups[1].Value + $escaped + $m.Groups[3].Value }, 1)
     [IO.File]::WriteAllText($f.Path, $text, $utf8NoBom)
 }
 
+# DocumentShare 값(JSON)을 항상 같은 네 필드 순서로 다룬다 — 앱의 DocumentShareSettings 가 읽는 형태.
+function Get-Share($f) {
+    $raw = Get-RawValue $f
+    $o   = if ($raw) { $raw | ConvertFrom-Json } else { $null }
+    [ordered]@{
+        RootPath = "$($o.RootPath)"; UserName = "$($o.UserName)"; Password = "$($o.Password)"; Domain = "$($o.Domain)"
+    }
+}
+
+function Split-RootPath([string]$root) {
+    $m = [regex]::Match($root, '^\\\\([^\\]+)\\?(.*?)\\?$')
+    if ($m.Success) { @{ Server = $m.Groups[1].Value; Folder = $m.Groups[2].Value } } else { @{ Server = ''; Folder = '' } }
+}
+
+function Get-RegionValue($f) {
+    if (-not $f.Json) { return Get-RawValue $f }
+    $share = Get-Share $f
+    if ($f.Part) { return (Split-RootPath $share.RootPath)[$f.Part] }
+    $share[$f.Json]
+}
+
+function Set-RegionValue($f, [string]$value) {
+    if (-not $f.Json) { Set-RawValue $f $value; return }
+    $share = Get-Share $f
+    if ($f.Part) {
+        $parts = Split-RootPath $share.RootPath
+        $parts[$f.Part] = $value
+        $share.RootPath = if (-not $parts.Server) { '' } elseif ($parts.Folder) { "\\$($parts.Server)\$($parts.Folder)\" } else { "\\$($parts.Server)\" }
+    }
+    else { $share[$f.Json] = $value }
+    Set-RawValue $f (New-Object PSObject -Property $share | ConvertTo-Json -Compress)
+}
+
 function Read-RegionValue($f, [string]$current) {
     # 입력이 끝없이 비어 오는 경우(CI처럼 대화형이 아닌 실행)에 멈춰 있지 않도록 횟수를 제한한다.
     for ($try = 1; $try -le 3; $try++) {
-        $hint  = if ($current) { " [현재: $current, Enter=유지]" } else { '' }
-        $value = "$(Read-Host "  $Region $($f.Label)$hint")".Trim()
+        $shown = if ($f.Secret) { '설정됨' } else { $current }
+        $hint  = if ($current) { " [현재: $shown, Enter=유지]" } else { '' }
+        if ($f.Secret) {
+            # 비밀번호는 화면에 남지 않도록 가려서 받는다.
+            $secure = Read-Host "  $Region $($f.Label)$hint" -AsSecureString
+            $value  = [Runtime.InteropServices.Marshal]::PtrToStringBSTR([Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure))
+        }
+        else { $value = "$(Read-Host "  $Region $($f.Label)$hint")".Trim() }
         if (-not $value) { $value = $current }
-        if (-not $value) { Write-Warning '값이 필요하다.'; continue }
+        if (-not $value) {
+            if ($f.Optional) { return '' }
+            Write-Warning '값이 필요하다.'; continue
+        }
         if ($f.Url) {
             if ($value -notmatch '^https?://') { Write-Warning 'http:// 또는 https:// 로 시작해야 한다.'; continue }
             if (-not $value.EndsWith('/')) { $value += '/' }
         }
+        if ($f.Part) { $value = $value.Trim('\') }
         return $value
     }
     throw "$Region $($f.Name) 값을 입력받지 못했다 - deploy/regions/$Region 의 파일에 직접 채우거나 -Configure 로 다시 실행할 것."
 }
 
 Write-Host "지역 입력값 확인 - $Region"
+# 계정 · 비밀번호는 비워 둘 수 있는 값이라 "비어 있으면 묻기" 규칙을 쓰면 게시할 때마다 묻게 된다.
+# 공유 폴더 경로를 새로 받을 때(또는 -Configure)만 함께 묻는다.
+$askShareAccount = $Configure -or -not (Get-Share $fields[3]).RootPath
 foreach ($f in $fields) {
     $current = Get-RegionValue $f
     # -DeployBaseUrl 로 넘긴 값은 이번 게시에만 쓰고 파일에는 남기지 않는다.
     if ($f.Name -eq 'DeployBaseUrl' -and $DeployBaseUrl -and -not $Configure) { continue }
-    if ($current -and -not $Configure) { continue }
+    if ($f.Optional) { if (-not $askShareAccount) { continue } }
+    elseif ($current -and -not $Configure) { continue }
     $value = Read-RegionValue $f $current
     if ($value -ne $current) {
         Set-RegionValue $f $value
-        Write-Host "  저장: $($f.Name) = $value  ($([IO.Path]::GetFileName($f.Path)))"
+        $shown = if ($f.Secret) { '****' } else { $value }
+        Write-Host "  저장: $($f.Name) = $shown  ($([IO.Path]::GetFileName($f.Path)))"
     }
 }
 if ($Configure) {
