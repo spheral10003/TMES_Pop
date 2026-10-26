@@ -79,7 +79,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.chkWorkStationEnable.Checked = true;
             this.chkWorkStationEnable.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkWorkStationEnable.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.chkWorkStationEnable.Location = new System.Drawing.Point(1410, 35);
+            this.chkWorkStationEnable.Location = new System.Drawing.Point(1413, 35);
             this.chkWorkStationEnable.Name = "chkWorkStationEnable";
             this.chkWorkStationEnable.Size = new System.Drawing.Size(91, 18);
             this.chkWorkStationEnable.TabIndex = 11;
@@ -93,7 +93,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.btnItemPick.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.btnItemPick.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
             this.btnItemPick.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnItemPick.Location = new System.Drawing.Point(1371, 32);
+            this.btnItemPick.Location = new System.Drawing.Point(1374, 32);
             this.btnItemPick.Margin = new System.Windows.Forms.Padding(1);
             this.btnItemPick.Name = "btnItemPick";
             this.btnItemPick.Size = new System.Drawing.Size(23, 20);
@@ -103,14 +103,14 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             // 
             // txtItemName
             // 
-            this.txtItemName.Location = new System.Drawing.Point(1269, 33);
+            this.txtItemName.Location = new System.Drawing.Point(1272, 33);
             this.txtItemName.Name = "txtItemName";
             this.txtItemName.Size = new System.Drawing.Size(98, 20);
             this.txtItemName.TabIndex = 9;
             // 
             // lblItemCode
             // 
-            this.lblItemCode.Location = new System.Drawing.Point(1072, 36);
+            this.lblItemCode.Location = new System.Drawing.Point(1034, 36);
             this.lblItemCode.Name = "lblItemCode";
             this.lblItemCode.Size = new System.Drawing.Size(75, 14);
             this.lblItemCode.TabIndex = 6;
@@ -118,7 +118,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             // 
             // txtItemCode
             // 
-            this.txtItemCode.Location = new System.Drawing.Point(1165, 33);
+            this.txtItemCode.Location = new System.Drawing.Point(1168, 33);
             this.txtItemCode.Name = "txtItemCode";
             this.txtItemCode.Size = new System.Drawing.Size(98, 20);
             this.txtItemCode.TabIndex = 7;

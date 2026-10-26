@@ -53,7 +53,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             lblItemCode.Text = "· " + Language.ItemPicker_Keyword;
             btnSearch.Text = Language.WorkEntry_Search;
             btnWork.Text = Language.WorkEntry_Work;
-
+            
             ApplyTheme();
             ConfigureGrid();
 
@@ -81,7 +81,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             AppTheme.CodeEditor(txtWorkOrderNo);
             AppTheme.CodeEditor(txtSerialNo);
             AppTheme.CodeEditor(txtItemCode);
-            
+            AppTheme.CodeEditor(txtItemName);
             btnSearch.Icon = AppIcons.Search;
             btnWork.Icon = AppIcons.Play;
 
