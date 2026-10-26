@@ -18,7 +18,7 @@ using System.Windows.Forms;
 namespace SEOJIN_TMES.Client.Forms.Attachment
 {
     /// <summary>
-    /// MEIS &gt; 작업관리 &gt; 첨부파일 조회.
+    /// TMES &gt; 작업관리 &gt; 첨부파일 조회.
     ///
     /// 흐름:
     ///  1) 등록일자 범위 · 시리얼번호 · 작업지시번호로 [조회] → 좌측 [목록]
@@ -107,7 +107,7 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             const int groupGap = 24;   // 입력칸 → 다음 라벨
 
             int x = lblRegDate.Left;
-            x = PlaceAfter(lblRegDate, dtpFrom, x, labelGap);
+            x = PlaceAfter(lblRegDate, dtpFrom, x, labelGap);        
             lblDateTilde.Left = x + 4;
             dtpTo.Left = lblDateTilde.Left + lblDateTilde.PreferredWidth + 4;
             x = dtpTo.Right + groupGap;

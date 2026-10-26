@@ -1,6 +1,6 @@
-﻿using DevExpress.XtraLayout.Customization;
-using SEOJIN_TMES.Client.ApiClient;
+﻿using SEOJIN_TMES.Client.ApiClient;
 using SEOJIN_TMES.Client.Common.Files;
+using SEOJIN_TMES.Client.Common.Imaging;
 using SEOJIN_TMES.Client.Common.Languages;
 using SEOJIN_TMES.Client.Common.Logging;
 using SEOJIN_TMES.Client.Common.Models;
@@ -8,12 +8,9 @@ using SEOJIN_TMES.Client.Core;
 using SEOJIN_TMES.Client.Forms.Common;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 

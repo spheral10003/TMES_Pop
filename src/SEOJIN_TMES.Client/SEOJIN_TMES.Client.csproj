@@ -13,7 +13,7 @@
       창/작업 표시줄에 뜨는 아이콘은 이것과 별개로 각 Form의 Icon 속성이 결정하며,
       App.config의 IsTestServer에 따라 TMES.ico / TMES_TEST.ico 중 하나를 쓴다(AppImages.AppIcon).
     -->
-    <ApplicationIcon>Images\TMES.ico</ApplicationIcon>
+    <ApplicationIcon>Images\TMES_TEST.ico</ApplicationIcon>
     <NeutralLanguage>ko-KR</NeutralLanguage>
   </PropertyGroup>
 
@@ -91,6 +91,12 @@
     <Compile Remove="Localization\**" />
     <EmbeddedResource Remove="Localization\**" />
     <None Remove="Localization\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Forms\Pop\ByteToImage.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Images\TMES_TEST.ico" />
   </ItemGroup>
   <!--
   <ItemGroup>
