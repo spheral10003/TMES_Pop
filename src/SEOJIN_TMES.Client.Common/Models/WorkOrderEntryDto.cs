@@ -81,10 +81,9 @@ namespace SEOJIN_TMES.Client.Common.Models
 
         /// <summary>
         /// 작업지시에 붙은 첨부파일 개수(첨부파일 조회 화면). 서버가 센 값을 그대로 표시한다.
-        /// TODO: 필드명(atchCnt)은 <b>가정값</b>이다 — 2026-10-26 기준 목록 API(md/work-orders/overview) 응답에는
-        ///       이 필드가 없어 화면의 "첨부파일" 열이 비어 있다. 서버에 필드가 추가되면 이름을 맞출 것.
+        /// 목록 API(md/work-orders/overview) 응답의 attachmentCount 필드.
         /// </summary>
-        [JsonProperty("atchCnt")]
+        [JsonProperty("attachmentCount")]
         public int? AttachmentCount { get; set; }
     }
 
