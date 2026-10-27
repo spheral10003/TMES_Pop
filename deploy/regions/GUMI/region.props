@@ -12,7 +12,7 @@
       주의: 이미 설치된 PC는 설치할 때의 주소로 업데이트를 확인한다. 주소를 바꾸면 기존 PC는
       옛 주소에도 새 버전을 한 번 게시하거나, PC에서 제거 후 새 주소로 재설치해야 한다.
     -->
-    <DeployBaseUrl Condition="'$(DeployBaseUrl)'==''">http://172.16.150.11/mes_client/</DeployBaseUrl>
+    <DeployBaseUrl Condition="'$(DeployBaseUrl)'==''">https://tmes-gm-test.texon.co.kr/mes_client/</DeployBaseUrl>
 
     <!-- 시작 메뉴 · 바탕화면 바로가기 · 프로그램 추가/제거에 보이는 이름. -->
     <ProductName>TMES POP (구미)</ProductName>

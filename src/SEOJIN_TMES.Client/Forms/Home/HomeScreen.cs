@@ -60,7 +60,7 @@ namespace SEOJIN_TMES.Client.Forms.Home
 
             _title = new LabelControl();
             _title.Location = new Point(96, 32);
-            _title.Text = "MEIS POP";
+            _title.Text = "TMES POP";
 
             _hint = new LabelControl();
             _hint.Location = new Point(98, 58);

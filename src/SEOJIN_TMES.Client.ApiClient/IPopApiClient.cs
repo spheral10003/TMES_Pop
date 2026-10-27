@@ -1,9 +1,10 @@
+using SEOJIN_TMES.Client.Common.Models;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using SEOJIN_TMES.Client.Common.Models;
 
 namespace SEOJIN_TMES.Client.ApiClient
 {
@@ -87,10 +88,8 @@ namespace SEOJIN_TMES.Client.ApiClient
         public async Task<PopScreenData> GetProcessInfoAsync(PopProcessKey key, CancellationToken cancellationToken = default)
         {
             var query = BuildQuery(("corpCd", key.CorpCode), ("woNo", key.WorkOrderNo), ("routingGroupRef", key.RoutingGroupRef), ("wkstnRef", key.WorkstationRef));
-            //PopScreenData screen = PopMapper.Parse(json);
             var response = await GetAsync<ApiDataResponse<PopApiResponse>>($"{PopPrefix}{key.SerialNo}/{key.SubRoutingRef}{query}", cancellationToken);
             PopMapper.Map(response?.Data);
-            //return response?.Data ?? new PopProcessInfoDto();
             return PopMapper.Map(response?.Data);
         }
             
@@ -176,10 +175,9 @@ namespace SEOJIN_TMES.Client.ApiClient
                 ("alrmTypeNm", query?.AlarmTypeName),
                 ("alrmGrd", query?.AlarmGrade),
                 ("useYn", query?.UseYn));
-
-            // 봉투({"data":[...]}) 유무가 확정되지 않아 두 형태를 모두 받는다.
-            return await GetDataAsync<List<AbnormalAlarmTypeDto>>($"{ApiPrefix}md/abnormal-alarm-types{condition}", cancellationToken)
-                   ?? new List<AbnormalAlarmTypeDto>();
+            string url = $"{ApiPrefix}md/abnormal-alarm-types{condition}";
+            var response = await GetAsync<ApiDataResponse<List<AbnormalAlarmTypeDto>>>(url, cancellationToken);
+            return response?.Data ?? new List<AbnormalAlarmTypeDto>();
         }
 
         public Task SetAbnormalAlarm(PopProcessKey key, AbnormalAlarmRequest request, CancellationToken cancellationToken = default)

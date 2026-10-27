@@ -35,9 +35,9 @@ namespace SEOJIN_TMES.Client.Forms
             this.btnConfirm = new System.Windows.Forms.Button();
             this.pnlFooter.SuspendLayout();
             this.SuspendLayout();
-            //
+            // 
             // flowStations
-            //
+            // 
             this.flowStations.AutoScroll = true;
             this.flowStations.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowStations.Location = new System.Drawing.Point(16, 72);
@@ -45,29 +45,31 @@ namespace SEOJIN_TMES.Client.Forms
             this.flowStations.Padding = new System.Windows.Forms.Padding(0, 4, 0, 0);
             this.flowStations.Size = new System.Drawing.Size(688, 174);
             this.flowStations.TabIndex = 0;
-            //
+            // 
             // lblHint
-            //
+            // 
             this.lblHint.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lblHint.Font = new System.Drawing.Font("Tahoma", 12F);
             this.lblHint.Location = new System.Drawing.Point(16, 48);
             this.lblHint.Name = "lblHint";
             this.lblHint.Size = new System.Drawing.Size(688, 24);
             this.lblHint.TabIndex = 1;
             this.lblHint.Text = "접속할 워크스테이션을 선택한 뒤 [확인]을 누르세요.";
             this.lblHint.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            //
+            // 
             // lblTitle
-            //
+            // 
             this.lblTitle.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lblTitle.Font = new System.Drawing.Font("Tahoma", 12F);
             this.lblTitle.Location = new System.Drawing.Point(16, 16);
             this.lblTitle.Name = "lblTitle";
             this.lblTitle.Size = new System.Drawing.Size(688, 32);
             this.lblTitle.TabIndex = 2;
             this.lblTitle.Text = "워크스테이션 선택";
             this.lblTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            //
+            // 
             // pnlFooter
-            //
+            // 
             this.pnlFooter.Controls.Add(this.btnCancel);
             this.pnlFooter.Controls.Add(this.btnConfirm);
             this.pnlFooter.Dock = System.Windows.Forms.DockStyle.Bottom;
@@ -75,9 +77,9 @@ namespace SEOJIN_TMES.Client.Forms
             this.pnlFooter.Name = "pnlFooter";
             this.pnlFooter.Size = new System.Drawing.Size(688, 70);
             this.pnlFooter.TabIndex = 3;
-            //
+            // 
             // btnCancel
-            //
+            // 
             this.btnCancel.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.btnCancel.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Tomato;
             this.btnCancel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -89,9 +91,9 @@ namespace SEOJIN_TMES.Client.Forms
             this.btnCancel.Text = "취소";
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
-            //
+            // 
             // btnConfirm
-            //
+            // 
             this.btnConfirm.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
             this.btnConfirm.FlatAppearance.MouseOverBackColor = System.Drawing.Color.DeepSkyBlue;
             this.btnConfirm.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -103,9 +105,9 @@ namespace SEOJIN_TMES.Client.Forms
             this.btnConfirm.Text = "확인";
             this.btnConfirm.UseVisualStyleBackColor = true;
             this.btnConfirm.Click += new System.EventHandler(this.btnConfirm_Click);
-            //
+            // 
             // LoginStationControl
-            //
+            // 
             this.Controls.Add(this.flowStations);
             this.Controls.Add(this.lblHint);
             this.Controls.Add(this.lblTitle);

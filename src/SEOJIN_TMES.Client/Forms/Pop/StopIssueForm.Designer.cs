@@ -45,9 +45,9 @@
             this.pnlBody.SuspendLayout();
             this.pnlFooter.SuspendLayout();
             this.SuspendLayout();
-            //
+            // 
             // pnlTitle
-            //
+            // 
             this.pnlTitle.Controls.Add(this.lblClose);
             this.pnlTitle.Controls.Add(this.lblTitle);
             this.pnlTitle.Dock = System.Windows.Forms.DockStyle.Top;
@@ -55,9 +55,9 @@
             this.pnlTitle.Name = "pnlTitle";
             this.pnlTitle.Size = new System.Drawing.Size(900, 48);
             this.pnlTitle.TabIndex = 0;
-            //
+            // 
             // lblClose
-            //
+            // 
             this.lblClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.lblClose.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.lblClose.Cursor = System.Windows.Forms.Cursors.Hand;
@@ -70,9 +70,9 @@
             this.lblClose.Click += new System.EventHandler(this.btnCancel_Click);
             this.lblClose.MouseEnter += new System.EventHandler(this.lblClose_MouseEnter);
             this.lblClose.MouseLeave += new System.EventHandler(this.lblClose_MouseLeave);
-            //
+            // 
             // lblTitle
-            //
+            // 
             this.lblTitle.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblTitle.Location = new System.Drawing.Point(0, 0);
             this.lblTitle.Name = "lblTitle";
@@ -81,9 +81,9 @@
             this.lblTitle.TabIndex = 0;
             this.lblTitle.Text = "공정 정지 사유";
             this.lblTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            //
+            // 
             // pnlBody
-            //
+            // 
             this.pnlBody.Controls.Add(this.flowCodes);
             this.pnlBody.Controls.Add(this.lblRemarkTitle);
             this.pnlBody.Controls.Add(this.txtRemark);
@@ -94,9 +94,9 @@
             this.pnlBody.Padding = new System.Windows.Forms.Padding(16, 4, 16, 8);
             this.pnlBody.Size = new System.Drawing.Size(900, 448);
             this.pnlBody.TabIndex = 1;
-            //
+            // 
             // flowCodes
-            //
+            // 
             this.flowCodes.AutoScroll = true;
             this.flowCodes.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowCodes.Location = new System.Drawing.Point(16, 36);
@@ -104,9 +104,9 @@
             this.flowCodes.Size = new System.Drawing.Size(868, 268);
             this.flowCodes.TabIndex = 1;
             this.flowCodes.SizeChanged += new System.EventHandler(this.flowCodes_SizeChanged);
-            //
+            // 
             // lblRemarkTitle
-            //
+            // 
             this.lblRemarkTitle.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.lblRemarkTitle.Location = new System.Drawing.Point(16, 304);
             this.lblRemarkTitle.Name = "lblRemarkTitle";
@@ -114,9 +114,9 @@
             this.lblRemarkTitle.TabIndex = 2;
             this.lblRemarkTitle.Text = "비고";
             this.lblRemarkTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            //
+            // 
             // txtRemark
-            //
+            // 
             this.txtRemark.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtRemark.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.txtRemark.Location = new System.Drawing.Point(16, 336);
@@ -125,9 +125,9 @@
             this.txtRemark.Size = new System.Drawing.Size(868, 104);
             this.txtRemark.TabIndex = 3;
             this.txtRemark.Text = "";
-            //
+            // 
             // lblCodeTitle
-            //
+            // 
             this.lblCodeTitle.Dock = System.Windows.Forms.DockStyle.Top;
             this.lblCodeTitle.Location = new System.Drawing.Point(16, 4);
             this.lblCodeTitle.Name = "lblCodeTitle";
@@ -135,9 +135,9 @@
             this.lblCodeTitle.TabIndex = 0;
             this.lblCodeTitle.Text = "정지 사유";
             this.lblCodeTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            //
+            // 
             // pnlFooter
-            //
+            // 
             this.pnlFooter.Controls.Add(this.pnlGrip);
             this.pnlFooter.Controls.Add(this.btnOK);
             this.pnlFooter.Controls.Add(this.btnCancel);
@@ -146,17 +146,17 @@
             this.pnlFooter.Name = "pnlFooter";
             this.pnlFooter.Size = new System.Drawing.Size(900, 64);
             this.pnlFooter.TabIndex = 2;
-            //
+            // 
             // pnlGrip
-            //
+            // 
             this.pnlGrip.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.pnlGrip.Location = new System.Drawing.Point(884, 48);
             this.pnlGrip.Name = "pnlGrip";
             this.pnlGrip.Size = new System.Drawing.Size(16, 16);
             this.pnlGrip.TabIndex = 2;
-            //
+            // 
             // btnOK
-            //
+            // 
             this.btnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnOK.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnOK.Enabled = false;
@@ -168,9 +168,9 @@
             this.btnOK.Text = "확인";
             this.btnOK.UseVisualStyleBackColor = false;
             this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
-            //
+            // 
             // btnCancel
-            //
+            // 
             this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCancel.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
@@ -182,9 +182,9 @@
             this.btnCancel.Text = "취소";
             this.btnCancel.UseVisualStyleBackColor = false;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
-            //
+            // 
             // StopIssueForm
-            //
+            // 
             this.CancelButton = this.btnCancel;
             this.ClientSize = new System.Drawing.Size(900, 560);
             this.Controls.Add(this.pnlBody);
