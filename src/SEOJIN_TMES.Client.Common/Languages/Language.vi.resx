@@ -153,6 +153,15 @@
   <data name="Login_RememberId" xml:space="preserve">
     <value>Lưu tài khoản</value>
   </data>
+  <data name="Login_StationTitle" xml:space="preserve">
+    <value>Chọn máy trạm</value>
+  </data>
+  <data name="Login_StationHint" xml:space="preserve">
+    <value>Chọn máy trạm để kết nối rồi nhấn [Đồng ý].</value>
+  </data>
+  <data name="Login_NoStation" xml:space="preserve">
+    <value>Không có máy trạm nào khả dụng.</value>
+  </data>
   <data name="MainForm_Title" xml:space="preserve">
     <value>Hệ thống TMES POP</value>
   </data>

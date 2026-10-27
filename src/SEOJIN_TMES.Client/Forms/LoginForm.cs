@@ -10,6 +10,7 @@ using SEOJIN_TMES.Client.Common.Models;
 using SEOJIN_TMES.Client.Core;
 using SEOJIN_TMES.Client.Theme;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.Net;
@@ -47,9 +48,6 @@ namespace SEOJIN_TMES.Client.Forms
         private ApiClientFactory _apiClient;
         private UserSession _currentUser;
         private UserPreferences _preferences;
-        private string _selectedStation;
-        //private readonly AppSettings _appSet = Global.Instance.Settings.AppSet;
-        private TaskCompletionSource<bool> _isTaskComplete;
         /// <summary>로그인 창 문구에만 쓰는 문화권. 스레드 문화권과는 따로 움직인다.</summary>
         private CultureInfo _loginCulture;
 
@@ -81,8 +79,6 @@ namespace SEOJIN_TMES.Client.Forms
             LoadUser();
             SetTexts();
             SetTheme();
-            if (cboWorkstation.Properties.Items.Count > 0) cboWorkstation.SelectedIndex = 0;
-
         }
 
         /// <summary>설정 값이 비었거나 잘못됐으면 목록의 첫 언어(한국어)로 대신한다.</summary>
@@ -104,12 +100,9 @@ namespace SEOJIN_TMES.Client.Forms
             lblLanguage.Text = Language.MainForm_LanguageHint;
             lblUserId.Text = Language.Login_UserId;
             lblPassword.Text = Language.Login_Password;
-            lblWorkstation.Text = Language.Login_Workstation;
             btnConnect.Text = Language.Login_Connect;
             btnClose.Text = Language.Login_Close;
             chkRememberId.Text = Language.Login_RememberId;
-            btnCancel.Text = Language.Common_Cancel;
-            btnConfirm.Text = Language.Common_Confirm;
             // 앞서 띄운 오류 문구는 이전 언어이므로 지운다.
             lblMessage.Text = string.Empty;
         }
@@ -130,12 +123,10 @@ namespace SEOJIN_TMES.Client.Forms
             AppTheme.BodyText(lblLanguage);
             AppTheme.BodyText(lblUserId);
             AppTheme.BodyText(lblPassword);
-            AppTheme.BodyText(lblWorkstation);
 
             AppTheme.Editor(cboLanguage);
             AppTheme.Editor(txtUserId);
             AppTheme.Editor(txtPassword);
-            AppTheme.Editor(cboWorkstation);
             AppTheme.CheckBox(chkRememberId);
 
 
@@ -269,20 +260,24 @@ namespace SEOJIN_TMES.Client.Forms
 
                 var userProfile = await _apiClient.UserProfileApiClient.GetProfileAsync(userId);
                 var stationInfo = await _apiClient.UserProfileApiClient.GetLoginStationAsync();
-                
-                cboWorkstation.Properties.Items.Clear();
-                foreach (var item in stationInfo.Workstation)
+                if (IsDisposed || Disposing) return;
+
+                var stations = stationInfo?.Workstation ?? new List<WorkstationInfo>();
+                if (stations.Count == 0)
                 {
-                    cboWorkstation.Properties.Items.Add(item.WorkstationName);
+                    AppLog.Warn($"로그인 워크스테이션 없음 - UserId={userId}");
+                    lblMessage.Text = Language.Login_NoStation;
+                    return;
                 }
 
-                if (cboWorkstation.Properties.Items.Count > 0)
-                    cboWorkstation.SelectedIndex = 0;
+                var station = await SelectStation(stations);
+                if (IsDisposed || Disposing) return;
 
-                _isTaskComplete = new TaskCompletionSource<bool>();
-                pnlStation.BringToFront();
-
-                await _isTaskComplete.Task;
+                if (station == null)
+                {
+                    AppLog.Warn($"로그인 스테이션 선택 취소 - UserId={userId}");
+                    return;
+                }
 
                 // 워크스테이션은 로그인 API 인자가 아니라 화면 표시용이다
                 // (사용자 정보 팝업과 홈 화면의 "워크스테이션" 타일이 이 값을 쓴다).
@@ -290,8 +285,8 @@ namespace SEOJIN_TMES.Client.Forms
                 {
                     UserId = userId,
                     Server = corpCd,
-                    Workstation = cboWorkstation.Text,
-                    WorkstationInfo = stationInfo.Workstation[cboWorkstation.SelectedIndex]
+                    Workstation = station.WorkstationName,
+                    WorkstationInfo = station
                 };
 
                 _setting.SaveCulture(_loginCulture.Name);
@@ -301,11 +296,6 @@ namespace SEOJIN_TMES.Client.Forms
 
                 DialogResult = DialogResult.OK;
                 Close();
-            }
-            catch (OperationCanceledException)
-            {
-                
-                AppLog.Warn($"로그인 스테이션 선택 취소 - UserId={userId}");
             }
             catch (ApiException ex) when (ex.StatusCode == HttpStatusCode.Unauthorized)
             {
@@ -330,22 +320,40 @@ namespace SEOJIN_TMES.Client.Forms
             }
             finally
             {
-                pnlStation.SendToBack();
-                btnConnect.Enabled = true;
+                if (!IsDisposed && !Disposing)
+                    btnConnect.Enabled = true;
+            }
+        }
+
+        /// <summary>
+        /// 워크스테이션 선택 화면(<see cref="LoginStationControl"/>)을 로그인 창 맨 위에 덮어 띄우고 고른 값을 기다린다.
+        /// [확인]이든 [취소]든 끝나면 화면을 걷어 내므로, 취소하면 아래에 있던 정보 입력 화면이 그대로 다시 보인다.
+        /// </summary>
+        /// <returns>고른 워크스테이션. 취소하면 null.</returns>
+        private async Task<WorkstationInfo> SelectStation(IList<WorkstationInfo> stations)
+        {
+            var selector = new LoginStationControl();
+            selector.Dock = DockStyle.Fill;
+            selector.Init();
+
+            Controls.Add(selector);
+            selector.BringToFront();
+            try
+            {
+                return await selector.ShowStations(stations);
+            }
+            finally
+            {
+                if (!IsDisposed && !Disposing)
+                {
+                    Controls.Remove(selector);
+                    ActiveControl = txtPassword;
+                }
+                selector.Dispose();
             }
         }
 
         private void btnClose_Click(object sender, EventArgs e) => Close();
-
-        private void btnConfirm_Click(object sender, EventArgs e)
-        {
-            _isTaskComplete.TrySetResult(true);
-        }
-
-        private void btnCancel_Click(object sender, EventArgs e)
-        {
-            _isTaskComplete.TrySetCanceled();
-        }
 
         private void cboLanguage_SelectedIndexChanged(object sender, EventArgs e)
         {

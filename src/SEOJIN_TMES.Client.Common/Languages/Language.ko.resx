@@ -153,6 +153,15 @@
   <data name="Login_RememberId" xml:space="preserve">
     <value>아이디 저장</value>
   </data>
+  <data name="Login_StationTitle" xml:space="preserve">
+    <value>워크스테이션 선택</value>
+  </data>
+  <data name="Login_StationHint" xml:space="preserve">
+    <value>접속할 워크스테이션을 선택한 뒤 [확인]을 누르세요.</value>
+  </data>
+  <data name="Login_NoStation" xml:space="preserve">
+    <value>선택할 수 있는 워크스테이션이 없습니다.</value>
+  </data>
   <data name="MainForm_Title" xml:space="preserve">
     <value>TMES POP 시스템</value>
   </data>

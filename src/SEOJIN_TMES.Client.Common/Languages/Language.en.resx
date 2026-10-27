@@ -153,6 +153,15 @@
   <data name="Login_RememberId" xml:space="preserve">
     <value>Remember ID</value>
   </data>
+  <data name="Login_StationTitle" xml:space="preserve">
+    <value>Select Workstation</value>
+  </data>
+  <data name="Login_StationHint" xml:space="preserve">
+    <value>Select the workstation to connect to, then press [Confirm].</value>
+  </data>
+  <data name="Login_NoStation" xml:space="preserve">
+    <value>No workstation is available.</value>
+  </data>
   <data name="MainForm_Title" xml:space="preserve">
     <value>TMES POP System</value>
   </data>
