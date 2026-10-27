@@ -198,7 +198,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// 고른 유형에 연결된 [알람 코드] 타일 — 유형 타일과 같은 배치로, 위에 작게 알람 코드, 가운데 크게 알람 명.
+        /// 고른 유형에 연결된 [알람 코드] 타일 — 유형 타일과 같은 배치로, 위에 작게 "알람 코드 / 등급 명", 가운데 크게 알람 명.
         /// 상단 띠는 등급 색이라 급한 알람이 먼저 눈에 들어온다. 유형을 바꾸면 고른 알람 코드는 비운다.
         ///
         /// 제목(lblCodeTitle)과 목록(flowCodes)은 유형을 고르기 전에도 숨기지 않는다(목록만 빈다).
@@ -223,7 +223,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 {
                     var tile = CreateTile(new Size(1, CardTile.MinHeight), AppTheme.AlarmGradeColor(alarm.AlarmGrade));
                     tile.Tag = alarm;
-                    tile.Caption = alarm.AlarmTypeCode;
+                    // 위쪽 작은 글자: "알람 코드 / 등급 명"(예: ALM001 / 긴급). 등급은 코드(P1~P4)가 아니라 명칭으로 보인다.
+                    tile.Caption = alarm.AlarmTypeCode + " / " + CodeText(alarm.AlarmGrade);
                     tile.Title = alarm.AlarmTypeName;
                     tile.WrapTitle = true;
                     tile.Click += CodeTile_Click;
