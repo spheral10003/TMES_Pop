@@ -306,6 +306,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         {
             using (var form = new StopIssueForm())
             {
+                form.Initialize();
+                form.CenterOn(this);
                 if (form.ShowDialog(this) != DialogResult.OK)
                 {
                     AppLog.Info("[POP] 공정 중지 취소 - 사유 선택 창에서 취소");

@@ -68,6 +68,9 @@ namespace SEOJIN_TMES.Client.Theme
         public static readonly Color AlarmP3 = Color.FromArgb(164, 158, 0);  // #A49E00
         public static readonly Color AlarmP4 = Color.FromArgb(37, 117, 214); // #2575D6
 
+        // 공정 정지 사유 창(StopIssueForm)의 강조 색 — POP [중지] 버튼과 같은 빨강 계열로, 알람 창(Amber)과 구분된다.
+        public static readonly Color StopIssue = Rose;
+
         // ── 콘솔(설비 로그) 색 ──
         public static readonly Color ConsoleBack = Color.FromArgb(23, 23, 43);
         public static readonly Color ConsoleFore = Color.FromArgb(134, 239, 172);

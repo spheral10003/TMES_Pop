@@ -1080,4 +1080,16 @@
   <data name="Common_NoData" xml:space="preserve">
     <value>No data available.</value>
   </data>
+  <data name="StopIssue_Title" xml:space="preserve">
+    <value>Process Stop Reason</value>
+  </data>
+  <data name="StopIssue_Code" xml:space="preserve">
+    <value>Stop Reason</value>
+  </data>
+  <data name="StopIssue_Remark" xml:space="preserve">
+    <value>Remark</value>
+  </data>
+  <data name="StopIssue_SelectCode" xml:space="preserve">
+    <value>Please select a stop reason.</value>
+  </data>
 </root>

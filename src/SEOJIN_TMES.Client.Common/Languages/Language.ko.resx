@@ -1080,4 +1080,16 @@
   <data name="Common_NoData" xml:space="preserve">
     <value>데이터가 존재하지 않습니다.</value>
   </data>
+  <data name="StopIssue_Title" xml:space="preserve">
+    <value>공정 정지 사유</value>
+  </data>
+  <data name="StopIssue_Code" xml:space="preserve">
+    <value>정지 사유</value>
+  </data>
+  <data name="StopIssue_Remark" xml:space="preserve">
+    <value>비고</value>
+  </data>
+  <data name="StopIssue_SelectCode" xml:space="preserve">
+    <value>정지 사유를 선택하세요.</value>
+  </data>
 </root>

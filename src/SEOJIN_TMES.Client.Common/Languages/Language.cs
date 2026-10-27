@@ -411,5 +411,9 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string Col_CreatedBy => Get(nameof(Col_CreatedBy));
         public static string Col_CreatedAt => Get(nameof(Col_CreatedAt));
         public static string Common_NoData => Get(nameof(Common_NoData));
+        public static string StopIssue_Title => Get(nameof(StopIssue_Title));
+        public static string StopIssue_Code => Get(nameof(StopIssue_Code));
+        public static string StopIssue_Remark => Get(nameof(StopIssue_Remark));
+        public static string StopIssue_SelectCode => Get(nameof(StopIssue_SelectCode));
     }
 }
