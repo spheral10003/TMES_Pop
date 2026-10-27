@@ -189,22 +189,23 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// <summary>
         /// 고른 유형에 연결된 [알람 코드] 타일 — 유형 타일과 같은 배치로, 위에 작게 알람 코드, 가운데 크게 알람 명.
         /// 상단 띠는 등급 색이라 급한 알람이 먼저 눈에 들어온다. 유형을 바꾸면 고른 알람 코드는 비운다.
+        ///
+        /// 제목(lblCodeTitle)과 목록(flowCodes)은 유형을 고르기 전에도 숨기지 않는다(목록만 빈다).
+        /// 창이 뜰 때 숨겨 둔 도킹 컨트롤을 나중에 Visible=true로 바꾸면 WinForms가 그 컨트롤을 z순서 맨 앞으로 올려,
+        /// Fill인 목록이 제목 자리까지 차지해 카드 상단 32px가 제목에 가려졌다(실측: 둘 다 Y=156).
         /// </summary>
         private void ShowCodeTiles()
         {
             ClearTiles(flowCodes);
             _selectedAlarm = null;
+            lblCodeTitle.Text = Language.AdminAlarm_ListTitle;
 
             var type = _selectedType;
-            lblCodeTitle.Visible = type != null;
-            flowCodes.Visible = type != null;
-
             if (type != null)
             {
                 var codes = _alarms.Where(a => a.AlarmType == type).ToList();
-                lblCodeTitle.Text = codes.Count == 0
-                    ? Language.AdminAlarm_ListTitle + "  ·  " + Language.AdminAlarm_NoTypes
-                    : Language.AdminAlarm_ListTitle;
+                if (codes.Count == 0)
+                    lblCodeTitle.Text = Language.AdminAlarm_ListTitle + "  ·  " + Language.AdminAlarm_NoTypes;
 
                 foreach (var alarm in codes)
                 {
