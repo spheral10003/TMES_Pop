@@ -210,6 +210,9 @@
     <EmbeddedResource Include="Images\login_icon.png">
       <LogicalName>SEOJIN_TMES.Client.Images.login_icon.png</LogicalName>
     </EmbeddedResource>
+    <EmbeddedResource Include="Images\tmes_login_card.png">
+      <LogicalName>SEOJIN_TMES.Client.Images.tmes_login_card.png</LogicalName>
+    </EmbeddedResource>
     <EmbeddedResource Include="Images\11_Texon_Logo_Signature.svg">
       <LogicalName>SEOJIN_TMES.Client.Images.texon_logo.svg</LogicalName>
     </EmbeddedResource>

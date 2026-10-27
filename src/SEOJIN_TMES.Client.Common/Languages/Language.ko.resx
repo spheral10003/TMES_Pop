@@ -162,6 +162,15 @@
   <data name="Login_NoStation" xml:space="preserve">
     <value>선택할 수 있는 워크스테이션이 없습니다.</value>
   </data>
+  <data name="Login_Language" xml:space="preserve">
+    <value>언어</value>
+  </data>
+  <data name="Login_Business" xml:space="preserve">
+    <value>사업부</value>
+  </data>
+  <data name="Login_CorpGumi" xml:space="preserve">
+    <value>Texon 구미</value>
+  </data>
   <data name="MainForm_Title" xml:space="preserve">
     <value>TMES POP 시스템</value>
   </data>

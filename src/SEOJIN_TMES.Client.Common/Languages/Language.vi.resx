@@ -162,6 +162,15 @@
   <data name="Login_NoStation" xml:space="preserve">
     <value>Không có máy trạm nào khả dụng.</value>
   </data>
+  <data name="Login_Language" xml:space="preserve">
+    <value>Ngôn ngữ</value>
+  </data>
+  <data name="Login_Business" xml:space="preserve">
+    <value>Bộ phận kinh doanh</value>
+  </data>
+  <data name="Login_CorpGumi" xml:space="preserve">
+    <value>Texon Gumi</value>
+  </data>
   <data name="MainForm_Title" xml:space="preserve">
     <value>Hệ thống TMES POP</value>
   </data>

@@ -12,6 +12,7 @@ using SEOJIN_TMES.Client.Theme;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Globalization;
 using System.Net;
 using System.Threading;
@@ -56,6 +57,16 @@ namespace SEOJIN_TMES.Client.Forms
 
         /// <summary>콤보를 코드로 채우는 동안 SelectedIndexChanged가 문구를 다시 입히지 않도록 막는다.</summary>
         private bool _suppressLanguageChange;
+
+        /// <summary>배경 그림(tmes_login_card.png)의 모서리 둥글기(px). 창 모양도 여기에 맞춰 깎는다.</summary>
+        private const int CardCornerRadius = 14;
+
+        /// <summary>콤보 오른쪽 그림 화살표(v)의 폭(px) — 이 자리를 누르면 콤보를 연다.</summary>
+        private const int ComboArrowWidth = 18;
+
+        /// <summary>제목 줄이 없어 창을 끌어 옮길 때 쓰는 마우스 누른 위치(창 기준). null이면 끄는 중이 아니다.</summary>
+        private Point? _dragOffset;
+
         public LoginForm()
         {
             InitializeComponent();
@@ -95,40 +106,59 @@ namespace SEOJIN_TMES.Client.Forms
         /// </summary>
         private void SetTexts()
         {
+            // ID · Password 항목 이름과 닫기(✕)는 언어와 상관없이 디자이너 문구 그대로 둔다.
             Text = Language.Login_Title;
-            groupUserInfo.Text = Language.Login_UserInfoGroup;
-            lblLanguage.Text = Language.MainForm_LanguageHint;
-            lblUserId.Text = Language.Login_UserId;
-            lblPassword.Text = Language.Login_Password;
+            lblLanguage.Text = Language.Login_Language;
+            lblCorp.Text = Language.Login_Business;
             btnConnect.Text = Language.Login_Connect;
-            btnClose.Text = Language.Login_Close;
             chkRememberId.Text = Language.Login_RememberId;
+            SetCorpList();
             // 앞서 띄운 오류 문구는 이전 언어이므로 지운다.
             lblMessage.Text = string.Empty;
         }
 
         /// <summary>
-        /// 로그인 화면에 공통 테마를 입힌다 — 좌측은 메인 화면과 같은 남보라 그라데이션 브랜드 블록,
-        /// 우측은 흰 카드 + 포인트 컬러 버튼. 색 값은 전부 <see cref="AppTheme"/>에서 가져온다.
+        /// 로그인 화면은 배경 그림(<see cref="AppImages.LoginCard"/>) 한 장 위에 컨트롤을 얹는다.
+        /// 얹은 컨트롤은 그림과 이어져 보여야 하므로 그림에서 뽑은 색(<see cref="AppTheme"/>의 LoginCard*)을 입힌다 —
+        /// 항목 이름 라벨은 흰 바탕으로 그림의 글자를 가리고, 입력 칸 · 콤보는 칸 안쪽 색으로 테두리 없이 둔다.
         /// </summary>
         private void SetTheme()
         {
-            AppTheme.Sidebar(panelLeft);
-            BuildBrandBlock();
+            BackgroundImage = AppImages.LoginCard();
+            BackgroundImageLayout = ImageLayout.None;
+            BackColor = AppTheme.LoginCardBack;
+            SetCardRegion();
 
-            AppTheme.ContentSurface(panelRight);
-            AppTheme.ContentSurface(panelBottom);
-            AppTheme.CardGroup(groupUserInfo, AppTheme.Violet);
+            foreach (var label in new[] { lblLanguage, lblCorp, lblUserId, lblPassword })
+            {
+                label.Appearance.BackColor = AppTheme.LoginCardBack;
+                label.Appearance.ForeColor = AppTheme.LoginCardText;
+            }
 
-            AppTheme.BodyText(lblLanguage);
-            AppTheme.BodyText(lblUserId);
-            AppTheme.BodyText(lblPassword);
+            foreach (var box in new[] { pnlLanguage, pnlCorp })
+                box.BackColor = AppTheme.LoginCardField;
 
-            AppTheme.Editor(cboLanguage);
-            AppTheme.Editor(txtUserId);
-            AppTheme.Editor(txtPassword);
-            AppTheme.CheckBox(chkRememberId);
+            foreach (var combo in new[] { cboLanguage, cboCorp })
+                combo.BackColor = AppTheme.LoginCardField;
 
+            FitComboInBox(cboLanguage, pnlLanguage);
+            FitComboInBox(cboCorp, pnlCorp);
+
+            txtUserId.BackColor = AppTheme.LoginCardField;
+            txtPassword.BackColor = AppTheme.LoginCardField;
+
+            chkRememberId.BackColor = AppTheme.LoginCardBack;
+            chkRememberId.ForeColor = AppTheme.LoginCardMuted;
+
+            // 접속 버튼은 AcceptButton(Enter)이라 기본 버튼 테두리가 그려진다 — 테두리 색을 바탕과 같게 해 감춘다.
+            btnConnect.BackColor = AppTheme.LoginCardButton;
+            btnConnect.FlatAppearance.BorderColor = AppTheme.LoginCardButton;
+            btnConnect.FlatAppearance.MouseOverBackColor = AppTheme.LoginCardButton;
+            btnConnect.FlatAppearance.MouseDownBackColor = AppTheme.LoginCardButtonPressed;
+            btnConnect.ForeColor = Color.White;
+
+            btnClose.BackColor = AppTheme.LoginCardBack;
+            btnClose.ForeColor = AppTheme.LoginCardClose;
 
             lblMessage.Appearance.ForeColor = AppTheme.Rose;
             lblMessage.Appearance.Font = AppTheme.BodyBoldFont;
@@ -153,13 +183,13 @@ namespace SEOJIN_TMES.Client.Forms
                 _languageFlags.AddImage(AppImages.Flag(language.FlagCode, LanguageFlagSize));
             }
                 
-            cboLanguage.Properties.SmallImages = _languageFlags;
-            cboLanguage.Properties.Items.Clear();
+            // 국기는 콤보가 직접 그린다(cboItem_DrawItem) — 순서는 LanguageOption.All과 같다.
+            cboLanguage.Items.Clear();
 
             for (var i = 0; i < LanguageOption.All.Length; i++)
             {
                 var option = LanguageOption.All[i];
-                cboLanguage.Properties.Items.Add(new ImageComboBoxItem(option.Display, option.Culture, i));
+                cboLanguage.Items.Add(option.Display);
             }
 
             cboLanguage.SelectedIndex = LanguageOption.IndexOf(_loginCulture.Name);
@@ -197,38 +227,122 @@ namespace SEOJIN_TMES.Client.Forms
         }
 
         /// <summary>
-        /// 좌측 패널을 [일러스트 + 제품명] 블록으로 채운다.
-        /// 위쪽은 Images\login_icon.png(배경 투명 스마트팩토리 일러스트), 아래는 제품명 한 줄이다.
-        /// 라벨은 글자 길이에 따라 폭이 달라지므로 좌표를 박아 두지 않고 패널 기준으로 가운데에 맞춘다.
+        /// 사업부 콤보 — 항목은 하나(Texon 구미)다. 보이는 글자만 다국어로 바꾸고,
+        /// 서버로 보내는 사업장 코드는 콤보 값이 아니라 App.config의 ServerName(GUM)을 그대로 쓴다(btnConnect_Click).
         /// </summary>
-        private void BuildBrandBlock()
+        private void SetCorpList()
         {
-            picLogo.Dock = DockStyle.None;
-            picLogo.Bounds = new Rectangle(20, 10, 220, 188);
-            picLogo.Properties.SizeMode = PictureSizeMode.Squeeze;   // 원본 비율 유지 + 넘치면 줄여서 맞춘다
-            picLogo.Properties.BorderStyle = BorderStyles.NoBorder;
-            picLogo.BackColor = Color.Transparent;
-            picLogo.Properties.Appearance.BackColor = Color.Transparent;
-            picLogo.Properties.Appearance.Options.UseBackColor = true;
-            picLogo.Image = AppImages.LoginIllustration();
-            picLogo.Visible = true;
-
-            var title = new LabelControl();
-            title.Text = "TMES POP";
-            title.Appearance.Font = new Font("맑은 고딕", 15F, FontStyle.Bold);
-            // 좌측 패널이 밝은 하늘색이라 흰 글자는 보이지 않는다 — 사이드바 글자색을 쓴다.
-            title.Appearance.ForeColor = AppTheme.SidebarText;
-            title.Appearance.Options.UseFont = true;
-            title.Appearance.Options.UseForeColor = true;
-
-            panelLeft.Controls.Add(title);
-
-            // 라벨은 자동 크기라서 부모에 붙인 뒤에야 실제 폭을 알 수 있다 — 그 다음에 가운데로 옮긴다.
-            CenterInPanelLeft(title, 206);
+            cboCorp.Items.Clear();
+            cboCorp.Items.Add(Language.Login_CorpGumi);
+            cboCorp.SelectedIndex = 0;
         }
 
-        private void CenterInPanelLeft(Control control, int top) =>
-            control.Location = new Point((panelLeft.Width - control.Width) / 2, top);
+        /// <summary>
+        /// .NET ComboBox는 테두리를 끌 수 없어(Flat도 1px 테두리 + 회색 화살표 버튼이 남는다),
+        /// 칸 안쪽 크기의 패널에 콤보를 조금 크게 넣어 테두리와 화살표 버튼을 패널 밖으로 잘라 낸다.
+        /// 화살표는 배경 그림의 것(v)이 그대로 보인다. 패널은 원래 세로 가운데를 유지한다.
+        /// </summary>
+        private void FitComboInBox(System.Windows.Forms.ComboBox combo, Panel box)
+        {
+            var centerY = box.Top + box.Height / 2;
+            const int border = 3;
+
+            box.Height = combo.Height - border * 2;
+            box.Top = centerY - box.Height / 2;
+            combo.Location = new Point(-border, -border);
+            combo.Width = box.Width + border + SystemInformation.VerticalScrollBarWidth + border;
+            combo.DropDownWidth = box.Width;
+        }
+
+        /// <summary>
+        /// 콤보 항목을 그린다 — 칸 안쪽 색 바탕 + (언어 콤보면) 국기 + 이름.
+        /// 펼친 목록에서 고른 줄만 접속 버튼 색으로 칠한다.
+        /// </summary>
+        private void cboItem_DrawItem(object sender, DrawItemEventArgs e)
+        {
+            var combo = (System.Windows.Forms.ComboBox)sender;
+            if (e.Index < 0)
+                return;
+
+            var inList = (e.State & DrawItemState.ComboBoxEdit) == 0;
+            var highlighted = inList && (e.State & DrawItemState.Selected) != 0;
+            var back = highlighted ? AppTheme.LoginCardButton : AppTheme.LoginCardField;
+            var fore = highlighted ? Color.White : AppTheme.LoginCardText;
+
+            using (var brush = new SolidBrush(back))
+                e.Graphics.FillRectangle(brush, e.Bounds);
+
+            var textLeft = e.Bounds.Left + 8;
+            if (combo == cboLanguage && _languageFlags != null && e.Index < _languageFlags.Images.Count)
+            {
+                var flagTop = e.Bounds.Top + (e.Bounds.Height - LanguageFlagSize) / 2;
+                e.Graphics.DrawImage(_languageFlags.Images[e.Index], textLeft, flagTop, LanguageFlagSize, LanguageFlagSize);
+                textLeft += LanguageFlagSize + 8;
+            }
+
+            var textBounds = new Rectangle(textLeft, e.Bounds.Top, e.Bounds.Right - textLeft, e.Bounds.Height);
+            TextRenderer.DrawText(e.Graphics, combo.GetItemText(combo.Items[e.Index]), combo.Font, textBounds, fore,
+                TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+        }
+
+        /// <summary>창 모양을 배경 그림의 둥근 모서리에 맞춘다 — 그림 모서리는 투명이라 그대로 두면 네모난 바탕이 비친다.</summary>
+        private void SetCardRegion()
+        {
+            var d = CardCornerRadius * 2;
+            using (var path = new GraphicsPath())
+            {
+                path.AddArc(0, 0, d, d, 180, 90);
+                path.AddArc(Width - d, 0, d, d, 270, 90);
+                path.AddArc(Width - d, Height - d, d, d, 0, 90);
+                path.AddArc(0, Height - d, d, d, 90, 90);
+                path.CloseFigure();
+                Region = new Region(path);
+            }
+        }
+
+        /// <summary>콤보 오른쪽, 배경 그림의 화살표(v) 자리.</summary>
+        private static Rectangle ComboArrowArea(Panel box) =>
+            Rectangle.FromLTRB(box.Right, box.Top - 4, box.Right + ComboArrowWidth, box.Bottom + 4);
+
+        /// <summary>
+        /// 제목 줄이 없으므로 빈 바탕을 끌어서 창을 옮긴다.
+        /// 그림 화살표(v) 자리를 누르면 끌지 않고 그 콤보를 연다 — 화살표는 그림이라 스스로 클릭을 받지 못한다.
+        /// </summary>
+        private void LoginForm_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Left)
+                return;
+
+            if (ComboArrowArea(pnlLanguage).Contains(e.Location))
+            {
+                cboLanguage.Focus();
+                cboLanguage.DroppedDown = true;
+                return;
+            }
+
+            if (ComboArrowArea(pnlCorp).Contains(e.Location))
+            {
+                cboCorp.Focus();
+                cboCorp.DroppedDown = true;
+                return;
+            }
+
+            _dragOffset = e.Location;
+        }
+
+        private void LoginForm_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (_dragOffset == null)
+                return;
+
+            var offset = _dragOffset.Value;
+            Location = new Point(Location.X + e.X - offset.X, Location.Y + e.Y - offset.Y);
+        }
+
+        private void LoginForm_MouseUp(object sender, MouseEventArgs e)
+        {
+            _dragOffset = null;
+        }
 
         private async void btnConnect_Click(object sender, EventArgs e)
         {
@@ -243,7 +357,8 @@ namespace SEOJIN_TMES.Client.Forms
                 return;
             }
 
-            // 접속서버 콤보에서 고른 값이 곧 사업장 코드(corpCd)다 — 서버가 이 값으로 계정을 찾는다.
+            // 사업장 코드(corpCd) — 서버가 이 값으로 계정을 찾는다.
+            // 사업부 콤보는 표시("Texon 구미")만 하고, 코드는 App.config의 ServerName(GUM)을 쓴다.
             //var corpCd = cboServer.Text?.Trim();
             var corpCd = _setting.AppSet.ServerName;
             btnConnect.Enabled = false;
@@ -270,14 +385,19 @@ namespace SEOJIN_TMES.Client.Forms
                     return;
                 }
 
-                var station = await SelectStation(stations);
-                if (IsDisposed || Disposing) return;
+                // 워크스테이션 선택 화면은 새 로그인 디자인에서 잠시 쓰지 않는다 — 다시 쓸 때 아래 주석을 풀고 station 대입 줄을 지운다.
+                //var station = await SelectStation(stations);
+                //if (IsDisposed || Disposing) return;
+                //
+                //if (station == null)
+                //{
+                //    AppLog.Warn($"로그인 스테이션 선택 취소 - UserId={userId}");
+                //    return;
+                //}
 
-                if (station == null)
-                {
-                    AppLog.Warn($"로그인 스테이션 선택 취소 - UserId={userId}");
-                    return;
-                }
+                // 고르는 화면이 없는 동안은 서버가 내려준 첫 워크스테이션으로 접속한다
+                // (POP · 작업 화면이 CurrentUser.WorkstationInfo.WorkstationRef를 쓰므로 비워 둘 수 없다).
+                var station = stations[0];
 
                 // 워크스테이션은 로그인 API 인자가 아니라 화면 표시용이다
                 // (사용자 정보 팝업과 홈 화면의 "워크스테이션" 타일이 이 값을 쓴다).

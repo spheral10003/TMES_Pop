@@ -71,6 +71,16 @@ namespace SEOJIN_TMES.Client.Theme
         // 공정 정지 사유 창(StopIssueForm)의 강조 색 — POP [중지] 버튼과 같은 빨강 계열로, 알람 창(Amber)과 구분된다.
         public static readonly Color StopIssue = Rose;
 
+        // ── 로그인 배경 그림(tmes_login_card.png)에서 뽑은 색 ──
+        // 그림 위에 얹는 컨트롤이 그림과 이어져 보여야 하므로 테마(다크)와 상관없이 그림의 픽셀 값을 그대로 쓴다.
+        public static readonly Color LoginCardBack = Color.White;                     // 입력 칸 바깥 흰 바탕
+        public static readonly Color LoginCardField = Color.FromArgb(251, 252, 253);  // #FBFCFD 입력 칸 안쪽
+        public static readonly Color LoginCardButton = Color.FromArgb(44, 91, 120);   // #2C5B78 접속 버튼
+        public static readonly Color LoginCardButtonPressed = Color.FromArgb(33, 72, 96);
+        public static readonly Color LoginCardText = Color.FromArgb(61, 67, 84);      // 항목 이름(언어 · 사업부 · ID · Password)
+        public static readonly Color LoginCardMuted = Color.FromArgb(136, 136, 136);  // 아이디 저장
+        public static readonly Color LoginCardClose = Color.FromArgb(75, 85, 99);     // 닫기(X)
+
         // ── 콘솔(설비 로그) 색 ──
         public static readonly Color ConsoleBack = Color.FromArgb(23, 23, 43);
         public static readonly Color ConsoleFore = Color.FromArgb(134, 239, 172);
