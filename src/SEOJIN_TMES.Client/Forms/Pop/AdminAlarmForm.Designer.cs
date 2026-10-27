@@ -37,8 +37,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.flowTypes = new System.Windows.Forms.FlowLayoutPanel();
             this.lblTypeTitle = new System.Windows.Forms.Label();
             this.pnlFooter = new System.Windows.Forms.Panel();
-            this.btnSend = new SEOJIN_TMES.Client.Forms.Common.MeisButton();
-            this.btnClose = new SEOJIN_TMES.Client.Forms.Common.MeisButton();
+            this.btnSend = new System.Windows.Forms.Button();
+            this.btnClose = new System.Windows.Forms.Button();
             this.pnlTitle.SuspendLayout();
             this.pnlBody.SuspendLayout();
             this.pnlFooter.SuspendLayout();
@@ -90,7 +90,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.pnlBody.Location = new System.Drawing.Point(0, 48);
             this.pnlBody.Name = "pnlBody";
             this.pnlBody.Padding = new System.Windows.Forms.Padding(16, 4, 16, 8);
-            this.pnlBody.Size = new System.Drawing.Size(1200, 488);
+            this.pnlBody.Size = new System.Drawing.Size(1200, 538);
             this.pnlBody.TabIndex = 1;
             //
             // flowCodes
@@ -99,7 +99,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.flowCodes.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowCodes.Location = new System.Drawing.Point(16, 188);
             this.flowCodes.Name = "flowCodes";
-            this.flowCodes.Size = new System.Drawing.Size(1168, 292);
+            this.flowCodes.Size = new System.Drawing.Size(1168, 342);
             this.flowCodes.TabIndex = 3;
             //
             // lblCodeTitle
@@ -136,53 +136,43 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.pnlFooter.Controls.Add(this.btnSend);
             this.pnlFooter.Controls.Add(this.btnClose);
             this.pnlFooter.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.pnlFooter.Location = new System.Drawing.Point(0, 536);
+            this.pnlFooter.Location = new System.Drawing.Point(0, 586);
             this.pnlFooter.Name = "pnlFooter";
             this.pnlFooter.Size = new System.Drawing.Size(1200, 64);
             this.pnlFooter.TabIndex = 2;
             //
             // btnSend
             //
-            this.btnSend.Accent = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
             this.btnSend.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnSend.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnSend.Enabled = false;
-            this.btnSend.Icon = null;
-            this.btnSend.Location = new System.Drawing.Point(1072, 14);
-            this.btnSend.LookAndFeel.Style = DevExpress.LookAndFeel.LookAndFeelStyle.Flat;
+            this.btnSend.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnSend.Location = new System.Drawing.Point(1046, 12);
             this.btnSend.Name = "btnSend";
-            this.btnSend.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
-            this.btnSend.Selected = false;
-            this.btnSend.ShowFocusRectangle = DevExpress.Utils.DefaultBoolean.False;
-            this.btnSend.Size = new System.Drawing.Size(112, 36);
+            this.btnSend.Size = new System.Drawing.Size(138, 39);
             this.btnSend.TabIndex = 0;
             this.btnSend.Text = "등록";
-            this.btnSend.TextAfterIcon = false;
+            this.btnSend.UseVisualStyleBackColor = false;
             this.btnSend.Click += new System.EventHandler(this.btnSend_Click);
             //
             // btnClose
             //
-            this.btnClose.Accent = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
             this.btnClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnClose.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnClose.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnClose.Icon = null;
-            this.btnClose.Location = new System.Drawing.Point(952, 14);
-            this.btnClose.LookAndFeel.Style = DevExpress.LookAndFeel.LookAndFeelStyle.Flat;
+            this.btnClose.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnClose.Location = new System.Drawing.Point(900, 12);
             this.btnClose.Name = "btnClose";
-            this.btnClose.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
-            this.btnClose.Selected = false;
-            this.btnClose.ShowFocusRectangle = DevExpress.Utils.DefaultBoolean.False;
-            this.btnClose.Size = new System.Drawing.Size(112, 36);
+            this.btnClose.Size = new System.Drawing.Size(138, 39);
             this.btnClose.TabIndex = 1;
             this.btnClose.Text = "닫기";
-            this.btnClose.TextAfterIcon = false;
+            this.btnClose.UseVisualStyleBackColor = false;
             this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
             //
             // AdminAlarmForm
             //
             this.CancelButton = this.btnClose;
-            this.ClientSize = new System.Drawing.Size(1200, 600);
+            this.ClientSize = new System.Drawing.Size(1200, 650);
             this.Controls.Add(this.pnlBody);
             this.Controls.Add(this.pnlFooter);
             this.Controls.Add(this.pnlTitle);
@@ -214,7 +204,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private System.Windows.Forms.Label lblCodeTitle;
         private System.Windows.Forms.FlowLayoutPanel flowCodes;
         private System.Windows.Forms.Panel pnlFooter;
-        private SEOJIN_TMES.Client.Forms.Common.MeisButton btnSend;
-        private SEOJIN_TMES.Client.Forms.Common.MeisButton btnClose;
+        private System.Windows.Forms.Button btnSend;
+        private System.Windows.Forms.Button btnClose;
     }
 }

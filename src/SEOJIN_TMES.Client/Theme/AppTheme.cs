@@ -563,6 +563,24 @@ namespace SEOJIN_TMES.Client.Theme
             close.Font = new Font(FontFamily, 13F, FontStyle.Bold);
         }
 
+        /// <summary>
+        /// 일반 .NET 팝업 하단 버튼 — FileUploadForm의 [업로드]/[다운로드]와 같은 형식
+        /// (평면 버튼, 옅은 회색 바탕, 굵은 진회색 글자)에 색만 화면 강조 색으로 맞춘다:
+        /// 테두리는 강조 색, 마우스를 올리면 강조 색을 옅게, 누르면 조금 더 진하게 채운다.
+        /// </summary>
+        public static void DialogFlatButton(Button button, Color accent)
+        {
+            button.FlatStyle = FlatStyle.Flat;
+            button.UseVisualStyleBackColor = false;
+            button.BackColor = Color.WhiteSmoke;
+            button.ForeColor = TextPrimary;
+            button.Font = BodyBoldFont;
+            button.FlatAppearance.BorderColor = accent;
+            button.FlatAppearance.BorderSize = 1;
+            button.FlatAppearance.MouseOverBackColor = Blend(accent, Color.White, 0.30f);
+            button.FlatAppearance.MouseDownBackColor = Blend(accent, Color.White, 0.50f);
+        }
+
         /// <summary>X 닫기 위에 마우스가 있을 때의 바탕(띠 색보다 한 톤 어둡게).</summary>
         public static Color TitleBarCloseHover(Color accent) => ControlPaint.Dark(accent, 0.1f);
 

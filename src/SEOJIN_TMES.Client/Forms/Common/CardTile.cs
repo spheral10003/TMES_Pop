@@ -37,6 +37,10 @@ namespace SEOJIN_TMES.Client.Forms.Common
         {
             SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer |
                      ControlStyles.ResizeRedraw | ControlStyles.UserPaint | ControlStyles.SupportsTransparentBackColor, true);
+
+            // 포커스를 받지 않는다 — 받으면 스크롤 패널(FlowLayoutPanel.AutoScroll)이 누른 카드를 화면 안으로 끌어오느라
+            // 목록을 어중간하게 스크롤해 윗줄 카드의 상단이 잘려 보였다(실측: 3번째 줄 카드를 누르면 40px 스크롤).
+            SetStyle(ControlStyles.Selectable, false);
             Size = new Size(200, 104);
             Cursor = Cursors.Hand;
             BackColor = Color.Transparent;
@@ -76,7 +80,8 @@ namespace SEOJIN_TMES.Client.Forms.Common
             var g = e.Graphics;
             g.SmoothingMode = SmoothingMode.AntiAlias;
 
-            var bounds = new Rectangle(0, 0, Width - 1, Height - 1);
+            // 선택 테두리(2.5px)가 선 가운데 기준으로 그려져 바깥 절반이 잘리지 않도록 1px 안쪽에 그린다.
+            var bounds = new Rectangle(1, 1, Width - 3, Height - 3);
             using (var path = RoundedRect(bounds, Radius))
             {
                 var back = AppTheme.Card;

@@ -386,12 +386,16 @@ namespace SEOJIN_TMES.Client.Common.Models
     /// <summary>
     /// 이상 알람 등록 본문 — <c>POST api/v1.0/pop/{sn}/{subRpRef}/abnormal-alarms</c>.
     /// 공정·작업지시는 URL 경로와 쿼리로 가므로 본문에는 알람 유형과 알람 코드 두 가지만 담는다.
+    /// 속성 이름을 서버 필드명 그대로 둔다(공정 중지 요청 <c>dttmCd</c> · <c>remark</c>와 같은 방식) —
+    /// 직렬화 설정과 상관없이 본문이 항상 <c>{"alrmType":..., "alrmTypeCd":...}</c>로 나가게 하기 위해서다.
     /// </summary>
     public class AbnormalAlarmRequest
     {
-        [JsonProperty("alrmType")] public string AlarmType { get; set; }
+        /// <summary>알람 유형(대분류) — EQP / QLT / MAT / PRD / EHS / SYS.</summary>
+        public string alrmType { get; set; }
 
-        [JsonProperty("alrmTypeCd")] public string AlarmTypeCode { get; set; }
+        /// <summary>알람 코드.</summary>
+        public string alrmTypeCd { get; set; }
     }
 
     /// <summary>

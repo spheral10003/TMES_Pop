@@ -69,6 +69,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         {
             AppTheme.TitleBar(pnlTitle, lblTitle, AppTheme.Amber);
             AppTheme.TitleBarClose(lblClose, AppTheme.Amber);
+            AppTheme.DialogFlatButton(btnClose, AppTheme.Amber);
+            AppTheme.DialogFlatButton(btnSend, AppTheme.Amber);
             pnlBody.BackColor = AppTheme.Surface;
             pnlFooter.BackColor = AppTheme.Surface;
 
@@ -289,8 +291,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             }
 
             var request = new AbnormalAlarmRequest();
-            request.AlarmType = alarm.AlarmType;
-            request.AlarmTypeCode = alarm.AlarmTypeCode;
+            request.alrmType = alarm.AlarmType;
+            request.alrmTypeCd = alarm.AlarmTypeCode;
 
             btnSend.Enabled = false;
             try
@@ -299,7 +301,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             }
             catch (ApiException ex)
             {
-                AppLog.Warn($"[POP] 알람 등록 실패 - {request.AlarmType}/{request.AlarmTypeCode} : {ex.Message}");
+                AppLog.Warn($"[POP] 알람 등록 실패 - {request.alrmType}/{request.alrmTypeCd} : {ex.Message}");
                 if (IsDisposed || Disposing) return;
 
                 AppMessageBox.Warn(this, ex.Message, Language.AdminAlarm_Title);
@@ -311,7 +313,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                     UpdateSendButton();
             }
 
-            AppLog.Info($"[POP] 알람 등록 - {_key.WorkOrderNo}/{_key.SerialNo} {request.AlarmType}/{request.AlarmTypeCode}");
+            AppLog.Info($"[POP] 알람 등록 - {_key.WorkOrderNo}/{_key.SerialNo} {request.alrmType}/{request.alrmTypeCd}");
             if (IsDisposed || Disposing) return;
 
             DialogResult = DialogResult.OK;
