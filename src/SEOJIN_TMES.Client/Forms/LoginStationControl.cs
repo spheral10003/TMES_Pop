@@ -22,7 +22,10 @@ namespace SEOJIN_TMES.Client.Forms
     /// </summary>
     public partial class LoginStationControl : XtraUserControl, IThemedScreen
     {
-        private readonly Size _tileSize = new Size(212, 96);
+        /// <summary>한 화면에 보이는 카드 배치 — 2열 × 2행. 이보다 많으면 세로 스크롤로 본다.</summary>
+        private const int TileColumns = 2;
+        private const int TileRows = 2;
+
         private readonly Padding _tileMargin = new Padding(0, 0, 10, 10);
 
         /// <summary>[확인]이면 고른 워크스테이션, [취소]나 창 닫힘이면 null로 끝난다.</summary>
@@ -42,6 +45,7 @@ namespace SEOJIN_TMES.Client.Forms
 
             // 고르는 중에 로그인 창을 닫으면 기다리던 쪽이 영영 끝나지 않으므로 취소로 마무리한다.
             Disposed += LoginStationControl_Disposed;
+            flowStations.Resize += flowStations_Resize;
         }
 
         private void SetTexts()
@@ -78,8 +82,8 @@ namespace SEOJIN_TMES.Client.Forms
             foreach (var station in stations)
             {
                 var tile = new CardTile();
-                tile.Size = _tileSize;
                 tile.Margin = _tileMargin;
+                tile.AutoFitText = true;
                 tile.Accent = AppTheme.Indigo;
                 tile.Tag = station;
                 tile.Caption = station.WorkstationCode;
@@ -89,10 +93,39 @@ namespace SEOJIN_TMES.Client.Forms
                 tile.DoubleClick += StationTile_DoubleClick;
                 flowStations.Controls.Add(tile);
             }
+            FitTiles();
             flowStations.ResumeLayout();
 
             UpdateConfirmButton();
             return _selection.Task;
+        }
+
+        private void flowStations_Resize(object sender, EventArgs e)
+        {
+            flowStations.SuspendLayout();
+            FitTiles();
+            flowStations.ResumeLayout();
+        }
+
+        /// <summary>
+        /// 카드 크기를 목록 영역에 맞춰 2열 × 2행이 꼭 들어차도록 나눈다.
+        /// 카드가 4장을 넘으면 세로 스크롤바가 생기므로 그 폭을 미리 빼 둔다 —
+        /// ClientSize로 계산하면 스크롤바가 생겼다 사라졌다 하면서 크기가 다시 바뀌어 배치가 흔들린다.
+        /// </summary>
+        private void FitTiles()
+        {
+            var scrolls = flowStations.Controls.Count > TileColumns * TileRows;
+            var width = flowStations.Width - flowStations.Padding.Horizontal
+                        - (scrolls ? SystemInformation.VerticalScrollBarWidth : 0);
+            var height = flowStations.Height - flowStations.Padding.Vertical;
+
+            var tileWidth = width / TileColumns - _tileMargin.Horizontal;
+            var tileHeight = height / TileRows - _tileMargin.Vertical;
+            if (tileWidth <= 0 || tileHeight <= 0)
+                return;
+
+            foreach (Control control in flowStations.Controls)
+                control.Size = new Size(tileWidth, tileHeight);
         }
 
         /// <summary>카드 아래 보조 문구 — 라인 · 부서 중 서버가 내려준 값만 잇는다.</summary>

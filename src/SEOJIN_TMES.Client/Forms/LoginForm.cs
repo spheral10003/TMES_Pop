@@ -332,8 +332,11 @@ namespace SEOJIN_TMES.Client.Forms
         /// <returns>고른 워크스테이션. 취소하면 null.</returns>
         private async Task<WorkstationInfo> SelectStation(IList<WorkstationInfo> stations)
         {
+            // Dock=Fill로 두면 맨 앞(z순서 0)인 컨트롤이 가장 나중에 도킹되어, 좌측 이미지·하단 버튼 패널이 차지하고 남은
+            // 접속 정보 자리만 덮었다. 도킹을 쓰지 않고 제목 줄 아래 클라이언트 영역 전체를 직접 덮는다.
             var selector = new LoginStationControl();
-            selector.Dock = DockStyle.Fill;
+            selector.Bounds = ClientRectangle;
+            selector.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             selector.Init();
 
             Controls.Add(selector);

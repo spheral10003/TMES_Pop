@@ -22,9 +22,12 @@ namespace SEOJIN_TMES.Client.Forms.Common
         private const int Pad = 14;
         private const int CheckSize = 22;
 
-        private readonly Font _captionFont = AppTheme.SmallFont;
-        private readonly Font _titleFont = AppTheme.CardTitleFont;
-        private readonly Font _subFont = AppTheme.SmallFont;
+        /// <summary>글자 자동 조절 때 큰 글자를 더 줄이지 않는 하한(px).</summary>
+        private const float MinTitlePixel = 11f;
+
+        private Font _captionFont = AppTheme.SmallFont;
+        private Font _titleFont = AppTheme.CardTitleFont;
+        private Font _subFont = AppTheme.SmallFont;
 
         private Color _accent = AppTheme.Indigo;
         private string _caption;
@@ -32,6 +35,7 @@ namespace SEOJIN_TMES.Client.Forms.Common
         private string _subText;
         private bool _selected;
         private bool _hovered;
+        private bool _autoFitText;
 
         public CardTile()
         {
@@ -53,13 +57,63 @@ namespace SEOJIN_TMES.Client.Forms.Common
         public string Caption { get => _caption; set { _caption = value; Invalidate(); } }
 
         /// <summary>가운데 큰 글자.</summary>
-        public string Title { get => _title; set { _title = value; Invalidate(); } }
+        public string Title { get => _title; set { _title = value; FitFonts(); Invalidate(); } }
 
         /// <summary>아래쪽 보조 문구. 비우면 그리지 않는다.</summary>
         public string SubText { get => _subText; set { _subText = value; Invalidate(); } }
 
         /// <summary>고른 타일 — 옅은 강조 색 바탕 + 강조 색 테두리 + 우상단 체크.</summary>
         public bool Selected { get => _selected; set { _selected = value; Invalidate(); } }
+
+        /// <summary>
+        /// 켜면 글자 크기를 카드 높이에 맞춰 정하고, 큰 글자가 카드 폭을 넘으면 맞을 때까지 줄인다.
+        /// 끄면(기본) 고정 글꼴 — 크기가 정해진 알람 카드는 이 상태로 쓴다.
+        /// </summary>
+        public bool AutoFitText { get => _autoFitText; set { _autoFitText = value; FitFonts(); Invalidate(); } }
+
+        protected override void OnSizeChanged(EventArgs e)
+        {
+            FitFonts();
+            base.OnSizeChanged(e);
+        }
+
+        /// <summary>
+        /// 카드 높이 비율로 작은 글자 · 큰 글자 크기를 잡는다(px 단위 — 높이와 바로 비교하려고).
+        /// 비율은 세 줄(코드 · 이름 · 보조 문구)이 서로 겹치지 않는 선에서 정했다.
+        /// </summary>
+        private void FitFonts()
+        {
+            if (!_autoFitText || Width <= 0 || Height <= 0)
+                return;
+
+            var family = _titleFont.FontFamily.Name;
+            var smallPixel = Math.Max(10f, Math.Min(18f, Height * 0.14f));
+            var titlePixel = Math.Max(MinTitlePixel, Math.Min(40f, Height * 0.26f));
+
+            var title = new Font(family, titlePixel, FontStyle.Bold, GraphicsUnit.Pixel);
+            var textWidth = Width - Pad * 2;
+            while (titlePixel > MinTitlePixel && !string.IsNullOrEmpty(_title)
+                   && TextRenderer.MeasureText(_title, title).Width > textWidth)
+            {
+                titlePixel -= 1f;
+                title.Dispose();
+                title = new Font(family, titlePixel, FontStyle.Bold, GraphicsUnit.Pixel);
+            }
+
+            ReplaceFonts(new Font(family, smallPixel, FontStyle.Regular, GraphicsUnit.Pixel),
+                         title,
+                         new Font(family, smallPixel, FontStyle.Regular, GraphicsUnit.Pixel));
+        }
+
+        private void ReplaceFonts(Font caption, Font title, Font sub)
+        {
+            _captionFont.Dispose();
+            _titleFont.Dispose();
+            _subFont.Dispose();
+            _captionFont = caption;
+            _titleFont = title;
+            _subFont = sub;
+        }
 
         protected override void OnMouseEnter(EventArgs e)
         {
