@@ -163,6 +163,64 @@ namespace SEOJIN_TMES.Client.Forms
 
         private void TitleArea_MouseUp(object sender, MouseEventArgs e) => _titleDragArmed = false;
 
+        // ────────────────────────────── 최대화 영역 · 최소 크기 ──────────────────────────────
+
+        private const int WM_GETMINMAXINFO = 0x0024;
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct POINT
+        {
+            public int X;
+            public int Y;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct MINMAXINFO
+        {
+            public POINT ptReserved;
+            public POINT ptMaxSize;
+            public POINT ptMaxPosition;
+            public POINT ptMinTrackSize;
+            public POINT ptMaxTrackSize;
+        }
+
+        /// <summary>
+        /// 제목 줄이 없는 창(FormBorderStyle.None)을 그냥 최대화하면 작업 표시줄까지 덮으므로
+        /// 최대화 영역을 "창이 있는 모니터의 작업 영역"으로 직접 알려 준다.
+        ///
+        /// 예전에는 <see cref="Form.MaximizedBounds"/>에 <c>Screen.WorkingArea</c>(가상 화면 절대 좌표)를 넣었는데,
+        /// 이 값은 MINMAXINFO.ptMaxPosition으로 그대로 들어가고 Windows는 그것을 <b>창이 놓인 모니터의 왼쪽 위 기준</b>으로 해석한다.
+        /// 주 모니터는 원점이 (0,0)이라 티가 안 나지만, 보조 모니터(예: X=1920)로 옮긴 뒤 최대화하면
+        /// 오프셋이 한 번 더 더해져(1920+1920) 창이 옆 모니터로 튀어 나갔다.
+        /// 그래서 여기서는 작업 영역에서 모니터 원점을 빼 "모니터 기준 상대 좌표"로 넘긴다.
+        /// 최대화 버튼뿐 아니라 Win+↑ · 작업 표시줄 · 시작 시 최대화 등 모든 경로가 이 메시지를 거친다.
+        /// </summary>
+        protected override void WndProc(ref Message m)
+        {
+            base.WndProc(ref m);
+
+            if (m.Msg != WM_GETMINMAXINFO)
+                return;
+
+            var screen = Screen.FromHandle(m.HWnd);
+            var work = screen.WorkingArea;
+            var monitor = screen.Bounds;
+
+            var info = (MINMAXINFO)Marshal.PtrToStructure(m.LParam, typeof(MINMAXINFO));
+
+            info.ptMaxPosition.X = work.X - monitor.X;
+            info.ptMaxPosition.Y = work.Y - monitor.Y;
+            info.ptMaxSize.X = work.Width;
+            info.ptMaxSize.Y = work.Height;
+
+            // 최소 크기도 OS에 직접 알린다 — 가장자리 끌기(Border_MouseMove)는 자체로 막지만,
+            // Win+← 스냅 같은 OS 경로는 이 값만 본다. 모니터가 최소 크기보다 작으면 모니터에 맞춘다.
+            info.ptMinTrackSize.X = Math.Min(MinimumWindowSize.Width, work.Width);
+            info.ptMinTrackSize.Y = Math.Min(MinimumWindowSize.Height, work.Height);
+
+            Marshal.StructureToPtr(info, m.LParam, false);
+        }
+
         private void btnMinimize_Click(object sender, EventArgs e) => WindowState = FormWindowState.Minimized;
 
         private void btnMaximize_Click(object sender, EventArgs e) => ToggleMaximize();
@@ -175,9 +233,7 @@ namespace SEOJIN_TMES.Client.Forms
             }
             else
             {
-                // 최대화 한계는 "지금 창이 있는 모니터"의 작업 영역이다.
-                // 생성자에서 주 모니터로 한 번 잡아 두지만, 창을 옮긴 뒤 최대화하면 그 값이 틀리므로 다시 계산한다.
-                MaximizedBounds = Screen.FromControl(this).WorkingArea;
+                // 최대화 위치·크기는 WM_GETMINMAXINFO(WndProc)에서 "지금 창이 있는 모니터" 기준으로 잡는다.
                 WindowState = FormWindowState.Maximized;
             }
 

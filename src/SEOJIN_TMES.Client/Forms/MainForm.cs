@@ -91,11 +91,8 @@ namespace SEOJIN_TMES.Client.Forms
         {
             InitializeComponent();
 
-            // 제목 줄이 없는 창(FormBorderStyle.None)을 그냥 최대화하면 작업 표시줄까지 덮는다.
-            // 최대화 크기를 화면 작업 영역으로 제한해 "작업 표시줄은 그대로, 제목 줄만 사라진" 상태로 띄운다.
-            // (전체 화면 키오스크로 쓰려면 이 줄을 지우면 된다.)
-            // WM_GETMINMAXINFO는 창이 만들어질 때(이미 최대화 상태) 한 번 오므로 핸들 생성 전인 여기서 잡아야 한다.
-            MaximizedBounds = Screen.PrimaryScreen.WorkingArea;
+            // 최대화 영역(작업 표시줄은 그대로 두고 제목 줄만 없는 상태)은 MainForm.Window.cs의 WndProc가
+            // 창이 있는 모니터 기준으로 매번 계산한다 — MaximizedBounds를 여기서 고정하면 보조 모니터에서 어긋난다.
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -499,6 +496,18 @@ namespace SEOJIN_TMES.Client.Forms
 
             // 접히면 메뉴 배경을 남색(#1F3B57)으로, 펼치면 원래 그라데이션으로 되돌린다.
             AppTheme.AccordionCollapsed(accordion, _sidebarCollapsed);
+
+            ApplyMenuCollapsedColors();
+        }
+
+        /// <summary>접힌 메뉴의 팝업에서 분류 글자가 묻히지 않도록 분류 항목 배경을 접힘 상태에 맞춘다.</summary>
+        private void ApplyMenuCollapsedColors()
+        {
+            foreach (var element in _menuElements.Values)
+            {
+                if (element.Style == ElementStyle.Group)
+                    AppTheme.MenuCategoryCollapsed(element, _sidebarCollapsed);
+            }
         }
 
         /// <summary>종 아이콘 → 알림 팝업. 닫은 뒤에는 배지 숫자를 바로 다시 맞춘다(읽음 처리 반영).</summary>
@@ -696,6 +705,9 @@ namespace SEOJIN_TMES.Client.Forms
 
             accordion.Elements.Clear();
             accordion.Elements.Add(BuildAccordionElement(root, string.Empty, 0));
+
+            // 접힌 채로 메뉴를 다시 만들 수도 있다(언어 변경 등) — 새 항목에도 접힘 색을 입힌다.
+            ApplyMenuCollapsedColors();
         }
 
         private async Task LoadMenusAsync()
