@@ -52,7 +52,7 @@ namespace SEOJIN_TMES.Client.Forms.ProductionStatus
             AppTheme.SectionTitle(lblGridTitle, AppTheme.Cyan);
             AppTheme.BodyText(lblDate);
             AppTheme.Editor(dateStandard);
-            btnSearch.Icon = AppIcons.Search;
+            AppTheme.StandardButton(btnSearch);
             AppTheme.Grid(grid, gridView, AppTheme.Cyan);
         }
 

@@ -216,6 +216,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
             gridViewInspection.OptionsBehavior.Editable = true;
 
+            gridViewInspection.RowStyle += GridViewInspection_RowStyle;
             SetGridLineColor(gridViewInspection);
         }
 
@@ -692,7 +693,15 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             AppLog.Info($"[POP] 토크 결과값 직접 입력 - {spec.BomSpecName}/{spec.InputPosition} = {spec.TorqueResult}");
         }
 
-        /// <summary>측정값이 있는데 하한~상한을 벗어난 줄은 붉게 칠한다(포커스 행 색보다 우선).</summary>
+        /// <summary>결과상태가 NG인 줄은 NG 색으로 칠한다(표시만 한다 — 판정은 서버).</summary>
+        private void GridViewInspection_RowStyle(object sender, RowStyleEventArgs e)
+        {
+            var spec = gridViewInspection.GetRow(e.RowHandle) as PopInspectionSpecDto;
+            if (spec != null && spec.ResultState == PopInspectionSpecDto.ResultNg)
+                AppTheme.NgRow(e);
+        }
+
+        /// <summary>측정값이 있는데 하한~상한을 벗어난 줄은 NG 색으로 칠한다(포커스 행 색보다 우선).</summary>
         private void GridViewBomSpec_RowStyle(object sender, RowStyleEventArgs e)
         {
             if (e.RowHandle < 0)
@@ -704,8 +713,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
             if (!IsBomSpecPassed(spec))
             {
-                e.Appearance.BackColor = AppTheme.Rose;
-                e.HighPriority = true;
+                AppTheme.NgRow(e);
             }
         }
 

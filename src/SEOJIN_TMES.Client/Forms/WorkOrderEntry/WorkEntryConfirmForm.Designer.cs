@@ -33,8 +33,8 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.gridView = new SEOJIN_TMES.Client.Forms.Common.MeisGridView();
             this.lblListTitle = new DevExpress.XtraEditors.LabelControl();
             this.footerPanel = new DevExpress.XtraEditors.PanelControl();
-            this.btnMove = new SEOJIN_TMES.Client.Forms.Common.MeisButton();
-            this.btnClose = new SEOJIN_TMES.Client.Forms.Common.MeisButton();
+            this.btnMove = new System.Windows.Forms.Button();
+            this.btnClose = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.headerPanel)).BeginInit();
             this.headerPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.headerIcon)).BeginInit();
@@ -134,39 +134,25 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             // 
             // btnMove
             // 
-            this.btnMove.Accent = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
             this.btnMove.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnMove.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnMove.Icon = null;
             this.btnMove.Location = new System.Drawing.Point(548, 16);
-            this.btnMove.LookAndFeel.Style = DevExpress.LookAndFeel.LookAndFeelStyle.Flat;
             this.btnMove.Name = "btnMove";
-            this.btnMove.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
-            this.btnMove.Selected = false;
-            this.btnMove.ShowFocusRectangle = DevExpress.Utils.DefaultBoolean.False;
             this.btnMove.Size = new System.Drawing.Size(96, 32);
             this.btnMove.TabIndex = 0;
             this.btnMove.Text = "이동";
-            this.btnMove.TextAfterIcon = false;
             this.btnMove.Click += new System.EventHandler(this.btnMove_Click);
             // 
             // btnClose
             // 
-            this.btnClose.Accent = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
             this.btnClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnClose.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnClose.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnClose.Icon = null;
             this.btnClose.Location = new System.Drawing.Point(444, 16);
-            this.btnClose.LookAndFeel.Style = DevExpress.LookAndFeel.LookAndFeelStyle.Flat;
             this.btnClose.Name = "btnClose";
-            this.btnClose.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
-            this.btnClose.Selected = false;
-            this.btnClose.ShowFocusRectangle = DevExpress.Utils.DefaultBoolean.False;
             this.btnClose.Size = new System.Drawing.Size(96, 32);
             this.btnClose.TabIndex = 1;
             this.btnClose.Text = "닫기";
-            this.btnClose.TextAfterIcon = false;
             this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
             // 
             // WorkEntryConfirmForm
@@ -214,7 +200,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
         private DevExpress.XtraGrid.GridControl grid;
         private SEOJIN_TMES.Client.Forms.Common.MeisGridView gridView;
         private DevExpress.XtraEditors.PanelControl footerPanel;
-        private SEOJIN_TMES.Client.Forms.Common.MeisButton btnMove;
-        private SEOJIN_TMES.Client.Forms.Common.MeisButton btnClose;
+        private System.Windows.Forms.Button btnMove;
+        private System.Windows.Forms.Button btnClose;
     }
 }

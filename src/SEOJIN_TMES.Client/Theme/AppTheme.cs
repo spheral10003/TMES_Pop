@@ -108,6 +108,13 @@ namespace SEOJIN_TMES.Client.Theme
         /// <summary>위 버튼을 눌렀을 때 — hover보다 한 톤 더 진해야 눌린 것이 보인다.</summary>
         public static Color ButtonQuietPressed => IsDarkMode ? Color.FromArgb(68, 66, 104) : Color.FromArgb(212, 219, 233);
 
+        /// <summary>
+        /// 화면·팝업의 일반 버튼(조회/저장/닫기 등) 바탕 — 회청색 <c>#6D7C92</c> + 흰 글자.
+        /// 모든 버튼이 같은 색이므로 화면마다 버튼 색을 따로 고르지 않는다(<see cref="StandardButton"/>).
+        /// </summary>
+        public static readonly Color ButtonBack = Color.FromArgb(109, 124, 146); // #6D7C92
+        public static readonly Color ButtonFore = Color.White;
+
         // ── 내보내기 문서(엑셀) 색 ──
         // 화면 색과 달리 다크 모드를 따라가면 안 된다 — 어두운 테마로 쓰던 중에 내보냈다고
         // 검은 배경 엑셀이 나오면 인쇄·공유가 곤란하다. 그래서 라이트 톤 고정이다.
@@ -117,7 +124,8 @@ namespace SEOJIN_TMES.Client.Theme
         public static bool IsDarkMode { get; private set; }
 
         // ── 모드에 따라 바뀌는 색(본문 영역) ──
-        public static Color Surface => IsDarkMode ? Color.FromArgb(28, 27, 46) : Color.FromArgb(244, 246, 251);
+        /// <summary>본문·폼 배경. 라이트 모드는 흰색 — 카드와 같은 색이라 카드 경계는 테두리(<see cref="CardBorder"/>)로만 구분된다.</summary>
+        public static Color Surface => IsDarkMode ? Color.FromArgb(17, 26, 46) : Color.White; // 다크 #111A2E
         public static Color Card => IsDarkMode ? Color.FromArgb(38, 37, 61) : Color.White;
         public static Color CardBorder => IsDarkMode ? Color.FromArgb(58, 56, 90) : Color.FromArgb(228, 231, 240);
         /// <summary>
@@ -152,11 +160,24 @@ namespace SEOJIN_TMES.Client.Theme
         /// <summary>그리드 구분선(행 사이 얇은 가로선).</summary>
         public static Color GridLine => IsDarkMode ? Color.FromArgb(58, 56, 90) : Color.FromArgb(230, 233, 241);
 
-        // ── 상단 탭 ── 선택 탭은 앱 포인트 컬러(Indigo), 나머지는 배경보다 한 톤 진한 회색 ──
-        public static Color TabActiveBack => Indigo;
-        public static Color TabInactiveBack => IsDarkMode ? Color.FromArgb(40, 39, 62) : Color.FromArgb(236, 239, 246);
-        public static Color TabHoverBack => IsDarkMode ? Color.FromArgb(50, 48, 78) : Color.FromArgb(225, 229, 240);
-        public static Color TabBorder => IsDarkMode ? Color.FromArgb(58, 56, 90) : Color.FromArgb(214, 219, 232);
+        /// <summary>그리드 선택(포커스) 행 바탕 — 화면별 포인트 컬러와 무관하게 모든 목록이 같은 하늘색을 쓴다.</summary>
+        public static Color GridSelectedRow => IsDarkMode ? Color.FromArgb(38, 58, 92) : Color.FromArgb(230, 247, 255); // #E6F7FF
+
+        /// <summary>
+        /// 불합격(NG) 행 바탕. 서버가 내려준 결과 상태를 <b>표시</b>만 하는 색이다(판정은 서버가 한다).
+        /// 선택 행보다 우선해야 선택해도 NG인 줄이 그대로 보인다 — <see cref="NgRow"/>로 칠할 것.
+        /// </summary>
+        public static Color GridNgRow => IsDarkMode ? Color.FromArgb(92, 44, 52) : Color.FromArgb(248, 215, 218); // #F8D7DA
+
+        // ── 상단 탭 ── 선택 탭은 진한 청록(#2C5B78) + 흰 글자, 나머지는 옅은 회청(#F4F6FA) + 검정 글자 ──
+        // 탭이 놓이는 스트립은 비선택 탭보다 한 톤 진하게 깔아야 비선택 탭의 윤곽이 바탕에 묻히지 않는다.
+        public static Color TabActiveBack => Color.FromArgb(44, 91, 120);   // #2C5B78
+        public static Color TabActiveFore => Color.White;
+        public static Color TabInactiveBack => IsDarkMode ? Color.FromArgb(17, 26, 46) : Color.FromArgb(244, 246, 250); // 다크 #111A2E / #F4F6FA
+        public static Color TabInactiveFore => IsDarkMode ? Color.FromArgb(200, 211, 224) : Color.Black;               // 다크 #C8D3E0
+        public static Color TabHoverBack => IsDarkMode ? Color.FromArgb(50, 48, 78) : Color.White;
+        public static Color TabStripBack => IsDarkMode ? Color.FromArgb(11, 15, 26) : Color.FromArgb(230, 234, 241);   // 다크 #0B0F1A / #E6EAF1
+        public static Color TabBorder => IsDarkMode ? Color.FromArgb(58, 56, 90) : Color.FromArgb(206, 212, 224);
 
         // ── 폰트 ──
         private const string FontFamily = "맑은 고딕";
@@ -705,6 +726,35 @@ namespace SEOJIN_TMES.Client.Theme
         }
 
         /// <summary>
+        /// 일반 버튼(.NET 기본 <see cref="Button"/>) — <see cref="ButtonBack"/> 바탕 + 흰 글자, 테두리 없음.
+        ///
+        /// DevExpress SimpleButton 대신 기본 Button을 쓰므로 스킨이 색을 덮어쓸 일이 없다 —
+        /// <c>FlatStyle.Flat</c>이면 BackColor/ForeColor와 FlatAppearance 색이 그대로 그려진다.
+        /// 아이콘은 넣지 않는다(글자만). 비활성 상태는 Button이 글자를 회색으로 흐려 그린다.
+        /// </summary>
+        /// <param name="keepFont">Designer에서 버튼마다 글꼴을 정해 둔 화면(POP 공정 버튼 등)은 true — 색만 바꾼다.</param>
+        public static void StandardButton(Button button, bool keepFont = false)
+        {
+            PaintFlatButton(button, ButtonBack, ButtonFore,
+                ControlPaint.Light(ButtonBack, 0.25f), ControlPaint.Dark(ButtonBack, 0.08f));
+
+            if (!keepFont)
+                button.Font = BodyBoldFont;
+        }
+
+        private static void PaintFlatButton(Button button, Color back, Color fore, Color hover, Color pressed)
+        {
+            button.FlatStyle = FlatStyle.Flat;
+            button.FlatAppearance.BorderSize = 0;
+            button.FlatAppearance.MouseOverBackColor = hover;
+            button.FlatAppearance.MouseDownBackColor = pressed;
+            button.BackColor = back;
+            button.ForeColor = fore;
+            button.UseVisualStyleBackColor = false;
+            button.Cursor = Cursors.Hand;
+        }
+
+        /// <summary>
         /// 대화상자 상단 색 띠(사용자 정보 팝업의 남보라 헤더와 같은 역할).
         /// 강조 색에서 어두운 쪽으로 가는 수직 그라데이션이라, 흰 본문 위에서 창 경계가 분명하게 보인다.
         /// </summary>
@@ -959,10 +1009,10 @@ namespace SEOJIN_TMES.Client.Theme
         /// 그래서 DevExpress 표준 그리드 시안처럼 <b>밝은 헤더 + 얇은 가로 구분선</b>으로 바꿨다:
         ///
         ///  - 헤더   : 아주 옅은 회색 배경 + 진한 글자. 포인트 컬러는 면적으로 쓰지 않는다.
-        ///  - 행     : 흰 배경 단색(줄무늬 없음) + 얇은 가로선. 세로선은 없앤다.
-        ///  - 포커스 : 포인트 컬러를 아주 옅게 깐 배경(<see cref="Forms.Common.MeisGridView"/>는 왼쪽 색 띠도 그린다).
+        ///  - 행     : 흰 배경 단색(줄무늬 없음) + 얇은 가로·세로선.
+        ///  - 선택   : 모든 목록이 같은 하늘색(<see cref="GridSelectedRow"/>). NG 행은 <see cref="GridNgRow"/>.
         ///
-        /// 포인트 컬러는 화면 구분용으로 <b>포커스 행과 컬럼 색 점</b>에만 쓴다.
+        /// 포인트 컬러는 화면 구분용으로 <see cref="Forms.Common.MeisGridView"/>의 헤더 라인·포커스 띠에만 쓴다.
         /// </summary>
         public static void Grid(GridControl grid, GridView view, Color accent)
         {
@@ -978,9 +1028,8 @@ namespace SEOJIN_TMES.Client.Theme
             view.OptionsView.ShowVerticalLines = DefaultBoolean.True;
             view.OptionsView.ShowHorizontalLines = DefaultBoolean.True;
 
-            // 한 줄 걸러 옅은 톤을 깔아 행을 구분한다(줄무늬).
-            // 짝수 행만 켜면 홀수 행은 Appearance.Row(흰색)가 그대로 쓰여 두 톤이 번갈아 나온다.
-            view.OptionsView.EnableAppearanceEvenRow = true;
+            // 줄무늬(Alternating)는 쓰지 않는다 — 모든 행이 흰 바탕이고, 선택 행·NG 행만 색이 다르다.
+            view.OptionsView.EnableAppearanceEvenRow = false;
             view.OptionsView.EnableAppearanceOddRow = false;
             view.OptionsView.ColumnAutoWidth = true;
             view.OptionsBehavior.Editable = false;
@@ -999,16 +1048,27 @@ namespace SEOJIN_TMES.Client.Theme
             view.Appearance.HeaderPanel.Options.UseTextOptions = true;
 
             Paint(view.Appearance.Row, Card, TextPrimary, BodyFont);
-            Paint(view.Appearance.EvenRow, GridRowAlt, TextPrimary, BodyFont);
-            Paint(view.Appearance.FocusedRow, Blend(accent, Card, 0.14f), TextPrimary, BodyBoldFont);
-            Paint(view.Appearance.SelectedRow, Blend(accent, Card, 0.11f), TextPrimary, BodyFont);
-            Paint(view.Appearance.HotTrackedRow, Blend(accent, Card, 0.06f), TextPrimary, BodyFont);
+            Paint(view.Appearance.FocusedRow, GridSelectedRow, TextPrimary, BodyBoldFont);
+            Paint(view.Appearance.SelectedRow, GridSelectedRow, TextPrimary, BodyFont);
+            Paint(view.Appearance.HideSelectionRow, GridSelectedRow, TextPrimary, BodyFont);
+            Paint(view.Appearance.HotTrackedRow, Blend(GridSelectedRow, Card, 0.5f), TextPrimary, BodyFont);
             Paint(view.Appearance.Empty, Card, TextPrimary, BodyFont);
 
             view.Appearance.HorzLine.BackColor = GridLine;
             view.Appearance.HorzLine.Options.UseBackColor = true;
             view.Appearance.VertLine.BackColor = GridLine;
             view.Appearance.VertLine.Options.UseBackColor = true;
+        }
+
+        /// <summary>
+        /// NG 행 칠하기 — 그리드의 <c>RowStyle</c> 이벤트에서 NG인 줄에만 부른다.
+        /// 선택 행 색보다 우선하도록 <c>HighPriority</c>를 켠다(선택해도 NG인 줄임이 보여야 한다).
+        /// </summary>
+        public static void NgRow(RowStyleEventArgs e)
+        {
+            e.Appearance.BackColor = GridNgRow;
+            e.Appearance.Options.UseBackColor = true;
+            e.HighPriority = true;
         }
 
         /// <summary>
@@ -1023,9 +1083,10 @@ namespace SEOJIN_TMES.Client.Theme
 
             tree.OptionsView.ShowIndicator = false;
 
-            // 그리드와 같은 규칙 — 한 줄 걸러 옅은 톤 + 세로선으로 컬럼 경계 표시.
+            // 그리드와 같은 규칙 — 줄무늬 없이 흰 바탕 + 세로선으로 컬럼 경계 표시.
             // 트리도 값 컬럼이 10개라 그리드와 다르게 두면 화면끼리 어긋나 보인다.
-            tree.OptionsView.EnableAppearanceEvenRow = true;
+            tree.OptionsView.EnableAppearanceEvenRow = false;
+            tree.OptionsView.EnableAppearanceOddRow = false;
             tree.OptionsView.ShowHorzLines = true;
             tree.OptionsView.ShowVertLines = true;
             tree.OptionsBehavior.Editable = false;
@@ -1040,14 +1101,10 @@ namespace SEOJIN_TMES.Client.Theme
 
             Paint(tree.Appearance.Row, Card, TextPrimary, BodyFont);
 
-            // 줄무늬 색은 그리드와 같은 값(GridRowAlt)을 써야 한다.
-            // EnableAppearanceEvenRow만 켜고 색을 지정하지 않으면 DevExpress 기본색이 쓰여
-            // 이 화면만 다른 톤으로 보인다(실제로 그렇게 어긋났었다).
-            Paint(tree.Appearance.EvenRow, GridRowAlt, TextPrimary, BodyFont);
-
-            Paint(tree.Appearance.FocusedRow, Blend(accent, Card, 0.14f), TextPrimary, BodyBoldFont);
-            Paint(tree.Appearance.SelectedRow, Blend(accent, Card, 0.11f), TextPrimary, BodyFont);
-            Paint(tree.Appearance.HotTrackedRow, Blend(accent, Card, 0.06f), TextPrimary, BodyFont);
+            Paint(tree.Appearance.FocusedRow, GridSelectedRow, TextPrimary, BodyBoldFont);
+            Paint(tree.Appearance.SelectedRow, GridSelectedRow, TextPrimary, BodyFont);
+            Paint(tree.Appearance.HideSelectionRow, GridSelectedRow, TextPrimary, BodyFont);
+            Paint(tree.Appearance.HotTrackedRow, Blend(GridSelectedRow, Card, 0.5f), TextPrimary, BodyFont);
             Paint(tree.Appearance.Empty, Card, TextPrimary, BodyFont);
 
             tree.Appearance.HorzLine.BackColor = GridLine;
@@ -1077,7 +1134,7 @@ namespace SEOJIN_TMES.Client.Theme
         /// </summary>
         public static void TabStrip(Control strip)
         {
-            strip.BackColor = Surface;
+            strip.BackColor = TabStripBack;
             // 스트립 높이 44 - 탭 높이 32 - 경계선 1 = 위 여백 11 (탭이 아래로 붙는다)
             strip.Padding = new Padding(10, 11, 8, 0);
             strip.Paint += (s, e) =>

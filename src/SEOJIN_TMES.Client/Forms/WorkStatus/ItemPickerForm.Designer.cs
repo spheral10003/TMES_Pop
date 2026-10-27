@@ -41,8 +41,8 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             this.txtItemName = new DevExpress.XtraEditors.TextEdit();
             this.txtItemCode = new DevExpress.XtraEditors.TextEdit();
             this.footerPanel = new DevExpress.XtraEditors.PanelControl();
-            this.btnSelect = new SEOJIN_TMES.Client.Forms.Common.MeisButton();
-            this.btnClose = new SEOJIN_TMES.Client.Forms.Common.MeisButton();
+            this.btnSelect = new System.Windows.Forms.Button();
+            this.btnClose = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.headerPanel)).BeginInit();
             this.headerPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.headerIcon)).BeginInit();
@@ -216,39 +216,25 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             // 
             // btnSelect
             // 
-            this.btnSelect.Accent = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
             this.btnSelect.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnSelect.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnSelect.Icon = null;
             this.btnSelect.Location = new System.Drawing.Point(508, 16);
-            this.btnSelect.LookAndFeel.Style = DevExpress.LookAndFeel.LookAndFeelStyle.Flat;
             this.btnSelect.Name = "btnSelect";
-            this.btnSelect.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
-            this.btnSelect.Selected = false;
-            this.btnSelect.ShowFocusRectangle = DevExpress.Utils.DefaultBoolean.False;
             this.btnSelect.Size = new System.Drawing.Size(96, 32);
             this.btnSelect.TabIndex = 0;
             this.btnSelect.Text = "선택";
-            this.btnSelect.TextAfterIcon = false;
             this.btnSelect.Click += new System.EventHandler(this.btnSelect_Click);
             // 
             // btnClose
             // 
-            this.btnClose.Accent = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
             this.btnClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnClose.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnClose.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnClose.Icon = null;
             this.btnClose.Location = new System.Drawing.Point(404, 16);
-            this.btnClose.LookAndFeel.Style = DevExpress.LookAndFeel.LookAndFeelStyle.Flat;
             this.btnClose.Name = "btnClose";
-            this.btnClose.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
-            this.btnClose.Selected = false;
-            this.btnClose.ShowFocusRectangle = DevExpress.Utils.DefaultBoolean.False;
             this.btnClose.Size = new System.Drawing.Size(96, 32);
             this.btnClose.TabIndex = 1;
             this.btnClose.Text = "닫기";
-            this.btnClose.TextAfterIcon = false;
             this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
             // 
             // ItemPickerForm
@@ -304,8 +290,8 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
         private DevExpress.XtraGrid.GridControl grid;
         private SEOJIN_TMES.Client.Forms.Common.MeisGridView gridView;
         private DevExpress.XtraEditors.PanelControl footerPanel;
-        private SEOJIN_TMES.Client.Forms.Common.MeisButton btnSelect;
-        private SEOJIN_TMES.Client.Forms.Common.MeisButton btnClose;
+        private System.Windows.Forms.Button btnSelect;
+        private System.Windows.Forms.Button btnClose;
         private DevExpress.XtraEditors.TextEdit txtItemName;
         private System.Windows.Forms.Button btnSearch;
         private System.Windows.Forms.Label label1;

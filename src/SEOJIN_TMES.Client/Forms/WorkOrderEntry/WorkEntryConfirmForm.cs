@@ -67,6 +67,8 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             AppTheme.DialogHeaderTitle(lblTitle);
             AppTheme.ContentSurface(bodyPanel);
             AppTheme.ContentSurface(footerPanel);
+            AppTheme.StandardButton(btnMove);
+            AppTheme.StandardButton(btnClose);
             AppTheme.CardPanel(listCard);
             AppTheme.SectionTitle(lblListTitle, AppTheme.Indigo);
             AppTheme.Grid(grid, gridView, AppTheme.Indigo);

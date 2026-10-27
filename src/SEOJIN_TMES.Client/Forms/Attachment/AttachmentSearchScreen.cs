@@ -6,6 +6,7 @@ using SEOJIN_TMES.Client.Common.Languages;
 using SEOJIN_TMES.Client.Common.Logging;
 using SEOJIN_TMES.Client.Common.Models;
 using SEOJIN_TMES.Client.Core;
+using SEOJIN_TMES.Client.Theme;
 using SEOJIN_TMES.Client.Forms.Common;
 using System;
 using System.Collections.Generic;
@@ -56,12 +57,20 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             _maxBytes = (long)_appSet.AppSet.UploadMaxMegaBytes * 1024 * 1024;
 
             ApplyTexts();
+            ApplyTheme();
 
             // 등록일자 기본값: 최근 일주일.
             dtpFrom.Value = DateTime.Today.AddDays(-6);
             dtpTo.Value = DateTime.Today;
 
             ControlEnabled();
+        }
+
+        /// <summary>버튼 색 — 앱 공통 버튼 색(글꼴은 Designer 값 유지).</summary>
+        private void ApplyTheme()
+        {
+            foreach (var button in new[] { btnSearch, btnUpload, btnDelete, btnDownload })
+                AppTheme.StandardButton(button, keepFont: true);
         }
 
         /// <summary>

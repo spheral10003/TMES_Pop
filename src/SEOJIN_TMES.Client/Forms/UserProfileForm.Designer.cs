@@ -41,7 +41,7 @@ namespace SEOJIN_TMES.Client.Forms
             this.lblWorkstation = new DevExpress.XtraEditors.LabelControl();
             this.lblMessage = new DevExpress.XtraEditors.LabelControl();
             this.footerPanel = new DevExpress.XtraEditors.PanelControl();
-            this.btnClose = new SEOJIN_TMES.Client.Forms.Common.MeisButton();
+            this.btnClose = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.headerPanel)).BeginInit();
             this.headerPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.bodyPanel)).BeginInit();
@@ -246,6 +246,6 @@ namespace SEOJIN_TMES.Client.Forms
         private DevExpress.XtraEditors.LabelControl lblWorkstation;
         private DevExpress.XtraEditors.LabelControl lblMessage;
         private DevExpress.XtraEditors.PanelControl footerPanel;
-        private SEOJIN_TMES.Client.Forms.Common.MeisButton btnClose;
+        private System.Windows.Forms.Button btnClose;
     }
 }

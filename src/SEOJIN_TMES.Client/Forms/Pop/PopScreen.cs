@@ -159,6 +159,11 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             RefreshAccordionButtons();
             viewerSurface.BackColor = AppTheme.Card;
 
+            // 버튼 색은 앱 공통(#6D7C92 + 흰 글자). 글꼴은 Designer에서 버튼마다 정해 둔 값을 그대로 쓴다.
+            foreach (var button in new[] { btnPrevProcess, btnNextProcess, btnStartProcess, btnStopProcess, btnProcessList, btnAdminAlarm,
+                                            btnSaveResults, btnFit, btnZoomIn, btnZoomOut })
+                AppTheme.StandardButton(button, keepFont: true);
+
             SetProgressState(_progressState);   // 테마를 다시 입혀도 상태 색이 보라로 되돌아가지 않도록
             viewerSurface.Invalidate();
         }

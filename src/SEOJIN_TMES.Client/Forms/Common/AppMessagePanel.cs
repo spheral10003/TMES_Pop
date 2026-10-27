@@ -84,6 +84,8 @@ namespace SEOJIN_TMES.Client.Forms.Common
             AppTheme.DialogHeaderTitle(lblTitle);
             AppTheme.ContentSurface(bodyPanel);
             AppTheme.ContentSurface(footerPanel);
+            AppTheme.StandardButton(btnOk);
+            AppTheme.StandardButton(btnCancel);
 
             headerIcon.SvgImage = AppIcons.Get(IconOf(kind), Color.White);
             headerIcon.SizeMode = SvgImageSizeMode.Stretch;

@@ -78,8 +78,8 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
             AppTheme.BodyText(lblSerialNo);
             AppTheme.CodeEditor(txtSerialNo);
 
-            btnSearch.Icon = AppIcons.Search;
-            btnExcelExport.Icon = AppIcons.Clipboard;
+            AppTheme.StandardButton(btnSearch);
+            AppTheme.StandardButton(btnExcelExport);
 
             AppTheme.Tree(treeOverview, AppTheme.Violet);
         }

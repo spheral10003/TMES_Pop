@@ -66,6 +66,9 @@ namespace SEOJIN_TMES.Client.Forms
             lblTitle.Font = AppTheme.TitleFont;
             lblHint.ForeColor = AppTheme.TextMuted;
             lblHint.Font = AppTheme.BodyFont;
+
+            AppTheme.StandardButton(btnConfirm, keepFont: true);
+            AppTheme.StandardButton(btnCancel, keepFont: true);
         }
 
         /// <summary>

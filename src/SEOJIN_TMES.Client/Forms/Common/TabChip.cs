@@ -172,7 +172,7 @@ namespace SEOJIN_TMES.Client.Forms.Common
                 }
             }
 
-            var foreColor = _active ? Color.White : AppTheme.TextMuted;
+            var foreColor = _active ? AppTheme.TabActiveFore : AppTheme.TabInactiveFore;
 
             var textRightPadding = Closable
                 ? CloseButtonSize + CloseButtonRightMargin + 4

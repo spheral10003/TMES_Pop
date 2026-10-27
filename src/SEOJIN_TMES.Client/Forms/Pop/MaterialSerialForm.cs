@@ -71,6 +71,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             AppTheme.DialogHeaderTitle(lblTitle);
             AppTheme.ContentSurface(bodyPanel);
             AppTheme.ContentSurface(footerPanel);
+            AppTheme.StandardButton(btnSave);
+            AppTheme.StandardButton(btnClose);
             AppTheme.CardPanel(fieldCard);
             AppTheme.CardPanel(listCard);
             spacer.BackColor = AppTheme.Surface;

@@ -79,8 +79,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         {
             AppTheme.TitleBar(pnlTitle, lblTitle, AppTheme.Amber);
             AppTheme.TitleBarClose(lblClose, AppTheme.Amber);
-            AppTheme.DialogFlatButton(btnClose, AppTheme.Amber);
-            AppTheme.DialogFlatButton(btnSend, AppTheme.Amber);
+            AppTheme.StandardButton(btnClose, keepFont: true);
+            AppTheme.StandardButton(btnSend, keepFont: true);
             pnlBody.BackColor = AppTheme.Surface;
             pnlFooter.BackColor = AppTheme.Surface;
             pnlGrip.BackColor = AppTheme.Surface;

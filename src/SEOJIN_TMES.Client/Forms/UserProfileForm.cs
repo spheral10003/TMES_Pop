@@ -66,6 +66,7 @@ namespace SEOJIN_TMES.Client.Forms
 
             AppTheme.ContentSurface(bodyPanel);
             AppTheme.ContentSurface(footerPanel);
+            AppTheme.StandardButton(btnClose);
 
             AppTheme.Caption(lblEmployeeNoCaption);
             AppTheme.Caption(lblUserNameCaption);

@@ -6,6 +6,7 @@ using SEOJIN_TMES.Client.Common.Logging;
 using SEOJIN_TMES.Client.Common.Models;
 using SEOJIN_TMES.Client.Core;
 using SEOJIN_TMES.Client.Forms.Common;
+using SEOJIN_TMES.Client.Theme;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -42,6 +43,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         {
             Init();
             SetTexts();
+            ApplyTheme();
             ControlEnabled();
             await LoadServerFilesAsync();
         }
@@ -50,6 +52,13 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         {
             _fileApi = Global.Instance.Settings.ApiClients.FileApiClient;
             _maxBytes = (long)Global.Instance.Settings.AppSet.UploadMaxMegaBytes * 1024 * 1024;
+        }
+
+        /// <summary>하단 버튼 색 — 앱 공통 버튼 색(글꼴은 Designer 값 유지).</summary>
+        private void ApplyTheme()
+        {
+            foreach (var button in new[] { btnFileOpen, btnUpload, btnDelete, btnCancle })
+                AppTheme.StandardButton(button, keepFont: true);
         }
 
         private void SetTexts()

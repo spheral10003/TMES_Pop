@@ -26,7 +26,7 @@ namespace SEOJIN_TMES.Client.Forms.ProductionStatus
             this.lblFilterTitle = new DevExpress.XtraEditors.LabelControl();
             this.lblDate = new DevExpress.XtraEditors.LabelControl();
             this.dateStandard = new DevExpress.XtraEditors.DateEdit();
-            this.btnSearch = new SEOJIN_TMES.Client.Forms.Common.MeisButton();
+            this.btnSearch = new System.Windows.Forms.Button();
             this.spacer = new System.Windows.Forms.Panel();
             this.gridCard = new DevExpress.XtraEditors.PanelControl();
             this.grid = new DevExpress.XtraGrid.GridControl();
@@ -80,18 +80,11 @@ namespace SEOJIN_TMES.Client.Forms.ProductionStatus
             // 
             // btnSearch
             // 
-            this.btnSearch.Accent = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
             this.btnSearch.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnSearch.Icon = null;
             this.btnSearch.Location = new System.Drawing.Point(262, 47);
-            this.btnSearch.LookAndFeel.Style = DevExpress.LookAndFeel.LookAndFeelStyle.Flat;
             this.btnSearch.Name = "btnSearch";
-            this.btnSearch.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
-            this.btnSearch.Selected = false;
-            this.btnSearch.ShowFocusRectangle = DevExpress.Utils.DefaultBoolean.False;
             this.btnSearch.Size = new System.Drawing.Size(104, 28);
             this.btnSearch.TabIndex = 3;
-            this.btnSearch.TextAfterIcon = false;
             this.btnSearch.Click += new System.EventHandler(this.btnSearch_Click);
             // 
             // spacer
@@ -168,7 +161,7 @@ namespace SEOJIN_TMES.Client.Forms.ProductionStatus
         private DevExpress.XtraEditors.LabelControl lblFilterTitle;
         private DevExpress.XtraEditors.LabelControl lblDate;
         private DevExpress.XtraEditors.DateEdit dateStandard;
-        private SEOJIN_TMES.Client.Forms.Common.MeisButton btnSearch;
+        private System.Windows.Forms.Button btnSearch;
         private System.Windows.Forms.Panel spacer;
         private DevExpress.XtraEditors.PanelControl gridCard;
         private DevExpress.XtraEditors.LabelControl lblGridTitle;

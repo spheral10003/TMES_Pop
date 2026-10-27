@@ -36,8 +36,8 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
             this.lblFilterTitle = new DevExpress.XtraEditors.LabelControl();
             this.lblSerialNo = new DevExpress.XtraEditors.LabelControl();
             this.txtSerialNo = new DevExpress.XtraEditors.TextEdit();
-            this.btnSearch = new SEOJIN_TMES.Client.Forms.Common.MeisButton();
-            this.btnExcelExport = new SEOJIN_TMES.Client.Forms.Common.MeisButton();
+            this.btnSearch = new System.Windows.Forms.Button();
+            this.btnExcelExport = new System.Windows.Forms.Button();
             this.spacer = new System.Windows.Forms.Panel();
             this.overviewCard = new DevExpress.XtraEditors.PanelControl();
             this.treeOverview = new DevExpress.XtraTreeList.TreeList();
@@ -88,36 +88,22 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
             // 
             // btnSearch
             // 
-            this.btnSearch.Accent = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
             this.btnSearch.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnSearch.Icon = null;
             this.btnSearch.Location = new System.Drawing.Point(456, 47);
-            this.btnSearch.LookAndFeel.Style = DevExpress.LookAndFeel.LookAndFeelStyle.Flat;
             this.btnSearch.Name = "btnSearch";
-            this.btnSearch.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
-            this.btnSearch.Selected = false;
-            this.btnSearch.ShowFocusRectangle = DevExpress.Utils.DefaultBoolean.False;
             this.btnSearch.Size = new System.Drawing.Size(104, 28);
             this.btnSearch.TabIndex = 3;
             this.btnSearch.Text = "조회";
-            this.btnSearch.TextAfterIcon = false;
             this.btnSearch.Click += new System.EventHandler(this.btnSearch_Click);
             // 
             // btnExcelExport
             // 
-            this.btnExcelExport.Accent = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
             this.btnExcelExport.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnExcelExport.Icon = null;
             this.btnExcelExport.Location = new System.Drawing.Point(568, 47);
-            this.btnExcelExport.LookAndFeel.Style = DevExpress.LookAndFeel.LookAndFeelStyle.Flat;
             this.btnExcelExport.Name = "btnExcelExport";
-            this.btnExcelExport.PaintStyle = DevExpress.XtraEditors.Controls.PaintStyles.Light;
-            this.btnExcelExport.Selected = false;
-            this.btnExcelExport.ShowFocusRectangle = DevExpress.Utils.DefaultBoolean.False;
             this.btnExcelExport.Size = new System.Drawing.Size(136, 28);
             this.btnExcelExport.TabIndex = 4;
             this.btnExcelExport.Text = "엑셀 내보내기";
-            this.btnExcelExport.TextAfterIcon = false;
             this.btnExcelExport.Click += new System.EventHandler(this.btnExcelExport_Click);
             // 
             // spacer
@@ -186,8 +172,8 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
         private DevExpress.XtraEditors.LabelControl lblFilterTitle;
         private DevExpress.XtraEditors.LabelControl lblSerialNo;
         private DevExpress.XtraEditors.TextEdit txtSerialNo;
-        private SEOJIN_TMES.Client.Forms.Common.MeisButton btnSearch;
-        private SEOJIN_TMES.Client.Forms.Common.MeisButton btnExcelExport;
+        private System.Windows.Forms.Button btnSearch;
+        private System.Windows.Forms.Button btnExcelExport;
         private System.Windows.Forms.Panel spacer;
         private DevExpress.XtraEditors.PanelControl overviewCard;
         private DevExpress.XtraEditors.LabelControl lblOverviewTitle;

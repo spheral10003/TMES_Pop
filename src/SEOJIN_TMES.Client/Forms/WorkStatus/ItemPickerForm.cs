@@ -94,7 +94,9 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             AppTheme.SectionTitle(lblListTitle, AppTheme.Cyan);
             //AppTheme.BodyText(lblItemCode);
             AppTheme.CodeEditor(txtItemCode);
-            //btnSearch.Icon = AppIcons.Search;
+            AppTheme.StandardButton(btnSearch, keepFont: true);
+            AppTheme.StandardButton(btnSelect);
+            AppTheme.StandardButton(btnClose);
             AppTheme.Grid(grid, gridView, AppTheme.Cyan);
 
             headerIcon.SvgImage = AppIcons.Get(AppIcons.Search, Color.White);

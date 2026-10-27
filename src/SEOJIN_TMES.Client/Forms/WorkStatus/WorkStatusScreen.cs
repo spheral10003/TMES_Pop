@@ -131,7 +131,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             AppTheme.Editor(cboProgressState);
             AppTheme.Editor(cboSpecResultState);
 
-            //btnSearch.Icon = AppIcons.Search;
+            AppTheme.StandardButton(btnSearch, keepFont: true);
             AppTheme.IconButton(btnItemPick, AppIcons.Search, AppTheme.Cyan, 16);
 
             AppTheme.Grid(gridOrders, gridViewOrders, AppTheme.Cyan);
@@ -175,6 +175,16 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
                 if (e.Column.FieldName == "SpecResultState" && string.IsNullOrEmpty(e.Value as string))
                     e.DisplayText = "-";
             };
+
+            gridViewProgress.RowStyle += GridViewProgress_RowStyle;
+        }
+
+        /// <summary>서버가 불합격으로 내려준 줄은 NG 색으로 칠한다(표시만 한다 — 판정은 서버).</summary>
+        private void GridViewProgress_RowStyle(object sender, DevExpress.XtraGrid.Views.Grid.RowStyleEventArgs e)
+        {
+            var row = gridViewProgress.GetRow(e.RowHandle) as WorkProgressDto;
+            if (row != null && string.Equals(row.SpecResultState, Language.Pop_ResultFail, StringComparison.OrdinalIgnoreCase))
+                AppTheme.NgRow(e);
         }
 
         /// <summary>조회 조건/필터 콤보를 채운다. 첫 항목은 항상 "전체"(조건 없음)다.</summary>

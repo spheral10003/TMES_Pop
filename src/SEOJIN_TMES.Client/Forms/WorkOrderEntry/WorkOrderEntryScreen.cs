@@ -82,8 +82,8 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             AppTheme.CodeEditor(txtSerialNo);
             AppTheme.CodeEditor(txtItemCode);
             AppTheme.CodeEditor(txtItemName);
-            btnSearch.Icon = AppIcons.Search;
-            btnWork.Icon = AppIcons.Play;
+            AppTheme.StandardButton(btnSearch);
+            AppTheme.StandardButton(btnWork);
 
             AppTheme.Grid(grid, gridView, AppTheme.Indigo);
         }
