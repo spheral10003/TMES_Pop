@@ -503,14 +503,33 @@ namespace SEOJIN_TMES.Client.Forms
             ApplyMenuCollapsedColors();
         }
 
-        /// <summary>접힌 메뉴의 팝업에서 분류 글자가 묻히지 않도록 분류 항목 배경을 접힘 상태에 맞춘다.</summary>
+        /// <summary>
+        /// 접힌 메뉴의 팝업에서 루트·분류 글자가 묻히지 않도록 배경·글자·아이콘 색을 접힘 상태에 맞춘다
+        /// (접힘 = 메뉴 바와 같은 남색 배경 + 흰 글자).
+        /// </summary>
         private void ApplyMenuCollapsedColors()
         {
             foreach (var element in _menuElements.Values)
             {
-                if (element.Style == ElementStyle.Group)
-                    AppTheme.MenuCategoryCollapsed(element, _sidebarCollapsed);
+                if (element.Style != ElementStyle.Group)
+                    continue;
+
+                AppTheme.MenuCategoryCollapsed(element, _sidebarCollapsed);
+
+                if (element.Tag is MenuNode node)
+                    element.ImageOptions.SvgImage = AppIcons.Get(
+                        node.Icon ?? AppIcons.Dot,
+                        AppTheme.MenuCategoryIconColor(MenuLevelOf(element), _sidebarCollapsed));
             }
+        }
+
+        /// <summary>메뉴 항목의 깊이(루트 = 0). 부모를 거슬러 올라가 센다.</summary>
+        private int MenuLevelOf(AccordionControlElement element)
+        {
+            var level = 0;
+            for (var parent = element.OwnerElement; parent != null; parent = parent.OwnerElement)
+                level++;
+            return level;
         }
 
         /// <summary>종 아이콘 → 알림 팝업. 닫은 뒤에는 배지 숫자를 바로 다시 맞춘다(읽음 처리 반영).</summary>
@@ -769,7 +788,7 @@ namespace SEOJIN_TMES.Client.Forms
             }
             else
             {
-                var iconColor = level == 0 ? Color.White : AppTheme.SidebarText;
+                var iconColor = AppTheme.MenuCategoryIconColor(level, _sidebarCollapsed);
                 var iconSize = level == 0 ? 18 : 16;
                 element.ImageOptions.SvgImage = AppIcons.Get(node.Icon ?? AppIcons.Dot, iconColor);
                 element.ImageOptions.SvgImageSize = new Size(iconSize, iconSize);

@@ -300,15 +300,28 @@ namespace SEOJIN_TMES.Client.Theme
         }
 
         /// <summary>
-        /// 메뉴 접힘/펼침에 맞춰 분류(그룹) 항목의 배경을 바꾼다.
-        /// 펼친 사이드바에서는 투명으로 둬 그라데이션이 비치게 하지만, 접은 상태에서 분류를 누르면 뜨는 팝업은
-        /// 사이드바 그라데이션이 없는 별도 창이라 투명 배경이 <b>검게</b> 칠해져 진한 글자가 보이지 않았다.
-        /// 그래서 접힌 동안에는 흰 배경으로 고정한다.
+        /// 메뉴 접힘/펼침에 맞춰 루트·분류(그룹) 항목의 배경과 글자색을 바꾼다.
+        /// 펼친 사이드바에서는 투명 배경 + 진한 글자로 그라데이션이 비치게 하지만, 접은 상태에서 분류를 누르면 뜨는 팝업은
+        /// 사이드바 그라데이션이 없는 별도 창이라 투명 배경이 어둡게 칠해져 진한 글자가 보이지 않았다.
+        /// 그래서 접힌 동안에는 접힌 메뉴 바와 같은 <see cref="SidebarCollapsed"/> 남색 배경에 흰 글자로 고정한다.
         /// </summary>
         public static void MenuCategoryCollapsed(AccordionControlElement element, bool collapsed)
         {
-            element.Appearance.Normal.BackColor = collapsed ? Color.White : Color.Transparent;
-            element.Appearance.Normal.Options.UseBackColor = true;
+            var normal = element.Appearance.Normal;
+
+            normal.BackColor = collapsed ? SidebarCollapsed : Color.Transparent;
+            normal.ForeColor = collapsed ? Color.White : SidebarText;
+            normal.Options.UseBackColor = true;
+            normal.Options.UseForeColor = true;
+        }
+
+        /// <summary>
+        /// 분류 아이콘 색 — 접힌 메뉴(남색 배경)에서는 흰색, 펼친 사이드바(밝은 배경)에서는 진한 글자색.
+        /// 루트("MEIS") 아이콘은 원래부터 흰색이다.
+        /// </summary>
+        public static Color MenuCategoryIconColor(int level, bool collapsed)
+        {
+            return level == 0 || collapsed ? Color.White : SidebarText;
         }
 
         /// <summary>선택된 화면 항목을 보라색 밴드로 강조한다(선택 해제 시 <paramref name="selected"/>=false).</summary>
