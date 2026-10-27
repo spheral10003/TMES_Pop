@@ -160,7 +160,7 @@ namespace SEOJIN_TMES.Client.Theme
         public static Font BannerFont => new Font(FontFamily, 14F, FontStyle.Bold);
 
         /// <summary>카드 타일 가운데 큰 글자(알람 유형 명 · 알람 코드) — 카드에서 가장 먼저 읽혀야 하는 값.</summary>
-        public static Font CardTitleFont => new Font(FontFamily, 16F, FontStyle.Bold);
+        public static Font CardTitleFont => new Font(FontFamily, 14F, FontStyle.Bold);
 
         /// <summary>
         /// 전역 스킨 + SVG 팔레트를 적용한다(DevExpress 벡터 스킨 기능).

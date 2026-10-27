@@ -28,6 +28,7 @@ namespace SEOJIN_TMES.Client.Forms.Common
         // 끌기 중 화면 경계·다중 모니터 처리가 제목 줄을 잡고 끌 때와 똑같이 동작한다.
         private const int WM_NCLBUTTONDOWN = 0x00A1;
         private const int HTCAPTION = 2;
+        private const int HTBOTTOMRIGHT = 17;
 
         [DllImport("user32.dll")]
         private static extern bool ReleaseCapture();
@@ -61,6 +62,40 @@ namespace SEOJIN_TMES.Client.Forms.Common
 
             if (header != null)
                 EnableDrag(header, clickables);
+        }
+
+        /// <summary>
+        /// 제목 줄을 없앤 창(FormBorderStyle.None)에 크기 조절 손잡이를 붙인다 — 창 우하단에 두는 작은 컨트롤.
+        /// 창틀이 없어 가장자리를 잡고 늘릴 수 없으므로, 이 손잡이를 끌면 OS가 창틀 우하단을 끌 때와 같이 크기를 바꾼다.
+        /// 최소 크기는 폼의 <c>MinimumSize</c>가 지킨다.
+        /// </summary>
+        public static void EnableResizeGrip(Control grip)
+        {
+            grip.Cursor = Cursors.SizeNWSE;
+            grip.MouseDown -= OnGripMouseDown;
+            grip.MouseDown += OnGripMouseDown;
+            grip.Paint -= OnGripPaint;
+            grip.Paint += OnGripPaint;
+        }
+
+        private static void OnGripMouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button != MouseButtons.Left)
+                return;
+
+            var form = ((Control)sender).FindForm();
+            if (form == null)
+                return;
+
+            ReleaseCapture();
+            SendMessage(form.Handle, WM_NCLBUTTONDOWN, (IntPtr)HTBOTTOMRIGHT, IntPtr.Zero);
+        }
+
+        /// <summary>윈도우 표준 크기 조절 손잡이(점 무늬)를 그린다.</summary>
+        private static void OnGripPaint(object sender, PaintEventArgs e)
+        {
+            var grip = (Control)sender;
+            ControlPaint.DrawSizeGrip(e.Graphics, grip.BackColor, grip.ClientRectangle);
         }
 
         /// <summary>

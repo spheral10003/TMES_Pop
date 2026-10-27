@@ -20,7 +20,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// 색·폰트·문구는 AdminAlarmForm.cs의 Initialize()에서 런타임에 넣고, 타일(CardTile)도 조회 결과로 런타임에 만든다.
         ///
         /// 일반 .NET Form — Windows 제목 줄은 없애고(FormBorderStyle.None) pnlTitle + lblTitle이 제목 줄 역할을 한다.
-        /// 구성: 제목 띠(오른쪽 X 닫기) + [알람 유형 타일] + [알람 코드 타일] + 하단 [닫기][등록].
+        /// 구성: 제목 띠(오른쪽 X 닫기) + [알람 유형 타일] + [알람 코드 타일] + 하단 [닫기][등록] + 우하단 크기 조절 손잡이(pnlGrip).
+        /// 크기 가변: 유형 타일(flowTypes)은 AutoSize라 폭이 줄면 다음 줄로 넘어가며 높이가 늘고,
+        ///            알람 코드 타일 크기는 flowCodes_SizeChanged에서 다시 계산한다. 최소 크기는 AdminAlarmForm.cs에서 정한다.
         /// lblClose는 lblTitle(Fill)보다 먼저 Add해 위에 그려지게 둔다(FileUploadForm과 같은 구성).
         /// 도킹 순서 주의: pnlBody(Fill) → pnlFooter(Bottom) → pnlTitle(Top).
         ///                 pnlBody 안은 flowCodes(Fill) → lblCodeTitle → flowTypes → lblTypeTitle(모두 Top).
@@ -39,6 +41,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.pnlFooter = new System.Windows.Forms.Panel();
             this.btnSend = new System.Windows.Forms.Button();
             this.btnClose = new System.Windows.Forms.Button();
+            this.pnlGrip = new System.Windows.Forms.Panel();
             this.pnlTitle.SuspendLayout();
             this.pnlBody.SuspendLayout();
             this.pnlFooter.SuspendLayout();
@@ -101,6 +104,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.flowCodes.Name = "flowCodes";
             this.flowCodes.Size = new System.Drawing.Size(1168, 342);
             this.flowCodes.TabIndex = 3;
+            this.flowCodes.SizeChanged += new System.EventHandler(this.flowCodes_SizeChanged);
             //
             // lblCodeTitle
             //
@@ -114,12 +118,13 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             //
             // flowTypes
             //
+            this.flowTypes.AutoSize = true;
+            this.flowTypes.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.flowTypes.Dock = System.Windows.Forms.DockStyle.Top;
             this.flowTypes.Location = new System.Drawing.Point(16, 36);
             this.flowTypes.Name = "flowTypes";
-            this.flowTypes.Size = new System.Drawing.Size(1168, 120);
+            this.flowTypes.Size = new System.Drawing.Size(1168, 114);
             this.flowTypes.TabIndex = 1;
-            this.flowTypes.WrapContents = false;
             //
             // lblTypeTitle
             //
@@ -133,6 +138,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             //
             // pnlFooter
             //
+            this.pnlFooter.Controls.Add(this.pnlGrip);
             this.pnlFooter.Controls.Add(this.btnSend);
             this.pnlFooter.Controls.Add(this.btnClose);
             this.pnlFooter.Dock = System.Windows.Forms.DockStyle.Bottom;
@@ -140,6 +146,14 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.pnlFooter.Name = "pnlFooter";
             this.pnlFooter.Size = new System.Drawing.Size(1200, 64);
             this.pnlFooter.TabIndex = 2;
+            //
+            // pnlGrip
+            //
+            this.pnlGrip.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.pnlGrip.Location = new System.Drawing.Point(1184, 48);
+            this.pnlGrip.Name = "pnlGrip";
+            this.pnlGrip.Size = new System.Drawing.Size(16, 16);
+            this.pnlGrip.TabIndex = 2;
             //
             // btnSend
             //
@@ -206,5 +220,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private System.Windows.Forms.Panel pnlFooter;
         private System.Windows.Forms.Button btnSend;
         private System.Windows.Forms.Button btnClose;
+        private System.Windows.Forms.Panel pnlGrip;
     }
 }

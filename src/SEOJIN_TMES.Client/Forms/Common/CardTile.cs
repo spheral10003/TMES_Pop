@@ -8,6 +8,8 @@ namespace SEOJIN_TMES.Client.Forms.Common
 {
     /// <summary>
     /// 카드형 타일 — <b>상단 색 띠 + 위쪽 작은 코드 + 가운데 큰 글자 + 아래 보조 문구</b>.
+    /// 큰 글자가 길 때는 두 가지 중 하나로 맞춘다 — 글자를 줄이거나(<see cref="AutoFitText"/>, 로그인 워크스테이션 카드),
+    /// 줄을 바꾸고 카드를 키우거나(<see cref="WrapTitle"/>, 알람 코드 카드).
     /// 대시보드 등급 카드 시안과 같은 모양으로, 눌러서 고르는 타일로 쓴다.
     ///
     /// 고른 상태(<see cref="Selected"/>)는 강조 색으로 옅게 칠하고 테두리를 두르며 우상단에 체크 표시를 단다 —
@@ -25,6 +27,12 @@ namespace SEOJIN_TMES.Client.Forms.Common
         /// <summary>글자 자동 조절 때 큰 글자를 더 줄이지 않는 하한(px).</summary>
         private const float MinTitlePixel = 11f;
 
+        /// <summary>카드의 기본(최소) 높이 — 큰 글자가 한 줄일 때의 높이다.</summary>
+        public const int MinHeight = 104;
+
+        private const TextFormatFlags WrapFlags =
+            TextFormatFlags.Left | TextFormatFlags.WordBreak | TextFormatFlags.TextBoxControl | TextFormatFlags.NoPadding;
+
         private Font _captionFont = AppTheme.SmallFont;
         private Font _titleFont = AppTheme.CardTitleFont;
         private Font _subFont = AppTheme.SmallFont;
@@ -36,6 +44,7 @@ namespace SEOJIN_TMES.Client.Forms.Common
         private bool _selected;
         private bool _hovered;
         private bool _autoFitText;
+        private bool _wrapTitle;
 
         public CardTile()
         {
@@ -45,7 +54,7 @@ namespace SEOJIN_TMES.Client.Forms.Common
             // 포커스를 받지 않는다 — 받으면 스크롤 패널(FlowLayoutPanel.AutoScroll)이 누른 카드를 화면 안으로 끌어오느라
             // 목록을 어중간하게 스크롤해 윗줄 카드의 상단이 잘려 보였다(실측: 3번째 줄 카드를 누르면 40px 스크롤).
             SetStyle(ControlStyles.Selectable, false);
-            Size = new Size(200, 104);
+            Size = new Size(200, MinHeight);
             Cursor = Cursors.Hand;
             BackColor = Color.Transparent;
         }
@@ -64,6 +73,26 @@ namespace SEOJIN_TMES.Client.Forms.Common
 
         /// <summary>고른 타일 — 옅은 강조 색 바탕 + 강조 색 테두리 + 우상단 체크.</summary>
         public bool Selected { get => _selected; set { _selected = value; Invalidate(); } }
+
+        /// <summary>
+        /// 큰 글자가 카드 폭을 넘으면 줄을 바꾼다(끄면 한 줄로 그리고 넘치는 부분은 …로 줄인다).
+        /// 서버가 준 이름 · 언어에 따라 길이가 크게 달라지는 알람 명에 쓴다 —
+        /// 카드 높이는 <see cref="GetPreferredHeight"/>로 구해 호출한 쪽이 맞춘다.
+        /// </summary>
+        public bool WrapTitle { get => _wrapTitle; set { _wrapTitle = value; Invalidate(); } }
+
+        /// <summary>줄바꿈한 큰 글자가 시작하는 높이 — 위쪽 코드 바로 아래.</summary>
+        private int WrappedTitleTop => AccentHeight + 10 + _captionFont.Height + 8;
+
+        /// <summary>
+        /// 이 폭일 때 큰 글자를 줄바꿈해 다 보여 주는 데 필요한 카드 높이(최소 <see cref="MinHeight"/>).
+        /// </summary>
+        public int GetPreferredHeight(int width)
+        {
+            var textWidth = Math.Max(1, width - Pad * 2);
+            var text = TextRenderer.MeasureText(_title ?? string.Empty, _titleFont, new Size(textWidth, int.MaxValue), WrapFlags);
+            return Math.Max(MinHeight, WrappedTitleTop + text.Height + Pad);
+        }
 
         /// <summary>
         /// 켜면 글자 크기를 카드 높이에 맞춰 정하고, 큰 글자가 카드 폭을 넘으면 맞을 때까지 줄인다.
@@ -165,10 +194,21 @@ namespace SEOJIN_TMES.Client.Forms.Common
             TextRenderer.DrawText(g, _caption, _captionFont,
                 new Rectangle(Pad, AccentHeight + 10, textWidth - CheckSize, _captionFont.Height), AppTheme.TextMuted, flags);
 
-            // 가운데 큰 글자 — 카드 세로 가운데에 놓는다.
-            var titleTop = (Height - _titleFont.Height) / 2 + 2;
-            TextRenderer.DrawText(g, _title, _titleFont,
-                new Rectangle(Pad, titleTop, textWidth, _titleFont.Height), _selected ? _accent : AppTheme.TextPrimary, flags);
+            var titleColor = _selected ? _accent : AppTheme.TextPrimary;
+            if (_wrapTitle)
+            {
+                // 줄바꿈 — 코드 아래 남은 영역의 세로 가운데에 놓는다(같은 줄 카드끼리 높이를 맞춰도 글자가 위로 쏠리지 않게).
+                var top = WrappedTitleTop;
+                TextRenderer.DrawText(g, _title, _titleFont,
+                    new Rectangle(Pad, top, textWidth, Height - top - Pad), titleColor, WrapFlags | TextFormatFlags.VerticalCenter);
+            }
+            else
+            {
+                // 한 줄 — 카드 세로 가운데에 놓는다.
+                var titleTop = (Height - _titleFont.Height) / 2 + 2;
+                TextRenderer.DrawText(g, _title, _titleFont,
+                    new Rectangle(Pad, titleTop, textWidth, _titleFont.Height), titleColor, flags);
+            }
 
             if (!string.IsNullOrEmpty(_subText))
             {

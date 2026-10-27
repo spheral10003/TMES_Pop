@@ -31,9 +31,17 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         // 알람 유형(대분류) 코드는 서버 스펙으로 고정된 6가지다. 코드는 그대로 쓰고 표시 문구만 다국어로 바꾼다.
         private readonly string[] _alarmTypes = { "EQP", "QLT", "MAT", "PRD", "EHS", "SYS" };
 
-        private readonly Size _typeTileSize = new Size(182, 104);
-        private readonly Size _codeTileSize = new Size(220, 104);
+        private readonly Size _typeTileSize = new Size(182, CardTile.MinHeight);
         private readonly Padding _tileMargin = new Padding(0, 0, 10, 10);
+
+        /// <summary>알람 코드 카드는 창 폭과 상관없이 한 줄에 4장 — 폭은 목록 폭에서 나눠 구한다(<see cref="LayoutCodeTiles"/>).</summary>
+        private const int CodeTilesPerRow = 4;
+
+        /// <summary>
+        /// 창을 줄일 수 있는 한계. 이보다 작으면 알람 유형 카드가 세 줄로 넘어가 알람 코드 목록이 한 줄도 안 남는다.
+        /// (폭 820이면 유형 카드가 한 줄에 4장 → 두 줄, 높이 620이면 그 아래 알람 코드 카드가 한 줄 이상 보인다.)
+        /// </summary>
+        private readonly Size _minimumFormSize = new Size(820, 620);
 
         private ApiClientFactory _apiClient;
         private PopProcessKey _key;
@@ -62,6 +70,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
             ApplyTheme();
             DialogChrome.Apply(this, pnlTitle, lblClose);
+            DialogChrome.EnableResizeGrip(pnlGrip);
+            MinimumSize = _minimumFormSize;
             ShowTypeTiles();
         }
 
@@ -73,6 +83,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             AppTheme.DialogFlatButton(btnSend, AppTheme.Amber);
             pnlBody.BackColor = AppTheme.Surface;
             pnlFooter.BackColor = AppTheme.Surface;
+            pnlGrip.BackColor = AppTheme.Surface;
 
             foreach (var label in new[] { lblTypeTitle, lblCodeTitle })
             {
@@ -207,18 +218,52 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 if (codes.Count == 0)
                     lblCodeTitle.Text = Language.AdminAlarm_ListTitle + "  ·  " + Language.AdminAlarm_NoTypes;
 
+                flowCodes.SuspendLayout();
                 foreach (var alarm in codes)
                 {
-                    var tile = CreateTile(_codeTileSize, AppTheme.AlarmGradeColor(alarm.AlarmGrade));
+                    var tile = CreateTile(new Size(1, CardTile.MinHeight), AppTheme.AlarmGradeColor(alarm.AlarmGrade));
                     tile.Tag = alarm;
                     tile.Caption = alarm.AlarmTypeCode;
                     tile.Title = alarm.AlarmTypeName;
+                    tile.WrapTitle = true;
                     tile.Click += CodeTile_Click;
                     flowCodes.Controls.Add(tile);
                 }
+                LayoutCodeTiles();
+                flowCodes.ResumeLayout();
             }
 
             UpdateSendButton();
+        }
+
+        /// <summary>창 크기가 바뀌면 알람 코드 카드의 폭 · 높이를 다시 맞춘다.</summary>
+        private void flowCodes_SizeChanged(object sender, EventArgs e) => LayoutCodeTiles();
+
+        /// <summary>
+        /// 알람 코드 카드 크기 — 폭은 목록 폭을 4등분하고, 높이는 알람 명이 줄바꿈된 만큼 늘린다.
+        /// 같은 줄 4장은 그중 가장 높은 카드에 맞춰 높이를 통일해 줄이 들쭉날쭉하지 않게 한다.
+        ///
+        /// 폭은 세로 스크롤바 자리를 항상 비워 두고 계산한다 — 스크롤바가 생겼다 없어질 때마다 폭이 바뀌면
+        /// 높이가 다시 바뀌고, 그 때문에 스크롤바가 다시 바뀌는 식으로 배치가 흔들린다.
+        /// </summary>
+        private void LayoutCodeTiles()
+        {
+            var tiles = flowCodes.Controls.OfType<CardTile>().ToList();
+            if (tiles.Count == 0)
+                return;
+
+            var available = flowCodes.Width - SystemInformation.VerticalScrollBarWidth - 1;
+            var width = Math.Max(1, available / CodeTilesPerRow - _tileMargin.Horizontal);
+
+            flowCodes.SuspendLayout();
+            for (var start = 0; start < tiles.Count; start += CodeTilesPerRow)
+            {
+                var row = tiles.Skip(start).Take(CodeTilesPerRow).ToList();
+                var height = row.Max(t => t.GetPreferredHeight(width));
+                foreach (var tile in row)
+                    tile.Size = new Size(width, height);
+            }
+            flowCodes.ResumeLayout();
         }
 
         private void CodeTile_Click(object sender, EventArgs e)
