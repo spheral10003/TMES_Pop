@@ -20,7 +20,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// 색·폰트·문구는 AdminAlarmForm.cs의 Initialize()에서 런타임에 넣고, 타일(CardTile)도 조회 결과로 런타임에 만든다.
         ///
         /// 일반 .NET Form — Windows 제목 줄은 없애고(FormBorderStyle.None) pnlTitle + lblTitle이 제목 줄 역할을 한다.
-        /// 구성: 제목 띠 + [알람 유형 타일] + [알람 코드 타일] + 하단 [닫기][등록].
+        /// 구성: 제목 띠(오른쪽 X 닫기) + [알람 유형 타일] + [알람 코드 타일] + 하단 [닫기][등록].
+        /// lblClose는 lblTitle(Fill)보다 먼저 Add해 위에 그려지게 둔다(FileUploadForm과 같은 구성).
         /// 도킹 순서 주의: pnlBody(Fill) → pnlFooter(Bottom) → pnlTitle(Top).
         ///                 pnlBody 안은 flowCodes(Fill) → lblCodeTitle → flowTypes → lblTypeTitle(모두 Top).
         ///                 나중에 Add한 것이 위에 놓인다.
@@ -28,6 +29,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private void InitializeComponent()
         {
             this.pnlTitle = new System.Windows.Forms.Panel();
+            this.lblClose = new System.Windows.Forms.Label();
             this.lblTitle = new System.Windows.Forms.Label();
             this.pnlBody = new System.Windows.Forms.Panel();
             this.flowCodes = new System.Windows.Forms.FlowLayoutPanel();
@@ -44,12 +46,28 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             //
             // pnlTitle
             //
+            this.pnlTitle.Controls.Add(this.lblClose);
             this.pnlTitle.Controls.Add(this.lblTitle);
             this.pnlTitle.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlTitle.Location = new System.Drawing.Point(0, 0);
             this.pnlTitle.Name = "pnlTitle";
             this.pnlTitle.Size = new System.Drawing.Size(1200, 48);
             this.pnlTitle.TabIndex = 0;
+            //
+            // lblClose
+            //
+            this.lblClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblClose.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lblClose.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.lblClose.Location = new System.Drawing.Point(1156, 8);
+            this.lblClose.Name = "lblClose";
+            this.lblClose.Size = new System.Drawing.Size(32, 32);
+            this.lblClose.TabIndex = 1;
+            this.lblClose.Text = "X";
+            this.lblClose.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblClose.Click += new System.EventHandler(this.btnClose_Click);
+            this.lblClose.MouseEnter += new System.EventHandler(this.lblClose_MouseEnter);
+            this.lblClose.MouseLeave += new System.EventHandler(this.lblClose_MouseLeave);
             //
             // lblTitle
             //
@@ -189,6 +207,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
         private System.Windows.Forms.Panel pnlTitle;
         private System.Windows.Forms.Label lblTitle;
+        private System.Windows.Forms.Label lblClose;
         private System.Windows.Forms.Panel pnlBody;
         private System.Windows.Forms.Label lblTypeTitle;
         private System.Windows.Forms.FlowLayoutPanel flowTypes;

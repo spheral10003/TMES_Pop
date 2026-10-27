@@ -61,13 +61,14 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             btnClose.Text = Language.Common_Close;
 
             ApplyTheme();
-            DialogChrome.Apply(this, pnlTitle);
+            DialogChrome.Apply(this, pnlTitle, lblClose);
             ShowTypeTiles();
         }
 
         private void ApplyTheme()
         {
             AppTheme.TitleBar(pnlTitle, lblTitle, AppTheme.Amber);
+            AppTheme.TitleBarClose(lblClose, AppTheme.Amber);
             pnlBody.BackColor = AppTheme.Surface;
             pnlFooter.BackColor = AppTheme.Surface;
 
@@ -184,8 +185,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// 고른 유형에 연결된 [알람 코드] 타일 — 위에 등급(P1 긴급 등), 가운데 크게 알람 코드, 아래 알람 명.
-        /// 바탕 띠는 등급 색이라 급한 알람이 먼저 눈에 들어온다. 유형을 바꾸면 고른 알람 코드는 비운다.
+        /// 고른 유형에 연결된 [알람 코드] 타일 — 유형 타일과 같은 배치로, 위에 작게 알람 코드, 가운데 크게 알람 명.
+        /// 상단 띠는 등급 색이라 급한 알람이 먼저 눈에 들어온다. 유형을 바꾸면 고른 알람 코드는 비운다.
         /// </summary>
         private void ShowCodeTiles()
         {
@@ -207,9 +208,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 {
                     var tile = CreateTile(_codeTileSize, AppTheme.AlarmGradeColor(alarm.AlarmGrade));
                     tile.Tag = alarm;
-                    tile.Caption = alarm.AlarmGrade + " " + CodeText(alarm.AlarmGrade);
-                    tile.Title = alarm.AlarmTypeCode;
-                    tile.SubText = alarm.AlarmTypeName;
+                    tile.Caption = alarm.AlarmTypeCode;
+                    tile.Title = alarm.AlarmTypeName;
                     tile.Click += CodeTile_Click;
                     flowCodes.Controls.Add(tile);
                 }
@@ -318,10 +318,17 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             Close();
         }
 
+        /// <summary>하단 [닫기]와 제목 띠의 X 공용.</summary>
         private void btnClose_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.Cancel;
             Close();
         }
+
+        private void lblClose_MouseEnter(object sender, EventArgs e) =>
+            lblClose.BackColor = AppTheme.TitleBarCloseHover(AppTheme.Amber);
+
+        private void lblClose_MouseLeave(object sender, EventArgs e) =>
+            lblClose.BackColor = AppTheme.Amber;
     }
 }

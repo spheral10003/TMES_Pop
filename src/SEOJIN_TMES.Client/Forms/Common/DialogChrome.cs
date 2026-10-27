@@ -41,7 +41,9 @@ namespace SEOJIN_TMES.Client.Forms.Common
         /// </summary>
         /// <param name="form">팝업 폼(XtraForm · 일반 .NET Form 모두).</param>
         /// <param name="header">제목 줄을 대신할 색 띠. 이 위를 끌면 창이 움직인다.</param>
-        public static void Apply(Form form, Control header)
+        /// <param name="clickables">띠 안에 있지만 끌기가 아니라 클릭을 받아야 하는 컨트롤(라벨로 만든 X 닫기 등).
+        /// 끌기를 붙이면 누르는 순간 창 이동이 시작돼 Click이 오지 않는다.</param>
+        public static void Apply(Form form, Control header, params Control[] clickables)
         {
             // 테두리 스타일을 바꾸면 바깥 크기(Size)는 그대로인 채 안쪽(ClientSize)이 제목 줄·테두리만큼
             // 넓어진다 — 디자이너에서 잡아 둔 내부 배치가 그만큼 어긋나므로 원래 값으로 되돌린다.
@@ -58,21 +60,21 @@ namespace SEOJIN_TMES.Client.Forms.Common
                 client.Height + BorderThickness * 2);
 
             if (header != null)
-                EnableDrag(header);
+                EnableDrag(header, clickables);
         }
 
         /// <summary>
         /// 헤더와 그 안의 <b>클릭을 받지 않는</b> 자식(아이콘·제목 라벨)에 끌기를 붙인다.
         /// 자식까지 붙이지 않으면 제목 글자 위를 잡았을 때 창이 따라오지 않는다.
         /// </summary>
-        private static void EnableDrag(Control header)
+        private static void EnableDrag(Control header, Control[] clickables)
         {
             Subscribe(header);
 
             foreach (Control child in header.Controls)
             {
                 // 버튼은 제 역할이 있다(헤더의 닫기 X 등).
-                if (child is SimpleButton || child is Button)
+                if (child is SimpleButton || child is Button || Array.IndexOf(clickables, child) >= 0)
                     continue;
 
                 Subscribe(child);

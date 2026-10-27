@@ -553,6 +553,20 @@ namespace SEOJIN_TMES.Client.Theme
         }
 
         /// <summary>
+        /// 제목 띠 오른쪽의 X 닫기 — 띠와 같은 바탕에 흰 X와 흰 테두리(FileUploadForm의 X와 같은 모양).
+        /// 마우스를 올리면 <see cref="TitleBarCloseHover"/>로 띠 색을 한 톤 어둡게 바꿔 누를 수 있는 곳임을 보인다.
+        /// </summary>
+        public static void TitleBarClose(Label close, Color accent)
+        {
+            close.BackColor = accent;
+            close.ForeColor = Color.White;
+            close.Font = new Font(FontFamily, 13F, FontStyle.Bold);
+        }
+
+        /// <summary>X 닫기 위에 마우스가 있을 때의 바탕(띠 색보다 한 톤 어둡게).</summary>
+        public static Color TitleBarCloseHover(Color accent) => ControlPaint.Dark(accent, 0.1f);
+
+        /// <summary>
         /// 조회 조건 폼(LayoutControl) — 라벨 열 정렬·간격·리사이즈를 컨트롤이 맡는다.
         ///
         /// DevExpress <see cref="LayoutControl"/>을 쓰면 조건이 늘거나 창 폭이 바뀌어도
