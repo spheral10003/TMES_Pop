@@ -134,7 +134,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             }
             catch (Exception ex)
             {
-                AppLog.Error("[POP] 알람 코드 조회 중 예외", ex);
+                ServerLog.Unexpected("POP 알람 코드 조회", ex);
             }
         }
 
@@ -320,7 +320,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             }
             catch (Exception ex)
             {
-                AppLog.Error("[POP] 알람 등록 중 예외", ex);
+                ServerLog.Unexpected("POP 알람 등록", ex);
             }
         }
 

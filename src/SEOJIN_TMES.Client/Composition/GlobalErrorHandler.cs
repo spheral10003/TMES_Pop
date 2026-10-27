@@ -34,17 +34,21 @@ namespace SEOJIN_TMES.Client.Composition
             TaskScheduler.UnobservedTaskException += (s, e) =>
             {
                 e.SetObserved();
-                AppLog.Error("[전역] 처리되지 않은 백그라운드 작업 예외", e.Exception);
+                ServerLog.Critical("처리되지 않은 백그라운드 작업", e.Exception);
             };
         }
 
         /// <summary>안내 창을 띄운다. 창 띄우기 자체가 또 실패해도 앱을 죽이지 않는다.</summary>
         private static void Report(Exception exception, string origin)
         {
-            AppLog.Error($"[전역] 처리되지 않은 예외 ({origin})", exception);
-
             if (exception == null)
+            {
+                AppLog.Error($"[전역] 처리되지 않은 예외 ({origin}) - 예외 객체 없음");
                 return;
+            }
+
+            // 화면이 감싸지 못한 예외는 시스템 차원의 치명적 오류로 보고 서버로도 보낸다(로컬 파일에도 남는다).
+            ServerLog.Critical(origin, exception);
 
             try
             {

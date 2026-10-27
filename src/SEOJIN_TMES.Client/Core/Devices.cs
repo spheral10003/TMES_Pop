@@ -33,12 +33,30 @@ namespace SEOJIN_TMES.Client.Core
         {
             _manager = new NutrunnerManager();
 
+            // 접속 결과와 설정 변경 이력은 화면과 상관없이 항상 서버로 보낸다 — 매니저를 만드는 이 자리 한 곳에서 건다.
+            _manager.ConnectAttempted += OnConnectAttempted;
+            _manager.SettingWritten += OnSettingWritten;
+
             //foreach (var info in LoadEquipments())
             //{
             //    TryAdd(info);
             //}
 
             //AppLog.Step($"설비 {_manager.Count}대 등록 완료");
+        }
+
+        /// <summary>장비 접속 성공/실패 — IP·포트와 함께 서버로 보낸다(통신 스레드에서 불린다).</summary>
+        private void OnConnectAttempted(object sender, NutrunnerConnectAttemptEventArgs e)
+        {
+            ServerLog.EquipmentConnected(e.Code, e.Channel, e.Host, e.Port, e.Success, e.Reason);
+        }
+
+        /// <summary>설정 레지스터 쓰기의 송신 · 응답 이력 — 서버로 보낸다(통신 스레드에서 불린다).</summary>
+        private void OnSettingWritten(object sender, NutrunnerSettingWriteEventArgs e)
+        {
+            var request = $"WriteSingleRegister({e.Register}={(ushort)e.Register})";
+            var values = string.Join(",", e.Values);
+            ServerLog.ModbusWritten(e.Code, e.Host, e.Port, request, e.IsResponse, values, e.Success);
         }
 
         private static List<NutrunnerInfo> LoadEquipments()

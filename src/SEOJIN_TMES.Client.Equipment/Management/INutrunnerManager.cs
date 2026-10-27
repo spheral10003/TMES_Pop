@@ -24,6 +24,8 @@ namespace SEOJIN_TMES.Client.Equipment.Management
         event EventHandler<NutrunnerRegisterEventArgs>? RegisterDataReceived;
         event EventHandler<NutrunnerFasteningEventArgs>? FasteningReceived;
         event EventHandler<AlarmEventArgs>? AlarmOccurred;
+        event EventHandler<NutrunnerConnectAttemptEventArgs>? ConnectAttempted;
+        event EventHandler<NutrunnerSettingWriteEventArgs>? SettingWritten;
 
         /// <summary>장비를 등록한다. 같은 ID가 이미 있으면 예외.</summary>
         INutrunner Add(NutrunnerInfo info);

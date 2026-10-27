@@ -4,6 +4,7 @@ using SEOJIN_TMES.Client.Modbus.Abstractions;
 using SEOJIN_TMES.Client.Modbus.Protocol;
 using SEOJIN_TMES.Client.Modbus.Transport;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Sockets;
 
@@ -58,6 +59,13 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
         private volatile bool _eventEnabled;
         private int _eventEnableRetry;
 
+        /// <summary>
+        /// 각 채널이 접속을 시도하는 중인지. 접속 실패는 별도 이벤트 없이 ErrorOccurred로만 올라오므로,
+        /// 시도 중에 난 오류를 "접속 실패"로 한 번만 보고하기 위해 둔다.
+        /// </summary>
+        private volatile bool _requestConnecting;
+        private volatile bool _eventConnecting;
+
         private bool _disposed;
 
         /// <summary>장비가 EventDataEnable 쓰기를 받았음을 응답으로 확인했는지 여부.</summary>
@@ -68,6 +76,8 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
         public event EventHandler<Exception>? ErrorOccurred;
         public event EventHandler<NutrunnerRegisterEventArgs>? RegisterDataReceived;
         public event EventHandler<NutrunnerFasteningEventArgs>? FasteningReceived;
+        public event EventHandler<NutrunnerConnectAttemptEventArgs>? ConnectAttempted;
+        public event EventHandler<NutrunnerSettingWriteEventArgs>? SettingWritten;
 
         public NutrunnerInfo Info { get; }
 
@@ -111,18 +121,22 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
 
             _client.Connected += OnClientConnected;
             _client.Disconnected += OnClientDisconnected;
-            _client.ErrorOccurred += OnError;
+            _client.ErrorOccurred += OnClientError;
             _client.ResponseReceived += OnResponseReceived;
 
             _eventTransport.Connected += OnEventTransportConnected;
             _eventTransport.DataReceived += OnEventDataReceived;
-            _eventTransport.ErrorOccurred += OnError;
+            _eventTransport.ErrorOccurred += OnEventTransportError;
             _eventTransport.Disconnected += OnEventTransportDisconnected;
         }
 
-       
 
-        public void Connect() => _client.Connect(Info.Ip, Info.Port);
+
+        public void Connect()
+        {
+            _requestConnecting = true;
+            _client.Connect(Info.Ip, Info.Port);
+        }
 
         public void ConnectEventChannel()
         {
@@ -131,6 +145,12 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
                 return;
             }
 
+            ConnectEventTransport();
+        }
+
+        private void ConnectEventTransport()
+        {
+            _eventConnecting = true;
             _eventTransport.Connect(Info.Ip, Info.ResolvedEventPort);
         }
 
@@ -180,6 +200,7 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
             }
 
             WriteRegister(NutrunnerRegister.Torque, (ushort) raw);
+            RaiseSettingWritten(NutrunnerRegister.Torque, false, true, new[] { (ushort)raw });
             return true;
         }
 
@@ -190,7 +211,9 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
                 return false;
             }
 
-            WriteRegister(NutrunnerRegister.DriverLock, locked? DriverLockValue : DriverUnlockValue);
+            ushort value = locked ? DriverLockValue : DriverUnlockValue;
+            WriteRegister(NutrunnerRegister.DriverLock, value);
+            RaiseSettingWritten(NutrunnerRegister.DriverLock, false, true, new[] { value });
             return true;
         }
 
@@ -242,8 +265,11 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
 
         private void OnClientConnected(object? sender, EventArgs e)
         {
+            _requestConnecting = false;
+            RaiseConnectAttempted("Request", Info.Port, true, null);
+
             // Request 채널이 붙으면 Event Transport 채널도 연결한다.
-            _eventTransport.Connect(Info.Ip, Info.ResolvedEventPort);
+            ConnectEventTransport();
             Connected?.Invoke(this, new EquipmentConnectionEventArgs(Info.Code, true));
         }
 
@@ -255,6 +281,9 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
 
         private void OnEventTransportConnected(object? sender, EventArgs e)
         {
+            _eventConnecting = false;
+            RaiseConnectAttempted("Event", Info.ResolvedEventPort, true, null);
+
             // 이벤트 채널 핸드셰이크: EventDataEnable 레지스터 ON.
             ResetEventHandshake();
             //WriteRegister(NutrunnerRegister.EventDataEnable, 2);
@@ -282,6 +311,14 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
                 _eventEnabled = true;
             }
 
+            // 설정 레지스터 쓰기의 응답만 이력으로 올린다(핸드셰이크 · Ack · Alive 응답은 제외).
+            if (response.FunctionCode == ModbusFunctionCode.WriteSingleRegister
+                && (response.StartAddress == (ushort)NutrunnerRegister.Torque
+                    || response.StartAddress == (ushort)NutrunnerRegister.DriverLock))
+            {
+                RaiseSettingWritten((NutrunnerRegister)response.StartAddress, true, !response.IsError, response.Data);
+            }
+
             RegisterDataReceived?.Invoke(this,
                 new NutrunnerRegisterEventArgs(Info.Code, !response.IsError, response.StartAddress, response.Data));
         }
@@ -302,7 +339,33 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
             WriteRegister(NutrunnerRegister.EventAck, 1);
         }
 
-        private void OnError(object? sender, Exception exception) => ErrorOccurred?.Invoke(this, exception);
+        private void OnClientError(object? sender, Exception exception)
+        {
+            if (_requestConnecting && !_client.IsConnected)
+            {
+                _requestConnecting = false;
+                RaiseConnectAttempted("Request", Info.Port, false, exception.Message);
+            }
+
+            ErrorOccurred?.Invoke(this, exception);
+        }
+
+        private void OnEventTransportError(object? sender, Exception exception)
+        {
+            if (_eventConnecting && !_eventTransport.IsConnected)
+            {
+                _eventConnecting = false;
+                RaiseConnectAttempted("Event", Info.ResolvedEventPort, false, exception.Message);
+            }
+
+            ErrorOccurred?.Invoke(this, exception);
+        }
+
+        private void RaiseConnectAttempted(string channel, int port, bool success, string? reason)
+            => ConnectAttempted?.Invoke(this, new NutrunnerConnectAttemptEventArgs(Info.Code, channel, Info.Ip, port, success, reason));
+
+        private void RaiseSettingWritten(NutrunnerRegister register, bool isResponse, bool success, IReadOnlyList<ushort> values)
+            => SettingWritten?.Invoke(this, new NutrunnerSettingWriteEventArgs(Info.Code, Info.Ip, Info.Port, register, isResponse, success, values));
 
 
 
@@ -317,12 +380,12 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
 
             _client.Connected -= OnClientConnected;
             _client.Disconnected -= OnClientDisconnected;
-            _client.ErrorOccurred -= OnError;
+            _client.ErrorOccurred -= OnClientError;
             _client.ResponseReceived -= OnResponseReceived;
 
             _eventTransport.Connected -= OnEventTransportConnected;
             _eventTransport.DataReceived -= OnEventDataReceived;
-            _eventTransport.ErrorOccurred -= OnError;
+            _eventTransport.ErrorOccurred -= OnEventTransportError;
             _eventTransport.Disconnected -= OnEventTransportDisconnected;
 
             _client.Dispose();

@@ -259,7 +259,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             catch (Exception ex)
             {
                 // 닫히는 중이라 창은 띄우지 않는다.
-                AppLog.Error("[POP] 설비 연결 해제 중 예외", ex);
+                ServerLog.Unexpected("POP 설비 연결 해제", ex);
             }
 
             // 들고 있던 도면 이미지를 해제한다.

@@ -35,6 +35,12 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
         /// <summary>Event Transport 채널의 체결 결과 수신.</summary>
         event EventHandler<NutrunnerFasteningEventArgs>? FasteningReceived;
 
+        /// <summary>접속 시도 결과(성공/실패, IP·포트 포함). Request · Event 채널 모두.</summary>
+        event EventHandler<NutrunnerConnectAttemptEventArgs>? ConnectAttempted;
+
+        /// <summary>설정 레지스터(토크 · 드라이버 잠금) 쓰기의 송신과 응답.</summary>
+        event EventHandler<NutrunnerSettingWriteEventArgs>? SettingWritten;
+
         void ReadRegisters(ushort address, ushort count,
             ModbusFunctionCode function = ModbusFunctionCode.ReadInputRegisters);
 

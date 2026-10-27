@@ -22,6 +22,8 @@ namespace SEOJIN_TMES.Client.Equipment.Management
         public event EventHandler<NutrunnerRegisterEventArgs>? RegisterDataReceived;
         public event EventHandler<NutrunnerFasteningEventArgs>? FasteningReceived;
         public event EventHandler<AlarmEventArgs>? AlarmOccurred;
+        public event EventHandler<NutrunnerConnectAttemptEventArgs>? ConnectAttempted;
+        public event EventHandler<NutrunnerSettingWriteEventArgs>? SettingWritten;
 
         public int Count
         {
@@ -51,6 +53,8 @@ namespace SEOJIN_TMES.Client.Equipment.Management
             device.Disconnected += OnConnectionChanged;
             device.RegisterDataReceived += OnRegisterDataReceived;
             device.FasteningReceived += OnFasteningReceived;
+            device.ConnectAttempted += OnConnectAttempted;
+            device.SettingWritten += OnSettingWritten;
             sequence.AlarmOccurred += OnAlarmOccurred;
 
             lock (_sync)
@@ -257,6 +261,8 @@ namespace SEOJIN_TMES.Client.Equipment.Management
             device.Disconnected -= OnConnectionChanged;
             device.RegisterDataReceived -= OnRegisterDataReceived;
             device.FasteningReceived -= OnFasteningReceived;
+            device.ConnectAttempted -= OnConnectAttempted;
+            device.SettingWritten -= OnSettingWritten;
             sequence.AlarmOccurred -= OnAlarmOccurred;
         }
 
@@ -271,5 +277,11 @@ namespace SEOJIN_TMES.Client.Equipment.Management
 
         private void OnAlarmOccurred(object? sender, AlarmEventArgs e)
             => AlarmOccurred?.Invoke(this, e);
+
+        private void OnConnectAttempted(object? sender, NutrunnerConnectAttemptEventArgs e)
+            => ConnectAttempted?.Invoke(this, e);
+
+        private void OnSettingWritten(object? sender, NutrunnerSettingWriteEventArgs e)
+            => SettingWritten?.Invoke(this, e);
     }
 }

@@ -292,7 +292,7 @@ namespace SEOJIN_TMES.Client.Forms
                 _setting.SaveCulture(_loginCulture.Name);
                 Global.Instance.Settings.CurrentUser = _currentUser;
 
-                AppLog.Step($"로그인 성공 - UserId={userId}");
+                ServerLog.LoggedIn(userId, corpCd, station.WorkstationName);
 
                 DialogResult = DialogResult.OK;
                 Close();
@@ -315,7 +315,7 @@ namespace SEOJIN_TMES.Client.Forms
             }
             catch (Exception ex)
             {
-                AppLog.Error($"로그인 중 예외 - UserId={userId}", ex);
+                ServerLog.Unexpected("로그인", ex);
                 lblMessage.Text = $"{Language.Login_ConnectionErrorMessage}: {ex.Message}";
             }
             finally

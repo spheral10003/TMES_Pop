@@ -78,7 +78,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (isApiError)
                 AppLog.Warn($"[POP] {actionName} 실패 - {ex.Message}");
             else
-                AppLog.Error($"[POP] {actionName} 중 예외", ex);
+                ServerLog.Unexpected($"POP {actionName}", ex);   // API 오류가 아닌 것은 예기치 못한 오류 — 서버로도 보낸다
 
             if (IsDisposed || Disposing)
                 return;

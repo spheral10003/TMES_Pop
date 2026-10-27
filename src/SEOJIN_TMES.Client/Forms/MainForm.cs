@@ -98,6 +98,9 @@ namespace SEOJIN_TMES.Client.Forms
         private void MainForm_Load(object sender, EventArgs e)
         {
             Init();
+
+            // 시작·로그인 로그는 토큰이 생긴 뒤에야 보낼 수 있어 지금까지 모아 두었다 — 메인 화면이 뜨는 시점에 내보낸다.
+            ServerLog.Attach(_setting.ApiClients.ClientLogApiClient);
         }
 
         public void Init()
@@ -572,7 +575,7 @@ namespace SEOJIN_TMES.Client.Forms
             }
             catch (Exception ex)
             {
-                AppLog.Error("[알림] 미읽음 개수 조회 중 예외", ex);
+                ServerLog.Unexpected("알림 미읽음 개수 조회", ex);
             }
         }
 
@@ -694,7 +697,10 @@ namespace SEOJIN_TMES.Client.Forms
         private void Accordion_ElementClick(object sender, ElementClickEventArgs e)
         {
             if (e.Element.Tag is MenuNode node && node.IsScreen)
+            {
+                ServerLog.MenuClicked(node.Key, node.Text, _openScreens.ContainsKey(node.Key) ? "Focus" : "Open");
                 OpenOrFocusTab(node);
+            }
         }
 
         private void BuildMenu()
@@ -734,7 +740,7 @@ namespace SEOJIN_TMES.Client.Forms
                 if (IsDisposed || Disposing) 
                     return; AppMessageBox.Warn(this, ex.Message, Language.MainForm_Title); 
             }
-            catch (Exception ex) { AppLog.Error("[메뉴] 메뉴 조회 중 예외", ex); }
+            catch (Exception ex) { ServerLog.Unexpected("메뉴 조회", ex); }
         }
 
         /// <summary>

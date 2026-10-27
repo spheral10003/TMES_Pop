@@ -140,7 +140,7 @@ namespace SEOJIN_TMES.Client.Forms
             }
             catch (Exception ex)
             {
-                AppLog.Warn($"사용자 프로필 조회 실패 - {ex.Message}");
+                ServerLog.Unexpected("사용자 프로필 조회", ex);
                 ShowLoadFailed(Language.UserProfile_LoadFailed);
             }
         }

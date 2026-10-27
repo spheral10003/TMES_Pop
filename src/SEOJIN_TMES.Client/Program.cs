@@ -1,4 +1,5 @@
 using SEOJIN_TMES.Client.Common.Logging;
+using SEOJIN_TMES.Client.Composition;
 using SEOJIN_TMES.Client.Core;
 using SEOJIN_TMES.Client.Forms;
 using System;
@@ -29,6 +30,9 @@ namespace SEOJIN_TMES.Client
                     AppLog.Step("애플리케이션 시작");
                     AppLog.Step($"로그 파일 - {AppLog.CurrentFilePath ?? "(파일 기록 불가 - 콘솔/출력 창만 사용)"}");
 
+                    // 시작 로그는 지금 모아 두었다가 메인 화면이 뜰 때(MainForm Load) 로그인 로그와 함께 서버로 나간다.
+                    ServerLog.AppStarted(AppVersion.Current);
+
                     Global.Initialize();
 
                     AppLog.Step("로그인 화면 표시");
@@ -47,7 +51,7 @@ namespace SEOJIN_TMES.Client
                 }
                 catch (Exception ex)
                 {
-                    AppLog.Error("애플리케이션 실행 중 처리되지 않은 예외", ex);
+                    ServerLog.Critical("애플리케이션 실행", ex);
                 }
                 finally
                 {
