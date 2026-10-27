@@ -856,16 +856,10 @@
     <value>알람 조회 / 등록</value>
   </data>
   <data name="AdminAlarm_Type" xml:space="preserve">
-    <value>알람 구분</value>
-  </data>
-  <data name="AdminAlarm_Grade" xml:space="preserve">
-    <value>알람 등급</value>
-  </data>
-  <data name="AdminAlarm_Unit" xml:space="preserve">
-    <value>건</value>
+    <value>알람 유형</value>
   </data>
   <data name="AdminAlarm_ListTitle" xml:space="preserve">
-    <value>알람 코드 / 조치 내용</value>
+    <value>알람 코드</value>
   </data>
   <data name="AdminAlarm_Send" xml:space="preserve">
     <value>등록</value>

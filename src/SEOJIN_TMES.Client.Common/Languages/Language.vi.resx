@@ -858,14 +858,8 @@
   <data name="AdminAlarm_Type" xml:space="preserve">
     <value>Loại cảnh báo</value>
   </data>
-  <data name="AdminAlarm_Grade" xml:space="preserve">
-    <value>Cấp cảnh báo</value>
-  </data>
-  <data name="AdminAlarm_Unit" xml:space="preserve">
-    <value>mục</value>
-  </data>
   <data name="AdminAlarm_ListTitle" xml:space="preserve">
-    <value>Mã cảnh báo / Nội dung xử lý</value>
+    <value>Mã cảnh báo</value>
   </data>
   <data name="AdminAlarm_Send" xml:space="preserve">
     <value>Đăng ký</value>

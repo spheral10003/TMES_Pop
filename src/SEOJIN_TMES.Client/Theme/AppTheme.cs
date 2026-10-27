@@ -159,8 +159,8 @@ namespace SEOJIN_TMES.Client.Theme
         /// <summary>POP 화면의 워크스테이션/공정 상태 띠처럼 멀리서도 읽혀야 하는 큰 글자.</summary>
         public static Font BannerFont => new Font(FontFamily, 14F, FontStyle.Bold);
 
-        /// <summary>카드 타일의 큰 값(건수) — 카드에서 가장 먼저 읽혀야 하는 숫자.</summary>
-        public static Font CardValueFont => new Font(FontFamily, 20F, FontStyle.Bold);
+        /// <summary>카드 타일 가운데 큰 글자(알람 유형 명 · 알람 코드) — 카드에서 가장 먼저 읽혀야 하는 값.</summary>
+        public static Font CardTitleFont => new Font(FontFamily, 16F, FontStyle.Bold);
 
         /// <summary>
         /// 전역 스킨 + SVG 팔레트를 적용한다(DevExpress 벡터 스킨 기능).
