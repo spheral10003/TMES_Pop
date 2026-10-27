@@ -182,7 +182,10 @@ if (-not $Version) {
     try {
         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
         $res = Invoke-WebRequest -Uri "$DeployBaseUrl$appName.application" -UseBasicParsing -TimeoutSec 10
-        $current = Get-DeployedVersion ([xml]$res.Content)
+        # IIS가 .application 을 application/x-ms-application 으로 주면 Content 가 문자열이 아니라 byte[] 로 온다
+        # (그대로 [xml] 로 바꾸면 실패해 로컬 이전 게시본 기준으로 대체됐다).
+        $text = if ($res.Content -is [byte[]]) { [Text.Encoding]::UTF8.GetString($res.Content) } else { [string]$res.Content }
+        $current = Get-DeployedVersion ([xml]$text.TrimStart([char]0xFEFF))
         Write-Host "배포 서버 최신 버전: $current"
     }
     catch {
