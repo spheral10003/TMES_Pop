@@ -157,7 +157,7 @@
     <value>워크스테이션 선택</value>
   </data>
   <data name="Login_StationHint" xml:space="preserve">
-    <value>접속할 워크스테이션을 선택한 뒤 [확인]을 누르세요.</value>
+    <value>접속할 워크스테이션을 누르세요.</value>
   </data>
   <data name="Login_NoStation" xml:space="preserve">
     <value>선택할 수 있는 워크스테이션이 없습니다.</value>
@@ -401,6 +401,9 @@
   </data>
   <data name="WorkEntry_NoRouting" xml:space="preserve">
     <value>선택한 작업지시의 공정 정보가 없습니다.</value>
+  </data>
+  <data name="WorkEntry_NoWorkstation" xml:space="preserve">
+    <value>선택한 워크스테이션이 없어 공정을 시작할 수 없습니다.</value>
   </data>
   <data name="WorkEntryConfirm_Title" xml:space="preserve">
     <value>작업 진입 확인</value>

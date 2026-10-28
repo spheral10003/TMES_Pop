@@ -198,6 +198,7 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string WorkEntry_SelectWorkOrder => Get(nameof(WorkEntry_SelectWorkOrder));
         public static string WorkEntry_NoResult => Get(nameof(WorkEntry_NoResult));
         public static string WorkEntry_NoRouting => Get(nameof(WorkEntry_NoRouting));
+        public static string WorkEntry_NoWorkstation => Get(nameof(WorkEntry_NoWorkstation));
         public static string WorkEntryConfirm_Title => Get(nameof(WorkEntryConfirm_Title));
         public static string WorkEntryConfirm_ListTitle => Get(nameof(WorkEntryConfirm_ListTitle));
         public static string WorkEntryConfirm_Move => Get(nameof(WorkEntryConfirm_Move));

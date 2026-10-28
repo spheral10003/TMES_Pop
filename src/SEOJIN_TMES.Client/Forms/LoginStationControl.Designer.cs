@@ -23,7 +23,7 @@ namespace SEOJIN_TMES.Client.Forms
         ///
         /// Add 순서: flowStations(Fill) → lblHint(Top) → lblTitle(Top) → pnlFooter(Bottom).
         /// 나중에 Add된 컨트롤이 먼저 도킹되므로 이 순서를 바꾸지 말 것.
-        /// 버튼은 로그인 창의 [닫기]/[접속]과 같은 모양(Flat, 회색 테두리, 마우스 올리면 색)으로 둔다.
+        /// 카드를 누르면 바로 골라지므로 [확인] 버튼은 없다. [취소]는 Anchor=None으로 두어 폭이 바뀌어도 가운데에 남는다.
         /// </summary>
         private void InitializeComponent()
         {
@@ -32,7 +32,6 @@ namespace SEOJIN_TMES.Client.Forms
             this.lblTitle = new System.Windows.Forms.Label();
             this.pnlFooter = new System.Windows.Forms.Panel();
             this.btnCancel = new System.Windows.Forms.Button();
-            this.btnConfirm = new System.Windows.Forms.Button();
             this.pnlFooter.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -54,7 +53,7 @@ namespace SEOJIN_TMES.Client.Forms
             this.lblHint.Name = "lblHint";
             this.lblHint.Size = new System.Drawing.Size(688, 24);
             this.lblHint.TabIndex = 1;
-            this.lblHint.Text = "접속할 워크스테이션을 선택한 뒤 [확인]을 누르세요.";
+            this.lblHint.Text = "접속할 워크스테이션을 누르세요.";
             this.lblHint.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // lblTitle
@@ -71,7 +70,6 @@ namespace SEOJIN_TMES.Client.Forms
             // pnlFooter
             // 
             this.pnlFooter.Controls.Add(this.btnCancel);
-            this.pnlFooter.Controls.Add(this.btnConfirm);
             this.pnlFooter.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.pnlFooter.Location = new System.Drawing.Point(16, 246);
             this.pnlFooter.Name = "pnlFooter";
@@ -84,28 +82,15 @@ namespace SEOJIN_TMES.Client.Forms
             this.btnCancel.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Tomato;
             this.btnCancel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnCancel.Font = new System.Drawing.Font("Arial", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnCancel.Location = new System.Drawing.Point(157, 18);
+            this.btnCancel.Anchor = System.Windows.Forms.AnchorStyles.None;
+            this.btnCancel.Location = new System.Drawing.Point(263, 18);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(161, 40);
-            this.btnCancel.TabIndex = 1;
+            this.btnCancel.TabIndex = 0;
             this.btnCancel.Text = "취소";
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
-            // 
-            // btnConfirm
-            // 
-            this.btnConfirm.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(64)))), ((int)(((byte)(64)))), ((int)(((byte)(64)))));
-            this.btnConfirm.FlatAppearance.MouseOverBackColor = System.Drawing.Color.DeepSkyBlue;
-            this.btnConfirm.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnConfirm.Font = new System.Drawing.Font("Arial", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnConfirm.Location = new System.Drawing.Point(370, 18);
-            this.btnConfirm.Name = "btnConfirm";
-            this.btnConfirm.Size = new System.Drawing.Size(161, 40);
-            this.btnConfirm.TabIndex = 0;
-            this.btnConfirm.Text = "확인";
-            this.btnConfirm.UseVisualStyleBackColor = true;
-            this.btnConfirm.Click += new System.EventHandler(this.btnConfirm_Click);
-            // 
+            //
             // LoginStationControl
             // 
             this.Controls.Add(this.flowStations);
@@ -127,6 +112,5 @@ namespace SEOJIN_TMES.Client.Forms
         private System.Windows.Forms.Label lblTitle;
         private System.Windows.Forms.Panel pnlFooter;
         private System.Windows.Forms.Button btnCancel;
-        private System.Windows.Forms.Button btnConfirm;
     }
 }

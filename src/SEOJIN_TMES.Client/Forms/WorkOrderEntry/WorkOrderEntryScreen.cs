@@ -2,6 +2,7 @@ using DevExpress.Xpo.DB.Helpers;
 using DevExpress.XtraEditors;
 using SEOJIN_TMES.Client.ApiClient;
 using SEOJIN_TMES.Client.Common.Languages;
+using SEOJIN_TMES.Client.Common.Logging;
 using SEOJIN_TMES.Client.Common.Models;
 using SEOJIN_TMES.Client.Composition;
 using SEOJIN_TMES.Client.Core;
@@ -188,6 +189,15 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             if (selected == null)
             {
                 AppMessageBox.Warn(this, Language.WorkEntry_SelectWorkOrder, Language.WorkEntry_Title);
+                return;
+            }
+
+            // 워크스테이션은 메인 화면이 뜰 때 고른다 — 목록이 없었거나 [취소]했으면 비어 있다.
+            // 공정 조회 · POP 화면이 모두 워크스테이션 기준이라 작업 진입 확인 창을 띄우지 않고 여기서 멈춘다.
+            if (string.IsNullOrEmpty(_appSet.CurrentUser?.WorkstationInfo?.WorkstationRef))
+            {
+                AppLog.Warn($"작업 진입 불가(워크스테이션 없음) - WorkOrderNo={selected.WorkOrderNo}");
+                AppMessageBox.Warn(this, Language.WorkEntry_NoWorkstation, Language.WorkEntryConfirm_Title);
                 return;
             }
 

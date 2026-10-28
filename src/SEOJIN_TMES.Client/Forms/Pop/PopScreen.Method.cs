@@ -107,7 +107,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             key.PageOperation = _entry.Process.PageName;
             key.SubRoutingRef = _entry.Process.SubRoutingReference;
             key.CorpCode = _entry.Process.CorpCode;
-            key.WorkstationRef = _appSet.CurrentUser.WorkstationInfo.WorkstationRef;
+            // 워크스테이션 없이는 작업 진입에서 막히지만(WorkOrderEntryScreen), 여기서 죽지 않도록 null을 견딘다.
+            key.WorkstationRef = _appSet.CurrentUser?.WorkstationInfo?.WorkstationRef;
             return key;
         }
 
@@ -199,7 +200,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             txtPageIdleTime.Text = FormatDuration(info.IdleTime);
             txtPageWorkTime.Text = FormatDuration(info.WorkTime);
 
-            // 서버가 워크스테이션을 내려주지 않으면 로그인할 때 고른 워크스테이션을 그대로 보여 준다.
+            // 서버가 워크스테이션을 내려주지 않으면 메인 화면에서 고른 워크스테이션을 그대로 보여 준다.
             var workstation = info.WorkstationDisplay;
             if (string.IsNullOrWhiteSpace(workstation) || workstation == "()")
                 workstation = _appSet?.CurrentUser?.Workstation;

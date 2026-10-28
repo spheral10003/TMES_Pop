@@ -157,7 +157,7 @@
     <value>Select Workstation</value>
   </data>
   <data name="Login_StationHint" xml:space="preserve">
-    <value>Select the workstation to connect to, then press [Confirm].</value>
+    <value>Tap the workstation to connect to.</value>
   </data>
   <data name="Login_NoStation" xml:space="preserve">
     <value>No workstation is available.</value>
@@ -401,6 +401,9 @@
   </data>
   <data name="WorkEntry_NoRouting" xml:space="preserve">
     <value>The selected work order has no routing information.</value>
+  </data>
+  <data name="WorkEntry_NoWorkstation" xml:space="preserve">
+    <value>No workstation is selected, so the process cannot be started.</value>
   </data>
   <data name="WorkEntryConfirm_Title" xml:space="preserve">
     <value>Work Entry Confirmation</value>

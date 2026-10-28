@@ -34,7 +34,7 @@ namespace SEOJIN_TMES.Client.Forms
     ///
     /// 응답 바디는 AccessToken/RefreshToken만 받는다.
     /// 성공/실패 판정은 HTTP 상태코드로 하고(서버가 401 등으로 응답), 클라이언트는 그 결과만 화면에 반영한다.
-    /// 접속서버는 사업장 코드(corpCd)로 로그인 바디에 실어 보내고, 워크스테이션은 화면 표시용으로만 쓴다.
+    /// 접속서버는 사업장 코드(corpCd)로 로그인 바디에 실어 보내고, 워크스테이션은 메인 화면이 뜬 뒤 고른다(<see cref="MainForm"/>).
     ///
     /// "아이디 저장"을 켜면 로그인 성공 시 아이디만 <see cref="UserPreferences"/>에 남긴다(비밀번호는 저장하지 않는다).
     ///
@@ -443,45 +443,20 @@ namespace SEOJIN_TMES.Client.Forms
                 SaveUserIdPreference(userId);
 
                 var userProfile = await _apiClient.UserProfileApiClient.GetProfileAsync(userId);
-                var stationInfo = await _apiClient.UserProfileApiClient.GetLoginStationAsync();
                 if (IsDisposed || Disposing) return;
 
-                var stations = stationInfo?.Workstation ?? new List<WorkstationInfo>();
-                if (stations.Count == 0)
-                {
-                    AppLog.Warn($"로그인 워크스테이션 없음 - UserId={userId}");
-                    lblMessage.Text = Language.Login_NoStation;
-                    return;
-                }
-
-                // 워크스테이션 선택 화면은 새 로그인 디자인에서 잠시 쓰지 않는다 — 다시 쓸 때 아래 주석을 풀고 station 대입 줄을 지운다.
-                //var station = await SelectStation(stations);
-                //if (IsDisposed || Disposing) return;
-                //
-                //if (station == null)
-                //{
-                //    AppLog.Warn($"로그인 스테이션 선택 취소 - UserId={userId}");
-                //    return;
-                //}
-
-                // 고르는 화면이 없는 동안은 서버가 내려준 첫 워크스테이션으로 접속한다
-                // (POP · 작업 화면이 CurrentUser.WorkstationInfo.WorkstationRef를 쓰므로 비워 둘 수 없다).
-                var station = stations[0];
-
-                // 워크스테이션은 로그인 API 인자가 아니라 화면 표시용이다
-                // (사용자 정보 팝업과 홈 화면의 "워크스테이션" 타일이 이 값을 쓴다).
+                // 워크스테이션은 여기서 고르지 않는다 — 메인 화면이 뜨면서 선택 화면(LoginStationControl)을 덮어 띄운다.
+                // 워크스테이션이 없어도 로그인은 통과시키고, 공정 시작(작업 진입) 단계에서 막는다.
                 _currentUser = new UserSession
                 {
                     UserId = userId,
-                    Server = corpCd,
-                    Workstation = station.WorkstationName,
-                    WorkstationInfo = station
+                    Server = corpCd
                 };
 
                 _setting.SaveCulture(_loginCulture.Name);
                 Global.Instance.Settings.CurrentUser = _currentUser;
 
-                ServerLog.LoggedIn(userId, corpCd, station.WorkstationName);
+                ServerLog.LoggedIn(userId, corpCd, null);
 
                 DialogResult = DialogResult.OK;
                 Close();
@@ -511,37 +486,6 @@ namespace SEOJIN_TMES.Client.Forms
             {
                 if (!IsDisposed && !Disposing)
                     btnConnect.Enabled = true;
-            }
-        }
-
-        /// <summary>
-        /// 워크스테이션 선택 화면(<see cref="LoginStationControl"/>)을 로그인 창 맨 위에 덮어 띄우고 고른 값을 기다린다.
-        /// [확인]이든 [취소]든 끝나면 화면을 걷어 내므로, 취소하면 아래에 있던 정보 입력 화면이 그대로 다시 보인다.
-        /// </summary>
-        /// <returns>고른 워크스테이션. 취소하면 null.</returns>
-        private async Task<WorkstationInfo> SelectStation(IList<WorkstationInfo> stations)
-        {
-            // Dock=Fill로 두면 맨 앞(z순서 0)인 컨트롤이 가장 나중에 도킹되어, 좌측 이미지·하단 버튼 패널이 차지하고 남은
-            // 접속 정보 자리만 덮었다. 도킹을 쓰지 않고 제목 줄 아래 클라이언트 영역 전체를 직접 덮는다.
-            var selector = new LoginStationControl();
-            selector.Bounds = ClientRectangle;
-            selector.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            selector.Init();
-
-            Controls.Add(selector);
-            selector.BringToFront();
-            try
-            {
-                return await selector.ShowStations(stations);
-            }
-            finally
-            {
-                if (!IsDisposed && !Disposing)
-                {
-                    Controls.Remove(selector);
-                    ActiveControl = txtPassword;
-                }
-                selector.Dispose();
             }
         }
 

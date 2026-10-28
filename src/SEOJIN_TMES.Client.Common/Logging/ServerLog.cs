@@ -88,6 +88,18 @@ namespace SEOJIN_TMES.Client.Common.Logging
             Enqueue(New(ClientLogType.Login, $"로그인 - {userId}"));
         }
 
+        /// <summary>
+        /// 워크스테이션 선택. 로그인 뒤 메인 화면에서 고르므로 로그인 시점에는 비어 있다 —
+        /// 고른 뒤부터의 로그에 함께 실린다.
+        /// </summary>
+        public static void WorkstationSelected(string workstation)
+        {
+            lock (SyncRoot)
+                _workstation = workstation;
+
+            AppLog.Step($"[서버로그] 워크스테이션 선택 - Workstation={workstation}");
+        }
+
         /// <summary>메뉴 클릭. <paramref name="action"/>은 <c>Open</c>(새 탭) / <c>Focus</c>(열린 탭으로 전환).</summary>
         public static void MenuClicked(string menuKey, string menuName, string action)
         {

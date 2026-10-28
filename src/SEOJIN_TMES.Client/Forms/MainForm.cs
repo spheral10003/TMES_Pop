@@ -6,6 +6,7 @@ using DevExpress.XtraEditors.Controls;
 using SEOJIN_TMES.Client.ApiClient;
 using SEOJIN_TMES.Client.Common.Languages;
 using SEOJIN_TMES.Client.Common.Logging;
+using SEOJIN_TMES.Client.Common.Models;
 using SEOJIN_TMES.Client.Composition;
 using SEOJIN_TMES.Client.Core;
 using SEOJIN_TMES.Client.Equipment;
@@ -125,6 +126,7 @@ namespace SEOJIN_TMES.Client.Forms
             panelTop.Resize += (s, e) => LayoutTopBar();
             tabStrip.Resize += (s, e) => LayoutTabChips();
             cboLanguage.SelectedIndexChanged += CboLanguage_SelectedIndexChanged;
+            Shown += MainForm_Shown;
 
             RefreshAlertBadge();
             ConnectEquipment();
@@ -132,6 +134,77 @@ namespace SEOJIN_TMES.Client.Forms
             StartNotificationPolling();
             StartSessionCountdown();
             LayoutTopBar();
+        }
+
+        // ────────────────────────────── 워크스테이션 선택 ──────────────────────────────
+
+        /// <summary>메인 화면이 그려진 뒤에 고르게 해야 선택 화면이 빈 창이 아니라 메인 화면 위에 덮여 보인다.</summary>
+        private async void MainForm_Shown(object sender, EventArgs e) => await SelectWorkstation();
+
+        /// <summary>
+        /// 로그인 사용자의 워크스테이션 목록을 받아 선택 화면(<see cref="LoginStationControl"/>)을 메인 화면 전체에 덮어 띄운다.
+        /// 카드를 누르면 세션에 넣고 화면을 걷어 낸다.
+        /// 목록이 없거나 조회에 실패하거나 [취소]하면 워크스테이션 없이 메인 화면을 쓴다 —
+        /// 이때는 작업 진입(공정 시작)에서 막는다(<see cref="WorkOrderEntry.WorkOrderEntryScreen"/>).
+        /// </summary>
+        private async Task SelectWorkstation()
+        {
+            List<WorkstationInfo> stations;
+            try
+            {
+                var stationInfo = await _setting.ApiClients.UserProfileApiClient.GetLoginStationAsync();
+                stations = stationInfo?.Workstation ?? new List<WorkstationInfo>();
+            }
+            catch (ApiException ex)
+            {
+                AppLog.Warn($"워크스테이션 목록 조회 실패 - {ex.Message.Replace(Environment.NewLine, " ")}");
+                return;
+            }
+
+            if (IsDisposed || Disposing) return;
+
+            if (stations.Count == 0)
+            {
+                AppLog.Warn($"워크스테이션 없음 - UserId={_setting.CurrentUser?.UserId}");
+                return;
+            }
+
+            // Dock=Fill은 다른 도킹 컨트롤이 차지하고 남은 자리만 덮으므로, 클라이언트 영역 전체를 직접 덮는다.
+            var selector = new LoginStationControl();
+            selector.Bounds = ClientRectangle;
+            selector.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            selector.Init();
+
+            Controls.Add(selector);
+            selector.BringToFront();
+
+            WorkstationInfo station;
+            try
+            {
+                station = await selector.ShowStations(stations);
+            }
+            finally
+            {
+                if (!IsDisposed && !Disposing)
+                    Controls.Remove(selector);
+                selector.Dispose();
+            }
+
+            if (IsDisposed || Disposing) return;
+
+            if (station == null)
+            {
+                AppLog.Warn($"워크스테이션 선택 취소 - UserId={_setting.CurrentUser?.UserId}");
+                return;
+            }
+
+            var user = _setting.CurrentUser;
+            user.Workstation = station.WorkstationName;
+            user.WorkstationInfo = station;
+            ServerLog.WorkstationSelected(station.WorkstationName);
+
+            // 홈 탭의 "워크스테이션" 타일이 "-"에서 고른 이름으로 바뀐다.
+            _homeScreen?.RefreshInfo();
         }
 
         // ────────────────────────────── 사용자 정보 ──────────────────────────────

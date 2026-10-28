@@ -157,7 +157,7 @@
     <value>Chọn máy trạm</value>
   </data>
   <data name="Login_StationHint" xml:space="preserve">
-    <value>Chọn máy trạm để kết nối rồi nhấn [Đồng ý].</value>
+    <value>Chạm vào máy trạm để kết nối.</value>
   </data>
   <data name="Login_NoStation" xml:space="preserve">
     <value>Không có máy trạm nào khả dụng.</value>
@@ -401,6 +401,9 @@
   </data>
   <data name="WorkEntry_NoRouting" xml:space="preserve">
     <value>Lệnh sản xuất đã chọn không có thông tin quy trình.</value>
+  </data>
+  <data name="WorkEntry_NoWorkstation" xml:space="preserve">
+    <value>Chưa chọn máy trạm nên không thể bắt đầu công đoạn.</value>
   </data>
   <data name="WorkEntryConfirm_Title" xml:space="preserve">
     <value>Xác nhận vào công việc</value>
