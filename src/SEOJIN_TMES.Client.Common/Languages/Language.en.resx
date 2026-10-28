@@ -1086,6 +1086,9 @@
   <data name="Col_CreatedAt" xml:space="preserve">
     <value>Created At</value>
   </data>
+  <data name="Col_UpdatedBy" xml:space="preserve">
+    <value>Modified By</value>
+  </data>
   <data name="Common_NoData" xml:space="preserve">
     <value>No data available.</value>
   </data>

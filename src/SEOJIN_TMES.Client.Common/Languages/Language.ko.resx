@@ -1086,6 +1086,9 @@
   <data name="Col_CreatedAt" xml:space="preserve">
     <value>작성일시</value>
   </data>
+  <data name="Col_UpdatedBy" xml:space="preserve">
+    <value>수정자</value>
+  </data>
   <data name="Common_NoData" xml:space="preserve">
     <value>데이터가 존재하지 않습니다.</value>
   </data>

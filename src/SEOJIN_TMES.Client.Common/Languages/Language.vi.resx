@@ -1086,6 +1086,9 @@
   <data name="Col_CreatedAt" xml:space="preserve">
     <value>Thời gian tạo</value>
   </data>
+  <data name="Col_UpdatedBy" xml:space="preserve">
+    <value>Người sửa</value>
+  </data>
   <data name="Common_NoData" xml:space="preserve">
     <value>Không có dữ liệu.</value>
   </data>

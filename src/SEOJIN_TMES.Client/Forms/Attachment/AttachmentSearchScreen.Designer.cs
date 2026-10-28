@@ -54,6 +54,7 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             this.colSerialNo = new DevExpress.XtraGrid.Columns.GridColumn();
             this.colAttachmentCount = new DevExpress.XtraGrid.Columns.GridColumn();
             this.colCreatedDate = new DevExpress.XtraGrid.Columns.GridColumn();
+            this.colUpdatedBy = new DevExpress.XtraGrid.Columns.GridColumn();
             this.pnlOrderLine = new System.Windows.Forms.Panel();
             this.lblOrderTitle = new System.Windows.Forms.Label();
             this.gridFiles = new DevExpress.XtraGrid.GridControl();
@@ -282,7 +283,8 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             this.colWorkOrderNo,
             this.colSerialNo,
             this.colAttachmentCount,
-            this.colCreatedDate});
+            this.colCreatedDate,
+            this.colUpdatedBy});
             this.gridViewOrders.GridControl = this.gridOrders;
             this.gridViewOrders.Name = "gridViewOrders";
             this.gridViewOrders.OptionsBehavior.Editable = false;
@@ -347,6 +349,17 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             this.colCreatedDate.Visible = true;
             this.colCreatedDate.VisibleIndex = 4;
             this.colCreatedDate.Width = 150;
+            //
+            // colUpdatedBy
+            //
+            this.colUpdatedBy.AppearanceCell.Options.UseTextOptions = true;
+            this.colUpdatedBy.AppearanceCell.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+            this.colUpdatedBy.Caption = "수정자";
+            this.colUpdatedBy.FieldName = "UpdatedBy";
+            this.colUpdatedBy.Name = "colUpdatedBy";
+            this.colUpdatedBy.Visible = true;
+            this.colUpdatedBy.VisibleIndex = 5;
+            this.colUpdatedBy.Width = 90;
             // 
             // pnlOrderLine
             // 
@@ -420,7 +433,10 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             this.gridViewFiles.OptionsBehavior.Editable = false;
             this.gridViewFiles.OptionsCustomization.AllowGroup = false;
             this.gridViewFiles.OptionsMenu.EnableColumnMenu = false;
+            this.gridViewFiles.OptionsSelection.CheckBoxSelectorColumnWidth = 30;
             this.gridViewFiles.OptionsSelection.MultiSelect = true;
+            this.gridViewFiles.OptionsSelection.MultiSelectMode = DevExpress.XtraGrid.Views.Grid.GridMultiSelectMode.CheckBoxRowSelect;
+            this.gridViewFiles.OptionsSelection.ShowCheckBoxSelectorInColumnHeader = DevExpress.Utils.DefaultBoolean.True;
             this.gridViewFiles.OptionsView.ShowGroupPanel = false;
             this.gridViewFiles.OptionsView.ShowIndicator = false;
             this.gridViewFiles.RowHeight = 26;
@@ -483,7 +499,7 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             this.colCreatedBy.AppearanceCell.Options.UseTextOptions = true;
             this.colCreatedBy.AppearanceCell.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
             this.colCreatedBy.Caption = "작성자";
-            this.colCreatedBy.FieldName = "CreatedBy";
+            this.colCreatedBy.FieldName = "UpdatedBy";
             this.colCreatedBy.Name = "colCreatedBy";
             this.colCreatedBy.Visible = true;
             this.colCreatedBy.VisibleIndex = 4;
@@ -627,6 +643,7 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
         private DevExpress.XtraGrid.Columns.GridColumn colSerialNo;
         private DevExpress.XtraGrid.Columns.GridColumn colAttachmentCount;
         private DevExpress.XtraGrid.Columns.GridColumn colCreatedDate;
+        private DevExpress.XtraGrid.Columns.GridColumn colUpdatedBy;
         private System.Windows.Forms.Button btnDownload;
         private System.Windows.Forms.Button btnDelete;
         private System.Windows.Forms.Button btnUpload;

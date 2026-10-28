@@ -413,6 +413,7 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string Col_FileSize => Get(nameof(Col_FileSize));
         public static string Col_CreatedBy => Get(nameof(Col_CreatedBy));
         public static string Col_CreatedAt => Get(nameof(Col_CreatedAt));
+        public static string Col_UpdatedBy => Get(nameof(Col_UpdatedBy));
         public static string Common_NoData => Get(nameof(Common_NoData));
         public static string StopIssue_Title => Get(nameof(StopIssue_Title));
         public static string StopIssue_Code => Get(nameof(StopIssue_Code));

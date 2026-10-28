@@ -1,3 +1,4 @@
+using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Views.Base;
 using DevExpress.XtraGrid.Views.Grid;
 using SEOJIN_TMES.Client.ApiClient;
@@ -11,6 +12,7 @@ using SEOJIN_TMES.Client.Forms.Common;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -24,9 +26,12 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
     /// 흐름:
     ///  1) 등록일자 범위 · 시리얼번호 · 작업지시번호로 [조회] → 좌측 [목록]
     ///     등록일자는 체크한 칸만 조건으로 보낸다. 날짜를 하나도 체크하지 않으면 시리얼번호 · 작업지시번호 중 하나는 필수다.
-    ///     "첨부파일" 열은 목록 API가 내려준 건수(WorkOrderEntryDto.AttachmentCount)를 그대로 보여 준다.
+    ///     "첨부파일" 열은 목록 API가 내려준 건수(WorkOrderEntryDto.AttachmentCount)로 시작하고,
+    ///     그 지시의 첨부를 받으면 첨부 API의 건수(WorkOrderAttachmentDto.AttachmentCount)로 바꿔 보여 준다.
+    ///     "수정자" 열은 최종 수정자(updatedBy)다.
     ///  2) 목록에서 한 건을 클릭하면 → 우측 [파일 상세목록]에 그 작업지시의 첨부가 바로 표시된다(자동 조회)
-    ///  3) 우측에서 [다운로드] · [삭제] · [업로드]로 첨부를 다룬다. 업로드 · 삭제 뒤에는 서버 목록을 다시 받는다.
+    ///  3) 우측에서 체크한 파일을 [다운로드] · [삭제]하고, [업로드]로 올린다. 업로드 · 삭제 뒤에는 서버 목록을 다시 받는다.
+    ///     체크 칸은 GridView의 CheckBoxRowSelect라 머리글 체크를 누르면 전체 체크 / 다시 누르면 전체 해제된다.
     ///
     /// FileUploadForm과 같은 API(IFileApiClient)를 쓰되 미리보기는 없다.
     /// 그리드를 제외한 컨트롤은 .NET 기본 컨트롤이고, 색은 Designer에 직접 지정했다(테마 전환 대상 아님).
@@ -95,6 +100,7 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             colSerialNo.Caption = Language.Col_SerialNo;
             colAttachmentCount.Caption = Language.Col_AttachmentCount;
             colCreatedDate.Caption = Language.Col_CreatedDate;
+            colUpdatedBy.Caption = Language.Col_UpdatedBy;
 
             colFileNo.Caption = Language.Col_No;
             colFileName.Caption = Language.Col_FileName;
@@ -289,7 +295,9 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
                 if (!ReferenceEquals(_currentOrder, order))
                     return;
 
-                BindFiles((result?.Attachments ?? new List<WorkOrderAttachmentDto>()).Select(ToFileResponse).ToList());
+                var attachments = result?.Attachments ?? new List<WorkOrderAttachmentDto>();
+                BindFiles(attachments.Select(ToFileResponse).ToList());
+                ApplyAttachmentCount(order, attachments);
             }
             catch (ApiException ex)
             {
@@ -317,8 +325,33 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             file.FileExtension = item.FileExtension;
             file.FileSize = item.FileSize;
             file.CreatedBy = item.CreatedBy;
+            file.UpdatedBy = item.UpdatedBy;
             file.CreatedAt = item.CreatedAt;
             return file;
+        }
+
+        /// <summary>
+        /// 목록의 "첨부파일" 열을 첨부 API가 준 건수(attachmentCount)로 바꾼다 — 업로드 · 삭제 뒤에도 목록 건수가 맞도록.
+        /// 직접 세지 않고 서버 값만 쓴다. 첨부가 하나도 없으면 건수를 실어 줄 행이 없으므로 0으로 둔다.
+        /// </summary>
+        private void ApplyAttachmentCount(WorkOrderEntryDto order, List<WorkOrderAttachmentDto> attachments)
+        {
+            if (attachments.Count == 0)
+            {
+                order.AttachmentCount = 0;
+            }
+            else if (int.TryParse(attachments[0].AttachmentCount, NumberStyles.Integer, CultureInfo.InvariantCulture, out var count))
+            {
+                order.AttachmentCount = count;
+            }
+            else
+            {
+                return;   // 서버가 건수를 주지 않았으면 목록 API 값을 그대로 둔다
+            }
+
+            int handle = gridViewOrders.FindRow(order);
+            if (handle != GridControl.InvalidRowHandle)
+                gridViewOrders.RefreshRow(handle);
         }
 
         private PopProcessKey KeyOf(WorkOrderEntryDto order)
@@ -343,13 +376,16 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             BindFiles(new List<FileUploadResponse>());
         }
 
-        /// <summary>그리드에서 고른 행이 바뀌면 [다운로드] · [삭제] 사용 여부를 다시 정한다.</summary>
+        /// <summary>체크한 행이 바뀌면(머리글 전체 체크 · 해제 포함) [다운로드] · [삭제] 사용 여부를 다시 정한다.</summary>
         private void gridViewFiles_SelectionChanged(object sender, DevExpress.Data.SelectionChangedEventArgs e)
         {
             ControlEnabled();
         }
 
-        /// <summary>다운로드 · 삭제 대상 — 파일 상세목록에서 고른 행.</summary>
+        /// <summary>
+        /// 다운로드 · 삭제 대상 — 파일 상세목록에서 체크한 행.
+        /// CheckBoxRowSelect 모드에서는 체크 상태가 곧 선택 상태라 GetSelectedRows()가 체크한 행을 돌려준다.
+        /// </summary>
         private List<FileUploadResponse> SelectedFiles()
         {
             return gridViewFiles.GetSelectedRows()
@@ -467,9 +503,18 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
         {
             var order = _currentOrder;
             var targets = SelectedFiles();
-            if (order == null || targets.Count == 0)
+            if (order == null)
+            {
+                AppMessageBox.Warn(this, Language.Attach_SelectOrder, Language.Attach_Title);
                 return;
+            }
+            if (targets.Count == 0)
+            {
+                AppMessageBox.Warn(this, Language.Attach_SelectFile, Language.Attach_Title);
+                return;
+            }
 
+            // 삭제는 되돌릴 수 없으므로 체크한 건수를 보여 주고 확인을 받은 뒤에만 지운다.
             if (!AppMessageBox.Confirm(this, string.Format(Language.Upload_DeleteConfirmFormat, targets.Count), Language.Attach_Title))
                 return;
 

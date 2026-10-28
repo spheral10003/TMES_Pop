@@ -85,6 +85,10 @@ namespace SEOJIN_TMES.Client.Common.Models
         /// </summary>
         [JsonProperty("attachmentCount")]
         public int? AttachmentCount { get; set; }
+
+        /// <summary>최종 수정자(첨부파일 조회 화면 "수정자" 열).</summary>
+        [JsonProperty("updatedBy")]
+        public string UpdatedBy { get; set; }
     }
 
     //public class WorkOrderEntryDto

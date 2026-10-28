@@ -26,12 +26,17 @@ namespace SEOJIN_TMES.Client.Common.Models
         [JsonProperty("fileExtn")]
         public string FileExtension { get; set; }
 
+        /// <summary>그 작업지시의 첨부 건수. 첨부파일 조회 화면 목록의 "첨부파일" 열을 이 값으로 갱신한다.</summary>
         [JsonProperty("attachmentCount")]
         public string AttachmentCount { get; set; }
 
         /// <summary>작성자. TODO: 필드명은 가정값.</summary>
         [JsonProperty("createdBy")]
         public string CreatedBy { get; set; }
+
+        /// <summary>최종 수정자. 첨부파일 조회 화면의 "작성자" 열은 이 값을 보여 준다.</summary>
+        [JsonProperty("updatedBy")]
+        public string UpdatedBy { get; set; }
 
         /// <summary>작성일시. TODO: 필드명은 가정값.</summary>
         [JsonProperty("createdAt")]

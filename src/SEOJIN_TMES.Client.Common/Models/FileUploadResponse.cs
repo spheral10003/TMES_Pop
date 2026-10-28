@@ -34,6 +34,10 @@ namespace SEOJIN_TMES.Client.Common.Models
         [JsonProperty("createdBy")]
         public string CreatedBy { get; set; }
 
+        /// <summary>최종 수정자.</summary>
+        [JsonProperty("updatedBy")]
+        public string UpdatedBy { get; set; }
+
         /// <summary>작성일시. TODO: 필드명은 가정값.</summary>
         [JsonProperty("createdAt")]
         public DateTime? CreatedAt { get; set; }
