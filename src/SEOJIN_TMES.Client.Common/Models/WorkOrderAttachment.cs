@@ -26,6 +26,9 @@ namespace SEOJIN_TMES.Client.Common.Models
         [JsonProperty("fileExtn")]
         public string FileExtension { get; set; }
 
+        [JsonProperty("attachmentCount")]
+        public string AttachmentCount { get; set; }
+
         /// <summary>작성자. TODO: 필드명은 가정값.</summary>
         [JsonProperty("createdBy")]
         public string CreatedBy { get; set; }
