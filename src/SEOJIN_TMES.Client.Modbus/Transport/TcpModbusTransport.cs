@@ -24,9 +24,17 @@ namespace SEOJIN_TMES.Client.Modbus.Transport
 
         public bool IsConnected => _sock.IsConnected;
 
-        public TcpModbusTransport(int socketId = 0)
+        /// <param name="connectTimeoutMs">접속 제한 시간(ms). 0 이하면 OS 기본값(약 21초).</param>
+        /// <param name="keepAliveTimeMs">무통신 후 첫 TCP KeepAlive 확인까지의 시간(ms). 0 이하면 KeepAlive 끔.</param>
+        /// <param name="keepAliveIntervalMs">KeepAlive 재확인 간격(ms).</param>
+        public TcpModbusTransport(int socketId = 0, int connectTimeoutMs = 0, int keepAliveTimeMs = 0, int keepAliveIntervalMs = 0)
         {
-            _sock = new AsyncSocketClient(socketId);
+            _sock = new AsyncSocketClient(socketId)
+            {
+                ConnectTimeoutMs = connectTimeoutMs,
+                KeepAliveTimeMs = keepAliveTimeMs,
+                KeepAliveIntervalMs = keepAliveIntervalMs
+            };
 
             _sock.OnConnet += OnSockConnect;
             _sock.OnClose += OnSockClose;

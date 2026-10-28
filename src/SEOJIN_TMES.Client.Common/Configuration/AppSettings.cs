@@ -39,6 +39,24 @@ namespace SEOJIN_TMES.Client.Common.Configuration
         public int NotificationPollingSeconds { get; set; } = 60;
 
         /// <summary>
+        /// 설비(Nutrunner) TCP 접속 제한 시간(ms). Request · Event 두 채널 모두 적용. 기본 500.
+        /// 0 이하면 OS 기본값(약 21초)까지 기다린다. 망이 느려 "접속 시간 초과"가 잦으면 늘린다.
+        /// </summary>
+        public int ModbusConnectTimeoutMs { get; set; } = 500;
+
+        /// <summary>
+        /// 설비 연결의 TCP KeepAlive — 무통신 후 첫 확인까지의 시간(ms). 기본 5000. 0 이하면 KeepAlive를 켜지 않는다.
+        /// 랜선 단선 · 장비 전원 차단처럼 신호 없이 끊긴 연결을 감지하려고 쓴다.
+        /// </summary>
+        public int ModbusKeepAliveTimeMs { get; set; } = 5000;
+
+        /// <summary>
+        /// TCP KeepAlive 재확인 간격(ms). 기본 5000. Windows는 10회 재확인하므로
+        /// 끊김 감지까지 약 ModbusKeepAliveTimeMs + 10 × 이 값(기본 약 55초)이 걸린다.
+        /// </summary>
+        public int ModbusKeepAliveIntervalMs { get; set; } = 5000;
+
+        /// <summary>
         /// 작업 표준/도면 PDF가 들어 있는 SMB 공유 폴더 접속 정보(App.config의 <c>DocumentShare</c>).
         /// <see cref="DocumentShareSettings.RootPath"/>가 비어 있으면 POP 화면은 도면 영역에
         /// "공유 폴더 미설정" 안내만 표시하고 파일 접근을 시도하지 않는다.

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.Sockets;
 using System.Net;
+using System.Threading;
 
 namespace SEOJIN_TMES.Client.Sockets
 {
@@ -248,6 +249,34 @@ namespace SEOJIN_TMES.Client.Sockets
         // connection socket
         private Socket _conn = null;
 
+        /// <summary>
+        /// 접속을 기다리는 시간(ms). 0 이하면 OS 기본값(Windows 약 21초)까지 기다린다.
+        /// 시간이 지나면 소켓을 닫고 <see cref="TimeoutException"/>을 OnError로 올린다.
+        /// </summary>
+        public int ConnectTimeoutMs { get; set; }
+
+        /// <summary>
+        /// 무통신 상태에서 첫 TCP KeepAlive 확인을 보내기까지의 시간(ms). 0 이하면 KeepAlive를 켜지 않는다(OS 기본 2시간).
+        /// 랜선 단선·장비 전원 차단처럼 FIN/RST 없이 끊긴 연결은 이것이 없으면 수신 대기가 끝나지 않아 끊김을 모른다.
+        /// </summary>
+        public int KeepAliveTimeMs { get; set; }
+
+        /// <summary>KeepAlive 확인에 응답이 없을 때 재확인 간격(ms). Windows는 10회 재확인 후 연결을 끊는다.</summary>
+        public int KeepAliveIntervalMs { get; set; }
+
+        /// <summary>접속 시도 1회의 상태. 완료 콜백과 타임아웃 중 먼저 온 쪽만 처리하도록 Status로 겨룬다.</summary>
+        private sealed class ConnectState
+        {
+            public const int Pending = 0;
+            public const int Completed = 1;
+            public const int TimedOut = 2;
+
+            public Socket Socket;
+            public IPEndPoint Remote;   // 닫힌 소켓의 RemoteEndPoint는 예외가 나므로 따로 둔다(타임아웃 메시지용).
+            public int Status;
+            public RegisteredWaitHandle TimeoutWait;
+        }
+
         public AsyncSocketClient(int id)
         {
             this._id = id;
@@ -284,7 +313,18 @@ namespace SEOJIN_TMES.Client.Sockets
                 IPEndPoint remoteEP = new IPEndPoint(ips[0], port);
                 Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-                client.BeginConnect(remoteEP, new AsyncCallback(OnConnectCallback), client);
+                ConnectState state = new ConnectState();
+                state.Socket = client;
+                state.Remote = remoteEP;
+
+                IAsyncResult ar = client.BeginConnect(remoteEP, new AsyncCallback(OnConnectCallback), state);
+
+                // BeginConnect 자체에는 제한 시간이 없어 응답 없는 장비는 OS 기본값(약 21초)까지 붙잡힌다.
+                if (ConnectTimeoutMs > 0 && !ar.IsCompleted)
+                {
+                    state.TimeoutWait = ThreadPool.RegisterWaitForSingleObject(
+                        ar.AsyncWaitHandle, new WaitOrTimerCallback(OnConnectTimeout), state, ConnectTimeoutMs, true);
+                }
             }
             catch (System.Exception e)
             {
@@ -305,12 +345,26 @@ namespace SEOJIN_TMES.Client.Sockets
         /// <param name="ar"></param>
         private void OnConnectCallback(IAsyncResult ar)
         {
+            ConnectState state = (ConnectState)ar.AsyncState;
+
+            if (state.TimeoutWait != null)
+                state.TimeoutWait.Unregister(null);
+
+            // 이미 타임아웃으로 소켓을 닫은 시도다 — 실패는 타임아웃 쪽에서 보고했으므로 여기서는 정리만 한다.
+            if (Interlocked.CompareExchange(ref state.Status, ConnectState.Completed, ConnectState.Pending) != ConnectState.Pending)
+            {
+                try { state.Socket.EndConnect(ar); } catch { /* 닫힌 소켓의 EndConnect 예외 — 이미 보고함 */ }
+                return;
+            }
+
             try
             {
-                Socket client = (Socket)ar.AsyncState;
+                Socket client = state.Socket;
 
                 // 보류 중인 연결을 완성한다.
                 client.EndConnect(ar);
+
+                ApplyKeepAlive(client);
 
                 _conn = client;
 
@@ -327,6 +381,51 @@ namespace SEOJIN_TMES.Client.Sockets
                 AsyncSocketErrorEventArgs eev = new AsyncSocketErrorEventArgs(this._id, e);
 
                 ErrorOccured(eev);
+            }
+        }
+
+        /// <summary>
+        /// 접속 제한 시간이 지났을 때 불린다(timedOut=false면 제한 시간 안에 접속이 끝난 것이라 할 일이 없다).
+        /// 소켓을 닫으면 대기 중인 BeginConnect가 끝나며 OnConnectCallback이 정리한다.
+        /// </summary>
+        private void OnConnectTimeout(object stateObject, bool timedOut)
+        {
+            if (!timedOut)
+                return;
+
+            ConnectState state = (ConnectState)stateObject;
+            if (Interlocked.CompareExchange(ref state.Status, ConnectState.TimedOut, ConnectState.Pending) != ConnectState.Pending)
+                return;
+
+            try { state.Socket.Close(); } catch { /* 이미 닫힌 소켓 */ }
+
+            ErrorOccured(new AsyncSocketErrorEventArgs(this._id,
+                new TimeoutException(string.Format("{0} 접속 시간 초과({1}ms)", state.Remote, ConnectTimeoutMs))));
+        }
+
+        /// <summary>
+        /// TCP KeepAlive를 켠다. 끊김 감지까지 대략 KeepAliveTimeMs + 10 × KeepAliveIntervalMs가 걸린다.
+        /// 실패해도 접속은 유지한다 — 감지를 빠르게 할 뿐 통신에 필수는 아니라서 오류로 올리지 않는다.
+        /// </summary>
+        private void ApplyKeepAlive(Socket client)
+        {
+            if (KeepAliveTimeMs <= 0)
+                return;
+
+            int interval = KeepAliveIntervalMs > 0 ? KeepAliveIntervalMs : KeepAliveTimeMs;
+
+            try
+            {
+                // SIO_KEEPALIVE_VALS 구조체: { u_long onoff; u_long keepalivetime; u_long keepaliveinterval; } (little-endian)
+                byte[] values = new byte[12];
+                BitConverter.GetBytes(1u).CopyTo(values, 0);
+                BitConverter.GetBytes((uint)KeepAliveTimeMs).CopyTo(values, 4);
+                BitConverter.GetBytes((uint)interval).CopyTo(values, 8);
+                client.IOControl(IOControlCode.KeepAliveValues, values, null);
+            }
+            catch (SocketException)
+            {
+                // 일부 환경(드라이버 · 정책)에서 지원하지 않을 수 있다 — KeepAlive 없이 계속 통신한다.
             }
         }
 

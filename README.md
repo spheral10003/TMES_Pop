@@ -106,7 +106,7 @@ src/
 - 화면/업무 코드는 논리 명령(`EquipmentCommand.Start/Stop/Reset/StatusRequest`)만 다루고, 실제 주소·값 변환은 `App.config`의 `RegisterMap` 설정이 담당한다 — 레지스터 맵이 바뀌어도 화면 코드는 손대지 않는다.
 - 이벤트 수신 시 장비에 확인(ACK)을 돌려줘야 하는 구성이면 `EventAckMode`를 `"Echo"`로 두면 받은 프레임을 같은 Transaction Id로 회신한다(기본 `"None"`).
 - 설비 접속 정보는 `App.config`의 `Equipments`(JSON)에서 로드한다. 필드 설명은 App.config 주석 참고: `Port`/`EventPort`/`UseStandardConnection`/`UseEventConnection`/`UnitId`/`ResponseTimeoutMs`/`EventAckMode`/`RegisterMap`.
-- `Connect()`는 즉시 리턴하고, 실제 TCP 접속은 각 Connection 전용 스레드 안에서 수행한다(접속 시도 자체가 UI 스레드를 막지 않도록). 접속 타임아웃은 5초(`ConnectTimeoutMs`). **주의**: `App.config`의 기본 예시 IP(`192.168.0.101/102`)는 실재하지 않는 더미 값이라 항상 5초 후 `Faulted` 상태가 된다 — 정상 동작이며, 실제 설비 IP로 교체하거나 당장 필요 없으면 `AutoConnect`를 `false`로 두면 된다.
+- `Connect()`는 즉시 리턴하고, 실제 TCP 접속은 각 Connection 전용 스레드 안에서 수행한다(접속 시도 자체가 UI 스레드를 막지 않도록). 접속 타임아웃은 App.config `ModbusConnectTimeoutMs`(기본 500ms)이고, 접속 후 TCP KeepAlive(`ModbusKeepAliveTimeMs` 기본 5000ms / `ModbusKeepAliveIntervalMs` 기본 5000ms)로 신호 없이 끊긴 연결을 감지한다. **주의**: 실재하지 않는 IP는 항상 접속 타임아웃 후 실패한다 — 정상 동작이며, 실제 설비 IP로 교체하거나 당장 필요 없으면 `AutoConnect`를 `false`로 두면 된다.
 - **확인 방법**: 로컬 가짜 슬레이브(TcpListener)를 띄워 코덱 프레이밍(정상/분할/연속/예외응답/재동기화), 표준 Connection의 요청→응답, 이벤트 Connection의 실시간 push 수신까지 스모크 테스트로 통과 확인했다(2026-08-24). 실장비 연동 시에는 아래 TODO의 레지스터 맵만 채우면 된다.
 
 **아직 안 붙인 것**: `Advertise` / `Scan ack` / `Search ack` 메시지로 IP·포트를 자동으로 받아오는 탐색(discovery) 절차는 구현하지 않았다.

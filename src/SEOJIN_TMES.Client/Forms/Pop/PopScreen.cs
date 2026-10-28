@@ -200,6 +200,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 info.EventPort = port + 1;
                 info.Name = eq.EquipmentName;
                 info.ModelName = eq.EquipmentModel;
+                info.ConnectTimeoutMs = _appSet.AppSet.ModbusConnectTimeoutMs;
+                info.KeepAliveTimeMs = _appSet.AppSet.ModbusKeepAliveTimeMs;
+                info.KeepAliveIntervalMs = _appSet.AppSet.ModbusKeepAliveIntervalMs;
 
                 _equip.TryAdd(info);
             }

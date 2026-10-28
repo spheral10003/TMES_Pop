@@ -32,6 +32,15 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
 
         public UnitTypes Unit { get; set; } = UnitTypes.KgfCm;
 
+        /// <summary>TCP 접속 제한 시간(ms). Request · Event 두 채널 모두 적용. App.config <c>ModbusConnectTimeoutMs</c>에서 온다.</summary>
+        public int ConnectTimeoutMs { get; set; } = 500;
+
+        /// <summary>무통신 후 첫 TCP KeepAlive 확인까지의 시간(ms). App.config <c>ModbusKeepAliveTimeMs</c>에서 온다.</summary>
+        public int KeepAliveTimeMs { get; set; } = 5000;
+
+        /// <summary>KeepAlive 재확인 간격(ms). App.config <c>ModbusKeepAliveIntervalMs</c>에서 온다.</summary>
+        public int KeepAliveIntervalMs { get; set; } = 5000;
+
         /// <summary>Modbus TransactionId. 장비 ID와 동일하다.</summary>
         public ushort TransactionId => (ushort)Id;
 

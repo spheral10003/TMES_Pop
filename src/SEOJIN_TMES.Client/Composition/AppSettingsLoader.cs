@@ -38,6 +38,15 @@ namespace SEOJIN_TMES.Client.Composition
             if (bool.TryParse(ConfigurationManager.AppSettings["IsTestServer"], out var isTestServer))
                 settings.IsTestServer = isTestServer;
 
+            if (int.TryParse(ConfigurationManager.AppSettings["ModbusConnectTimeoutMs"], out var connectTimeoutMs))
+                settings.ModbusConnectTimeoutMs = connectTimeoutMs;
+
+            if (int.TryParse(ConfigurationManager.AppSettings["ModbusKeepAliveTimeMs"], out var keepAliveTimeMs))
+                settings.ModbusKeepAliveTimeMs = keepAliveTimeMs;
+
+            if (int.TryParse(ConfigurationManager.AppSettings["ModbusKeepAliveIntervalMs"], out var keepAliveIntervalMs))
+                settings.ModbusKeepAliveIntervalMs = keepAliveIntervalMs;
+
             //var equipmentsJson = ConfigurationManager.AppSettings["Equipments"];
             //if (!string.IsNullOrWhiteSpace(equipmentsJson))
             //{

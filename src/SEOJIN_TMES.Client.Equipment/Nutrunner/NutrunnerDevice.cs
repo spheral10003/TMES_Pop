@@ -96,8 +96,10 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
         /// </summary>
         public NutrunnerDevice(NutrunnerInfo info)
             : this(info,
-                   new TcpModbusTransport(info.Id * 2),
-                   new TcpModbusTransport((info.Id * 2) + 1))
+                   new TcpModbusTransport(info.Id * 2,
+                       info.ConnectTimeoutMs, info.KeepAliveTimeMs, info.KeepAliveIntervalMs),
+                   new TcpModbusTransport((info.Id * 2) + 1,
+                       info.ConnectTimeoutMs, info.KeepAliveTimeMs, info.KeepAliveIntervalMs))
         {
         }
 
