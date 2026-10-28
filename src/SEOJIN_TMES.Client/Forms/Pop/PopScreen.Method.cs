@@ -208,8 +208,17 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             SetProgressState(info.ProgressState);
         }
 
+        /// <summary>우측 카드 아래 안내 칸에 문구를 띄운다. 언제 일어난 일인지 알 수 있게 시각을 붙인다.</summary>
+        private void ShowMessage(string message)
+        {
+            if (IsDisposed || Disposing)
+                return;
+
+            lblMessage.Text = $"[{DateTime.Now:HH:mm:ss}] {message}";
+        }
+
         /// <summary>
-        /// 서버가 준 진행 상태로 하단 상태 띠의 색과 시작 · 중지 버튼을 바꾼다.
+        /// 서버가 준 진행 상태로 상태 띠의 색과 중지 버튼을 바꾼다.
         /// 상태 판정은 서버 몫이고, 여기서는 받은 값을 화면에 옮기기만 한다 —
         /// 모르는 값이 오면 기본색(보라)으로 두고 글자만 보여 준다.
         /// </summary>
@@ -221,37 +230,29 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (IsProgressState(StateReady))
             {
                 lblProgressState.BackColor = AppTheme.Slate;
-                btnStartProcess.Text = Language.Pop_StartProcess;
                 btnStopProcess.Text = Language.Pop_StopProcess;
                 btnStopProcess.Tag = PopProcessAction.stop;
             }
             else if (IsProgressState(StateProgress))
             {
                 lblProgressState.BackColor = AppTheme.Emerald;
-                btnStartProcess.Text = Language.Pop_EndProcess;
                 btnStopProcess.Text = Language.Pop_StopProcess;
                 btnStopProcess.Tag = PopProcessAction.stop;
             }
             else if (IsProgressState(StateStopped))
             {
                 lblProgressState.BackColor = AppTheme.Rose;
-                btnStartProcess.Text = Language.Pop_EndProcess;
                 btnStopProcess.Text = Language.Pop_RestartProcess;
                 btnStopProcess.Tag = PopProcessAction.resume;
             }
             else if (IsProgressState(StateFinished))
             {
                 lblProgressState.BackColor = AppTheme.Amber;
-                btnStartProcess.Text = Language.Pop_EndProcess;
             }
             else
             {
                 lblProgressState.BackColor = AppTheme.Violet;
             }
-
-            // [공정 시작]은 대기(Ready) 공정에서만 누를 수 있다 — 진행 중(자동 시작 포함) · 중지 · 완료 상태에서
-            // 다시 누르면 같은 시작 요청이 또 나가므로 막아 둔다. 수동 이동한 공정은 Ready라 직접 시작할 수 있다.
-            btnStartProcess.Enabled = IsProgressState(StateReady);
         }
 
         // ─────────────────────────────────────────────────────────────────────────
@@ -353,6 +354,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             }
 
             await MoveToProcess(_processes[target]);
+            if (IsDisposed || Disposing) return;
+
+            await StartEnteredProcess();
         }
 
         /// <summary>
@@ -388,6 +392,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (IsDisposed || Disposing) return;
 
             AppMessageBox.Info(this, Language.Pop_ProcessMoved, Language.Pop_Title);
+            if (IsDisposed || Disposing) return;
+
+            await StartEnteredProcess();
         }
 
         /// <summary>
@@ -466,9 +473,57 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         //  탭 3개(투입자재 / BOM 스팩 / 검사 스팩)의 입력이 모두 끝나면 서버에 [공정 종료]를 보내고,
         //  다음 공정으로 옮겨 [공정 시작]까지 자동으로 이어 간다.
         //   - 세 탭 모두 데이터가 없는 공정도 "끝난 공정"으로 보고 그대로 종료 → 다음 공정으로 넘어간다.
-        //   - 작업자가 [이전 공정] · [다음 공정] · [공정 목록]으로 직접 옮긴 경우에는 자동 시작하지 않는다
-        //     (그 경로는 MoveToProcess만 부른다). 작업자가 [공정 시작]을 누르면 그때부터 같은 완료 검사가 돈다.
+        //   - [공정 시작] 버튼은 없다. 화면 진입 · [이전 공정] · [다음 공정] · [공정 목록]으로 공정에 들어와도
+        //     자동으로 시작하고, 중지돼 있던 공정이면 재시작한다(StartEnteredProcess).
         // ─────────────────────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// 공정에 들어온 뒤의 공통 처리(진입 · 이전/다음 · 공정 목록) — 자동 시작 → 남은 시리얼 입력 → 완료 검사.
+        /// 완료 검사를 마지막에 두는 이유: 세 탭이 모두 비어 있는 공정은 입력할 것이 없어 저장이 일어나지 않으므로,
+        /// 여기서 한 번 보지 않으면 다음 공정으로 넘어갈 계기가 없다.
+        /// </summary>
+        public async Task StartEnteredProcess()
+        {
+            await AutoStartProcess();
+            if (IsDisposed || Disposing) return;
+
+            await CheckMaterialSerials();
+            if (IsDisposed || Disposing) return;
+
+            await TryAutoProgress();
+        }
+
+        /// <summary>
+        /// 지금 공정을 자동으로 시작한다 — 대기(Ready)면 시작, 중지(Stopped)면 재시작.
+        /// 이미 진행 중이거나 완료된 공정에는 요청하지 않는다(전이 가능 여부의 최종 판단은 서버가 한다).
+        /// 자동 처리라 확인 창은 띄우지 않고, 결과는 우측 안내 칸에 남긴다.
+        /// </summary>
+        /// <returns>요청 뒤(또는 원래부터) 공정이 진행 중이면 true.</returns>
+        private async Task<bool> AutoStartProcess()
+        {
+            if (_key == null)
+                return false;
+
+            PopProcessAction action;
+            if (IsProgressState(StateReady))
+                action = PopProcessAction.start;
+            else if (IsProgressState(StateStopped))
+                action = PopProcessAction.resume;
+            else
+                return IsProcessRunning;
+
+            // 실패 사유는 SetProcessAction이 창으로 알린다 — 안내 칸에는 실패 사실만 남긴다.
+            if (!await SetProcessAction(action))
+            {
+                ShowMessage(Language.Pop_AutoStartFailed);
+                return false;
+            }
+
+            var restarted = action == PopProcessAction.resume;
+            AppLog.Step($"[POP] 공정 자동 {(restarted ? "재시작" : "시작")} - {_key.RoutingOperation}/{_key.PageOperation} → {_progressState}");
+            ShowMessage(restarted ? Language.Pop_AutoRestarted : Language.Pop_AutoStarted);
+            return IsProcessRunning;
+        }
 
         private void BeginResultSave()
         {
@@ -501,6 +556,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                     if (!await SetProcessAction(PopProcessAction.end))
                         return;
 
+                    ShowMessage(Language.Pop_AutoEnded);
+
                     if (!await MoveNextAndStart())
                         return;
 
@@ -529,8 +586,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// 공정 목록의 다음 공정으로 옮기고 [공정 시작]을 자동으로 보낸다.
-        /// 마지막 공정이었으면 알리고 false. 옮긴 공정이 대기(Ready)가 아니면(이미 진행 · 완료 등)
+        /// 공정 목록의 다음 공정으로 옮기고 자동으로 시작(중지 상태면 재시작)한다.
+        /// 마지막 공정이었으면 알리고 false. 옮긴 공정이 이미 진행 · 완료 상태면
         /// 시작 요청은 보내지 않고 서버 상태를 그대로 따른다.
         /// </summary>
         private async Task<bool> MoveNextAndStart()
@@ -548,17 +605,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             await MoveToProcess(_processes[current + 1]);
             if (IsDisposed || Disposing) return false;
 
-            if (!IsProgressState(StateReady))
-            {
-                AppLog.Info($"[POP] 다음 공정 자동 시작 생략 - 상태 {_progressState}");
-                return IsProcessRunning;
-            }
-
-            if (!await SetProcessAction(PopProcessAction.start))
-                return false;
-
-            AppLog.Step($"[POP] 공정 자동 시작 - {_key.RoutingOperation}/{_key.PageOperation} → {_progressState}");
-            return IsProcessRunning;
+            return await AutoStartProcess();
         }
 
         // ─────────────────────────────────────────────────────────────────────────

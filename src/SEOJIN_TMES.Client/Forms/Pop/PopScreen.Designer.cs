@@ -20,8 +20,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// 색·폰트·아이콘·다국어 문구는 PopScreen.cs의 Initialize()/ApplyTheme()에서 런타임에 입힌다.
         ///
         /// 화면 구성(화면 설계서 기준):
-        ///   ┌ toolbarCard : 공정 제어 버튼 7개 + 우측 작업자/현재시각
-        ///   ├ mainPanel   : 좌측 viewerCard(작업 표준/도면) + 우측 infoCard(진행 중 공정 정보 + 워크스테이션/상태 띠)
+        ///   ┌ toolbarCard : 공정 제어 버튼(이전/다음/중지/공정 목록/알림 — 시작 버튼은 없다, 자동 시작) + 우측 작업자/상태
+        ///   ├ mainPanel   : 좌측 viewerCard(작업 표준/도면) + 우측 infoCard(진행 중 공정 정보 + 안내 문구 lblMessage)
         ///   └ bottomCard  : 탭 헤더(투입자재/BOM 스팩/검사 스팩/연결 장비 + 수동 렌치 + 결과 저장) + 탭별 그리드 4개
         ///
         /// 도킹은 나중에 Add된 컨트롤이 먼저 처리되므로 Add 순서를 바꾸지 말 것
@@ -74,6 +74,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.txtPageIdleTime = new DevExpress.XtraEditors.TextEdit();
             this.lblPageWorkTime = new DevExpress.XtraEditors.LabelControl();
             this.txtPageWorkTime = new DevExpress.XtraEditors.TextEdit();
+            this.lblMessage = new System.Windows.Forms.Label();
             this.lblInfoTitle = new DevExpress.XtraEditors.LabelControl();
             this.btnInfoAccordion = new SEOJIN_TMES.Client.Forms.Common.AccordionHandle();
             this.panel1 = new System.Windows.Forms.Panel();
@@ -83,7 +84,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.lblWorkerTile = new System.Windows.Forms.Label();
             this.btnAdminAlarm = new System.Windows.Forms.Button();
             this.btnProcessList = new System.Windows.Forms.Button();
-            this.btnStartProcess = new System.Windows.Forms.Button();
             this.btnNextProcess = new System.Windows.Forms.Button();
             this.btnStopProcess = new System.Windows.Forms.Button();
             this.spacerBottom = new System.Windows.Forms.Panel();
@@ -347,6 +347,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.fieldPanel.Controls.Add(this.txtPageIdleTime);
             this.fieldPanel.Controls.Add(this.lblPageWorkTime);
             this.fieldPanel.Controls.Add(this.txtPageWorkTime);
+            this.fieldPanel.Controls.Add(this.lblMessage);
             this.fieldPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.fieldPanel.Location = new System.Drawing.Point(29, 57);
             this.fieldPanel.Name = "fieldPanel";
@@ -605,6 +606,22 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.txtPageWorkTime.Properties.ReadOnly = true;
             this.txtPageWorkTime.Size = new System.Drawing.Size(160, 24);
             this.txtPageWorkTime.TabIndex = 21;
+            //
+            // lblMessage — 자동 시작/재시작/종료 등 안내 문구. 입력칸 아래 빈 공간을 채우도록 네 변에 앵커를 건다.
+            //
+            this.lblMessage.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            | System.Windows.Forms.AnchorStyles.Left)
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblMessage.AutoSize = false;
+            this.lblMessage.BackColor = System.Drawing.Color.White;
+            this.lblMessage.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lblMessage.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblMessage.ForeColor = System.Drawing.Color.Black;
+            this.lblMessage.Location = new System.Drawing.Point(14, 400);
+            this.lblMessage.Name = "lblMessage";
+            this.lblMessage.Padding = new System.Windows.Forms.Padding(8);
+            this.lblMessage.Size = new System.Drawing.Size(358, 115);
+            this.lblMessage.TabIndex = 22;
             // 
             // lblInfoTitle
             // 
@@ -643,7 +660,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.panel1.Controls.Add(this.lblWorkerTile);
             this.panel1.Controls.Add(this.btnAdminAlarm);
             this.panel1.Controls.Add(this.btnProcessList);
-            this.panel1.Controls.Add(this.btnStartProcess);
             this.panel1.Controls.Add(this.btnNextProcess);
             this.panel1.Controls.Add(this.btnStopProcess);
             this.panel1.Controls.Add(this.btnPrevProcess);
@@ -712,7 +728,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.btnAdminAlarm.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
             this.btnAdminAlarm.Image = ((System.Drawing.Image)(resources.GetObject("btnAdminAlarm.Image")));
             this.btnAdminAlarm.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnAdminAlarm.Location = new System.Drawing.Point(663, 7);
+            this.btnAdminAlarm.Location = new System.Drawing.Point(533, 7);
             this.btnAdminAlarm.Name = "btnAdminAlarm";
             this.btnAdminAlarm.Padding = new System.Windows.Forms.Padding(5, 0, 0, 0);
             this.btnAdminAlarm.Size = new System.Drawing.Size(124, 31);
@@ -730,7 +746,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.btnProcessList.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
             this.btnProcessList.Image = ((System.Drawing.Image)(resources.GetObject("btnProcessList.Image")));
             this.btnProcessList.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnProcessList.Location = new System.Drawing.Point(533, 7);
+            this.btnProcessList.Location = new System.Drawing.Point(403, 7);
             this.btnProcessList.Name = "btnProcessList";
             this.btnProcessList.Padding = new System.Windows.Forms.Padding(5, 0, 0, 0);
             this.btnProcessList.Size = new System.Drawing.Size(124, 31);
@@ -738,24 +754,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.btnProcessList.Text = "공정 목록";
             this.btnProcessList.UseVisualStyleBackColor = false;
             this.btnProcessList.Click += new System.EventHandler(this.btnProcessList_Click);
-            // 
-            // btnStartProcess
-            // 
-            this.btnStartProcess.BackColor = System.Drawing.Color.Gray;
-            this.btnStartProcess.FlatAppearance.MouseOverBackColor = System.Drawing.Color.LightGray;
-            this.btnStartProcess.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnStartProcess.Font = new System.Drawing.Font("Noto Sans KR Medium", 9.75F, System.Drawing.FontStyle.Bold);
-            this.btnStartProcess.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
-            this.btnStartProcess.Image = ((System.Drawing.Image)(resources.GetObject("btnStartProcess.Image")));
-            this.btnStartProcess.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.btnStartProcess.Location = new System.Drawing.Point(403, 7);
-            this.btnStartProcess.Name = "btnStartProcess";
-            this.btnStartProcess.Padding = new System.Windows.Forms.Padding(5, 0, 0, 0);
-            this.btnStartProcess.Size = new System.Drawing.Size(124, 31);
-            this.btnStartProcess.TabIndex = 14;
-            this.btnStartProcess.Text = "공정 시작";
-            this.btnStartProcess.UseVisualStyleBackColor = false;
-            this.btnStartProcess.Click += new System.EventHandler(this.ProcessAction_Click);
             // 
             // btnNextProcess
             // 
@@ -1093,6 +1091,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private DevExpress.XtraEditors.TextEdit txtPageIdleTime;
         private DevExpress.XtraEditors.LabelControl lblPageWorkTime;
         private DevExpress.XtraEditors.TextEdit txtPageWorkTime;
+        private System.Windows.Forms.Label lblMessage;
         private System.Windows.Forms.Panel spacerBottom;
         private DevExpress.XtraEditors.PanelControl bottomCard;
         private DevExpress.XtraGrid.GridControl gridMaterial;
@@ -1114,7 +1113,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Button btnAdminAlarm;
         private System.Windows.Forms.Button btnProcessList;
-        private System.Windows.Forms.Button btnStartProcess;
         private System.Windows.Forms.Label lblWorkerTile;
         private DevExpress.XtraEditors.PanelControl toolbarCard;
         private System.Windows.Forms.Label lblWorker;

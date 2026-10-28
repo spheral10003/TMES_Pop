@@ -22,11 +22,13 @@ namespace SEOJIN_TMES.Client.Forms.Pop
     /// TMES &gt; 작업관리 &gt; POP 본 화면 — 진입 화면에서 고른 페이지 공정 하나를 실제로 작업하는 화면.
     ///
     /// 구성:
-    ///  - 상단  : 공정 제어 버튼(이전/다음/중지/시작/공정 목록/관리자 알람) + 작업자
-    ///            · 시작/중지 : 서버에 상태 전이를 요청하고, 돌아온 진행 상태를 우측 카드와 하단 띠에 반영한다.
-    ///            · 이전/다음 : [공정 목록]과 같은 순서로 옆 공정으로 옮긴다(상태 전이가 아니라 화면 이동).
+    ///  - 상단  : 공정 제어 버튼(이전/다음/중지/공정 목록/관리자 알람) + 작업자
+    ///            · 중지      : 서버에 상태 전이를 요청하고, 돌아온 진행 상태를 우측 카드와 상단 띠에 반영한다.
+    ///            · 이전/다음 : [공정 목록]과 같은 순서로 옆 공정으로 옮긴다.
+    ///            · [공정 시작] 버튼은 없다 — 공정에 들어오면(진입 · 이전/다음 · 공정 목록) 자동으로 시작하고,
+    ///              중지돼 있던 공정이면 자동으로 다시 시작한다. 종료는 탭 값이 모두 입력되면 자동으로 보낸다.
     ///  - 좌측  : 작업 표준/도면(공유 폴더의 도면 이미지)
-    ///  - 우측  : 진행 중 공정 정보 + 워크스테이션 띠 + 공정 진행 상태 띠
+    ///  - 우측  : 진행 중 공정 정보 + 안내 문구(lblMessage). 처음에는 접힌 채로 보여 준다.
     ///  - 하단  : 탭 4개 — 투입자재 / BOM 스팩 / 검사 스팩 / 연결 장비
     ///
     /// 파일 구성:
@@ -106,7 +108,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             btnPrevProcess.Text = Language.Pop_PrevProcess;
             btnNextProcess.Text = Language.Pop_NextProcess;
             btnStopProcess.Text = Language.Pop_StopProcess;
-            btnStartProcess.Text = Language.Pop_StartProcess;
             btnProcessList.Text = Language.Pop_ProcessList;
             btnAdminAlarm.Text = Language.Pop_AdminAlarm;
 
@@ -125,6 +126,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             lblPageRunTime.Text = "· " + Language.Pop_PageRunTime;
             lblPageIdleTime.Text = "· " + Language.Pop_PageIdleTime;
             lblPageWorkTime.Text = "· " + Language.Pop_PageWorkTime;
+            lblMessage.Text = string.Empty;
 
             pageMaterial.Text = Language.Pop_TabMaterial;
             pageBom.Text = Language.Pop_TabBomSpec;
@@ -160,7 +162,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             viewerSurface.BackColor = AppTheme.Card;
 
             // 버튼 색은 앱 공통(#6D7C92 + 흰 글자). 글꼴은 Designer에서 버튼마다 정해 둔 값을 그대로 쓴다.
-            foreach (var button in new[] { btnPrevProcess, btnNextProcess, btnStartProcess, btnStopProcess, btnProcessList, btnAdminAlarm,
+            foreach (var button in new[] { btnPrevProcess, btnNextProcess, btnStopProcess, btnProcessList, btnAdminAlarm,
                                             btnSaveResults, btnFit, btnZoomIn, btnZoomOut })
                 AppTheme.StandardButton(button, keepFont: true);
 
@@ -168,10 +170,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             viewerSurface.Invalidate();
         }
 
-        /// <summary>시작 · 중지 버튼이 서버에 요청할 동작. 중지 버튼은 서버 상태에 따라 stop ↔ resume으로 바뀐다.</summary>
+        /// <summary>중지 버튼이 서버에 요청할 동작. 서버 상태에 따라 stop ↔ resume으로 바뀐다.</summary>
         private void InitActionTiles()
         {
-            btnStartProcess.Tag = PopProcessAction.start;
             btnStopProcess.Tag = PopProcessAction.stop;
         }
 
@@ -245,11 +246,16 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 InitActionTiles();
                 Screen.InitGrids();
 
+                // 도면을 넓게 보는 것이 먼저라 우측 공정 정보는 접힌 채로 시작한다(손잡이로 펼친다).
+                SetInfoExpanded(false);
+
                 await Screen.GetProcessInfo();
                 if (IsDisposed || Disposing) return;
 
                 WireEquipmentEvents();
-                await Screen.CheckMaterialSerials();
+
+                // 진입도 공정 이동과 같다 — 시작 버튼이 없으므로 여기서 시작하지 않으면 첫 공정은 시작할 길이 없다.
+                await Screen.StartEnteredProcess();
             }
             catch (Exception ex)
             {
@@ -280,7 +286,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         // ─────────────────────────────────────────────────────────────────────────
 
         /// <summary>
-        /// [공정 시작] · [공정 중지/재시작] 공용 핸들러. 요청할 동작은 버튼 Tag에서 읽는다.
+        /// [공정 중지/재시작] 핸들러. 요청할 동작은 버튼 Tag에서 읽는다.
         /// 버튼 문구는 여기서 바꾸지 않는다 — 요청 뒤 서버가 다시 내려준 진행 상태로 <see cref="SetProgressState"/>가 그린다.
         /// </summary>
         private async void ProcessAction_Click(object sender, EventArgs e)

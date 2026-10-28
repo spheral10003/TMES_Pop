@@ -984,6 +984,18 @@
   <data name="Pop_EndProcess" xml:space="preserve">
     <value>Hoàn thành</value>
   </data>
+  <data name="Pop_AutoStarted" xml:space="preserve">
+    <value>Công đoạn đã được tự động bắt đầu.</value>
+  </data>
+  <data name="Pop_AutoRestarted" xml:space="preserve">
+    <value>Công đoạn đang dừng đã được tự động bắt đầu lại.</value>
+  </data>
+  <data name="Pop_AutoStartFailed" xml:space="preserve">
+    <value>Không thể tự động bắt đầu công đoạn.</value>
+  </data>
+  <data name="Pop_AutoEnded" xml:space="preserve">
+    <value>Đã nhập đủ các giá trị nên công đoạn đã được tự động hoàn thành.</value>
+  </data>
   <data name="Col_WorkQty" xml:space="preserve">
     <value>Work Qty</value>
   </data>

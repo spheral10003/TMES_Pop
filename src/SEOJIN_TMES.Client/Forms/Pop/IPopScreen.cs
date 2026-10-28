@@ -29,6 +29,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         Task<bool> SetProcessAction(PopProcessAction action);
         Task MoveProcess(int offset);
         Task ShowProcessList();
+        Task StartEnteredProcess();
         Task TryAutoProgress();
         Task ShowAdminAlarm();
 

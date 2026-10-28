@@ -984,6 +984,18 @@
   <data name="Pop_EndProcess" xml:space="preserve">
     <value>Complete</value>
   </data>
+  <data name="Pop_AutoStarted" xml:space="preserve">
+    <value>The process was started automatically.</value>
+  </data>
+  <data name="Pop_AutoRestarted" xml:space="preserve">
+    <value>The stopped process was restarted automatically.</value>
+  </data>
+  <data name="Pop_AutoStartFailed" xml:space="preserve">
+    <value>The process could not be started automatically.</value>
+  </data>
+  <data name="Pop_AutoEnded" xml:space="preserve">
+    <value>All values were entered, so the process was completed automatically.</value>
+  </data>
   <data name="Col_WorkQty" xml:space="preserve">
     <value>Work Qty</value>
   </data>
