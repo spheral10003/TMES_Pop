@@ -91,6 +91,10 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string Login_Language => Get(nameof(Login_Language));
         public static string Login_Business => Get(nameof(Login_Business));
         public static string Login_CorpGumi => Get(nameof(Login_CorpGumi));
+        public static string Login_Exit => Get(nameof(Login_Exit));
+        public static string Login_KeyHint => Get(nameof(Login_KeyHint));
+        public static string Login_Online => Get(nameof(Login_Online));
+        public static string Login_Offline => Get(nameof(Login_Offline));
 
         public static string MainForm_Title => Get(nameof(MainForm_Title));
         public static string MainForm_VersionFormat => Get(nameof(MainForm_VersionFormat));

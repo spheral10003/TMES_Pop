@@ -25,7 +25,8 @@ namespace SEOJIN_TMES.Client.Theme
     public static class AppImages
     {
         private const string LoginIllustrationResource = "SEOJIN_TMES.Client.Images.login_icon.png";
-        private const string LoginCardResource = "SEOJIN_TMES.Client.Images.tmes_login_card.png";
+        private const string LoginTestResource = "SEOJIN_TMES.Client.Images.login_TEST.png";
+        private const string LoginProdResource = "SEOJIN_TMES.Client.Images.login_PROD.png";
         private const string BrandLogoResource = "SEOJIN_TMES.Client.Images.texon_logo.svg";
 
         /// <summary>창·작업 표시줄 아이콘 — 운용 서버. exe 아이콘(csproj의 ApplicationIcon)과 같은 파일이다.</summary>
@@ -63,7 +64,8 @@ namespace SEOJIN_TMES.Client.Theme
         private const string MarkViewBox = "28 -6 150 108";
 
         private static Image _loginIllustration;
-        private static Image _loginCard;
+        private static Image _loginTestBackground;
+        private static Image _loginProdBackground;
         private static Icon _appIcon;
         private static Icon _testAppIcon;
         private static SvgImage _brandSignature;
@@ -132,23 +134,39 @@ namespace SEOJIN_TMES.Client.Theme
         }
 
         /// <summary>
-        /// 로그인 창 배경(Images\tmes_login_card.png, 1200×650) — 일러스트 + 입력 칸 모양까지 그려진 한 장짜리 그림.
+        /// 로그인 창 배경(880×560) — 제목 줄 · 좌측 소개 · 입력 칸 · 버튼 · 상태 줄까지 그려진 한 장짜리 그림.
         /// 로그인 창은 이 그림 위의 칸 좌표에 맞춰 컨트롤을 얹으므로 원본 크기 그대로 쓴다.
+        /// 테스트 서버(login_TEST.png)는 주황 아이콘 · TEST 배지, 운용 서버(login_PROD.png)는 파란 아이콘 · PROD 배지다.
         /// </summary>
-        public static Image LoginCard()
+        /// <param name="testServer">App.config의 IsTestServer 값.</param>
+        public static Image LoginBackground(bool testServer)
         {
-            if (_loginCard == null)
+            if (testServer)
             {
-                // LoginIllustration과 같은 이유로 MemoryStream을 닫지 않는다.
-                var buffer = new MemoryStream();
-                using (var stream = OpenResource(LoginCardResource))
-                    stream.CopyTo(buffer);
+                if (_loginTestBackground == null)
+                    _loginTestBackground = LoadImage(LoginTestResource);
 
-                buffer.Position = 0;
-                _loginCard = Image.FromStream(buffer);
+                return _loginTestBackground;
             }
 
-            return _loginCard;
+            if (_loginProdBackground == null)
+                _loginProdBackground = LoadImage(LoginProdResource);
+
+            return _loginProdBackground;
+        }
+
+        /// <summary>
+        /// 리소스 그림을 원본 그대로 읽는다. Image.FromStream은 이미지가 살아 있는 동안 스트림도 살아 있어야 하고,
+        /// 여기서 만든 이미지는 앱이 끝날 때까지 캐시로 들고 있으므로 MemoryStream을 닫지 않는다.
+        /// </summary>
+        private static Image LoadImage(string resourceName)
+        {
+            var buffer = new MemoryStream();
+            using (var stream = OpenResource(resourceName))
+                stream.CopyTo(buffer);
+
+            buffer.Position = 0;
+            return Image.FromStream(buffer);
         }
 
         /// <summary>

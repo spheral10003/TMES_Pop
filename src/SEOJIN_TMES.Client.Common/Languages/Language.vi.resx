@@ -166,10 +166,22 @@
     <value>Ngôn ngữ</value>
   </data>
   <data name="Login_Business" xml:space="preserve">
-    <value>Bộ phận kinh doanh</value>
+    <value>Bộ phận</value>
   </data>
   <data name="Login_CorpGumi" xml:space="preserve">
     <value>Texon Gumi</value>
+  </data>
+  <data name="Login_Exit" xml:space="preserve">
+    <value>Thoát</value>
+  </data>
+  <data name="Login_KeyHint" xml:space="preserve">
+    <value>Enter: Đăng nhập · Esc: Thoát</value>
+  </data>
+  <data name="Login_Online" xml:space="preserve">
+    <value>Trực tuyến</value>
+  </data>
+  <data name="Login_Offline" xml:space="preserve">
+    <value>Ngoại tuyến</value>
   </data>
   <data name="MainForm_Title" xml:space="preserve">
     <value>Hệ thống TMES POP</value>

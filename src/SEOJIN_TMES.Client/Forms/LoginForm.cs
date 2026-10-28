@@ -7,14 +7,15 @@ using SEOJIN_TMES.Client.Common.Configuration;
 using SEOJIN_TMES.Client.Common.Languages;
 using SEOJIN_TMES.Client.Common.Logging;
 using SEOJIN_TMES.Client.Common.Models;
+using SEOJIN_TMES.Client.Composition;
 using SEOJIN_TMES.Client.Core;
 using SEOJIN_TMES.Client.Theme;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Globalization;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -58,9 +59,6 @@ namespace SEOJIN_TMES.Client.Forms
         /// <summary>콤보를 코드로 채우는 동안 SelectedIndexChanged가 문구를 다시 입히지 않도록 막는다.</summary>
         private bool _suppressLanguageChange;
 
-        /// <summary>배경 그림(tmes_login_card.png)의 모서리 둥글기(px). 창 모양도 여기에 맞춰 깎는다.</summary>
-        private const int CardCornerRadius = 14;
-
         /// <summary>콤보 오른쪽 그림 화살표(v)의 폭(px) — 이 자리를 누르면 콤보를 연다.</summary>
         private const int ComboArrowWidth = 18;
 
@@ -90,6 +88,9 @@ namespace SEOJIN_TMES.Client.Forms
             LoadUser();
             SetTexts();
             SetTheme();
+
+            // 상태 줄의 네트워크 표시는 윈도우가 알려 주는 연결 변화를 따라간다(창이 닫히면 FormClosed에서 끊는다).
+            NetworkChange.NetworkAvailabilityChanged += NetworkChange_NetworkAvailabilityChanged;
         }
 
         /// <summary>설정 값이 비었거나 잘못됐으면 목록의 첫 언어(한국어)로 대신한다.</summary>
@@ -106,65 +107,148 @@ namespace SEOJIN_TMES.Client.Forms
         /// </summary>
         private void SetTexts()
         {
-            // ID · Password 항목 이름과 닫기(✕)는 언어와 상관없이 디자이너 문구 그대로 둔다.
-            Text = Language.Login_Title;
+            // ID · Password 항목 이름, 제목 줄(TMES Client · TEST/PROD · ✕)은 배경 그림의 글자 그대로라 언어와 상관없이 둔다.
             lblLanguage.Text = Language.Login_Language;
             lblCorp.Text = Language.Login_Business;
             btnConnect.Text = Language.Login_Connect;
+            btnExit.Text = Language.Login_Exit;
             chkRememberId.Text = Language.Login_RememberId;
+            lblKeyHint.Text = Language.Login_KeyHint;
+            lblVersion.Text = string.Format(Language.MainForm_VersionFormat, AppVersion.Current);
             SetCorpList();
+            SetNetworkStatus(NetworkInterface.GetIsNetworkAvailable());
             // 앞서 띄운 오류 문구는 이전 언어이므로 지운다.
             lblMessage.Text = string.Empty;
         }
 
         /// <summary>
-        /// 로그인 화면은 배경 그림(<see cref="AppImages.LoginCard"/>) 한 장 위에 컨트롤을 얹는다.
-        /// 얹은 컨트롤은 그림과 이어져 보여야 하므로 그림에서 뽑은 색(<see cref="AppTheme"/>의 LoginCard*)을 입힌다 —
-        /// 항목 이름 라벨은 흰 바탕으로 그림의 글자를 가리고, 입력 칸 · 콤보는 칸 안쪽 색으로 테두리 없이 둔다.
+        /// 로그인 화면은 배경 그림(<see cref="AppImages.LoginBackground"/>) 한 장 위에 컨트롤을 얹는다.
+        /// App.config의 IsTestServer로 그림(TEST/PROD)과 제목 줄 아이콘 · 배지를 고른다.
+        /// 얹은 컨트롤은 그림과 이어져 보여야 하므로 그림에서 뽑은 색(<see cref="AppTheme"/>의 Login*)을 입힌다 —
+        /// 오른쪽 흰 영역의 글자는 전부 컨트롤로 덮어 다국어로 바꿔 쓰고, 입력 칸 · 콤보는 테두리 없이 그림의 칸 안에 넣는다.
         /// </summary>
         private void SetTheme()
         {
-            BackgroundImage = AppImages.LoginCard();
+            var testServer = _setting.AppSet.IsTestServer;
+
+            BackgroundImage = AppImages.LoginBackground(testServer);
             BackgroundImageLayout = ImageLayout.None;
-            BackColor = AppTheme.LoginCardBack;
-            SetCardRegion();
+            BackColor = AppTheme.LoginBack;
+
+            // 제목 줄 — 그림의 제목 줄을 덮어 다시 만든다(최소화 버튼은 두지 않는다).
+            pnlTitle.BackColor = AppTheme.LoginTitleBar;
+            picTitleIcon.Image = AppImages.AppLogo(testServer, picTitleIcon.Width);
+            lblBadge.Text = testServer ? "TEST" : "PROD";
+            lblBadge.BackColor = testServer ? AppTheme.LoginBadgeTest : AppTheme.LoginBadgeProd;
+            btnClose.BackColor = AppTheme.LoginTitleBar;
+            btnClose.FlatAppearance.MouseOverBackColor = AppTheme.LoginTitleCloseHover;
 
             foreach (var label in new[] { lblLanguage, lblCorp, lblUserId, lblPassword })
             {
-                label.Appearance.BackColor = AppTheme.LoginCardBack;
-                label.Appearance.ForeColor = AppTheme.LoginCardText;
+                label.Appearance.BackColor = AppTheme.LoginBack;
+                label.Appearance.ForeColor = AppTheme.LoginText;
             }
 
             foreach (var box in new[] { pnlLanguage, pnlCorp })
-                box.BackColor = AppTheme.LoginCardField;
+                box.BackColor = AppTheme.LoginBack;
 
             foreach (var combo in new[] { cboLanguage, cboCorp })
-                combo.BackColor = AppTheme.LoginCardField;
+                combo.BackColor = AppTheme.LoginBack;
 
             FitComboInBox(cboLanguage, pnlLanguage);
             FitComboInBox(cboCorp, pnlCorp);
 
-            txtUserId.BackColor = AppTheme.LoginCardField;
-            txtPassword.BackColor = AppTheme.LoginCardField;
+            txtUserId.BackColor = AppTheme.LoginBack;
+            txtPassword.BackColor = AppTheme.LoginBack;
 
-            chkRememberId.BackColor = AppTheme.LoginCardBack;
-            chkRememberId.ForeColor = AppTheme.LoginCardMuted;
+            chkRememberId.BackColor = AppTheme.LoginBack;
+            chkRememberId.ForeColor = AppTheme.LoginSubText;
 
             // 접속 버튼은 AcceptButton(Enter)이라 기본 버튼 테두리가 그려진다 — 테두리 색을 바탕과 같게 해 감춘다.
-            btnConnect.BackColor = AppTheme.LoginCardButton;
-            btnConnect.FlatAppearance.BorderColor = AppTheme.LoginCardButton;
-            btnConnect.FlatAppearance.MouseOverBackColor = AppTheme.LoginCardButton;
-            btnConnect.FlatAppearance.MouseDownBackColor = AppTheme.LoginCardButtonPressed;
+            btnConnect.BackColor = AppTheme.LoginButton;
+            btnConnect.FlatAppearance.BorderColor = AppTheme.LoginButton;
+            btnConnect.FlatAppearance.MouseOverBackColor = AppTheme.LoginButton;
+            btnConnect.FlatAppearance.MouseDownBackColor = AppTheme.LoginButtonPressed;
             btnConnect.ForeColor = Color.White;
 
-            btnClose.BackColor = AppTheme.LoginCardBack;
-            btnClose.ForeColor = AppTheme.LoginCardClose;
+            btnExit.BackColor = AppTheme.LoginBack;
+            btnExit.ForeColor = AppTheme.LoginText;
+            btnExit.FlatAppearance.BorderColor = AppTheme.LoginLine;
+            btnExit.FlatAppearance.MouseOverBackColor = AppTheme.LoginStatusBack;
 
-            lblMessage.Appearance.ForeColor = AppTheme.Rose;
-            lblMessage.Appearance.Font = AppTheme.BodyBoldFont;
+            lblKeyHint.BackColor = AppTheme.LoginBack;
+            lblKeyHint.ForeColor = AppTheme.LoginHint;
+
+            pnlStatus.BackColor = AppTheme.LoginStatusBack;
+            lblNetwork.ForeColor = AppTheme.LoginSubText;
+            lblVersion.ForeColor = AppTheme.LoginSubText;
+
+            lblMessage.Appearance.ForeColor = AppTheme.LoginErrorText;
             lblMessage.Appearance.Options.UseForeColor = true;
-            lblMessage.Appearance.Options.UseFont = true;
             lblMessage.Text = string.Empty;
+            SetErrorBox();
+        }
+
+        /// <summary>
+        /// 오류 상자 — 문구가 있을 때만 붉은 상자로 보인다.
+        /// 문구가 없으면 흰색으로 칠해, 운용 그림(login_PROD.png)에 그려진 붉은 상자도 함께 가린다.
+        /// lblMessage.Text가 바뀔 때마다(lblMessage_TextChanged) 다시 맞춘다.
+        /// </summary>
+        private void SetErrorBox()
+        {
+            pnlError.BackColor = string.IsNullOrEmpty(lblMessage.Text) ? AppTheme.LoginBack : AppTheme.LoginErrorBack;
+            pnlError.Invalidate();
+        }
+
+        private void lblMessage_TextChanged(object sender, EventArgs e) => SetErrorBox();
+
+        private void pnlError_Paint(object sender, PaintEventArgs e)
+        {
+            if (string.IsNullOrEmpty(lblMessage.Text))
+                return;
+
+            using (var pen = new Pen(AppTheme.LoginErrorBorder))
+                e.Graphics.DrawRectangle(pen, 0, 0, pnlError.Width - 1, pnlError.Height - 1);
+        }
+
+        /// <summary>접속 중(Enabled=false)에는 그림의 비활성 LOGIN처럼 회색으로 바꾼다.</summary>
+        private void btnConnect_EnabledChanged(object sender, EventArgs e)
+        {
+            var back = btnConnect.Enabled ? AppTheme.LoginButton : AppTheme.LoginButtonDisabled;
+            btnConnect.BackColor = back;
+            btnConnect.FlatAppearance.BorderColor = back;
+        }
+
+        /// <summary>
+        /// 상태 줄 왼쪽 — 이 PC의 네트워크 연결 여부(윈도우가 알려 주는 값)다. 서버 응답 여부는 아니다.
+        /// </summary>
+        private void SetNetworkStatus(bool online)
+        {
+            lblNetworkDot.ForeColor = online ? AppTheme.LoginOnline : AppTheme.LoginOffline;
+            lblNetwork.Text = online ? Language.Login_Online : Language.Login_Offline;
+        }
+
+        /// <summary>연결 변화 알림은 작업 스레드에서 오므로 화면 스레드로 넘겨서 바꾼다.</summary>
+        private void NetworkChange_NetworkAvailabilityChanged(object sender, NetworkAvailabilityEventArgs e)
+        {
+            try
+            {
+                if (IsDisposed || Disposing || !IsHandleCreated)
+                    return;
+
+                BeginInvoke(new Action<bool>(SetNetworkStatus), e.IsAvailable);
+            }
+            catch (Exception ex)
+            {
+                // 창이 닫히는 순간과 겹치면 BeginInvoke가 실패할 수 있다 — 표시만 못 할 뿐이라 로그만 남긴다.
+                AppLog.Warn($"로그인 창 네트워크 상태 표시 실패 - {ex.Message}");
+            }
+        }
+
+        /// <summary>NetworkChange는 정적 이벤트라 끊지 않으면 닫힌 창이 계속 붙잡혀 있다.</summary>
+        private void LoginForm_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            NetworkChange.NetworkAvailabilityChanged -= NetworkChange_NetworkAvailabilityChanged;
         }
 
         /// <summary>
@@ -266,8 +350,8 @@ namespace SEOJIN_TMES.Client.Forms
 
             var inList = (e.State & DrawItemState.ComboBoxEdit) == 0;
             var highlighted = inList && (e.State & DrawItemState.Selected) != 0;
-            var back = highlighted ? AppTheme.LoginCardButton : AppTheme.LoginCardField;
-            var fore = highlighted ? Color.White : AppTheme.LoginCardText;
+            var back = highlighted ? AppTheme.LoginButton : AppTheme.LoginBack;
+            var fore = highlighted ? Color.White : AppTheme.LoginText;
 
             using (var brush = new SolidBrush(back))
                 e.Graphics.FillRectangle(brush, e.Bounds);
@@ -283,21 +367,6 @@ namespace SEOJIN_TMES.Client.Forms
             var textBounds = new Rectangle(textLeft, e.Bounds.Top, e.Bounds.Right - textLeft, e.Bounds.Height);
             TextRenderer.DrawText(e.Graphics, combo.GetItemText(combo.Items[e.Index]), combo.Font, textBounds, fore,
                 TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
-        }
-
-        /// <summary>창 모양을 배경 그림의 둥근 모서리에 맞춘다 — 그림 모서리는 투명이라 그대로 두면 네모난 바탕이 비친다.</summary>
-        private void SetCardRegion()
-        {
-            var d = CardCornerRadius * 2;
-            using (var path = new GraphicsPath())
-            {
-                path.AddArc(0, 0, d, d, 180, 90);
-                path.AddArc(Width - d, 0, d, d, 270, 90);
-                path.AddArc(Width - d, Height - d, d, d, 0, 90);
-                path.AddArc(0, Height - d, d, d, 90, 90);
-                path.CloseFigure();
-                Region = new Region(path);
-            }
         }
 
         /// <summary>콤보 오른쪽, 배경 그림의 화살표(v) 자리.</summary>

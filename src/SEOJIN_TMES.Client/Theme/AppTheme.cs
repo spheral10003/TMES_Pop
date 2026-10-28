@@ -71,15 +71,26 @@ namespace SEOJIN_TMES.Client.Theme
         // 공정 정지 사유 창(StopIssueForm)의 강조 색 — POP [중지] 버튼과 같은 빨강 계열로, 알람 창(Amber)과 구분된다.
         public static readonly Color StopIssue = Rose;
 
-        // ── 로그인 배경 그림(tmes_login_card.png)에서 뽑은 색 ──
+        // ── 로그인 배경 그림(login_TEST.png / login_PROD.png)에서 뽑은 색 ──
         // 그림 위에 얹는 컨트롤이 그림과 이어져 보여야 하므로 테마(다크)와 상관없이 그림의 픽셀 값을 그대로 쓴다.
-        public static readonly Color LoginCardBack = Color.White;                     // 입력 칸 바깥 흰 바탕
-        public static readonly Color LoginCardField = Color.FromArgb(251, 252, 253);  // #FBFCFD 입력 칸 안쪽
-        public static readonly Color LoginCardButton = Color.FromArgb(44, 91, 120);   // #2C5B78 접속 버튼
-        public static readonly Color LoginCardButtonPressed = Color.FromArgb(33, 72, 96);
-        public static readonly Color LoginCardText = Color.FromArgb(61, 67, 84);      // 항목 이름(언어 · 사업부 · ID · Password)
-        public static readonly Color LoginCardMuted = Color.FromArgb(136, 136, 136);  // 아이디 저장
-        public static readonly Color LoginCardClose = Color.FromArgb(75, 85, 99);     // 닫기(X)
+        public static readonly Color LoginBack = Color.White;                             // 오른쪽 입력 영역 흰 바탕
+        public static readonly Color LoginTitleBar = Color.FromArgb(27, 58, 82);          // #1B3A52 제목 줄 · 창 테두리
+        public static readonly Color LoginTitleCloseHover = Color.FromArgb(196, 43, 28);  // 닫기(✕)에 마우스를 올렸을 때(윈도우 기본 닫기 색)
+        public static readonly Color LoginBadgeTest = Color.FromArgb(194, 65, 12);        // #C2410C TEST 배지
+        public static readonly Color LoginBadgeProd = Color.FromArgb(58, 90, 116);       // #3A5A74 PROD 배지
+        public static readonly Color LoginText = Color.FromArgb(43, 55, 67);              // #2B3743 항목 이름 · EXIT 글자
+        public static readonly Color LoginSubText = Color.FromArgb(59, 71, 84);           // #3B4754 아이디 저장 · 상태 줄 글자
+        public static readonly Color LoginHint = Color.FromArgb(101, 104, 117);           // #656875 Enter/Esc 안내
+        public static readonly Color LoginButton = Color.FromArgb(45, 93, 123);           // #2D5D7B LOGIN
+        public static readonly Color LoginButtonPressed = Color.FromArgb(33, 72, 96);
+        public static readonly Color LoginButtonDisabled = Color.FromArgb(138, 155, 169); // #8A9BA9 LOGIN 비활성(접속 중)
+        public static readonly Color LoginLine = Color.FromArgb(169, 182, 194);           // #A9B6C2 입력 칸 · EXIT 테두리
+        public static readonly Color LoginErrorBack = Color.FromArgb(253, 237, 235);      // #FDEDEB 오류 상자
+        public static readonly Color LoginErrorBorder = Color.FromArgb(232, 163, 156);    // #E8A39C
+        public static readonly Color LoginErrorText = Color.FromArgb(155, 41, 20);        // #9B2914
+        public static readonly Color LoginStatusBack = Color.FromArgb(238, 242, 246);     // #EEF2F6 상태 줄
+        public static readonly Color LoginOnline = Color.FromArgb(46, 158, 79);           // #2E9E4F 연결됨 점
+        public static readonly Color LoginOffline = Color.FromArgb(198, 40, 40);          // #C62828 끊김 점
 
         // ── 콘솔(설비 로그) 색 ──
         public static readonly Color ConsoleBack = Color.FromArgb(23, 23, 43);
