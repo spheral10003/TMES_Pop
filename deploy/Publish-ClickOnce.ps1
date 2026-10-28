@@ -259,14 +259,26 @@ if ($published -ne [version]$Version) { throw "게시된 매니페스트 버전(
 
 # ── 배포 서버로 복사 ───────────────────────────────────────────
 if ($CopyTo) {
+    # 접속(net use) 전이거나 비밀번호가 틀리면 robocopy 가 재시도만 하며 멈춰 있으므로, 폴더에 닿는지 먼저 본다.
+    if (-not (Test-Path $CopyTo)) {
+        throw "배포 서버 폴더에 접근할 수 없다: $CopyTo - net use 로 먼저 접속(계정 · 비밀번호 확인)한 뒤 다시 실행할 것. 게시본은 $outDir 에 있다."
+    }
+
     # 이전 버전 폴더(Application Files\...)는 지우지 않는다 — 업데이트 중이던 PC가 옛 파일을 받을 수 있어야 한다.
     # 루트의 .application 은 버전 폴더가 다 올라간 다음에 바꿔야, 반쯤 올라간 버전을 PC가 받아 가지 않는다.
-    robocopy (Join-Path $outDir 'Application Files') (Join-Path $CopyTo 'Application Files') /E /NP /NFL /NDL | Out-Null
-    if ($LASTEXITCODE -ge 8) { throw "robocopy 실패(exit $LASTEXITCODE) - Application Files" }
-    robocopy $outDir $CopyTo /NP /NFL /NDL | Out-Null
-    if ($LASTEXITCODE -ge 8) { throw "robocopy 실패(exit $LASTEXITCODE) - 루트 파일" }
+    # 재시도는 짧게 둔다 — 기본값(100만 회 · 30초)이면 접속이 끊겼을 때 끝나지 않는다.
+    # 결과 코드는 0~7만 성공이다. 강제로 끝난 robocopy 는 음수로 끝나므로 "8 이상"만 보면 실패를 놓친다.
+    robocopy (Join-Path $outDir 'Application Files') (Join-Path $CopyTo 'Application Files') /E /NP /NFL /NDL /R:3 /W:5 | Out-Null
+    if ($LASTEXITCODE -lt 0 -or $LASTEXITCODE -ge 8) { throw "robocopy 실패(exit $LASTEXITCODE) - Application Files" }
+    robocopy $outDir $CopyTo /NP /NFL /NDL /R:3 /W:5 | Out-Null
+    if ($LASTEXITCODE -lt 0 -or $LASTEXITCODE -ge 8) { throw "robocopy 실패(exit $LASTEXITCODE) - 루트 파일" }
     $global:LASTEXITCODE = 0
-    Write-Host "배포 서버 복사 완료: $CopyTo"
+
+    # 결과 코드만 믿지 않고, 서버에 올라간 매니페스트가 이번 버전인지 직접 확인한다.
+    $copiedManifest = Join-Path $CopyTo "$appName.application"
+    $copiedVersion  = if (Test-Path $copiedManifest) { Get-DeployedVersion ([xml](Get-Content $copiedManifest -Raw)) }
+    if ($copiedVersion -ne [version]$Version) { throw "배포 서버의 매니페스트 버전($copiedVersion)이 게시 버전($Version)과 다르다: $copiedManifest" }
+    Write-Host "배포 서버 복사 완료: $CopyTo ($copiedVersion)"
 }
 
 Write-Host ""
