@@ -474,15 +474,17 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
         /// <summary>
         /// 작업자가 공정을 바꿀 때([이전 공정] · [다음 공정] · [공정 목록]) 지금 공정을 완료 처리한다.
-        /// 진행 중(Progress)일 때만 보낸다 — 대기 · 중지 · 완료 상태는 그대로 두고 옮긴다.
+        /// 진행 중(Progress)이고 <b>입력할 항목이 없는</b> 공정에만 보낸다 — 자동 완료되지 않는 공정이 그것뿐이다.
+        /// 입력할 항목이 있는 공정은 완료 없이 그대로 옮긴다: 할 일이 남아 있으면 서버가 완료를 400(WORK_005)으로
+        /// 거절하고, 그 거절로 이동까지 막히면 작업자가 그 공정을 벗어날 수 없었다. 입력을 다 마치면 자동 완료된다.
+        /// 대기 · 중지 · 완료 상태도 그대로 두고 옮긴다.
         /// </summary>
         /// <returns>
-        /// 이동을 계속해도 되면 true. 서버가 완료를 거절했거나(사유는 SetProcessAction이 창으로 알린다) 화면이 닫혔으면 false —
-        /// 완료가 서버에 남지 않은 채 다른 공정으로 넘어가지 않게 막는다.
+        /// 이동을 계속해도 되면 true. 서버가 완료를 거절했거나(사유는 SetProcessAction이 창으로 알린다) 화면이 닫혔으면 false.
         /// </returns>
         private async Task<bool> EndCurrentProcess()
         {
-            if (!IsProcessRunning)
+            if (!IsProcessRunning || HasInputItems())
                 return true;
 
             AppLog.Step($"[POP] 공정 변경으로 완료 - {_key.RoutingOperation}/{_key.PageOperation}");
@@ -508,7 +510,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         //
         //  탭 3개(투입자재 / BOM 스팩 / 검사 스팩)의 입력이 모두 끝나면 서버에 [공정 종료]를 보내고,
         //  다음 공정으로 옮겨 [공정 시작]까지 자동으로 이어 간다.
-        //   - 세 탭 모두 데이터가 없는 공정은 자동으로 끝내지 않는다. 시작 상태로 두고, 작업자가
+        //   - 입력할 항목이 없는 공정(HasInputItems)은 자동으로 끝내지 않는다. 시작 상태로 두고, 작업자가
         //     [이전 공정] · [다음 공정] · [공정 목록]으로 공정을 바꿀 때 완료를 보낸다(EndCurrentProcess).
         //   - [공정 시작] 버튼은 없다. 화면 진입 · [이전 공정] · [다음 공정] · [공정 목록]으로 공정에 들어와도
         //     자동으로 시작하고, 중지돼 있던 공정이면 재시작한다(StartEnteredProcess).
@@ -613,12 +615,22 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// 탭 3개의 입력이 모두 끝났는지. 빈 탭은 끝난 것으로 보지만,
-        /// 세 탭이 <b>모두</b> 비어 있으면 false — 그런 공정은 자동 완료하지 않고 작업자가 공정을 바꿀 때 완료한다.
+        /// 작업자가 입력할 항목이 있는 공정인지 — 시리얼 확인이 필요한 자재 · BOM 스팩 · 검사 항목 중 하나라도 있으면 true.
+        /// 탭의 행 수로 보면 안 된다: 시리얼 확인이 필요 없는 자재(serialVrfcYn=N)는 행이 있어도 입력할 것이 없고
+        /// 처음부터 "입력 완료"로 셈해져, 그런 자재만 있는 공정이 들어가자마자 자동 완료됐다.
+        /// </summary>
+        private bool HasInputItems()
+        {
+            return _materials.Any(m => m.SerialCheckRequired) || _bomSpecs.Count > 0 || _inspections.Count > 0;
+        }
+
+        /// <summary>
+        /// 탭 3개의 입력이 모두 끝났는지. 입력할 항목이 하나도 없는 공정(<see cref="HasInputItems"/>)은 false —
+        /// 그런 공정은 자동 완료하지 않고 작업자가 공정을 바꿀 때 완료한다.
         /// </summary>
         private bool IsAllTabsCompleted()
         {
-            if (_materials.Count == 0 && _bomSpecs.Count == 0 && _inspections.Count == 0)
+            if (!HasInputItems())
                 return false;
 
             var materialsDone = _materials.All(m => m.IsSerialInputCompleted);
