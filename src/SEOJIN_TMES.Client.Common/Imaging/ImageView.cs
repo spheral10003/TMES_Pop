@@ -141,8 +141,14 @@ namespace SEOJIN_TMES.Client.Common.Imaging
 
             // 확대된 상태에서는 스크롤바가 떠 있어, ImageBox.ZoomToFit이 스크롤바만큼 좁아진 영역으로 배율을 계산한다
             // (그 뒤 스크롤바가 사라지면 그림이 한쪽으로 치우치고 작게 남는다). 가장 작게 줄여 스크롤바를 먼저 걷어 낸 뒤 맞춘다.
+            //
+            // 스크롤 위치도 직접 0으로 되돌려야 한다. ImageBox는 스크롤바가 사라져도 확대 때 옮겨 둔 AutoScrollPosition을
+            // 그대로 들고 있고, 그림을 그 값만큼 밀어 그린다 — 확대 후 Fit하면 그림이 사라지거나 잘린 크기로 보이던 원인.
+            // (축소 후 Fit은 스크롤 위치가 원래 0이라 문제가 드러나지 않았다.)
             _box.Zoom = ZoomMin;
+            _box.AutoScrollPosition = Point.Empty;
             _box.ZoomToFit();
+            _box.AutoScrollPosition = Point.Empty;
             // ImageBox의 하한(1%)은 기존 규칙(10%)보다 낮다 — 아주 큰 도면도 10% 아래로는 내리지 않는다.
             if (_box.Zoom < ZoomMin) _box.Zoom = ZoomMin;
         }

@@ -60,6 +60,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// </summary>
         private int _pendingResultSaves;
 
+        /// <summary>지금 화면에 띄운 도면의 전체 경로. 같은 도면을 다시 읽어 깜빡이지 않게 비교한다.</summary>
+        private string _drawingPath;
+
         private bool _infoExpanded = true;
         private bool _bottomExpanded = true;
 
@@ -263,8 +266,12 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         // ─────────────────────────────────────────────────────────────────────────
 
         /// <summary>
-        /// 공정 상태 전이(시작 · 중지 · 재시작 · 종료)를 서버에 요청하고, 서버가 바꾼 상태를 다시 읽어 그린다.
+        /// 공정 상태 전이(시작 · 중지 · 재시작 · 종료)를 서버에 요청하고, 서버가 돌려준 상태 · 시각을 화면에 옮긴다.
         /// 전이 가능 여부와 시간 집계는 서버가 판단한다.
+        ///
+        /// 화면 전체(공정 정보 조회 → 탭 4개 + 도면)를 다시 읽지 않는 이유: 전이로 바뀌는 것은 상태와 시각뿐인데,
+        /// 다시 읽으면 도면이 지워졌다 다시 그려져 공정 이동(이동 → 자동 시작)마다 화면이 깜빡였다.
+        /// 응답이 비어 오면 그때만 다시 조회한다.
         /// </summary>
         /// <returns>요청이 받아들여지고 화면을 다시 읽었으면 true. 취소 · 서버 거절 · 화면 닫힘이면 false.</returns>
         public async Task<bool> SetProcessAction(PopProcessAction action)
@@ -283,9 +290,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                     return false;
             }
 
+            PopProcessInfoDto changed;
             try
             {
-                await _apiClient.PopApiClient.ChangeProcessStateAsync(_key, action, request);
+                changed = await _apiClient.PopApiClient.ChangeProcessStateAsync(_key, action, request);
             }
             catch (ApiException ex)
             {
@@ -298,11 +306,31 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
             if (IsDisposed || Disposing) return false;
 
-            await GetProcessInfo();
-            if (IsDisposed || Disposing) return false;
+            if (_info != null && !string.IsNullOrEmpty(changed?.ProgressState))
+            {
+                SetStateChange(changed);
+            }
+            else
+            {
+                await GetProcessInfo();
+                if (IsDisposed || Disposing) return false;
+            }
 
             AppLog.Info($"[POP] 공정 상태 전이 - {action} → {_progressState}");
             return true;
+        }
+
+        /// <summary>상태 전이 응답의 상태 · 시각 · 시간 집계만 지금 공정 정보에 옮겨 우측 카드를 다시 채운다(탭 · 도면은 그대로).</summary>
+        private void SetStateChange(PopProcessInfoDto changed)
+        {
+            _info.ProgressState = changed.ProgressState;
+            _info.PageStartTime = changed.PageStartTime;
+            _info.PageEndTime = changed.PageEndTime;
+            _info.RunTime = changed.RunTime;
+            _info.IdleTime = changed.IdleTime;
+            _info.WorkTime = changed.WorkTime;
+
+            SetProcessInfo();
         }
 
         /// <summary>중지 사유 선택 창. 취소하면 null — 중지 요청을 보내지 않는다.</summary>
@@ -996,17 +1024,17 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// </summary>
         public async Task LoadDrawing()
         {
-            ClearImage();
-
             string root = _appSet.AppSet.DocumentShare.RootPath;
             if (string.IsNullOrEmpty(root))
             {
+                ClearImage();
                 ShowViewerMessage(Language.Pop_DrawingShareNotConfigured);
                 return;
             }
 
             if (string.IsNullOrEmpty(_info?.DrawingFilePath))
             {
+                ClearImage();
                 ShowViewerMessage(Language.Pop_DrawingNone);
                 return;
             }
@@ -1014,6 +1042,12 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 서버 경로는 "/GUM/..."처럼 '/'로 시작한다. DocShare.Resolve에 그대로 넘기면 "\GUM\..."이
             // 루트 경로로 판정되어 공유 루트와 합쳐지지 않으므로, 여기서 전체 UNC 경로를 만들어 넘긴다.
             string path = Path.Combine(root, _info.DrawingFilePath.Replace('/', '\\').TrimStart('\\'));
+
+            // 같은 도면이 이미 떠 있으면 다시 읽지 않는다 — 지웠다 다시 그리면 깜빡이고, 보던 배율 · 위치도 풀린다.
+            if (_viewer != null && _viewer.HasImage && string.Equals(path, _drawingPath, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            ClearImage();
             try
             {
                 byte[] raw = await _appSet.DocShare.ReadAllBytesAsync(path);
@@ -1055,12 +1089,14 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
             // 이전 그림 해제 + 화면 맞춤까지 ImageView가 처리한다(img는 이제 ImageView 소유).
             _viewer.SetImage(img);
+            _drawingPath = path;
         }
 
         private void ClearImage()
         {
             // Init 전에 불릴 수 있다(도면 읽기 실패 경로) — 그때는 띄운 그림도 없다.
             _viewer?.Clear();
+            _drawingPath = null;
         }
 
         /// <summary>도면 자리표시자에 안내 문구를 띄운다.</summary>

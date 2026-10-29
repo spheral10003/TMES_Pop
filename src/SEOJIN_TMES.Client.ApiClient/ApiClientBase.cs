@@ -98,6 +98,21 @@ namespace SEOJIN_TMES.Client.ApiClient
             return token.Type == JTokenType.Null ? default : token.ToObject<TData>();
         }
 
+        /// <summary>
+        /// JSON 본문을 POST하고 응답의 <b>알맹이</b>를 돌려준다(봉투가 있으면 벗긴다 — GetDataAsync와 같은 규칙).
+        /// <see cref="PostAsync{TRequest, TResponse}"/>는 본문 전체를 그대로 읽어, 봉투로 오는 응답이면 값이 전부 null이 된다.
+        /// </summary>
+        protected Task<TData> PostDataAsync<TRequest, TData>(string relativeUrl, TRequest body, CancellationToken cancellationToken = default) =>
+            ExecuteAsync("POST", relativeUrl, async () =>
+            {
+                using (var content = ToJsonContent(body))
+                using (var response = await HttpClient.PostAsync(relativeUrl, content, cancellationToken).ConfigureAwait(false))
+                {
+                    var responseBody = await ReadBodyAsync(response).ConfigureAwait(false);
+                    return Parse(response, responseBody, Unwrap<TData>);
+                }
+            }, cancellationToken);
+
         protected Task<TResponse> PostAsync<TRequest, TResponse>(string relativeUrl, TRequest body, CancellationToken cancellationToken = default) =>
             ExecuteAsync("POST", relativeUrl, async () =>
             {

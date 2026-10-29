@@ -50,6 +50,7 @@ namespace SEOJIN_TMES.Client.ApiClient
         /// <summary>
         /// 공정 상태 전이 요청 — 시작/중지/생략/이전/다음.
         /// 전이 가능 여부와 실적 기록은 전부 서버가 판단한다(클라이언트는 요청만 보낸다).
+        /// 반환값은 바뀐 진행 상태 · 시각 · 시간 집계뿐이다(탭 목록 · 도면 경로는 오지 않는다).
         /// </summary>
         Task<PopProcessInfoDto> ChangeProcessStateAsync(PopProcessKey key, PopProcessAction action, PopProcessActionRequest request = null, CancellationToken cancellationToken = default);
 
@@ -163,7 +164,8 @@ namespace SEOJIN_TMES.Client.ApiClient
             var query = PostKeyQuery(key);
             string url = $"{PopPrefix}{key.SerialNo}/{key.SubRoutingRef}/{action.ToString()}{query}";
             
-            return PostAsync<PopProcessActionRequest, PopProcessInfoDto>(url, request, cancellationToken);
+            // 응답은 {"data":{workStatus, trackInDtm, ...}} 봉투로 온다 — 벗겨 읽어야 바뀐 상태를 화면이 쓸 수 있다.
+            return PostDataAsync<PopProcessActionRequest, PopProcessInfoDto>(url, request, cancellationToken);
         }
 
         public async Task<List<AbnormalAlarmTypeDto>> GetAbnormalAlarmTypes(AbnormalAlarmTypeQuery query, CancellationToken cancellationToken = default)
