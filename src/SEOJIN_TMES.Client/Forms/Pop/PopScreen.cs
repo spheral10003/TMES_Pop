@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace SEOJIN_TMES.Client.Forms.Pop
@@ -232,7 +233,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         //  화면
         // ─────────────────────────────────────────────────────────────────────────
 
-        private async void PopScreen_Load(object sender, EventArgs e)
+        private void PopScreen_Load(object sender, EventArgs e)
         {
             // Designer가 Load를 직접 구독하므로 VS 디자이너에서도 호출된다 — 런타임이 아니면 아무것도 하지 않는다.
             if (DesignMode)
@@ -249,6 +250,20 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 // 도면을 넓게 보는 것이 먼저라 우측 공정 정보는 접힌 채로 시작한다(손잡이로 펼친다).
                 SetInfoExpanded(false);
 
+                // 화면 틀을 먼저 보여 준 뒤 조회한다(ScreenLoad 참고).
+                ScreenLoad.AfterPaint(this, ShowInitialData);
+            }
+            catch (Exception ex)
+            {
+                HandleError("화면 초기화", ex);
+            }
+        }
+
+        /// <summary>화면이 다 그려진 뒤 한 번 — 공정 정보를 읽고, 설비를 배선한 다음 진입 공정을 시작한다.</summary>
+        private async Task ShowInitialData()
+        {
+            try
+            {
                 await Screen.GetProcessInfo();
                 if (IsDisposed || Disposing) return;
 

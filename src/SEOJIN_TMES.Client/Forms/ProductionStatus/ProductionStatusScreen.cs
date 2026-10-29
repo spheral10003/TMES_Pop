@@ -37,7 +37,8 @@ namespace SEOJIN_TMES.Client.Forms.ProductionStatus
 
             ApplyTheme();
 
-            Load += async (s, e) => await SearchAsync();
+            // 화면 틀을 먼저 보여 준 뒤 조회한다(ScreenLoad 참고).
+            ScreenLoad.AfterShown(this, SearchAsync);
         }
 
         /// <summary>현재 테마 색을 화면에 입힌다(테마 전환 시 MainForm이 다시 호출).</summary>
