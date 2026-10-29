@@ -23,6 +23,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         void SetGridData(PopScreenData screen);
         void RefreshBomSpecGrid();
         void RefreshEquipmentStates();
+        void SelectBomSpecRow();
 
         // 공정
         Task GetProcessInfo();
@@ -36,12 +37,14 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         // 실적
         Task InputMaterialSerial(int rowHandle);
         Task CheckMaterialSerials();
+        bool ShowBomSpecTab();
         Task<bool> SetBomSpecResult(PopBomSpecDto spec, decimal? torque, decimal? angle, string equipmentCode);
         Task SetInspectionResult(PopInspectionSpecDto spec, string fieldName);
 
         // 설비
         Task SetTorqueFromEquipment(string equipmentId, decimal torqueValue, decimal angleValue);
         string WriteTorqueToEquipment(decimal torqueTarget);
+        void WriteBomSpecTorque();
 
         // 도면(공유 폴더 파일)
         Task LoadDrawing();

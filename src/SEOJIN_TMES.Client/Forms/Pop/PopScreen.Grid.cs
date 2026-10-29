@@ -434,6 +434,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 _bomSpecs = screen.BomSpecs ?? new List<PopBomSpecDto>();
                 gridBomSpec.DataSource = _bomSpecs;
                 gridViewBomSpec.RefreshData();
+
+                // 앞 공정에서 쓰던 행 위치를 그대로 들고 오면 새 공정의 마지막 행(또는 범위 밖)에 결과가 채워진다.
+                // 목표 토크는 공정이 시작된 뒤 SelectBomSpecRow가 쓴다.
+                FocusBomSpecRow(FindBomSpecTargetRow());
             }
             finally
             {
@@ -448,6 +452,69 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             try
             {
                 gridViewBomSpec.RefreshData();
+            }
+            finally
+            {
+                EndBomSpecRedraw();
+            }
+        }
+
+        /// <summary>
+        /// 설비 결과를 채울 [BOM 스팩] 행을 골라 포커스를 옮기고, 그 행의 목표 토크를 연결된 너트러너에 쓴다.
+        /// 공정에 들어올 때(진입 · 이동 · 자동 진행)와 투입자재 입력을 마쳐 [BOM 스팩] 탭으로 넘어올 때 부른다.
+        /// </summary>
+        public void SelectBomSpecRow()
+        {
+            FocusBomSpecRow(FindBomSpecTargetRow());
+            Screen.WriteBomSpecTorque();
+        }
+
+        /// <summary>
+        /// 설비 결과를 채울 첫 행 — NG이거나 결과가 아직 없는 첫 행. 그런 행이 없으면 첫 행.
+        /// 그리드에 보이는 순서(정렬 반영)대로 본다. 행이 하나도 없으면 InvalidRowHandle.
+        /// </summary>
+        private int FindBomSpecTargetRow()
+        {
+            for (int rowHandle = 0; rowHandle < gridViewBomSpec.RowCount; rowHandle++)
+            {
+                if (gridViewBomSpec.GetRow(rowHandle) is PopBomSpecDto spec && !IsBomSpecPassed(spec))
+                    return rowHandle;
+            }
+
+            return gridViewBomSpec.RowCount > 0 ? 0 : DevExpress.XtraGrid.GridControl.InvalidRowHandle;
+        }
+
+        /// <summary>
+        /// <paramref name="fromRowHandle"/> 다음부터 NG이거나 결과가 없는 행을 찾는다(끝에 닿으면 처음부터 앞까지).
+        /// 남은 행이 없으면 -1.
+        /// </summary>
+        private int FindNextBomSpecRow(int fromRowHandle)
+        {
+            int count = gridViewBomSpec.RowCount;
+            for (int step = 1; step < count; step++)
+            {
+                int rowHandle = (fromRowHandle + step) % count;
+                if (gridViewBomSpec.GetRow(rowHandle) is PopBomSpecDto spec && !IsBomSpecPassed(spec))
+                    return rowHandle;
+            }
+
+            return -1;
+        }
+
+        /// <summary>
+        /// 행을 설비 결과를 채울 행으로 삼고 포커스를 옮긴다. 목표 토크는 쓰지 않는다 —
+        /// 포커스 이벤트로 쓰게 두면 너트러너가 없을 때 경고 창이 뜨므로, 쓸 곳에서 한 번만 쓴다.
+        /// </summary>
+        private void FocusBomSpecRow(int rowHandle)
+        {
+            _bomSpecSelectedRow = rowHandle;
+            if (rowHandle < 0)
+                return;
+
+            BeginBomSpecRedraw();
+            try
+            {
+                gridViewBomSpec.FocusedRowHandle = rowHandle;
             }
             finally
             {
@@ -531,7 +598,14 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
             try
             {
+                var bomSpecs = _bomSpecs;
                 await Screen.InputMaterialSerial(e.RowHandle);
+
+                // 저장으로 자동 진행이 일어나 공정이 바뀌었으면 새 공정 쪽에서 이미 탭 · 행을 골랐다.
+                if (IsDisposed || Disposing || !ReferenceEquals(bomSpecs, _bomSpecs))
+                    return;
+
+                Screen.ShowBomSpecTab();
             }
             catch (Exception ex)
             {

@@ -53,6 +53,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// <summary>자동 완료 · 이동 · 시작이 진행 중인지. 저장 응답이 겹쳐 들어와도 한 번만 돌게 막는다.</summary>
         private bool _autoProgressing;
 
+        /// <summary>[이전 공정] · [다음 공정](PageUp · PageDown 포함) 이동이 진행 중인지.</summary>
+        private bool _processMoving;
+
         /// <summary>
         /// 서버에 보내는 중인 실적 저장(시리얼 · 토크 · 검사) 개수.
         /// 화면 값은 저장 응답 전에 이미 채워져 있으므로, 응답을 기다리지 않고 완료를 보내면
@@ -374,6 +377,23 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 return;
             }
 
+            // PageUp/PageDown을 누르고 있으면 키가 반복 입력된다 — 이동 하나가 끝나기 전의 입력은 버린다.
+            if (_processMoving)
+                return;
+
+            _processMoving = true;
+            try
+            {
+                await MoveProcessBy(offset);
+            }
+            finally
+            {
+                _processMoving = false;
+            }
+        }
+
+        private async Task MoveProcessBy(int offset)
+        {
             if (!await GetProcesses())
                 return;
 
@@ -728,6 +748,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// <summary>
         /// 시리얼 입력이 남은 자재마다 차례로 입력 팝업을 띄우고, 모두 끝났으면 [BOM 스팩] 탭으로 넘긴다.
         /// 중간에 자동 진행으로 공정이 바뀌면(자재 목록이 새로 바뀌면) 남은 팝업은 띄우지 않는다.
+        /// 공정에 들어올 때마다(진입 · 이동 · 자동 진행) 여기를 지나므로, BOM 대상 행 선택과 목표 토크도 여기서 한다.
         /// </summary>
         public async Task CheckMaterialSerials()
         {
@@ -746,8 +767,23 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                     return;
             }
 
-            if (materials.Count > 0 && materials.All(m => m.IsSerialInputCompleted))
-                tabSpec.SelectedTabPage = pageBom;
+            if (!ShowBomSpecTab())
+                SelectBomSpecRow();
+        }
+
+        /// <summary>
+        /// 투입자재 시리얼 입력이 모두 끝났으면 [BOM 스팩] 탭으로 넘기고 체결할 행 · 목표 토크를 맞춘다.
+        /// 시리얼 확인이 필요한 자재가 없으면 탭을 옮기지 않는다(작업자가 보던 탭을 그대로 둔다).
+        /// </summary>
+        /// <returns>탭을 옮겼으면 true.</returns>
+        public bool ShowBomSpecTab()
+        {
+            if (_materials.Count == 0 || !_materials.All(m => m.IsSerialInputCompleted))
+                return false;
+
+            tabSpec.SelectedTabPage = pageBom;
+            SelectBomSpecRow();
+            return true;
         }
 
         private async Task SetMaterialSerials(PopInputMaterialDto material)
@@ -886,33 +922,74 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
             var target = gridViewBomSpec.GetRow(_bomSpecSelectedRow) as PopBomSpecDto;
             if (target == null)
+            {
+                AppLog.Info($"[POP] {Language.Pop_TorqueNoPendingRow} (설비 {equipmentId}, 토크 {torqueValue}, 각도 {angleValue})");
                 return;
+            }
 
-            if (target.TorqueResult == null && target.AngleResult == null)
-                return;
-
-            if (IsBomSpecPassed(target))
-                _bomSpecSelectedRow++;
-
-            AppLog.Info($"[POP] {Language.Pop_TorqueNoPendingRow} (설비 {equipmentId}, 값 {torqueValue}, 값 {angleValue}");
-
+            var bomSpecs = _bomSpecs;
             target.TorqueResult = torqueValue;
             target.AngleResult = angleValue;
             target.IsManualInput = false;
             target.EquipmentCode = equipmentId;
             RefreshBomSpecGrid();
 
+            AppLog.Info($"[POP] 설비 토크 결과값 수신 - {equipmentId} → {target.BomSpecName}/{target.InputPosition} = {torqueValue}");
+
             if (!await SetBomSpecResult(target, torqueValue, angleValue, equipmentId))
                 return;
 
-            if (_bomSpecs.Count >= _bomSpecSelectedRow)
-                gridViewBomSpec.FocusedRowHandle = _bomSpecSelectedRow;
-            else
-                _bomSpecSelectedRow = _bomSpecs.Count;
+            // 저장을 기다리는 사이 공정이 바뀌었으면 새 공정의 행은 SetGridData가 이미 골랐다.
+            if (!ReferenceEquals(bomSpecs, _bomSpecs))
+                return;
 
-            AppLog.Info($"[POP] 설비 토크 결과값 수신 - {equipmentId} → {target.BomSpecName}/{target.InputPosition} = {torqueValue}");
+            // 합격이면 이 결과로 바로 다음 행에 넘어가 목표 토크까지 써 둔다. 다음 체결이 들어올 때 넘기면
+            // 그 체결 값이 이미 합격한 행을 덮어써, 다음 행으로 가려면 한 번 더 조여야 했다.
+            // NG면 같은 행을 다시 조이도록 그대로 둔다. 남은 행이 없으면 자리를 지킨다(자동 진행이 공정을 넘긴다).
+            if (IsBomSpecPassed(target))
+            {
+                var next = FindNextBomSpecRow(_bomSpecSelectedRow);
+                if (next >= 0)
+                {
+                    FocusBomSpecRow(next);
+                    WriteBomSpecTorque();
+                }
+            }
 
             await TryAutoProgress();
+        }
+
+        /// <summary>
+        /// 지금 고른 [BOM 스팩] 행의 목표 토크를 너트러너에 쓴다(공정 이동 · 행 자동 선택 · 장비 연결 시).
+        /// 진행 중인 공정이 아니거나 연결된 너트러너가 없으면 쓰지 않는다 — 자동으로 부르는 곳이라 창도 띄우지 않는다.
+        /// 작업자가 행을 직접 고를 때는 <see cref="GridViewBomSpec_FocusedRowChanged"/>가 써 주고 실패도 알린다.
+        /// </summary>
+        public void WriteBomSpecTorque()
+        {
+            if (!IsProcessRunning || !HasConnectedNutrunner())
+                return;
+
+            var spec = gridViewBomSpec.GetRow(_bomSpecSelectedRow) as PopBomSpecDto;
+            if (spec?.TorqueTarget == null)
+                return;
+
+            // 목표 토크는 서버 기준정보 값을 그대로 쓴다(클라이언트가 계산하지 않는다).
+            WriteTorqueToEquipment(spec.TorqueTarget.Value);
+        }
+
+        /// <summary>이 공정의 너트러너 중 Request 채널이 연결된 것이 하나라도 있는지.</summary>
+        private bool HasConnectedNutrunner()
+        {
+            if (_equip?.Manager == null)
+                return false;
+
+            foreach (var equipment in _equipments)
+            {
+                if (_equip.Manager.TryGet(equipment.EquipmentCode, out INutrunner nutrunner) && nutrunner.IsConnected)
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>

@@ -25,7 +25,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
     /// 구성:
     ///  - 상단  : 공정 제어 버튼(이전/다음/중지/공정 목록/관리자 알람) + 작업자
     ///            · 중지      : 서버에 상태 전이를 요청하고, 돌아온 진행 상태를 우측 카드와 상단 띠에 반영한다.
-    ///            · 이전/다음 : [공정 목록]과 같은 순서로 옆 공정으로 옮긴다.
+    ///            · 이전/다음 : [공정 목록]과 같은 순서로 옆 공정으로 옮긴다(키보드 PageUp / PageDown도 같다).
     ///            · [공정 시작] 버튼은 없다 — 공정에 들어오면(진입 · 이전/다음 · 공정 목록) 자동으로 시작하고,
     ///              중지돼 있던 공정이면 자동으로 다시 시작한다. 종료는 탭 값이 모두 입력되면 자동으로 보낸다.
     ///  - 좌측  : 작업 표준/도면(공유 폴더의 도면 이미지)
@@ -349,6 +349,27 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             }
         }
 
+        /// <summary>
+        /// PageUp = [이전 공정], PageDown = [다음 공정]. 그리드 · 입력칸에 포커스가 있어도 화면 안이면 먼저 가로챈다
+        /// (그리드의 페이지 스크롤보다 공정 이동이 우선이다). 버튼과 같은 처리를 타도록 PerformClick으로 부른다 —
+        /// 버튼이 꺼져 있으면(공정 목록 조회 중) 키도 먹지 않는다.
+        /// </summary>
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            switch (keyData)
+            {
+                case Keys.PageUp:
+                    btnPrevProcess.PerformClick();
+                    return true;
+
+                case Keys.PageDown:
+                    btnNextProcess.PerformClick();
+                    return true;
+            }
+
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
         private async void btnProcessList_Click(object sender, EventArgs e)
         {
             try
@@ -603,6 +624,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         {
             AppLog.Info($"[ID {e.Code}] {(e.IsConnected ? "연결 됨" : "연결 끊김")}");
             Screen.RefreshEquipmentStates();
+
+            // 화면 진입 직후에는 너트러너가 아직 붙기 전이라 행을 골라도 목표 토크를 쓰지 못한다 — 붙는 순간 써 준다.
+            if (e.IsConnected)
+                Screen.WriteBomSpecTorque();
         }
 
         /// <summary>설비 수신 스레드에서 올라온 처리를 화면 스레드로 넘긴다. 화면이 이미 닫혔으면 버린다.</summary>
