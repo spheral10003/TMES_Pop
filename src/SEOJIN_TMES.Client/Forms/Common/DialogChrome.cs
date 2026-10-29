@@ -24,6 +24,9 @@ namespace SEOJIN_TMES.Client.Forms.Common
         /// <summary>창 경계가 옅은 배경에 묻히지 않도록 남기는 테두리 두께.</summary>
         private const int BorderThickness = 1;
 
+        /// <summary>업무 팝업 창의 공통 크기(테두리 포함). 팝업마다 제각각이던 크기를 하나로 맞췄다.</summary>
+        public static readonly Size PopupSize = new Size(1200, 700);
+
         // 창 이동은 좌표를 직접 계산하지 않고 OS에 맡긴다 — MainForm이 쓰는 것과 같은 방법이라
         // 끌기 중 화면 경계·다중 모니터 처리가 제목 줄을 잡고 끌 때와 똑같이 동작한다.
         private const int WM_NCLBUTTONDOWN = 0x00A1;
@@ -54,7 +57,7 @@ namespace SEOJIN_TMES.Client.Forms.Common
 
             // 제목 줄과 함께 창 테두리도 사라진다. 폼 자체를 테두리 색으로 칠하고 Padding만큼만
             // 남기면, 안쪽을 Fill로 채운 자식 덕에 그 부분이 1px 테두리로 보인다.
-            form.BackColor = AppTheme.CardBorder;
+            form.BackColor = AppTheme.PopupBorder;
             form.Padding = new Padding(BorderThickness);
             form.ClientSize = new Size(
                 client.Width + BorderThickness * 2,
@@ -62,6 +65,16 @@ namespace SEOJIN_TMES.Client.Forms.Common
 
             if (header != null)
                 EnableDrag(header, clickables);
+        }
+
+        /// <summary>
+        /// 팝업 창 크기를 <see cref="PopupSize"/>(테두리 포함 바깥 크기)로 맞춘다.
+        /// <see cref="Apply"/>가 테두리 두께만큼 ClientSize를 늘리므로 그 <b>뒤에</b> 부른다.
+        /// 공용 메시지 창(AppMessageForm)은 내용에 맞춰 크기가 정해지므로 부르지 않는다.
+        /// </summary>
+        public static void FitPopupSize(Form form)
+        {
+            form.Size = PopupSize;
         }
 
         /// <summary>

@@ -209,6 +209,7 @@
             // 
             // btnCancle
             // 
+            this.btnCancle.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCancle.BackColor = System.Drawing.Color.WhiteSmoke;
             this.btnCancle.FlatAppearance.MouseOverBackColor = System.Drawing.Color.OrangeRed;
             this.btnCancle.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -224,6 +225,7 @@
             // 
             // btnUpload
             // 
+            this.btnUpload.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnUpload.BackColor = System.Drawing.Color.WhiteSmoke;
             this.btnUpload.FlatAppearance.MouseOverBackColor = System.Drawing.Color.MediumSpringGreen;
             this.btnUpload.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -241,7 +243,7 @@
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.BackColor = System.Drawing.Color.Cyan;
-            this.ClientSize = new System.Drawing.Size(648, 442);
+            this.ClientSize = new System.Drawing.Size(1200, 700);
             this.Controls.Add(this.tlpMain);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "FileUploadForm";

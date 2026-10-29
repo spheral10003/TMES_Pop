@@ -186,7 +186,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // AdminAlarmForm
             //
             this.CancelButton = this.btnClose;
-            this.ClientSize = new System.Drawing.Size(1200, 650);
+            this.ClientSize = new System.Drawing.Size(1200, 700);
             this.Controls.Add(this.pnlBody);
             this.Controls.Add(this.pnlFooter);
             this.Controls.Add(this.pnlTitle);

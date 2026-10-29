@@ -67,6 +67,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
             ApplyTheme();
             DialogChrome.Apply(this, pnlTitle, lblClose);
+            DialogChrome.FitPopupSize(this);
             DialogChrome.EnableResizeGrip(pnlGrip);
             MinimumSize = _minimumFormSize;
             ShowCodeTiles();

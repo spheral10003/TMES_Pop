@@ -186,7 +186,7 @@
             // StopIssueForm
             // 
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(900, 560);
+            this.ClientSize = new System.Drawing.Size(1200, 700);
             this.Controls.Add(this.pnlBody);
             this.Controls.Add(this.pnlFooter);
             this.Controls.Add(this.pnlTitle);

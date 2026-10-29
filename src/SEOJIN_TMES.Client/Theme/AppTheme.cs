@@ -140,6 +140,12 @@ namespace SEOJIN_TMES.Client.Theme
         public static Color Card => IsDarkMode ? Color.FromArgb(38, 37, 61) : Color.White;
         public static Color CardBorder => IsDarkMode ? Color.FromArgb(58, 56, 90) : Color.FromArgb(228, 231, 240);
         /// <summary>
+        /// 팝업 창 1px 테두리 — 어두운 그레이 <c>#4B5563</c>.
+        /// 카드 테두리(<see cref="CardBorder"/>)는 흰 배경에서 너무 옅어, 팝업이 뒤 화면(흰 본문) 위에 뜨면 경계가 묻힌다.
+        /// 다크 모드에서도 배경(#111A2E)보다 밝아 경계가 보이므로 모드와 상관없이 같은 색을 쓴다.
+        /// </summary>
+        public static readonly Color PopupBorder = Color.FromArgb(75, 85, 99);
+        /// <summary>
         /// 상단 바 배경 — TEXON 로고의 파란색(스우시)과 같은 <c>#225EA8</c>.
         /// 진한 색이므로 그 위에 얹히는 글자·아이콘은 <see cref="TopBarFore"/> 계열을 써야 한다
         /// (본문용 TextPrimary/TextMuted를 쓰면 파란 바탕에 묻힌다).

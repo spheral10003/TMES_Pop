@@ -94,6 +94,7 @@ namespace SEOJIN_TMES.Client.Forms.Notification
         {
             AppTheme.DialogHeader(headerPanel, AppTheme.Indigo);
             DialogChrome.Apply(this, headerPanel);
+            DialogChrome.FitPopupSize(this);
             AppTheme.DialogHeaderTitle(lblTitle);
 
             headerIcon.SvgImage = AppIcons.Get(AppIcons.Bell, Color.White);

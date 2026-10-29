@@ -58,6 +58,7 @@ namespace SEOJIN_TMES.Client.Forms
         {
             AppTheme.Sidebar(headerPanel);
             DialogChrome.Apply(this, headerPanel);
+            DialogChrome.FitPopupSize(this);
             AppTheme.Avatar(lblAvatar, GetInitial(), 52);
             lblAvatar.Appearance.Font = AppTheme.TitleFont;
 

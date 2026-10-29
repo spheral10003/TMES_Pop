@@ -159,7 +159,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             // 
             this.Appearance.Options.UseFont = true;
             this.CancelButton = this.btnClose;
-            this.ClientSize = new System.Drawing.Size(660, 572);
+            this.ClientSize = new System.Drawing.Size(1200, 700);
             this.Controls.Add(this.bodyPanel);
             this.Controls.Add(this.footerPanel);
             this.Controls.Add(this.headerPanel);

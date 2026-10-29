@@ -64,6 +64,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
         {
             AppTheme.DialogHeader(headerPanel, AppTheme.Indigo);
             DialogChrome.Apply(this, headerPanel);
+            DialogChrome.FitPopupSize(this);
             AppTheme.DialogHeaderTitle(lblTitle);
             AppTheme.ContentSurface(bodyPanel);
             AppTheme.ContentSurface(footerPanel);

@@ -346,7 +346,7 @@ namespace SEOJIN_TMES.Client.Forms.Notification
             //
             this.Appearance.Options.UseFont = true;
             this.CancelButton = this.btnClose;
-            this.ClientSize = new System.Drawing.Size(1220, 660);
+            this.ClientSize = new System.Drawing.Size(1200, 700);
             this.Controls.Add(this.bodyPanel);
             this.Controls.Add(this.headerPanel);
             this.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));

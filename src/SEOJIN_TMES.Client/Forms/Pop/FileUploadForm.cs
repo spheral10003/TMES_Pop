@@ -54,9 +54,12 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             _maxBytes = (long)Global.Instance.Settings.AppSet.UploadMaxMegaBytes * 1024 * 1024;
         }
 
-        /// <summary>하단 버튼 색 — 앱 공통 버튼 색(글꼴은 Designer 값 유지).</summary>
+        /// <summary>창 테두리 색 · 하단 버튼 색 — 앱 공통 색(글꼴은 Designer 값 유지).</summary>
         private void ApplyTheme()
         {
+            // 폼 바탕이 각 칸의 1px 여백(Margin) 사이로 드러나 창 테두리가 된다.
+            BackColor = AppTheme.PopupBorder;
+
             foreach (var button in new[] { btnFileOpen, btnUpload, btnDelete, btnCancle })
                 AppTheme.StandardButton(button, keepFont: true);
         }

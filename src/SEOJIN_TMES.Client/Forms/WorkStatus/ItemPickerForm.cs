@@ -84,6 +84,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
         {
             AppTheme.DialogHeader(headerPanel, AppTheme.Cyan);
             DialogChrome.Apply(this, headerPanel);
+            DialogChrome.FitPopupSize(this);
             AppTheme.DialogHeaderTitle(lblTitle);
             AppTheme.ContentSurface(bodyPanel);
             AppTheme.ContentSurface(footerPanel);
