@@ -945,15 +945,12 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
             // 합격이면 이 결과로 바로 다음 행에 넘어가 목표 토크까지 써 둔다. 다음 체결이 들어올 때 넘기면
             // 그 체결 값이 이미 합격한 행을 덮어써, 다음 행으로 가려면 한 번 더 조여야 했다.
-            // NG면 같은 행을 다시 조이도록 그대로 둔다. 남은 행이 없으면 자리를 지킨다(자동 진행이 공정을 넘긴다).
-            if (IsBomSpecPassed(target))
+            // 다음 행은 결과 유무와 상관없이 그리드 순서상 바로 아래 행이다 — 작업자가 위에서부터 차례로 조이므로.
+            // NG면 같은 행을 다시 조이도록 그대로 둔다. 마지막 행이면 자리를 지킨다(자동 진행이 공정을 넘긴다).
+            if (IsBomSpecPassed(target) && _bomSpecSelectedRow + 1 < gridViewBomSpec.RowCount)
             {
-                var next = FindNextBomSpecRow(_bomSpecSelectedRow);
-                if (next >= 0)
-                {
-                    FocusBomSpecRow(next);
-                    WriteBomSpecTorque();
-                }
+                FocusBomSpecRow(_bomSpecSelectedRow + 1);
+                WriteBomSpecTorque();
             }
 
             await TryAutoProgress();

@@ -485,23 +485,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// <paramref name="fromRowHandle"/> 다음부터 NG이거나 결과가 없는 행을 찾는다(끝에 닿으면 처음부터 앞까지).
-        /// 남은 행이 없으면 -1.
-        /// </summary>
-        private int FindNextBomSpecRow(int fromRowHandle)
-        {
-            int count = gridViewBomSpec.RowCount;
-            for (int step = 1; step < count; step++)
-            {
-                int rowHandle = (fromRowHandle + step) % count;
-                if (gridViewBomSpec.GetRow(rowHandle) is PopBomSpecDto spec && !IsBomSpecPassed(spec))
-                    return rowHandle;
-            }
-
-            return -1;
-        }
-
-        /// <summary>
         /// 행을 설비 결과를 채울 행으로 삼고 포커스를 옮긴다. 목표 토크는 쓰지 않는다 —
         /// 포커스 이벤트로 쓰게 두면 너트러너가 없을 때 경고 창이 뜨므로, 쓸 곳에서 한 번만 쓴다.
         /// </summary>
