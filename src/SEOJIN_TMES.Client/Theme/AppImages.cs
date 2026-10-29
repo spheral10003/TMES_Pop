@@ -156,6 +156,43 @@ namespace SEOJIN_TMES.Client.Theme
         }
 
         /// <summary>
+        /// 화면 덮개(예: 워크스테이션 선택) 뒤에 깔 흐린 배경.
+        /// 1/<paramref name="factor"/>로 줄였다가 원래 크기로 늘려 흐리게 만든다 — 가우시안 블러를 직접 돌리는 것보다
+        /// 훨씬 빠르고(전체 화면도 수 ms), 뒤 화면이 무엇인지만 알아볼 정도면 충분하다.
+        /// 그 위에 검정을 <paramref name="dimAlpha"/>만큼 덮어 앞에 띄운 화면이 도드라지게 한다.
+        /// </summary>
+        /// <returns>새 비트맵. 다 쓰면 호출한 쪽이 Dispose한다.</returns>
+        public static Bitmap Blur(Image source, int factor, int dimAlpha)
+        {
+            var width = source.Width;
+            var height = source.Height;
+
+            using (var small = new Bitmap(Math.Max(1, width / factor), Math.Max(1, height / factor)))
+            {
+                using (var g = Graphics.FromImage(small))
+                {
+                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    g.DrawImage(source, 0, 0, small.Width, small.Height);
+                }
+
+                var result = new Bitmap(width, height);
+                using (var g = Graphics.FromImage(result))
+                using (var attributes = new System.Drawing.Imaging.ImageAttributes())
+                using (var dim = new SolidBrush(Color.FromArgb(dimAlpha, Color.Black)))
+                {
+                    // 가장자리 바깥을 투명으로 보고 섞으면 테두리가 어둡게 번지므로, 가장자리를 거울처럼 이어 붙여 섞는다.
+                    attributes.SetWrapMode(WrapMode.TileFlipXY);
+                    g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    g.PixelOffsetMode = PixelOffsetMode.Half;
+                    g.DrawImage(small, new Rectangle(0, 0, width, height), 0, 0, small.Width, small.Height,
+                                GraphicsUnit.Pixel, attributes);
+                    g.FillRectangle(dim, 0, 0, width, height);
+                }
+                return result;
+            }
+        }
+
+        /// <summary>
         /// 리소스 그림을 원본 그대로 읽는다. Image.FromStream은 이미지가 살아 있는 동안 스트림도 살아 있어야 하고,
         /// 여기서 만든 이미지는 앱이 끝날 때까지 캐시로 들고 있으므로 MemoryStream을 닫지 않는다.
         /// </summary>

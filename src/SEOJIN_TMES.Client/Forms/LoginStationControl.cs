@@ -12,7 +12,7 @@ using System.Windows.Forms;
 namespace SEOJIN_TMES.Client.Forms
 {
     /// <summary>
-    /// 로그인 직후 접속할 워크스테이션을 고르는 화면. 메인 화면이 뜨면서 그 위를 덮어 띄운다(<see cref="MainForm"/>).
+    /// 로그인 직후 접속할 워크스테이션을 고르는 화면. 메인 화면이 뜨면서 흐린 배경 위 가운데에 1200×700으로 띄운다(<see cref="MainForm"/>).
     ///
     /// 고르기는 알람 등록 팝업과 같은 <b>카드 타일(<see cref="CardTile"/>)</b>로 한다.
     /// 워크스테이션에는 등급이 없어 모든 카드를 같은 색으로 두고, 코드 · 이름 · 라인/부서만 보여 준다.
@@ -23,9 +23,12 @@ namespace SEOJIN_TMES.Client.Forms
     /// </summary>
     public partial class LoginStationControl : XtraUserControl, IThemedScreen
     {
-        /// <summary>한 화면에 보이는 카드 배치 — 2열 × 2행. 이보다 많으면 세로 스크롤로 본다.</summary>
-        private const int TileColumns = 2;
-        private const int TileRows = 2;
+        /// <summary>
+        /// 카드 한 장 크기. 개수에 맞춰 늘이지 않고 고정해 두고, 목록 폭에 들어가는 만큼 한 줄에 놓고 넘치면 다음 줄로 넘긴다.
+        /// 1200×700 선택 화면에서 한 줄 3장 · 세 줄(9장)이 스크롤 없이 보이고, 그보다 많으면 세로 스크롤로 본다.
+        /// 예전에는 2열 × 2행에 맞춰 카드를 늘였는데, 화면이 커지자 카드가 지나치게 커지고 5장째부터는 스크롤해야 했다.
+        /// </summary>
+        private static readonly Size TileSize = new Size(360, 150);
 
         private readonly Padding _tileMargin = new Padding(0, 0, 10, 10);
 
@@ -45,7 +48,6 @@ namespace SEOJIN_TMES.Client.Forms
 
             // 고르는 중에 로그인 창을 닫으면 기다리던 쪽이 영영 끝나지 않으므로 취소로 마무리한다.
             Disposed += LoginStationControl_Disposed;
-            flowStations.Resize += flowStations_Resize;
         }
 
         private void SetTexts()
@@ -83,6 +85,7 @@ namespace SEOJIN_TMES.Client.Forms
             {
                 var tile = new CardTile();
                 tile.Margin = _tileMargin;
+                tile.Size = TileSize;
                 tile.AutoFitText = true;
                 tile.Accent = AppTheme.Indigo;
                 tile.Tag = station;
@@ -92,38 +95,9 @@ namespace SEOJIN_TMES.Client.Forms
                 tile.Click += StationTile_Click;
                 flowStations.Controls.Add(tile);
             }
-            FitTiles();
             flowStations.ResumeLayout();
 
             return _selection.Task;
-        }
-
-        private void flowStations_Resize(object sender, EventArgs e)
-        {
-            flowStations.SuspendLayout();
-            FitTiles();
-            flowStations.ResumeLayout();
-        }
-
-        /// <summary>
-        /// 카드 크기를 목록 영역에 맞춰 2열 × 2행이 꼭 들어차도록 나눈다.
-        /// 카드가 4장을 넘으면 세로 스크롤바가 생기므로 그 폭을 미리 빼 둔다 —
-        /// ClientSize로 계산하면 스크롤바가 생겼다 사라졌다 하면서 크기가 다시 바뀌어 배치가 흔들린다.
-        /// </summary>
-        private void FitTiles()
-        {
-            var scrolls = flowStations.Controls.Count > TileColumns * TileRows;
-            var width = flowStations.Width - flowStations.Padding.Horizontal
-                        - (scrolls ? SystemInformation.VerticalScrollBarWidth : 0);
-            var height = flowStations.Height - flowStations.Padding.Vertical;
-
-            var tileWidth = width / TileColumns - _tileMargin.Horizontal;
-            var tileHeight = height / TileRows - _tileMargin.Vertical;
-            if (tileWidth <= 0 || tileHeight <= 0)
-                return;
-
-            foreach (Control control in flowStations.Controls)
-                control.Size = new Size(tileWidth, tileHeight);
         }
 
         /// <summary>카드 아래 보조 문구 — 라인 · 부서 중 서버가 내려준 값만 잇는다.</summary>

@@ -138,11 +138,42 @@ namespace SEOJIN_TMES.Client.Forms
 
         // ────────────────────────────── 워크스테이션 선택 ──────────────────────────────
 
-        /// <summary>메인 화면이 그려진 뒤에 고르게 해야 선택 화면이 빈 창이 아니라 메인 화면 위에 덮여 보인다.</summary>
-        private async void MainForm_Shown(object sender, EventArgs e) => await SelectWorkstation();
+        /// <summary>워크스테이션 선택 화면 크기. 메인 화면이 이보다 작으면 여백을 남기고 줄인다.</summary>
+        private static readonly Size StationSelectorSize = new Size(1200, 700);
+
+        /// <summary>메인 화면이 작을 때 선택 화면 둘레에 남기는 여백(px) — 뒤가 흐린 메인 화면이라는 게 보이도록.</summary>
+        private const int StationSelectorMargin = 20;
 
         /// <summary>
-        /// 로그인 사용자의 워크스테이션 목록을 받아 선택 화면(<see cref="LoginStationControl"/>)을 메인 화면 전체에 덮어 띄운다.
+        /// 선택 화면 뒤에 까는 흐린 배경. 타입을 따로 두는 이유는 DoubleBuffered를 켜기 위해서다 —
+        /// 창 크기를 바꿀 때 늘린 배경 그림을 다시 그리면서 깜빡이지 않게 한다.
+        /// </summary>
+        private sealed class StationBackdrop : Panel
+        {
+            public StationBackdrop()
+            {
+                DoubleBuffered = true;
+            }
+        }
+
+        /// <summary>메인 화면이 그려진 뒤에 고르게 해야 선택 화면이 빈 창이 아니라 메인 화면 위에 덮여 보인다.</summary>
+        private async void MainForm_Shown(object sender, EventArgs e)
+        {
+            try
+            {
+                await SelectWorkstation();
+            }
+            catch (Exception ex)
+            {
+                // async void에서 예외가 새면 앱이 종료된다 — 워크스테이션 없이라도 메인 화면은 계속 쓰게 둔다.
+                ServerLog.Unexpected("워크스테이션 선택", ex);
+            }
+        }
+
+        /// <summary>
+        /// 로그인 사용자의 워크스테이션 목록을 받아 선택 화면(<see cref="LoginStationControl"/>)을 띄운다.
+        /// 메인 화면 전체를 흐리게 찍은 그림으로 덮고, 그 가운데에 선택 화면(1200×700)을 얹는다 —
+        /// 덮개가 입력을 막아 고르기 전에는 메뉴 · 탭을 누를 수 없다.
         /// 카드를 누르면 세션에 넣고 화면을 걷어 낸다.
         /// 목록이 없거나 조회에 실패하거나 [취소]하면 워크스테이션 없이 메인 화면을 쓴다 —
         /// 이때는 작업 진입(공정 시작)에서 막는다(<see cref="WorkOrderEntry.WorkOrderEntryScreen"/>).
@@ -170,13 +201,21 @@ namespace SEOJIN_TMES.Client.Forms
             }
 
             // Dock=Fill은 다른 도킹 컨트롤이 차지하고 남은 자리만 덮으므로, 클라이언트 영역 전체를 직접 덮는다.
-            var selector = new LoginStationControl();
-            selector.Bounds = ClientRectangle;
-            selector.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            selector.Init();
+            var backdrop = new StationBackdrop();
+            backdrop.Bounds = ClientRectangle;
+            backdrop.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            backdrop.BackColor = AppTheme.Surface;   // 화면을 찍지 못했을 때의 바탕
+            backdrop.BackgroundImage = CaptureBlurredClient();
+            backdrop.BackgroundImageLayout = ImageLayout.Stretch;
 
-            Controls.Add(selector);
-            selector.BringToFront();
+            var selector = new LoginStationControl();
+            selector.Init();
+            backdrop.Controls.Add(selector);
+            backdrop.Resize += StationBackdrop_Resize;
+            PlaceStationSelector(backdrop);
+
+            Controls.Add(backdrop);
+            backdrop.BringToFront();
 
             WorkstationInfo station;
             try
@@ -186,8 +225,9 @@ namespace SEOJIN_TMES.Client.Forms
             finally
             {
                 if (!IsDisposed && !Disposing)
-                    Controls.Remove(selector);
-                selector.Dispose();
+                    Controls.Remove(backdrop);
+                backdrop.BackgroundImage?.Dispose();
+                backdrop.Dispose();   // 안에 얹은 선택 화면도 함께 Dispose된다
             }
 
             if (IsDisposed || Disposing) return;
@@ -205,6 +245,52 @@ namespace SEOJIN_TMES.Client.Forms
 
             // 홈 탭의 "워크스테이션" 타일이 "-"에서 고른 이름으로 바뀐다.
             _homeScreen?.RefreshInfo();
+        }
+
+        private void StationBackdrop_Resize(object sender, EventArgs e) => PlaceStationSelector((Control)sender);
+
+        /// <summary>선택 화면을 덮개 가운데에 놓는다. 덮개가 1200×700보다 작으면 여백을 남기고 줄인다.</summary>
+        private static void PlaceStationSelector(Control backdrop)
+        {
+            if (backdrop.Controls.Count == 0)
+                return;
+
+            var selector = backdrop.Controls[0];
+            var width = Math.Min(StationSelectorSize.Width, backdrop.Width - StationSelectorMargin * 2);
+            var height = Math.Min(StationSelectorSize.Height, backdrop.Height - StationSelectorMargin * 2);
+            if (width <= 0 || height <= 0)
+                return;
+
+            selector.Bounds = new Rectangle((backdrop.Width - width) / 2, (backdrop.Height - height) / 2, width, height);
+        }
+
+        /// <summary>
+        /// 지금 보이는 메인 화면(클라이언트 영역)을 찍어 흐리게 만든다.
+        /// DrawToBitmap은 DevExpress 스킨 · 직접 그리는 컨트롤 일부를 빠뜨리므로 화면에서 그대로 복사한다.
+        /// 최소화 · 잠금 화면처럼 찍을 수 없으면 null — 덮개는 바탕색만 칠한다.
+        /// </summary>
+        private Bitmap CaptureBlurredClient()
+        {
+            if (ClientSize.Width <= 0 || ClientSize.Height <= 0 || WindowState == FormWindowState.Minimized)
+                return null;
+
+            try
+            {
+                // Shown 직후에는 아직 다 그려지지 않은 컨트롤이 있어, 찍기 전에 한 번 그리게 한다.
+                Refresh();
+                using (var shot = new Bitmap(ClientSize.Width, ClientSize.Height))
+                {
+                    using (var g = Graphics.FromImage(shot))
+                        g.CopyFromScreen(PointToScreen(Point.Empty), Point.Empty, ClientSize);
+
+                    return AppImages.Blur(shot, 12, 70);
+                }
+            }
+            catch (Exception ex)
+            {
+                AppLog.Warn($"워크스테이션 선택 배경 캡처 실패(흐림 없이 표시) - {ex.Message}");
+                return null;
+            }
         }
 
         // ────────────────────────────── 사용자 정보 ──────────────────────────────

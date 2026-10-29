@@ -42,7 +42,7 @@ namespace SEOJIN_TMES.Client.Forms
             this.flowStations.Location = new System.Drawing.Point(16, 72);
             this.flowStations.Name = "flowStations";
             this.flowStations.Padding = new System.Windows.Forms.Padding(0, 4, 0, 0);
-            this.flowStations.Size = new System.Drawing.Size(688, 174);
+            this.flowStations.Size = new System.Drawing.Size(1166, 556);
             this.flowStations.TabIndex = 0;
             // 
             // lblHint
@@ -51,7 +51,7 @@ namespace SEOJIN_TMES.Client.Forms
             this.lblHint.Font = new System.Drawing.Font("Tahoma", 12F);
             this.lblHint.Location = new System.Drawing.Point(16, 48);
             this.lblHint.Name = "lblHint";
-            this.lblHint.Size = new System.Drawing.Size(688, 24);
+            this.lblHint.Size = new System.Drawing.Size(1166, 24);
             this.lblHint.TabIndex = 1;
             this.lblHint.Text = "접속할 워크스테이션을 누르세요.";
             this.lblHint.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -62,7 +62,7 @@ namespace SEOJIN_TMES.Client.Forms
             this.lblTitle.Font = new System.Drawing.Font("Tahoma", 12F);
             this.lblTitle.Location = new System.Drawing.Point(16, 16);
             this.lblTitle.Name = "lblTitle";
-            this.lblTitle.Size = new System.Drawing.Size(688, 32);
+            this.lblTitle.Size = new System.Drawing.Size(1166, 32);
             this.lblTitle.TabIndex = 2;
             this.lblTitle.Text = "워크스테이션 선택";
             this.lblTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -71,9 +71,9 @@ namespace SEOJIN_TMES.Client.Forms
             // 
             this.pnlFooter.Controls.Add(this.btnCancel);
             this.pnlFooter.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.pnlFooter.Location = new System.Drawing.Point(16, 246);
+            this.pnlFooter.Location = new System.Drawing.Point(16, 628);
             this.pnlFooter.Name = "pnlFooter";
-            this.pnlFooter.Size = new System.Drawing.Size(688, 70);
+            this.pnlFooter.Size = new System.Drawing.Size(1166, 70);
             this.pnlFooter.TabIndex = 3;
             // 
             // btnCancel
@@ -83,7 +83,7 @@ namespace SEOJIN_TMES.Client.Forms
             this.btnCancel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnCancel.Font = new System.Drawing.Font("Arial", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnCancel.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.btnCancel.Location = new System.Drawing.Point(263, 18);
+            this.btnCancel.Location = new System.Drawing.Point(502, 18);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(161, 40);
             this.btnCancel.TabIndex = 0;
@@ -97,9 +97,10 @@ namespace SEOJIN_TMES.Client.Forms
             this.Controls.Add(this.lblHint);
             this.Controls.Add(this.lblTitle);
             this.Controls.Add(this.pnlFooter);
+            this.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.Name = "LoginStationControl";
             this.Padding = new System.Windows.Forms.Padding(16, 16, 16, 0);
-            this.Size = new System.Drawing.Size(720, 316);
+            this.Size = new System.Drawing.Size(1200, 700);
             this.pnlFooter.ResumeLayout(false);
             this.ResumeLayout(false);
 
