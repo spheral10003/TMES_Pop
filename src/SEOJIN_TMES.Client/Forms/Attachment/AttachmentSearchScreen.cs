@@ -64,6 +64,10 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             ApplyTexts();
             ApplyTheme();
 
+            // 일반 GridView라 MeisGridView처럼 스스로 적용되지 않는다 — 컬럼 지우기만 막는다.
+            GridColumnGuard.Apply(gridViewOrders);
+            GridColumnGuard.Apply(gridViewFiles);
+
             // 등록일자 기본값: 최근 일주일.
             dtpFrom.Value = DateTime.Today.AddDays(-6);
             dtpTo.Value = DateTime.Today;

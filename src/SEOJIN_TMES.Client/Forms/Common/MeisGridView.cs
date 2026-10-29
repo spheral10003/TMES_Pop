@@ -2,6 +2,7 @@ using System.Drawing;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Views.Base;
 using DevExpress.XtraGrid.Views.Grid;
+using SEOJIN_TMES.Client.Core;
 using SEOJIN_TMES.Client.Theme;
 
 namespace SEOJIN_TMES.Client.Forms.Common
@@ -48,6 +49,9 @@ namespace SEOJIN_TMES.Client.Forms.Common
         {
             CustomDrawColumnHeader += MeisGridView_CustomDrawColumnHeader;
             CustomDrawCell += MeisGridView_CustomDrawCell;
+
+            // 앱의 모든 목록에서 컬럼을 끌어 지우는 조작은 막는다(GridColumnGuard 참고).
+            GridColumnGuard.Apply(this);
         }
 
         /// <summary>
