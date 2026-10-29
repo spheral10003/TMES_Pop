@@ -71,7 +71,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.headerPanel.Dock = System.Windows.Forms.DockStyle.Top;
             this.headerPanel.Location = new System.Drawing.Point(0, 0);
             this.headerPanel.Name = "headerPanel";
-            this.headerPanel.Size = new System.Drawing.Size(620, 56);
+            this.headerPanel.Size = new System.Drawing.Size(1200, 56);
             this.headerPanel.TabIndex = 0;
             // 
             // headerIcon
@@ -98,7 +98,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.bodyPanel.Location = new System.Drawing.Point(0, 56);
             this.bodyPanel.Name = "bodyPanel";
             this.bodyPanel.Padding = new System.Windows.Forms.Padding(16, 12, 16, 8);
-            this.bodyPanel.Size = new System.Drawing.Size(620, 400);
+            this.bodyPanel.Size = new System.Drawing.Size(1200, 580);
             this.bodyPanel.TabIndex = 1;
             // 
             // listCard
@@ -109,7 +109,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.listCard.Location = new System.Drawing.Point(18, 148);
             this.listCard.Name = "listCard";
             this.listCard.Padding = new System.Windows.Forms.Padding(1);
-            this.listCard.Size = new System.Drawing.Size(584, 242);
+            this.listCard.Size = new System.Drawing.Size(1164, 422);
             this.listCard.TabIndex = 2;
             // 
             // grid
@@ -118,7 +118,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.grid.Location = new System.Drawing.Point(3, 35);
             this.grid.MainView = this.gridView;
             this.grid.Name = "grid";
-            this.grid.Size = new System.Drawing.Size(578, 204);
+            this.grid.Size = new System.Drawing.Size(1158, 384);
             this.grid.TabIndex = 1;
             this.grid.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
             this.gridView});
@@ -144,7 +144,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.spacer.Dock = System.Windows.Forms.DockStyle.Top;
             this.spacer.Location = new System.Drawing.Point(18, 138);
             this.spacer.Name = "spacer";
-            this.spacer.Size = new System.Drawing.Size(584, 10);
+            this.spacer.Size = new System.Drawing.Size(1164, 10);
             this.spacer.TabIndex = 1;
             // 
             // fieldCard
@@ -159,7 +159,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.fieldCard.Location = new System.Drawing.Point(18, 14);
             this.fieldCard.Name = "fieldCard";
             this.fieldCard.Padding = new System.Windows.Forms.Padding(1);
-            this.fieldCard.Size = new System.Drawing.Size(584, 124);
+            this.fieldCard.Size = new System.Drawing.Size(1164, 124);
             this.fieldCard.TabIndex = 0;
             // 
             // lblMaterialCode
@@ -216,15 +216,15 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.footerPanel.Controls.Add(this.btnSave);
             this.footerPanel.Controls.Add(this.btnClose);
             this.footerPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.footerPanel.Location = new System.Drawing.Point(0, 456);
+            this.footerPanel.Location = new System.Drawing.Point(0, 636);
             this.footerPanel.Name = "footerPanel";
-            this.footerPanel.Size = new System.Drawing.Size(620, 64);
+            this.footerPanel.Size = new System.Drawing.Size(1200, 64);
             this.footerPanel.TabIndex = 2;
             // 
             // pnlGrip
             // 
             this.pnlGrip.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.pnlGrip.Location = new System.Drawing.Point(604, 48);
+            this.pnlGrip.Location = new System.Drawing.Point(1184, 48);
             this.pnlGrip.Name = "pnlGrip";
             this.pnlGrip.Size = new System.Drawing.Size(16, 16);
             this.pnlGrip.TabIndex = 2;
@@ -233,7 +233,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 
             this.btnSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnSave.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnSave.Location = new System.Drawing.Point(508, 16);
+            this.btnSave.Location = new System.Drawing.Point(1088, 16);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(96, 32);
             this.btnSave.TabIndex = 0;
@@ -245,7 +245,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.btnClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnClose.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnClose.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnClose.Location = new System.Drawing.Point(404, 16);
+            this.btnClose.Location = new System.Drawing.Point(984, 16);
             this.btnClose.Name = "btnClose";
             this.btnClose.Size = new System.Drawing.Size(96, 32);
             this.btnClose.TabIndex = 1;

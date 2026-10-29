@@ -57,7 +57,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.headerPanel.Dock = System.Windows.Forms.DockStyle.Top;
             this.headerPanel.Location = new System.Drawing.Point(0, 0);
             this.headerPanel.Name = "headerPanel";
-            this.headerPanel.Size = new System.Drawing.Size(660, 56);
+            this.headerPanel.Size = new System.Drawing.Size(1200, 56);
             this.headerPanel.TabIndex = 0;
             // 
             // headerIcon
@@ -82,7 +82,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.bodyPanel.Location = new System.Drawing.Point(0, 56);
             this.bodyPanel.Name = "bodyPanel";
             this.bodyPanel.Padding = new System.Windows.Forms.Padding(16, 12, 16, 8);
-            this.bodyPanel.Size = new System.Drawing.Size(660, 452);
+            this.bodyPanel.Size = new System.Drawing.Size(1200, 580);
             this.bodyPanel.TabIndex = 1;
             // 
             // listCard
@@ -93,7 +93,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.listCard.Location = new System.Drawing.Point(18, 14);
             this.listCard.Name = "listCard";
             this.listCard.Padding = new System.Windows.Forms.Padding(1);
-            this.listCard.Size = new System.Drawing.Size(624, 428);
+            this.listCard.Size = new System.Drawing.Size(1164, 556);
             this.listCard.TabIndex = 0;
             // 
             // grid
@@ -102,7 +102,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.grid.Location = new System.Drawing.Point(3, 35);
             this.grid.MainView = this.gridView;
             this.grid.Name = "grid";
-            this.grid.Size = new System.Drawing.Size(618, 390);
+            this.grid.Size = new System.Drawing.Size(1158, 518);
             this.grid.TabIndex = 1;
             this.grid.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
             this.gridView});
@@ -130,15 +130,15 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.footerPanel.Controls.Add(this.btnMove);
             this.footerPanel.Controls.Add(this.btnClose);
             this.footerPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.footerPanel.Location = new System.Drawing.Point(0, 508);
+            this.footerPanel.Location = new System.Drawing.Point(0, 636);
             this.footerPanel.Name = "footerPanel";
-            this.footerPanel.Size = new System.Drawing.Size(660, 64);
+            this.footerPanel.Size = new System.Drawing.Size(1200, 64);
             this.footerPanel.TabIndex = 2;
             // 
             // pnlGrip
             // 
             this.pnlGrip.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.pnlGrip.Location = new System.Drawing.Point(644, 48);
+            this.pnlGrip.Location = new System.Drawing.Point(1184, 48);
             this.pnlGrip.Name = "pnlGrip";
             this.pnlGrip.Size = new System.Drawing.Size(16, 16);
             this.pnlGrip.TabIndex = 2;
@@ -147,7 +147,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             // 
             this.btnMove.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnMove.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnMove.Location = new System.Drawing.Point(548, 16);
+            this.btnMove.Location = new System.Drawing.Point(1088, 16);
             this.btnMove.Name = "btnMove";
             this.btnMove.Size = new System.Drawing.Size(96, 32);
             this.btnMove.TabIndex = 0;
@@ -159,7 +159,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.btnClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnClose.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnClose.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnClose.Location = new System.Drawing.Point(444, 16);
+            this.btnClose.Location = new System.Drawing.Point(984, 16);
             this.btnClose.Name = "btnClose";
             this.btnClose.Size = new System.Drawing.Size(96, 32);
             this.btnClose.TabIndex = 1;
