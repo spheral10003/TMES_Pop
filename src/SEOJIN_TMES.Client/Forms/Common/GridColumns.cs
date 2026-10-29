@@ -95,6 +95,22 @@ namespace SEOJIN_TMES.Client.Forms.Common
             }
         }
 
+        /// <summary>
+        /// 컬럼 폭을 그리드 폭에 맞춘다 — 창 크기를 바꾸면 컬럼이 함께 늘고 준다.
+        /// 순번(NO) 컬럼은 숫자만 들어가 넓힐 이유가 없으므로 기본 폭에 고정하고, 나머지 컬럼이
+        /// <see cref="Apply"/>에서 준 폭의 비율대로 남은 폭을 나눠 갖는다. <see cref="Apply"/> 뒤에 부른다.
+        /// </summary>
+        public static void FitToWidth(GridView view)
+        {
+            if (view == null) throw new ArgumentNullException(nameof(view));
+
+            var rowNo = view.Columns.ColumnByFieldName(RowNumberField);
+            if (rowNo != null)
+                rowNo.OptionsColumn.FixedWidth = true;
+
+            view.OptionsView.ColumnAutoWidth = true;
+        }
+
         /// <summary>순번 컬럼(바인딩되지 않은 컬럼)을 만들거나 이미 있으면 재사용한다.</summary>
         private static GridColumn EnsureRowNumberColumn(GridView view, string caption)
         {

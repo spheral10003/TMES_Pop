@@ -23,6 +23,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
     /// </summary>
     public partial class MaterialSerialForm : XtraForm
     {
+        /// <summary>창을 줄일 수 있는 한계 — 크기를 통일하기 전 원래 크기(테두리 포함). 이보다 작으면 자재 정보 칸이 잘린다.</summary>
+        private readonly Size _minimumFormSize = new Size(622, 522);
+
         private PopInputMaterialDto _material;
         private List<MaterialSerialRow> _rows;
 
@@ -69,9 +72,12 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             AppTheme.DialogHeader(headerPanel, AppTheme.Indigo);
             DialogChrome.Apply(this, headerPanel);
             DialogChrome.FitPopupSize(this);
+            DialogChrome.EnableResizeGrip(pnlGrip);
+            MinimumSize = _minimumFormSize;
             AppTheme.DialogHeaderTitle(lblTitle);
             AppTheme.ContentSurface(bodyPanel);
             AppTheme.ContentSurface(footerPanel);
+            pnlGrip.BackColor = AppTheme.Surface;
             AppTheme.StandardButton(btnSave);
             AppTheme.StandardButton(btnClose);
             AppTheme.CardPanel(fieldCard);
@@ -114,7 +120,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 GridColumns.Left("SerialNo", Language.Col_SerialNumber, 420));
 
             gridView.OptionsBehavior.Editable = true;
-            gridView.OptionsView.ColumnAutoWidth = true;
+            GridColumns.FitToWidth(gridView);
 
             var serialColumn = gridView.Columns.ColumnByFieldName("SerialNo");
             if (serialColumn != null)

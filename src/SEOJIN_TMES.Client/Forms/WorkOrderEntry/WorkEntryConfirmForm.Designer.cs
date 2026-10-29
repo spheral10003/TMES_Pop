@@ -19,7 +19,8 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
         /// 디자이너 지원 메서드. 람다식/삼항연산자/문자열보간/객체이니셜라이저/커스텀 static 호출 사용 금지.
         /// 색·폰트·아이콘·문구는 WorkEntryConfirmForm.cs의 Initialize()에서 런타임에 넣는다.
         ///
-        /// 구성(다른 팝업과 동일): 상단 색 띠(아이콘+제목) + 옅은 본문 안의 카드(공정 목록 그리드) + 하단 [닫기][이동].
+        /// 구성(다른 팝업과 동일): 상단 색 띠(아이콘+제목) + 옅은 본문 안의 카드(공정 목록 그리드) + 하단 [닫기][이동]
+        /// + 우하단 크기 조절 손잡이(pnlGrip).
         /// 도킹 순서 주의: bodyPanel(Fill) → footerPanel(Bottom) → headerPanel(Top).
         /// </summary>
         private void InitializeComponent()
@@ -35,6 +36,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.footerPanel = new DevExpress.XtraEditors.PanelControl();
             this.btnMove = new System.Windows.Forms.Button();
             this.btnClose = new System.Windows.Forms.Button();
+            this.pnlGrip = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.headerPanel)).BeginInit();
             this.headerPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.headerIcon)).BeginInit();
@@ -124,6 +126,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             // 
             // footerPanel
             // 
+            this.footerPanel.Controls.Add(this.pnlGrip);
             this.footerPanel.Controls.Add(this.btnMove);
             this.footerPanel.Controls.Add(this.btnClose);
             this.footerPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
@@ -131,6 +134,14 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.footerPanel.Name = "footerPanel";
             this.footerPanel.Size = new System.Drawing.Size(660, 64);
             this.footerPanel.TabIndex = 2;
+            // 
+            // pnlGrip
+            // 
+            this.pnlGrip.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.pnlGrip.Location = new System.Drawing.Point(644, 48);
+            this.pnlGrip.Name = "pnlGrip";
+            this.pnlGrip.Size = new System.Drawing.Size(16, 16);
+            this.pnlGrip.TabIndex = 2;
             // 
             // btnMove
             // 
@@ -202,5 +213,6 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
         private DevExpress.XtraEditors.PanelControl footerPanel;
         private System.Windows.Forms.Button btnMove;
         private System.Windows.Forms.Button btnClose;
+        private System.Windows.Forms.Panel pnlGrip;
     }
 }

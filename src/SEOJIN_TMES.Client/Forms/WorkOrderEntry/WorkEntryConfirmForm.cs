@@ -22,6 +22,9 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
     /// </summary>
     public partial class WorkEntryConfirmForm : XtraForm
     {
+        /// <summary>창을 줄일 수 있는 한계 — 크기를 통일하기 전 원래 크기(테두리 포함). 이보다 작으면 하단 버튼이 겹친다.</summary>
+        private readonly Size _minimumFormSize = new Size(662, 574);
+
         private WorkOrderEntryDto _workOrder;
 
         /// <summary>[이동]으로 확정한 페이지 공정. 취소/닫기면 null.</summary>
@@ -52,6 +55,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
                 GridColumns.Text("RoutingName", Language.Col_RoutingOperation, 140),
                 GridColumns.Text("PageName", Language.Col_PageOperation, 140),
                 GridColumns.Text("ProgressState", Language.Col_ProgressState, 120));
+            GridColumns.FitToWidth(gridView);
 
             if (gridView.RowCount > 0)
                 gridView.FocusedRowHandle = 0;
@@ -65,9 +69,12 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             AppTheme.DialogHeader(headerPanel, AppTheme.Indigo);
             DialogChrome.Apply(this, headerPanel);
             DialogChrome.FitPopupSize(this);
+            DialogChrome.EnableResizeGrip(pnlGrip);
+            MinimumSize = _minimumFormSize;
             AppTheme.DialogHeaderTitle(lblTitle);
             AppTheme.ContentSurface(bodyPanel);
             AppTheme.ContentSurface(footerPanel);
+            pnlGrip.BackColor = AppTheme.Surface;
             AppTheme.StandardButton(btnMove);
             AppTheme.StandardButton(btnClose);
             AppTheme.CardPanel(listCard);
