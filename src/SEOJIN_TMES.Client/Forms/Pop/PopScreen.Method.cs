@@ -333,9 +333,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         // ─────────────────────────────────────────────────────────────────────────
 
         /// <summary>
-        /// [이전 공정] / [다음 공정] — 공정 목록에서 지금 공정의 <paramref name="offset"/>칸 옆으로 옮긴다.
-        /// 이동은 상태 전이가 아니라 <b>보고 있는 공정을 바꾸는 것</b>이라 조회 키만 바꾸고 화면을 다시 읽는다.
+        /// [이전 공정] / [다음 공정] — 지금 공정을 완료 처리하고, 공정 목록에서 <paramref name="offset"/>칸 옆으로 옮긴다.
         /// 목록에 없는 공정이거나 목록의 끝이면 옮기지 않는다.
+        /// 단, 마지막 공정에서 [다음 공정]을 누르면 옮길 곳은 없어도 완료는 보낸다 —
+        /// 입력할 데이터가 없는 공정은 자동 완료되지 않으므로, 이 클릭 말고는 끝낼 길이 없다.
         /// </summary>
         public async Task MoveProcess(int offset)
         {
@@ -353,8 +354,14 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (current < 0 || target < 0 || target >= _processes.Count)
             {
                 AppLog.Info($"[POP] 공정 이동 불가 - 현재 {current}, 이동 {offset}, 목록 {_processes.Count}건");
+
+                if (current >= 0 && offset > 0 && await EndCurrentProcess())
+                    AppMessageBox.Info(this, Language.Pop_LastProcess, Language.Pop_Title);
                 return;
             }
+
+            if (!await EndCurrentProcess())
+                return;
 
             await MoveToProcess(_processes[target]);
             if (IsDisposed || Disposing) return;
@@ -389,6 +396,11 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             }
 
             if (selected == null)
+                return;
+
+            // 지금 공정을 다시 고른 것은 공정을 바꾼 것이 아니므로 완료하지 않는다.
+            var isSameProcess = string.Equals(selected.SubRoutingReference, _key.SubRoutingRef, StringComparison.OrdinalIgnoreCase);
+            if (!isSameProcess && !await EndCurrentProcess())
                 return;
 
             await MoveToProcess(selected);
@@ -460,6 +472,27 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             return -1;
         }
 
+        /// <summary>
+        /// 작업자가 공정을 바꿀 때([이전 공정] · [다음 공정] · [공정 목록]) 지금 공정을 완료 처리한다.
+        /// 진행 중(Progress)일 때만 보낸다 — 대기 · 중지 · 완료 상태는 그대로 두고 옮긴다.
+        /// </summary>
+        /// <returns>
+        /// 이동을 계속해도 되면 true. 서버가 완료를 거절했거나(사유는 SetProcessAction이 창으로 알린다) 화면이 닫혔으면 false —
+        /// 완료가 서버에 남지 않은 채 다른 공정으로 넘어가지 않게 막는다.
+        /// </returns>
+        private async Task<bool> EndCurrentProcess()
+        {
+            if (!IsProcessRunning)
+                return true;
+
+            AppLog.Step($"[POP] 공정 변경으로 완료 - {_key.RoutingOperation}/{_key.PageOperation}");
+            if (!await SetProcessAction(PopProcessAction.end))
+                return false;
+
+            ShowMessage(Language.Pop_ProcessEnded);
+            return true;
+        }
+
         /// <summary>고른 공정으로 조회 키를 옮기고 화면 전체(공정 정보 + 탭 4개 + 도면)를 다시 읽는다.</summary>
         private async Task MoveToProcess(RoutingProcessDto process)
         {
@@ -475,14 +508,15 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         //
         //  탭 3개(투입자재 / BOM 스팩 / 검사 스팩)의 입력이 모두 끝나면 서버에 [공정 종료]를 보내고,
         //  다음 공정으로 옮겨 [공정 시작]까지 자동으로 이어 간다.
-        //   - 세 탭 모두 데이터가 없는 공정도 "끝난 공정"으로 보고 그대로 종료 → 다음 공정으로 넘어간다.
+        //   - 세 탭 모두 데이터가 없는 공정은 자동으로 끝내지 않는다. 시작 상태로 두고, 작업자가
+        //     [이전 공정] · [다음 공정] · [공정 목록]으로 공정을 바꿀 때 완료를 보낸다(EndCurrentProcess).
         //   - [공정 시작] 버튼은 없다. 화면 진입 · [이전 공정] · [다음 공정] · [공정 목록]으로 공정에 들어와도
         //     자동으로 시작하고, 중지돼 있던 공정이면 재시작한다(StartEnteredProcess).
         // ─────────────────────────────────────────────────────────────────────────
 
         /// <summary>
         /// 공정에 들어온 뒤의 공통 처리(진입 · 이전/다음 · 공정 목록) — 자동 시작 → 남은 시리얼 입력 → 완료 검사.
-        /// 완료 검사를 마지막에 두는 이유: 세 탭이 모두 비어 있는 공정은 입력할 것이 없어 저장이 일어나지 않으므로,
+        /// 완료 검사를 마지막에 두는 이유: 이미 입력이 다 끝나 있는 공정에 다시 들어온 경우엔 저장이 일어나지 않으므로,
         /// 여기서 한 번 보지 않으면 다음 공정으로 넘어갈 계기가 없다.
         /// </summary>
         public async Task StartEnteredProcess()
@@ -542,7 +576,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// <summary>
         /// 지금 공정의 탭 3개가 모두 끝났으면 자동으로 완료 → 다음 공정 이동 → 공정 시작을 진행한다.
         /// 실적을 저장한 직후 · 공정을 시작한 직후에 부른다.
-        /// 다음 공정도 데이터가 없으면 같은 자리에서 연달아 넘어간다.
+        /// 다음 공정도 입력이 이미 다 끝나 있으면 같은 자리에서 연달아 넘어가고, 입력할 데이터가 없는 공정에서는 멈춘다.
         /// </summary>
         public async Task TryAutoProgress()
         {
@@ -578,9 +612,15 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 await CheckMaterialSerials();
         }
 
-        /// <summary>탭 3개의 입력이 모두 끝났는지. 세 탭 모두 비어 있으면 할 일이 없는 공정이므로 끝난 것으로 본다.</summary>
+        /// <summary>
+        /// 탭 3개의 입력이 모두 끝났는지. 빈 탭은 끝난 것으로 보지만,
+        /// 세 탭이 <b>모두</b> 비어 있으면 false — 그런 공정은 자동 완료하지 않고 작업자가 공정을 바꿀 때 완료한다.
+        /// </summary>
         private bool IsAllTabsCompleted()
         {
+            if (_materials.Count == 0 && _bomSpecs.Count == 0 && _inspections.Count == 0)
+                return false;
+
             var materialsDone = _materials.All(m => m.IsSerialInputCompleted);
             var bomSpecsDone = _bomSpecs.All(IsBomSpecPassed);
             var inspectionsDone = _inspections.All(IsInspectionEntered);

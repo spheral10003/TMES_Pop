@@ -171,6 +171,7 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string Pop_AutoRestarted => Get(nameof(Pop_AutoRestarted));
         public static string Pop_AutoStartFailed => Get(nameof(Pop_AutoStartFailed));
         public static string Pop_AutoEnded => Get(nameof(Pop_AutoEnded));
+        public static string Pop_ProcessEnded => Get(nameof(Pop_ProcessEnded));
 
         public static string Pop_WorkOrderList => Get(nameof(Pop_WorkOrderList));
         public static string Pop_EquipmentLog => Get(nameof(Pop_EquipmentLog));

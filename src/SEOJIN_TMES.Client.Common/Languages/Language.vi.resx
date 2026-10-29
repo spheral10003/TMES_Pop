@@ -999,6 +999,9 @@
   <data name="Pop_AutoEnded" xml:space="preserve">
     <value>Đã nhập đủ các giá trị nên công đoạn đã được tự động hoàn thành.</value>
   </data>
+  <data name="Pop_ProcessEnded" xml:space="preserve">
+    <value>Đã hoàn thành công đoạn.</value>
+  </data>
   <data name="Col_WorkQty" xml:space="preserve">
     <value>Work Qty</value>
   </data>
