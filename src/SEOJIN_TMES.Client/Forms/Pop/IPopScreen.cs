@@ -44,6 +44,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         string WriteTorqueToEquipment(decimal torqueTarget);
 
         // 도면(공유 폴더 파일)
-        void LoadDrawing();
+        Task LoadDrawing();
     }
 }

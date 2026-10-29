@@ -179,8 +179,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             _bomManualEnabled = screen.BomManualEnabled;
 
             SetGridData(screen);
-            LoadDrawing();
             SetProcessInfo();
+
+            // 도면은 공유 폴더를 거쳐 늦게 올 수 있으므로 공정 정보를 먼저 채운 뒤 읽는다.
+            await LoadDrawing();
         }
 
         /// <summary>&lt;진행 중 공정 정보&gt;를 우측 카드에 채운다. 워크스테이션은 로그인 세션 값으로 보완한다.</summary>
@@ -935,8 +937,12 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// 공유 폴더에서 지금 공정의 도면 파일을 읽어 띄운다.
         /// 읽지 못하면(경로 없음 · 권한 · 손상 등) 자리표시자에 사유를 적고 로그를 남긴다 —
         /// 도면 하나 때문에 공정 정보 조회 전체가 실패하면 안 된다.
+        ///
+        /// 파일은 반드시 DocShare(DocumentShareClient)로 읽는다 — App.config의 공유 계정(UserName/Password)을
+        /// 세션에 붙이는 일(WNetAddConnection2)이 그 안에서 이루어진다. File.ReadAllBytes로 바로 읽으면
+        /// 현재 윈도우 계정으로 접근하게 되어 "사용자 이름 또는 암호가 올바르지 않습니다"로 실패한다.
         /// </summary>
-        public void LoadDrawing()
+        public async Task LoadDrawing()
         {
             ClearImage();
 
@@ -953,10 +959,13 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 return;
             }
 
+            // 서버 경로는 "/GUM/..."처럼 '/'로 시작한다. DocShare.Resolve에 그대로 넘기면 "\GUM\..."이
+            // 루트 경로로 판정되어 공유 루트와 합쳐지지 않으므로, 여기서 전체 UNC 경로를 만들어 넘긴다.
             string path = Path.Combine(root, _info.DrawingFilePath.Replace('/', '\\').TrimStart('\\'));
             try
             {
-                byte[] raw = File.ReadAllBytes(path);
+                byte[] raw = await _appSet.DocShare.ReadAllBytesAsync(path);
+                if (IsDisposed || Disposing) return;
 
                 // Base64 텍스트로 저장된 도면은 먼저 디코딩한다.
                 if (_imgCtrl.TryDecodeBase64(raw, out byte[] decoded))
@@ -967,6 +976,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             catch (Exception ex)
             {
                 AppLog.Warn($"[POP] 도면 읽기 실패 - {path} : {ex.Message}");
+                if (IsDisposed || Disposing) return;
                 ShowViewerMessage(Language.Pop_DrawingLoadFailed);
             }
         }
