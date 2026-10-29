@@ -801,6 +801,12 @@ namespace SEOJIN_TMES.Client.Forms
                    return;
                }
 
+               // Alive(상태 레지스터 읽기)는 5초마다 와서 로그 · 콘솔을 덮는다 — 기록하지 않는다.
+               if (e.StartAddress == (ushort)NutrunnerRegister.Status)
+               {
+                   return;
+               }
+
                ushort address = e.StartAddress;
 
                foreach (ushort value in e.Data)

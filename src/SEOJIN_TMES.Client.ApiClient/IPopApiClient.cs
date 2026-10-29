@@ -159,13 +159,16 @@ namespace SEOJIN_TMES.Client.ApiClient
             return PostAsync(url, result, cancellationToken);
         }
 
-        public Task<PopProcessInfoDto> ChangeProcessStateAsync(PopProcessKey key, PopProcessAction action, PopProcessActionRequest request = null, CancellationToken cancellationToken = default)
+        public async Task<PopProcessInfoDto> ChangeProcessStateAsync(PopProcessKey key, PopProcessAction action, PopProcessActionRequest request = null, CancellationToken cancellationToken = default)
         {
             var query = PostKeyQuery(key);
             string url = $"{PopPrefix}{key.SerialNo}/{key.SubRoutingRef}/{action.ToString()}{query}";
-            
-            // 응답은 {"data":{workStatus, trackInDtm, ...}} 봉투로 온다 — 벗겨 읽어야 바뀐 상태를 화면이 쓸 수 있다.
-            return PostDataAsync<PopProcessActionRequest, PopProcessInfoDto>(url, request, cancellationToken);
+
+            // 응답은 {"data":{workStatus, trackInDtm, actlWorkDurSec, ...}} 봉투로 온다 — 벗겨 읽어야 바뀐 상태를 화면이 쓸 수 있다.
+            // PopProcessInfoDto로 바로 읽으면 안 된다: 시간 필드가 초 단위 숫자(예: 706)라 TimeSpan으로 변환하지 못해
+            // 응답 해석 실패로 공정 이동이 막혔다. 공정 정보 조회(GetProcessInfoAsync)와 같이 원본 형식으로 읽고 PopMapper로 바꾼다.
+            var data = await PostDataAsync<PopProcessActionRequest, PopApiResponse>(url, request, cancellationToken);
+            return data == null ? null : PopMapper.Map(data).Process;
         }
 
         public async Task<List<AbnormalAlarmTypeDto>> GetAbnormalAlarmTypes(AbnormalAlarmTypeQuery query, CancellationToken cancellationToken = default)
