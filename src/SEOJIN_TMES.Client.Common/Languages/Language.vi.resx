@@ -996,6 +996,9 @@
   <data name="Pop_ProcessEnded" xml:space="preserve">
     <value>Đã hoàn thành công đoạn.</value>
   </data>
+  <data name="Pop_ProcessMovedUnfinished" xml:space="preserve">
+    <value>Đã chuyển mà chưa hoàn thành công đoạn (còn việc chưa làm).</value>
+  </data>
   <data name="Col_WorkQty" xml:space="preserve">
     <value>Work Qty</value>
   </data>

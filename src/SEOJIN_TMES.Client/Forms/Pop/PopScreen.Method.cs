@@ -13,6 +13,7 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -526,18 +527,42 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// 입력할 항목이 있는 공정은 완료 없이 그대로 옮긴다: 할 일이 남아 있으면 서버가 완료를 400(WORK_005)으로
         /// 거절하고, 그 거절로 이동까지 막히면 작업자가 그 공정을 벗어날 수 없었다. 입력을 다 마치면 자동 완료된다.
         /// 대기 · 중지 · 완료 상태도 그대로 두고 옮긴다.
+        ///
+        /// 서버가 완료를 <b>업무 사유로 거절(400)</b>해도 이동은 계속한다. "입력할 항목이 없다"는 것은 화면이 받은 탭 기준의
+        /// 추정일 뿐이라 서버의 할 일(WORK_005)과 어긋날 수 있는데, 그 거절로 이동까지 막으면 작업자가 공정을 벗어날 수 없었다.
+        /// 완료 여부는 서버 판단을 그대로 따르고(공정은 진행 중으로 남는다) 안내 칸에만 남긴다.
+        ///
+        /// 완료 응답으로 지금 화면을 다시 그리지 않는다 — 곧바로 다른 공정을 읽으므로 그 갱신(응답이 비면 재조회까지)은 낭비다.
         /// </summary>
-        /// <returns>
-        /// 이동을 계속해도 되면 true. 서버가 완료를 거절했거나(사유는 SetProcessAction이 창으로 알린다) 화면이 닫혔으면 false.
-        /// </returns>
+        /// <returns>이동을 계속해도 되면 true. 통신 실패 · 서버 장애로 완료 결과를 알 수 없거나 화면이 닫혔으면 false.</returns>
         private async Task<bool> EndCurrentProcess()
         {
             if (!IsProcessRunning || HasInputItems())
                 return true;
 
             AppLog.Step($"[POP] 공정 변경으로 완료 - {_key.RoutingOperation}/{_key.PageOperation}");
-            if (!await SetProcessAction(PopProcessAction.end))
+            try
+            {
+                await _apiClient.PopApiClient.ChangeProcessStateAsync(_key, PopProcessAction.end);
+            }
+            catch (ApiException ex) when (ex.StatusCode == HttpStatusCode.BadRequest)
+            {
+                AppLog.Warn($"[POP] 공정 완료 거절 - 완료하지 않고 이동 ({_key.RoutingOperation}/{_key.PageOperation}) : {ex.Message}");
+                if (IsDisposed || Disposing) return false;
+
+                ShowMessage(Language.Pop_ProcessMovedUnfinished);
+                return true;
+            }
+            catch (ApiException ex)
+            {
+                AppLog.Warn($"[POP] 공정 상태 전이 실패 - {PopProcessAction.end} : {ex.Message}");
+                if (IsDisposed || Disposing) return false;
+
+                AppMessageBox.Warn(this, ex.Message, Language.Pop_Title);
                 return false;
+            }
+
+            if (IsDisposed || Disposing) return false;
 
             ShowMessage(Language.Pop_ProcessEnded);
             return true;
@@ -739,10 +764,19 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 serials = form.SerialNumbers;
             }
 
+            // 저장이 실패하면 입력 전 값으로 되돌린다 — 그대로 두면 서버에는 없는 시리얼로 "완료"가 표시되고,
+            // 그 화면 값을 믿은 자동 완료가 서버에서 WORK_005(할 일 남음)로 거절됐다.
+            var previous = material.SerialNumbers;
             material.SerialNumbers = serials;
             gridViewMaterial.RefreshData();
 
-            await SetMaterialSerials(material);
+            if (await SetMaterialSerials(material))
+                return;
+
+            if (IsDisposed || Disposing) return;
+
+            material.SerialNumbers = previous;
+            gridViewMaterial.RefreshData();
         }
 
         /// <summary>
@@ -786,7 +820,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             return true;
         }
 
-        private async Task SetMaterialSerials(PopInputMaterialDto material)
+        /// <returns>서버에 저장됐으면 true. 실패(사유는 창으로 알린다) · 화면 닫힘이면 false.</returns>
+        private async Task<bool> SetMaterialSerials(PopInputMaterialDto material)
         {
             var request = new PopMaterialSerialSaveRequest();
             request.inputtedItemCd = material.MaterialCode;
@@ -800,20 +835,21 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             catch (ApiException ex)
             {
                 AppLog.Warn($"[POP] 투입자재 시리얼 저장 실패 - {material.MaterialCode} : {ex.Message}");
-                if (IsDisposed || Disposing) return;
+                if (IsDisposed || Disposing) return false;
 
                 AppMessageBox.Warn(this, ex.Message, Language.PopSerial_Title);
-                return;
+                return false;
             }
             finally
             {
                 EndResultSave();
             }
 
-            if (IsDisposed || Disposing) return;
+            if (IsDisposed || Disposing) return false;
 
             AppMessageBox.Success(this, Language.PopSerial_Saved, Language.PopSerial_Title);
             await TryAutoProgress();
+            return true;
         }
 
         // ─────────────────────────────────────────────────────────────────────────

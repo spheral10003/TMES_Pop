@@ -1,3 +1,5 @@
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Net;
 using System.Net.Http;
@@ -16,6 +18,12 @@ namespace SEOJIN_TMES.Client.ApiClient
         public HttpStatusCode StatusCode { get; }
         public string ResponseBody { get; }
 
+        /// <summary>
+        /// 서버가 오류 본문에 담아 준 업무 오류 코드(예: WORK_005). 본문이 없거나 JSON이 아니면 null.
+        /// 화면이 "어떤 거절인지"에 따라 다르게 처리해야 할 때 이 값으로 구분한다.
+        /// </summary>
+        public string ErrorCode { get; }
+
         public ApiException(HttpStatusCode statusCode, string responseBody, string message, Exception innerException = null)
             : base(message, innerException)
         {
@@ -23,8 +31,47 @@ namespace SEOJIN_TMES.Client.ApiClient
             ResponseBody = responseBody;
         }
 
+        private ApiException(HttpStatusCode statusCode, string responseBody, string message, string errorCode)
+            : base(message)
+        {
+            StatusCode = statusCode;
+            ResponseBody = responseBody;
+            ErrorCode = errorCode;
+        }
+
         /// <summary>서버 응답 자체를 받지 못한 실패(연결 실패/타임아웃 등)인지 여부.</summary>
         public bool IsTransportFailure => (int)StatusCode == 0;
+
+        /// <summary>
+        /// 실패 상태코드 응답을 예외로 바꾼다. 서버 오류 본문(<c>{"message":..., "code":...}</c>)의 사유를 안내 문구에 붙인다 —
+        /// 상태코드만 보여 주면("API 호출 실패: 400") 작업자도 개발자도 무엇이 거절됐는지 알 수 없었다.
+        /// 본문이 JSON이 아니면(HTML 오류 페이지 등) 상태코드만으로 안내한다.
+        /// </summary>
+        public static ApiException FromErrorResponse(HttpStatusCode statusCode, string reasonPhrase, string responseBody)
+        {
+            var message = $"API 호출 실패: {(int)statusCode} {reasonPhrase}".TrimEnd();
+            string errorCode = null;
+
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(responseBody) && JToken.Parse(responseBody) is JObject body)
+                {
+                    errorCode = (string)body["code"];
+                    var serverMessage = (string)body["message"];
+
+                    if (!string.IsNullOrWhiteSpace(serverMessage))
+                        message += $"{Environment.NewLine}{serverMessage}";
+                    if (!string.IsNullOrWhiteSpace(errorCode))
+                        message += $" ({errorCode})";
+                }
+            }
+            catch (JsonException)
+            {
+                // 오류 본문이 JSON이 아니어도 실패 사실은 그대로 알려야 한다.
+            }
+
+            return new ApiException(statusCode, responseBody, message, errorCode);
+        }
 
         /// <summary>
         /// 통신 단계 예외를 화면에 그대로 띄울 수 있는 안내 문구로 바꿔 담는다.

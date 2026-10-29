@@ -269,7 +269,7 @@ namespace SEOJIN_TMES.Client.ApiClient
         {
             var body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
-                throw new ApiException(response.StatusCode, body, $"API 호출 실패: {(int)response.StatusCode} {response.ReasonPhrase}");
+                throw ApiException.FromErrorResponse(response.StatusCode, response.ReasonPhrase, body);
 
             return body;
         }
@@ -280,7 +280,7 @@ namespace SEOJIN_TMES.Client.ApiClient
                 return;
 
             var body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-            throw new ApiException(response.StatusCode, body, $"API 호출 실패: {(int)response.StatusCode} {response.ReasonPhrase}");
+            throw ApiException.FromErrorResponse(response.StatusCode, response.ReasonPhrase, body);
         }
     }
 }

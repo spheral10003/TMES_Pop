@@ -996,6 +996,9 @@
   <data name="Pop_ProcessEnded" xml:space="preserve">
     <value>공정을 완료했습니다.</value>
   </data>
+  <data name="Pop_ProcessMovedUnfinished" xml:space="preserve">
+    <value>공정을 완료하지 못한 채 이동했습니다(남은 작업 있음).</value>
+  </data>
   <data name="Col_WorkQty" xml:space="preserve">
     <value>작업지시 수량</value>
   </data>
