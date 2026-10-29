@@ -71,6 +71,9 @@ namespace SEOJIN_TMES.Client.Theme
         // 공정 정지 사유 창(StopIssueForm)의 강조 색 — POP [중지] 버튼과 같은 빨강 계열로, 알람 창(Amber)과 구분된다.
         public static readonly Color StopIssue = Rose;
 
+        /// <summary>POP 도면 이미지 박스 바탕. 도면(흰 종이)과 이어지도록 다크 테마에서도 흰색으로 고정한다.</summary>
+        public static readonly Color ImageViewerBack = Color.White;
+
         // ── 로그인 배경 그림(login_TEST.png / login_PROD.png)에서 뽑은 색 ──
         // 그림 위에 얹는 컨트롤이 그림과 이어져 보여야 하므로 테마(다크)와 상관없이 그림의 픽셀 값을 그대로 쓴다.
         public static readonly Color LoginBack = Color.White;                             // 오른쪽 입력 영역 흰 바탕

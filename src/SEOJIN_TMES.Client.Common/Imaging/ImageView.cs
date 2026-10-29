@@ -47,6 +47,8 @@ namespace SEOJIN_TMES.Client.Common.Imaging
             _box.AllowClickZoom = false;
             // ZoomIn/ZoomOut은 이 목록의 다음/이전 값으로 이동한다 → 기존 1.25배 단계를 그대로 재현한다.
             _box.ZoomLevels = BuildZoomLevels();
+            // 기본값(Client)은 빈 자리에 회색 체크무늬를 깐다 — 도면 바깥은 바탕색(흰색) 그대로 보이게 끈다.
+            _box.GridDisplayMode = ImageBoxGridDisplayMode.None;
 
             _box.MouseWheel += Box_MouseWheel;
             _box.MouseEnter += Box_MouseEnter;
@@ -137,6 +139,9 @@ namespace SEOJIN_TMES.Client.Common.Imaging
             if (_image == null) return;
             _fitMode = true;
 
+            // 확대된 상태에서는 스크롤바가 떠 있어, ImageBox.ZoomToFit이 스크롤바만큼 좁아진 영역으로 배율을 계산한다
+            // (그 뒤 스크롤바가 사라지면 그림이 한쪽으로 치우치고 작게 남는다). 가장 작게 줄여 스크롤바를 먼저 걷어 낸 뒤 맞춘다.
+            _box.Zoom = ZoomMin;
             _box.ZoomToFit();
             // ImageBox의 하한(1%)은 기존 규칙(10%)보다 낮다 — 아주 큰 도면도 10% 아래로는 내리지 않는다.
             if (_box.Zoom < ZoomMin) _box.Zoom = ZoomMin;

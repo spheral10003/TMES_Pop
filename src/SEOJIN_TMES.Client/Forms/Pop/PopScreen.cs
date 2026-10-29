@@ -161,6 +161,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // (실제로 그렇게 보였다). Designer의 Add 순서가 이미 올바른 도킹 순서를 만든다.
             RefreshAccordionButtons();
             viewerSurface.BackColor = AppTheme.Card;
+            picView.BackColor = AppTheme.ImageViewerBack;
 
             // 버튼 색은 앱 공통(#6D7C92 + 흰 글자). 글꼴은 Designer에서 버튼마다 정해 둔 값을 그대로 쓴다.
             foreach (var button in new[] { btnPrevProcess, btnNextProcess, btnStopProcess, btnProcessList, btnAdminAlarm,

@@ -95,6 +95,30 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             InitBomSpecGrid();
             InitInspectionGrid();
             InitEquipmentGrid();
+
+            foreach (var view in new GridView[] { gridViewMaterial, gridViewBomSpec, gridViewInspection, gridViewEquipment })
+                LockGridCustomization(view);
+        }
+
+        /// <summary>
+        /// 컬럼 머리글로 할 수 있는 조작을 <b>정렬만</b> 남기고 막는다.
+        /// 터치 화면에서 머리글을 잘못 끌면 그룹으로 묶이거나 컬럼이 사라져, 작업자가 원래 화면으로 되돌릴 방법이 없었다.
+        /// 우클릭 메뉴(컬럼 · 그룹 패널 · 합계 · 그룹 행)도 같은 이유로 띄우지 않는다. 컬럼 폭 조절은 그대로 둔다.
+        /// </summary>
+        private void LockGridCustomization(GridView view)
+        {
+            view.OptionsCustomization.AllowSort = true;
+            view.OptionsCustomization.AllowColumnMoving = false;
+            view.OptionsCustomization.AllowGroup = false;
+            view.OptionsCustomization.AllowQuickHideColumns = false;
+            view.OptionsCustomization.AllowFilter = false;
+            view.OptionsView.ShowGroupPanel = false;
+            view.OptionsFind.AllowFindPanel = false;
+
+            view.OptionsMenu.EnableColumnMenu = false;
+            view.OptionsMenu.EnableGroupPanelMenu = false;
+            view.OptionsMenu.EnableFooterMenu = false;
+            view.OptionsMenu.EnableGroupRowMenu = false;
         }
 
         private void InitMaterialGrid()
