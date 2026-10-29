@@ -609,12 +609,6 @@
   <data name="Pop_InputButton" xml:space="preserve">
     <value>Enter</value>
   </data>
-  <data name="Pop_SaveResult" xml:space="preserve">
-    <value>Save Results</value>
-  </data>
-  <data name="Pop_SavedResult" xml:space="preserve">
-    <value>Results have been saved.</value>
-  </data>
   <data name="Pop_SerialNotRequired" xml:space="preserve">
     <value>This material does not require serial numbers.</value>
   </data>

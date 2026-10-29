@@ -89,7 +89,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.spacerBottom = new System.Windows.Forms.Panel();
             this.bottomCard = new DevExpress.XtraEditors.PanelControl();
             this.pnlTabHead = new DevExpress.XtraEditors.PanelControl();
-            this.btnSaveResults = new System.Windows.Forms.Button();
             this.chkManualWrench = new DevExpress.XtraEditors.CheckEdit();
             this.btnTabsAccordion = new SEOJIN_TMES.Client.Forms.Common.AccordionHandle();
             this.tabSpec = new DevExpress.XtraTab.XtraTabControl();
@@ -813,27 +812,12 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // pnlTabHead
             // 
             this.pnlTabHead.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.pnlTabHead.Controls.Add(this.btnSaveResults);
             this.pnlTabHead.Controls.Add(this.chkManualWrench);
             this.pnlTabHead.Controls.Add(this.btnTabsAccordion);
             this.pnlTabHead.Location = new System.Drawing.Point(1119, 3);
             this.pnlTabHead.Name = "pnlTabHead";
             this.pnlTabHead.Size = new System.Drawing.Size(388, 28);
             this.pnlTabHead.TabIndex = 4;
-            // 
-            // btnSaveResults
-            // 
-            this.btnSaveResults.BackColor = System.Drawing.Color.Transparent;
-            this.btnSaveResults.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnSaveResults.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSaveResults.Location = new System.Drawing.Point(157, 3);
-            this.btnSaveResults.Name = "btnSaveResults";
-            this.btnSaveResults.Size = new System.Drawing.Size(104, 25);
-            this.btnSaveResults.TabIndex = 25;
-            this.btnSaveResults.Text = "결과 저장";
-            this.btnSaveResults.UseVisualStyleBackColor = false;
-            this.btnSaveResults.Visible = false;
-            this.btnSaveResults.Click += new System.EventHandler(this.btnSaveResults_Click);
             // 
             // chkManualWrench
             // 
@@ -1121,7 +1105,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private DevExpress.XtraEditors.PanelControl pnlTabHead;
         private System.Windows.Forms.Label lblProgressState;
         private System.Windows.Forms.Label lblWorkstation;
-        private System.Windows.Forms.Button btnSaveResults;
         //private System.Windows.Forms.PictureBox picView;
         private ImageBoxExtensions.ImageBoxEx picView;
         private System.Windows.Forms.ContextMenuStrip menuView;

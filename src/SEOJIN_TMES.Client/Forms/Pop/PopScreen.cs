@@ -134,7 +134,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             pageInspec.Text = Language.Pop_TabInspection;
             pageEquip.Text = Language.Pop_TabEquipment;
             chkManualWrench.Text = Language.Pop_ManualWrench;
-            btnSaveResults.Text = Language.Pop_SaveResult;
 
             mnuFit.Text = Language.Pop_ImageFit;
             mnuActual.Text = Language.Pop_ImageActualSize;
@@ -165,7 +164,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
             // 버튼 색은 앱 공통(#6D7C92 + 흰 글자). 글꼴은 Designer에서 버튼마다 정해 둔 값을 그대로 쓴다.
             foreach (var button in new[] { btnPrevProcess, btnNextProcess, btnStopProcess, btnProcessList, btnAdminAlarm,
-                                            btnSaveResults, btnFit, btnZoomIn, btnZoomOut })
+                                            btnFit, btnZoomIn, btnZoomOut })
                 AppTheme.StandardButton(button, keepFont: true);
 
             SetProgressState(_progressState);   // 테마를 다시 입혀도 상태 색이 보라로 되돌아가지 않도록
@@ -419,19 +418,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private void chkManualWrench_CheckedChanged(object sender, EventArgs e)
         {
             SetResultInputColumnVisible(chkManualWrench.Checked);
-        }
-
-        /// <summary>
-        /// 편집 중인 셀을 확정한다. 실적은 셀을 고칠 때마다 이미 서버에 보냈으므로 여기서 다시 보내지 않는다.
-        /// </summary>
-        private void btnSaveResults_Click(object sender, EventArgs e)
-        {
-            gridViewBomSpec.CloseEditor();
-            gridViewBomSpec.UpdateCurrentRow();
-            gridViewInspection.CloseEditor();
-            gridViewInspection.UpdateCurrentRow();
-
-            AppMessageBox.Success(this, Language.Pop_SavedResult, Language.Pop_Title);
         }
 
         // ─────────────────────────────────────────────────────────────────────────

@@ -609,12 +609,6 @@
   <data name="Pop_InputButton" xml:space="preserve">
     <value>Nhập</value>
   </data>
-  <data name="Pop_SaveResult" xml:space="preserve">
-    <value>Lưu kết quả</value>
-  </data>
-  <data name="Pop_SavedResult" xml:space="preserve">
-    <value>Đã lưu kết quả.</value>
-  </data>
   <data name="Pop_SerialNotRequired" xml:space="preserve">
     <value>Vật tư này không yêu cầu số sê-ri.</value>
   </data>

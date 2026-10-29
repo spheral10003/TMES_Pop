@@ -257,8 +257,6 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string Pop_ManualWrench => Get(nameof(Pop_ManualWrench));
         public static string Pop_ResultInputColumn => Get(nameof(Pop_ResultInputColumn));
         public static string Pop_InputButton => Get(nameof(Pop_InputButton));
-        public static string Pop_SaveResult => Get(nameof(Pop_SaveResult));
-        public static string Pop_SavedResult => Get(nameof(Pop_SavedResult));
         public static string Pop_SerialNotRequired => Get(nameof(Pop_SerialNotRequired));
         public static string Pop_NoProcessList => Get(nameof(Pop_NoProcessList));
         public static string Pop_ProcessMoved => Get(nameof(Pop_ProcessMoved));
