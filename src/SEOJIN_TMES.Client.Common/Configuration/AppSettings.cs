@@ -57,6 +57,18 @@ namespace SEOJIN_TMES.Client.Common.Configuration
         public int ModbusKeepAliveIntervalMs { get; set; } = 5000;
 
         /// <summary>
+        /// 설비 접속 테스트 팝업에서 포트 하나에 접속을 기다리는 시간(ms). 이 안에 붙지 않으면 실패로 센다. 기본 2000.
+        /// 운영 연결의 <see cref="ModbusConnectTimeoutMs"/>와 따로 둔다 — 테스트는 "느리지만 붙는지"까지 보려고 넉넉히 기다린다.
+        /// </summary>
+        public int ModbusTestTimeoutMs { get; set; } = 2000;
+
+        /// <summary>
+        /// 설비 접속 테스트에서 끊은 뒤 다음 접속까지 쉬는 시간(ms). 기본 300.
+        /// 끊자마자 다시 붙으면 장비가 이전 소켓을 아직 정리하지 못해 거부하는 경우가 있어 잠깐 둔다.
+        /// </summary>
+        public int ModbusTestIntervalMs { get; set; } = 300;
+
+        /// <summary>
         /// 작업 표준/도면 PDF가 들어 있는 SMB 공유 폴더 접속 정보(App.config의 <c>DocumentShare</c>).
         /// <see cref="DocumentShareSettings.RootPath"/>가 비어 있으면 POP 화면은 도면 영역에
         /// "공유 폴더 미설정" 안내만 표시하고 파일 접근을 시도하지 않는다.

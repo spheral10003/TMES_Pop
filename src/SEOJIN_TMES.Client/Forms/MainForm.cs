@@ -14,6 +14,7 @@ using SEOJIN_TMES.Client.Equipment.Core;
 using SEOJIN_TMES.Client.Equipment.Nutrunner;
 using SEOJIN_TMES.Client.Forms.Common;
 using SEOJIN_TMES.Client.Forms.Home;
+using SEOJIN_TMES.Client.Forms.ModbusTest;
 using SEOJIN_TMES.Client.Forms.Notification;
 using SEOJIN_TMES.Client.Menu;
 using SEOJIN_TMES.Client.Theme;
@@ -30,7 +31,7 @@ namespace SEOJIN_TMES.Client.Forms
 {
     /// <summary>
     /// 메인 셸: 좌측 브랜드 블록 + 3-Depth 트리 메뉴(AccordionControl), 상단 바, 우측 탭 스트립 + 화면 영역.
-    /// 상단 바 우측 정보 묶음은 "언어 · 알림 · {이름} 님 환영합니다. · 사용자 · 최소화 · 최대화 · 로그아웃" 순서로 배치하고,
+    /// 상단 바 우측 정보 묶음은 "언어 · 접속 테스트 · 알림 · {이름} 님 환영합니다. · 사용자 · 최소화 · 최대화 · 로그아웃" 순서로 배치하고,
     /// 현재 일시(시계)는 상단 바 가로 가운데에 따로 둔다.
     ///
     /// 색·폰트·아이콘은 전부 <see cref="AppTheme"/>/<see cref="AppIcons"/>를 통해 적용한다(런타임).
@@ -473,6 +474,7 @@ namespace SEOJIN_TMES.Client.Forms
             btnUser.ToolTip = Language.UserProfile_Title;
             btnLogout.ToolTip = Language.Common_Logout;
             btnMinimize.ToolTip = Language.MainForm_Minimize;
+            btnModbusTest.ToolTip = Language.ModbusTest_Title;
             ApplyWindowStatePresentation();
 
             BuildMenu();
@@ -511,7 +513,7 @@ namespace SEOJIN_TMES.Client.Forms
 
         /// <summary>
         /// 상단 바를 배치한다.
-        /// 우측 묶음(왼쪽 → 오른쪽): 언어 · 알림 · "{이름} 님 환영합니다." · 사용자 · 최소화 · 최대화 · 로그아웃
+        /// 우측 묶음(왼쪽 → 오른쪽): 언어 · 접속 테스트 · 알림 · "{이름} 님 환영합니다." · 사용자 · 최소화 · 최대화 · 로그아웃
         /// 남은 시간은 이 묶음에서 빼내 <b>상단 바 가로 가운데</b>에 따로 둔다.
         /// </summary>
         private void LayoutTopBar()
@@ -554,9 +556,13 @@ namespace SEOJIN_TMES.Client.Forms
             lblAlertBadge.Top = btnAlerts.Top - 1;
             lblAlertBadge.Left = btnAlerts.Right - 13;
 
+            // 설비 접속 테스트
+            btnModbusTest.Top = CenterTop(btnModbusTest);
+            btnModbusTest.Left = btnAlerts.Left - 12 - btnModbusTest.Width;
+
             // 언어
             cboLanguage.Top = CenterTop(cboLanguage);
-            cboLanguage.Left = btnAlerts.Left - 12 - cboLanguage.Width;
+            cboLanguage.Left = btnModbusTest.Left - 12 - cboLanguage.Width;
 
             CenterSessionTime();
         }
@@ -689,6 +695,17 @@ namespace SEOJIN_TMES.Client.Forms
             for (var parent = element.OwnerElement; parent != null; parent = parent.OwnerElement)
                 level++;
             return level;
+        }
+
+        /// <summary>네트워크 아이콘 → 설비 Modbus TCP 접속 테스트 팝업.</summary>
+        private void btnModbusTest_Click(object sender, EventArgs e)
+        {
+            using (var form = new ModbusConnectionTestForm())
+            {
+                form.Initialize();
+                form.CenterOn(this);
+                form.ShowDialog(this);
+            }
         }
 
         /// <summary>종 아이콘 → 알림 팝업. 닫은 뒤에는 배지 숫자를 바로 다시 맞춘다(읽음 처리 반영).</summary>

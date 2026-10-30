@@ -109,6 +109,9 @@ namespace SEOJIN_TMES.Client.Theme
         /// <summary>설비/장비(공장).</summary>
         public const string Factory = "<path d=\"M4 20V10l5 3V10l5 3V7l6 4v9z\" stroke=\"{0}\" stroke-width=\"1.7\"/><path d=\"M4 20h16\" stroke=\"{0}\" stroke-width=\"1.7\"/>";
 
+        /// <summary>네트워크(설비 접속 테스트).</summary>
+        public const string Network = "<rect x=\"9\" y=\"3.5\" width=\"6\" height=\"5\" rx=\"1.2\" stroke=\"{0}\" stroke-width=\"1.7\"/><rect x=\"3.5\" y=\"15.5\" width=\"6\" height=\"5\" rx=\"1.2\" stroke=\"{0}\" stroke-width=\"1.7\"/><rect x=\"14.5\" y=\"15.5\" width=\"6\" height=\"5\" rx=\"1.2\" stroke=\"{0}\" stroke-width=\"1.7\"/><path d=\"M12 8.5v3.5M6.5 15.5V12h11v3.5\" stroke=\"{0}\" stroke-width=\"1.7\"/>";
+
         private static readonly Dictionary<string, SvgImage> Cache = new Dictionary<string, SvgImage>();
 
         /// <summary>

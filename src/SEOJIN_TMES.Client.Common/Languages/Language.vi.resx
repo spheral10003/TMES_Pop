@@ -1156,4 +1156,91 @@ Không có phản hồi sau 3 lần thử kết nối lại. Hãy kiểm tra ngu
   <data name="StopIssue_SelectCode" xml:space="preserve">
     <value>Vui lòng chọn lý do dừng.</value>
   </data>
+  <data name="ModbusTest_Title" xml:space="preserve">
+    <value>Kiểm tra kết nối Modbus TCP</value>
+  </data>
+  <data name="ModbusTest_RepeatCount" xml:space="preserve">
+    <value>Số lần lặp</value>
+  </data>
+  <data name="ModbusTest_TimeoutInfo" xml:space="preserve">
+    <value>Chờ kết nối {0}ms · Khoảng kết nối lại {1}ms</value>
+  </data>
+  <data name="ModbusTest_LoadEquipments" xml:space="preserve">
+    <value>Tải thiết bị đã đăng ký</value>
+  </data>
+  <data name="ModbusTest_AddRow" xml:space="preserve">
+    <value>Thêm dòng</value>
+  </data>
+  <data name="ModbusTest_RemoveRow" xml:space="preserve">
+    <value>Xóa dòng</value>
+  </data>
+  <data name="ModbusTest_ListTitle" xml:space="preserve">
+    <value>Thiết bị kiểm tra</value>
+  </data>
+  <data name="ModbusTest_LogTitle" xml:space="preserve">
+    <value>Nhật ký kết nối</value>
+  </data>
+  <data name="ModbusTest_Start" xml:space="preserve">
+    <value>Bắt đầu</value>
+  </data>
+  <data name="ModbusTest_Stop" xml:space="preserve">
+    <value>Dừng</value>
+  </data>
+  <data name="ModbusTest_ColHost" xml:space="preserve">
+    <value>IP</value>
+  </data>
+  <data name="ModbusTest_ColPort" xml:space="preserve">
+    <value>Cổng</value>
+  </data>
+  <data name="ModbusTest_ColEventPort" xml:space="preserve">
+    <value>Cổng sự kiện</value>
+  </data>
+  <data name="ModbusTest_ColProgress" xml:space="preserve">
+    <value>Tiến độ</value>
+  </data>
+  <data name="ModbusTest_ColSuccess" xml:space="preserve">
+    <value>Thành công</value>
+  </data>
+  <data name="ModbusTest_ColFail" xml:space="preserve">
+    <value>Thất bại</value>
+  </data>
+  <data name="ModbusTest_ColState" xml:space="preserve">
+    <value>Trạng thái</value>
+  </data>
+  <data name="ModbusTest_ColLastResult" xml:space="preserve">
+    <value>Kết quả gần nhất</value>
+  </data>
+  <data name="ModbusTest_StateRunning" xml:space="preserve">
+    <value>Đang chạy</value>
+  </data>
+  <data name="ModbusTest_StateDone" xml:space="preserve">
+    <value>Hoàn tất</value>
+  </data>
+  <data name="ModbusTest_StateStopped" xml:space="preserve">
+    <value>Đã dừng</value>
+  </data>
+  <data name="ModbusTest_ResultOk" xml:space="preserve">
+    <value>Thành công ({0}ms)</value>
+  </data>
+  <data name="ModbusTest_ResultFail" xml:space="preserve">
+    <value>{0} thất bại - {1}</value>
+  </data>
+  <data name="ModbusTest_Timeout" xml:space="preserve">
+    <value>Hết thời gian chờ ({0}ms)</value>
+  </data>
+  <data name="ModbusTest_NoTargets" xml:space="preserve">
+    <value>Hãy nhập IP và cổng cần kiểm tra.</value>
+  </data>
+  <data name="ModbusTest_InvalidTarget" xml:space="preserve">
+    <value>IP hoặc cổng ở dòng {0} không hợp lệ. (cổng 1-65535)</value>
+  </data>
+  <data name="ModbusTest_NoEquipments" xml:space="preserve">
+    <value>Không có thiết bị nào được đăng ký.</value>
+  </data>
+  <data name="ModbusTest_ReportStopped" xml:space="preserve">
+    <value>Đã dừng kiểm tra. Kết quả đến thời điểm dừng:</value>
+  </data>
+  <data name="ModbusTest_ReportLine" xml:space="preserve">
+    <value>{0}  Thành công {1} / Thất bại {2} (tổng {3} lần)</value>
+  </data>
 </root>

@@ -119,7 +119,11 @@ namespace SEOJIN_TMES.Client.Forms
             AppTheme.ImageIconButton(btnAlerts, AppImages.IconBell, AppTheme.TopBarFore, 18);
             AppTheme.Badge(lblAlertBadge, 16);
 
-            // 우측 상단 정보 묶음: 언어 · 알림 · "{이름} 님 환영합니다." · 사용자 · 창 버튼 · 로그아웃 (현재 일시는 상단 바 가운데)
+            // 설비 접속 테스트는 업무 화면이 아니라 점검 도구라 메뉴(탭) 대신 상단 바에서 팝업으로 연다.
+            AppTheme.IconButton(btnModbusTest, AppIcons.Network, AppTheme.TopBarFore, 18);
+            btnModbusTest.ToolTip = Language.ModbusTest_Title;
+
+            // 우측 상단 정보 묶음: 언어 · 접속 테스트 · 알림 · "{이름} 님 환영합니다." · 사용자 · 창 버튼 · 로그아웃 (현재 일시는 상단 바 가운데)
             AppTheme.TopBarText(lblWelcome);
             AppTheme.SessionTime(lblSessionTime);
             AppTheme.TopBarCombo(cboLanguage);

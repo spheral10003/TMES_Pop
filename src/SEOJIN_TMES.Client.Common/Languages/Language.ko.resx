@@ -1156,4 +1156,91 @@
   <data name="StopIssue_SelectCode" xml:space="preserve">
     <value>정지 사유를 선택하세요.</value>
   </data>
+  <data name="ModbusTest_Title" xml:space="preserve">
+    <value>Modbus TCP 접속 테스트</value>
+  </data>
+  <data name="ModbusTest_RepeatCount" xml:space="preserve">
+    <value>반복 횟수</value>
+  </data>
+  <data name="ModbusTest_TimeoutInfo" xml:space="preserve">
+    <value>접속 대기 {0}ms · 재접속 간격 {1}ms</value>
+  </data>
+  <data name="ModbusTest_LoadEquipments" xml:space="preserve">
+    <value>등록 장비 불러오기</value>
+  </data>
+  <data name="ModbusTest_AddRow" xml:space="preserve">
+    <value>행 추가</value>
+  </data>
+  <data name="ModbusTest_RemoveRow" xml:space="preserve">
+    <value>행 삭제</value>
+  </data>
+  <data name="ModbusTest_ListTitle" xml:space="preserve">
+    <value>테스트 대상</value>
+  </data>
+  <data name="ModbusTest_LogTitle" xml:space="preserve">
+    <value>접속 기록</value>
+  </data>
+  <data name="ModbusTest_Start" xml:space="preserve">
+    <value>시작</value>
+  </data>
+  <data name="ModbusTest_Stop" xml:space="preserve">
+    <value>중지</value>
+  </data>
+  <data name="ModbusTest_ColHost" xml:space="preserve">
+    <value>IP</value>
+  </data>
+  <data name="ModbusTest_ColPort" xml:space="preserve">
+    <value>포트</value>
+  </data>
+  <data name="ModbusTest_ColEventPort" xml:space="preserve">
+    <value>이벤트 포트</value>
+  </data>
+  <data name="ModbusTest_ColProgress" xml:space="preserve">
+    <value>진행</value>
+  </data>
+  <data name="ModbusTest_ColSuccess" xml:space="preserve">
+    <value>성공</value>
+  </data>
+  <data name="ModbusTest_ColFail" xml:space="preserve">
+    <value>실패</value>
+  </data>
+  <data name="ModbusTest_ColState" xml:space="preserve">
+    <value>상태</value>
+  </data>
+  <data name="ModbusTest_ColLastResult" xml:space="preserve">
+    <value>최근 결과</value>
+  </data>
+  <data name="ModbusTest_StateRunning" xml:space="preserve">
+    <value>진행 중</value>
+  </data>
+  <data name="ModbusTest_StateDone" xml:space="preserve">
+    <value>완료</value>
+  </data>
+  <data name="ModbusTest_StateStopped" xml:space="preserve">
+    <value>중지됨</value>
+  </data>
+  <data name="ModbusTest_ResultOk" xml:space="preserve">
+    <value>성공 ({0}ms)</value>
+  </data>
+  <data name="ModbusTest_ResultFail" xml:space="preserve">
+    <value>{0} 실패 - {1}</value>
+  </data>
+  <data name="ModbusTest_Timeout" xml:space="preserve">
+    <value>접속 시간 초과({0}ms)</value>
+  </data>
+  <data name="ModbusTest_NoTargets" xml:space="preserve">
+    <value>테스트할 IP와 포트를 입력하세요.</value>
+  </data>
+  <data name="ModbusTest_InvalidTarget" xml:space="preserve">
+    <value>{0}번째 행의 IP 또는 포트가 올바르지 않습니다. (포트 1~65535)</value>
+  </data>
+  <data name="ModbusTest_NoEquipments" xml:space="preserve">
+    <value>등록된 설비가 없습니다.</value>
+  </data>
+  <data name="ModbusTest_ReportStopped" xml:space="preserve">
+    <value>테스트를 중지했습니다. 진행된 횟수까지의 결과입니다.</value>
+  </data>
+  <data name="ModbusTest_ReportLine" xml:space="preserve">
+    <value>{0}  성공 {1} / 실패 {2} (총 {3}회)</value>
+  </data>
 </root>

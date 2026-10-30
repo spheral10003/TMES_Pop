@@ -436,5 +436,34 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string StopIssue_Code => Get(nameof(StopIssue_Code));
         public static string StopIssue_Remark => Get(nameof(StopIssue_Remark));
         public static string StopIssue_SelectCode => Get(nameof(StopIssue_SelectCode));
+        public static string ModbusTest_Title => Get(nameof(ModbusTest_Title));
+        public static string ModbusTest_RepeatCount => Get(nameof(ModbusTest_RepeatCount));
+        public static string ModbusTest_TimeoutInfo => Get(nameof(ModbusTest_TimeoutInfo));
+        public static string ModbusTest_LoadEquipments => Get(nameof(ModbusTest_LoadEquipments));
+        public static string ModbusTest_AddRow => Get(nameof(ModbusTest_AddRow));
+        public static string ModbusTest_RemoveRow => Get(nameof(ModbusTest_RemoveRow));
+        public static string ModbusTest_ListTitle => Get(nameof(ModbusTest_ListTitle));
+        public static string ModbusTest_LogTitle => Get(nameof(ModbusTest_LogTitle));
+        public static string ModbusTest_Start => Get(nameof(ModbusTest_Start));
+        public static string ModbusTest_Stop => Get(nameof(ModbusTest_Stop));
+        public static string ModbusTest_ColHost => Get(nameof(ModbusTest_ColHost));
+        public static string ModbusTest_ColPort => Get(nameof(ModbusTest_ColPort));
+        public static string ModbusTest_ColEventPort => Get(nameof(ModbusTest_ColEventPort));
+        public static string ModbusTest_ColProgress => Get(nameof(ModbusTest_ColProgress));
+        public static string ModbusTest_ColSuccess => Get(nameof(ModbusTest_ColSuccess));
+        public static string ModbusTest_ColFail => Get(nameof(ModbusTest_ColFail));
+        public static string ModbusTest_ColState => Get(nameof(ModbusTest_ColState));
+        public static string ModbusTest_ColLastResult => Get(nameof(ModbusTest_ColLastResult));
+        public static string ModbusTest_StateRunning => Get(nameof(ModbusTest_StateRunning));
+        public static string ModbusTest_StateDone => Get(nameof(ModbusTest_StateDone));
+        public static string ModbusTest_StateStopped => Get(nameof(ModbusTest_StateStopped));
+        public static string ModbusTest_ResultOk => Get(nameof(ModbusTest_ResultOk));
+        public static string ModbusTest_ResultFail => Get(nameof(ModbusTest_ResultFail));
+        public static string ModbusTest_Timeout => Get(nameof(ModbusTest_Timeout));
+        public static string ModbusTest_NoTargets => Get(nameof(ModbusTest_NoTargets));
+        public static string ModbusTest_InvalidTarget => Get(nameof(ModbusTest_InvalidTarget));
+        public static string ModbusTest_NoEquipments => Get(nameof(ModbusTest_NoEquipments));
+        public static string ModbusTest_ReportStopped => Get(nameof(ModbusTest_ReportStopped));
+        public static string ModbusTest_ReportLine => Get(nameof(ModbusTest_ReportLine));
     }
 }

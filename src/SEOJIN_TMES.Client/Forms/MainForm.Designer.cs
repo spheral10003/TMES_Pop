@@ -41,6 +41,7 @@ namespace SEOJIN_TMES.Client.Forms
             this.btnMenuToggle = new DevExpress.XtraEditors.SimpleButton();
             this.lblBreadcrumb = new DevExpress.XtraEditors.LabelControl();
             this.btnAlerts = new DevExpress.XtraEditors.SimpleButton();
+            this.btnModbusTest = new DevExpress.XtraEditors.SimpleButton();
             this.lblAlertBadge = new DevExpress.XtraEditors.LabelControl();
             this.lblWelcome = new DevExpress.XtraEditors.LabelControl();
             this.lblSessionTime = new DevExpress.XtraEditors.LabelControl();
@@ -186,6 +187,7 @@ namespace SEOJIN_TMES.Client.Forms
             this.panelTop.Controls.Add(this.btnMenuToggle);
             this.panelTop.Controls.Add(this.lblBreadcrumb);
             this.panelTop.Controls.Add(this.btnAlerts);
+            this.panelTop.Controls.Add(this.btnModbusTest);
             this.panelTop.Controls.Add(this.lblAlertBadge);
             this.panelTop.Controls.Add(this.lblWelcome);
             this.panelTop.Controls.Add(this.lblSessionTime);
@@ -222,6 +224,14 @@ namespace SEOJIN_TMES.Client.Forms
             this.btnAlerts.Size = new System.Drawing.Size(24, 24);
             this.btnAlerts.TabIndex = 3;
             this.btnAlerts.Click += new System.EventHandler(this.btnAlerts_Click);
+            //
+            // btnModbusTest
+            //
+            this.btnModbusTest.Location = new System.Drawing.Point(772, 4);
+            this.btnModbusTest.Name = "btnModbusTest";
+            this.btnModbusTest.Size = new System.Drawing.Size(24, 24);
+            this.btnModbusTest.TabIndex = 12;
+            this.btnModbusTest.Click += new System.EventHandler(this.btnModbusTest_Click);
             // 
             // lblAlertBadge
             // 
@@ -338,6 +348,7 @@ namespace SEOJIN_TMES.Client.Forms
         private DevExpress.XtraEditors.SimpleButton btnMenuToggle;
         private DevExpress.XtraEditors.LabelControl lblBreadcrumb;
         private DevExpress.XtraEditors.SimpleButton btnAlerts;
+        private DevExpress.XtraEditors.SimpleButton btnModbusTest;
         private DevExpress.XtraEditors.LabelControl lblAlertBadge;
         private DevExpress.XtraEditors.LabelControl lblWelcome;
         private DevExpress.XtraEditors.LabelControl lblSessionTime;

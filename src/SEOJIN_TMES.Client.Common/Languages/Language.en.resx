@@ -1156,4 +1156,91 @@ No response after 3 reconnection attempts. Check the equipment power and network
   <data name="StopIssue_SelectCode" xml:space="preserve">
     <value>Please select a stop reason.</value>
   </data>
+  <data name="ModbusTest_Title" xml:space="preserve">
+    <value>Modbus TCP Connection Test</value>
+  </data>
+  <data name="ModbusTest_RepeatCount" xml:space="preserve">
+    <value>Repeat count</value>
+  </data>
+  <data name="ModbusTest_TimeoutInfo" xml:space="preserve">
+    <value>Connect timeout {0}ms · Reconnect interval {1}ms</value>
+  </data>
+  <data name="ModbusTest_LoadEquipments" xml:space="preserve">
+    <value>Load registered equipment</value>
+  </data>
+  <data name="ModbusTest_AddRow" xml:space="preserve">
+    <value>Add row</value>
+  </data>
+  <data name="ModbusTest_RemoveRow" xml:space="preserve">
+    <value>Remove row</value>
+  </data>
+  <data name="ModbusTest_ListTitle" xml:space="preserve">
+    <value>Test targets</value>
+  </data>
+  <data name="ModbusTest_LogTitle" xml:space="preserve">
+    <value>Connection log</value>
+  </data>
+  <data name="ModbusTest_Start" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="ModbusTest_Stop" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="ModbusTest_ColHost" xml:space="preserve">
+    <value>IP</value>
+  </data>
+  <data name="ModbusTest_ColPort" xml:space="preserve">
+    <value>Port</value>
+  </data>
+  <data name="ModbusTest_ColEventPort" xml:space="preserve">
+    <value>Event port</value>
+  </data>
+  <data name="ModbusTest_ColProgress" xml:space="preserve">
+    <value>Progress</value>
+  </data>
+  <data name="ModbusTest_ColSuccess" xml:space="preserve">
+    <value>Success</value>
+  </data>
+  <data name="ModbusTest_ColFail" xml:space="preserve">
+    <value>Failed</value>
+  </data>
+  <data name="ModbusTest_ColState" xml:space="preserve">
+    <value>State</value>
+  </data>
+  <data name="ModbusTest_ColLastResult" xml:space="preserve">
+    <value>Last result</value>
+  </data>
+  <data name="ModbusTest_StateRunning" xml:space="preserve">
+    <value>Running</value>
+  </data>
+  <data name="ModbusTest_StateDone" xml:space="preserve">
+    <value>Done</value>
+  </data>
+  <data name="ModbusTest_StateStopped" xml:space="preserve">
+    <value>Stopped</value>
+  </data>
+  <data name="ModbusTest_ResultOk" xml:space="preserve">
+    <value>OK ({0}ms)</value>
+  </data>
+  <data name="ModbusTest_ResultFail" xml:space="preserve">
+    <value>{0} failed - {1}</value>
+  </data>
+  <data name="ModbusTest_Timeout" xml:space="preserve">
+    <value>Timed out ({0}ms)</value>
+  </data>
+  <data name="ModbusTest_NoTargets" xml:space="preserve">
+    <value>Enter the IP and port to test.</value>
+  </data>
+  <data name="ModbusTest_InvalidTarget" xml:space="preserve">
+    <value>Row {0} has an invalid IP or port. (port 1-65535)</value>
+  </data>
+  <data name="ModbusTest_NoEquipments" xml:space="preserve">
+    <value>No equipment is registered.</value>
+  </data>
+  <data name="ModbusTest_ReportStopped" xml:space="preserve">
+    <value>The test was stopped. Results up to that point:</value>
+  </data>
+  <data name="ModbusTest_ReportLine" xml:space="preserve">
+    <value>{0}  OK {1} / Failed {2} ({3} total)</value>
+  </data>
 </root>
