@@ -57,6 +57,13 @@ namespace SEOJIN_TMES.Client.Common.Configuration
         public int ModbusKeepAliveIntervalMs { get; set; } = 5000;
 
         /// <summary>
+        /// 설비(Nutrunner) Request 채널 요청 하나의 응답 대기 시간(ms) — Alive(5초 주기) 응답 대기에도 쓴다. 기본 2000.
+        /// 예전에는 <see cref="ModbusConnectTimeoutMs"/>(500)를 같이 써서, 장비가 체결 · 설정 처리로 잠깐만 늦어도
+        /// Alive 응답 없음으로 연결을 끊고 재연결했다. 0 이하면 1000.
+        /// </summary>
+        public int ModbusResponseTimeoutMs { get; set; } = 2000;
+
+        /// <summary>
         /// 설비 접속 테스트 팝업에서 포트 하나에 접속을 기다리는 시간(ms). 이 안에 붙지 않으면 실패로 센다. 기본 2000.
         /// 운영 연결의 <see cref="ModbusConnectTimeoutMs"/>와 따로 둔다 — 테스트는 "느리지만 붙는지"까지 보려고 넉넉히 기다린다.
         /// </summary>

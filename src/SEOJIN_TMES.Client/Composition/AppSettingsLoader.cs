@@ -47,6 +47,9 @@ namespace SEOJIN_TMES.Client.Composition
             if (int.TryParse(ConfigurationManager.AppSettings["ModbusKeepAliveIntervalMs"], out var keepAliveIntervalMs))
                 settings.ModbusKeepAliveIntervalMs = keepAliveIntervalMs;
 
+            if (int.TryParse(ConfigurationManager.AppSettings["ModbusResponseTimeoutMs"], out var responseTimeoutMs))
+                settings.ModbusResponseTimeoutMs = responseTimeoutMs;
+
             if (int.TryParse(ConfigurationManager.AppSettings["ModbusTestTimeoutMs"], out var testTimeoutMs))
                 settings.ModbusTestTimeoutMs = testTimeoutMs;
 

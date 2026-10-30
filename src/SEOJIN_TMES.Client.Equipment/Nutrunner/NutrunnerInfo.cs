@@ -35,6 +35,12 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
         /// <summary>TCP 접속 제한 시간(ms). Request · Event 두 채널 모두 적용. App.config <c>ModbusConnectTimeoutMs</c>에서 온다.</summary>
         public int ConnectTimeoutMs { get; set; } = 500;
 
+        /// <summary>
+        /// Request 채널 요청 하나의 응답 대기 시간(ms) — Alive 응답 대기에도 쓴다. App.config <c>ModbusResponseTimeoutMs</c>에서 온다.
+        /// 예전에는 <see cref="ConnectTimeoutMs"/>를 같이 써서 500ms만 늦어도 응답 없음으로 연결을 끊었다.
+        /// </summary>
+        public int ResponseTimeoutMs { get; set; } = 2000;
+
         /// <summary>무통신 후 첫 TCP KeepAlive 확인까지의 시간(ms). App.config <c>ModbusKeepAliveTimeMs</c>에서 온다.</summary>
         public int KeepAliveTimeMs { get; set; } = 5000;
 

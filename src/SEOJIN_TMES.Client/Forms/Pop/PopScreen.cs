@@ -180,9 +180,11 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// <summary>
         /// 설비 목록(서버 기준정보)을 장비 관리자에 등록하고 이벤트를 구독한 뒤 연결을 시작한다.
         /// 설비 Id는 목록 순번으로 다시 매긴다 — 장비 관리자 안에서만 쓰는 식별자다.
+        /// 등록 · 시작은 <see cref="Devices.Attach"/>가 한다 — 이전 POP가 아직 열려 있어도 이 화면이 장비를 넘겨받는다.
         /// </summary>
         private void WireEquipmentEvents()
         {
+            var infos = new List<NutrunnerInfo>();
             int index = 0;
             foreach (var eq in _equipments)
             {
@@ -203,30 +205,34 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 info.Name = eq.EquipmentName;
                 info.ModelName = eq.EquipmentModel;
                 info.ConnectTimeoutMs = _appSet.AppSet.ModbusConnectTimeoutMs;
+                info.ResponseTimeoutMs = _appSet.AppSet.ModbusResponseTimeoutMs;
                 info.KeepAliveTimeMs = _appSet.AppSet.ModbusKeepAliveTimeMs;
                 info.KeepAliveIntervalMs = _appSet.AppSet.ModbusKeepAliveIntervalMs;
 
-                _equip.TryAdd(info);
+                infos.Add(info);
             }
 
+            // 시작 직후의 첫 연결 이벤트를 놓치지 않도록 구독을 먼저 한다.
             _equip.Manager.ConnectionChanged += OnConnectionChanged;
             _equip.Manager.AlarmOccurred += OnErrorOccurred;
             _equip.Manager.RegisterDataReceived += OnRegisterDataReceived;
             _equip.Manager.FasteningReceived += OnFasteningReceived;
-            _equip.Manager.StartAll();
+            _equip.Attach(this, infos);
 
             Screen.RefreshEquipmentStates();
         }
 
-        /// <summary>구독을 먼저 끊고 장비를 멈춘다 — 멈추는 중에 올라온 이벤트가 사라진 화면을 건드리지 않게.</summary>
+        /// <summary>
+        /// 구독을 먼저 끊고 장비를 놓는다 — 멈추는 중에 올라온 이벤트가 사라진 화면을 건드리지 않게.
+        /// 매니저는 폐기하지 않는다(앱 전역 공용, 종료 때 Global이 정리). 다른 POP가 이미 넘겨받았으면 장비는 그대로 둔다.
+        /// </summary>
         private void UnwireEquipmentEvents()
         {
             _equip.Manager.ConnectionChanged -= OnConnectionChanged;
             _equip.Manager.AlarmOccurred -= OnErrorOccurred;
             _equip.Manager.RegisterDataReceived -= OnRegisterDataReceived;
             _equip.Manager.FasteningReceived -= OnFasteningReceived;
-            _equip.Manager.StopAll();
-            _equip.Manager.Dispose();
+            _equip.Detach(this);
         }
 
         // ─────────────────────────────────────────────────────────────────────────
@@ -552,8 +558,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// 알람은 로그로 남긴다. 재연결을 3회 실패한 알람(ConnectFailed)만 작업자에게 창으로 알린다 —
-        /// 시퀀스가 멈춰 [재연결]을 누르기 전에는 다시 붙지 않으므로 알아채야 한다.
+        /// 알람은 로그로 남긴다. 재연결을 3회 연속 실패한 알람(ConnectFailed)만 작업자에게 창으로 알린다 —
+        /// 재연결은 뒤에서 계속되지만(NutrunnerSequence) 그동안 체결이 들어오지 않으므로 알아채야 한다.
+        /// 다시 붙을 때까지 같은 알람은 한 번만 온다.
         /// </summary>
         private void OnErrorOccurred(object sender, AlarmEventArgs e)
         {

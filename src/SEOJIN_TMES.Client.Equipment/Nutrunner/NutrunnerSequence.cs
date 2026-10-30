@@ -11,24 +11,33 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
     ///  1. Start() 하면 Thread 가 뜨고, 연결이 유지되는 동안 계속 동작한다.
     ///  2. 연결되면 5초마다 Alive(상태 레지스터 Read)를 보낸다.
     ///     장비는 15초 동안 Alive가 없으면 스스로 연결을 끊으므로 이 주기를 늘리지 말 것.
-    ///  3. Alive 응답이 응답 대기 시간(App.config ModbusConnectTimeoutMs) 안에 오지 않으면 바로 다시 보낸다.
+    ///  3. Alive 응답이 응답 대기 시간(App.config ModbusResponseTimeoutMs) 안에 오지 않으면 바로 다시 보낸다.
     ///     <see cref="AliveMaxRetry"/>(3)회 다시 보내도 응답이 없으면 연결 상태를 확인하고 끊은 뒤 재연결한다.
     ///  4. 통신이 끊기면 Disconnect 이벤트 핸들러가 동작해서 재연결을 시도한다.
-    ///  5. 재연결은 최대 <see cref="MaxRetryCount"/>(3)회. 3회를 넘기면
-    ///     연결 실패 Alarm 이벤트를 발생시키고 시퀀스(Thread)를 종료한다.
+    ///  5. 재연결은 <b>연결될 때까지 계속</b>한다. 처음 <see cref="MaxRetryCount"/>(3)회는 5초 간격,
+    ///     그 뒤로는 10초 → 20초 → 30초(최대)로 간격을 늘린다. 3회 연속 실패하면 연결 실패 Alarm을 <b>한 번</b> 올린다.
+    ///
+    /// 예전에는 3회(3초 간격) 실패하면 시퀀스를 끝냈다. 그런데 너트러너는 Request 포트에 동시 접속을 1개만 받고,
+    /// 접속이 실패하거나 끊긴 뒤 3~6초 동안 새 접속을 받지 않는다(2026-10 실측, 172.16.151.70/71) —
+    /// 잠깐의 끊김에도 약 9초 만에 포기해 앱을 다시 켤 때까지 장비를 못 쓰는 일이 생겨 포기하지 않게 바꿨다.
     /// </summary>
     public sealed class NutrunnerSequence : ThreadBase, INutrunnerSequence
     {
-        /// <summary>최대 재연결 시도 횟수.</summary>
+        /// <summary>연결 실패 Alarm을 올리는 연속 재연결 실패 횟수. 이 뒤로도 재연결은 계속한다.</summary>
         public const int MaxRetryCount = 3;
 
         /// <summary>Alive 응답이 없을 때 다시 보내는 횟수. 이 횟수를 넘기면 연결을 끊고 재연결한다.</summary>
         public const int AliveMaxRetry = 3;
 
-        private const double RetryIntervalMs = 3000;
+        /// <summary>재연결 기본 간격. 장비가 접속 실패 뒤 다시 받기까지 3~6초가 걸려 그보다 짧으면 연달아 실패한다.</summary>
+        private const double RetryIntervalMs = 5000;
+
+        /// <summary>오래 끊겨 있을 때 재연결 간격의 상한. 장비가 돌아오면 이 시간 안에는 다시 붙는다.</summary>
+        private const double MaxRetryIntervalMs = 30000;
+
         private const double AliveIntervalMs = 5000;
 
-        /// <summary>ModbusConnectTimeoutMs가 0 이하(접속은 OS 기본값)일 때 쓰는 Alive 응답 대기 시간.</summary>
+        /// <summary>ModbusResponseTimeoutMs가 0 이하일 때 쓰는 Alive 응답 대기 시간.</summary>
         private const double DefaultAliveResponseTimeoutMs = 1000;
 
         private readonly INutrunner _nutrunner;
@@ -39,6 +48,9 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
         private volatile bool _firstAttempt;
         private volatile bool _disposed;
         private int _retryCount;
+
+        /// <summary>이번 끊김에서 연결 실패 Alarm을 이미 올렸는지. 다시 붙을 때까지 같은 알람을 반복하지 않는다.</summary>
+        private bool _connectFailedRaised;
 
         /// <summary>Alive를 보내고 응답을 기다리는 중인지. 응답은 수신 스레드에서 지우므로 volatile.</summary>
         private volatile bool _aliveWaiting;
@@ -58,8 +70,28 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
 
         public int Id => _nutrunner.Id;
 
+        /// <summary>
+        /// Alive 응답 대기 시간. 접속 대기(ConnectTimeoutMs)와 따로 둔다 — 예전에는 같은 500ms를 써서
+        /// 장비가 체결 · 설정 처리로 잠깐만 늦어도 응답 없음으로 보고 연결을 끊었다.
+        /// </summary>
         private double AliveResponseTimeoutMs
-            => _nutrunner.Info.ConnectTimeoutMs > 0 ? _nutrunner.Info.ConnectTimeoutMs : DefaultAliveResponseTimeoutMs;
+            => _nutrunner.Info.ResponseTimeoutMs > 0 ? _nutrunner.Info.ResponseTimeoutMs : DefaultAliveResponseTimeoutMs;
+
+        /// <summary>
+        /// 다음 재연결까지 기다릴 시간. 처음 <see cref="MaxRetryCount"/>회는 기본 간격,
+        /// 그 뒤로는 두 배씩 늘려 <see cref="MaxRetryIntervalMs"/>에서 멈춘다(장비가 꺼져 있을 때 로그 · 서버 로그 폭주 방지).
+        /// </summary>
+        private double CurrentRetryIntervalMs
+        {
+            get
+            {
+                if (_retryCount <= MaxRetryCount)
+                    return RetryIntervalMs;
+
+                double interval = RetryIntervalMs * Math.Pow(2, _retryCount - MaxRetryCount);
+                return Math.Min(interval, MaxRetryIntervalMs);
+            }
+        }
 
         public INutrunner Nutrunner => _nutrunner;
 
@@ -68,6 +100,7 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
         public override void Start()
         {
             _retryCount = 0;
+            _connectFailedRaised = false;
             _firstAttempt = true;      // 최초 연결은 대기 없이 바로 시도한다.
             _retryTimer.Restart();
             _aliveTimer.Restart();
@@ -166,7 +199,8 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
         }
 
         /// <summary>
-        /// 연결을 끊고 다음 tick에 바로 재연결하게 한다(재연결 3회 · 실패 알람 흐름은 <see cref="TryReconnect"/> 그대로).
+        /// 연결을 끊고 다음 tick에 바로 재연결하게 한다(이후 재시도 · 실패 알람 흐름은 <see cref="TryReconnect"/> 그대로).
+        /// 우리가 정상적으로 끊은 직후의 첫 접속은 장비가 바로 받아 준다(실측) — 막히는 건 접속 실패가 쌓인 뒤다.
         /// </summary>
         private void ForceReconnect()
         {
@@ -198,17 +232,17 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
 
         private void TryReconnect()
         {
-            if (!_firstAttempt && _retryTimer.Elapsed.TotalMilliseconds < RetryIntervalMs)
+            if (!_firstAttempt && _retryTimer.Elapsed.TotalMilliseconds < CurrentRetryIntervalMs)
             {
                 return;
             }
 
-            if (_retryCount >= MaxRetryCount)
+            // 포기하지 않는다 — 알람만 한 번 올리고 간격을 늘려 계속 시도한다(클래스 설명 5번 참고).
+            if (_retryCount >= MaxRetryCount && !_connectFailedRaised)
             {
+                _connectFailedRaised = true;
                 RaiseAlarm(AlarmCode.ConnectFailed,
-                    $"재연결 {MaxRetryCount}회 시도 실패. 시퀀스를 종료합니다. ({_nutrunner.Info.Ip}:{_nutrunner.Info.Port})");
-                Stop();
-                return;
+                    $"재연결 {MaxRetryCount}회 시도 실패. 최대 {MaxRetryIntervalMs / 1000:0}초 간격으로 계속 재시도합니다. ({_nutrunner.Info.Ip}:{_nutrunner.Info.Port})");
             }
 
             _firstAttempt = false;
@@ -220,6 +254,7 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
         private void OnConnected(object? sender, EquipmentConnectionEventArgs e)
         {
             _retryCount = 0;
+            _connectFailedRaised = false;
             _firstAttempt = false;
             _aliveWaiting = false;
             _aliveRetry = 0;

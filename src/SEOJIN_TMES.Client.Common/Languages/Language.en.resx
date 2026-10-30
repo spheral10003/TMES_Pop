@@ -671,7 +671,9 @@
   </data>
   <data name="Pop_EquipmentConnectFailed" xml:space="preserve">
     <value>Could not connect to equipment [{0}].
-No response after 3 reconnection attempts. Check the equipment power and network cable, then press [Reconnect] in the equipment list.</value>
+No response after 3 reconnection attempts. Check the equipment power and network cable.
+The equipment accepts only one connection, so it cannot connect while another PC or program is connected to it.
+Reconnection continues automatically until it succeeds. You can also press [Reconnect] in the equipment list to try immediately.</value>
   </data>
   <data name="Pop_EquipmentUsable" xml:space="preserve">
     <value>Available</value>

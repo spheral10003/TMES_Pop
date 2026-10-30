@@ -671,7 +671,9 @@
   </data>
   <data name="Pop_EquipmentConnectFailed" xml:space="preserve">
     <value>Không thể kết nối với thiết bị [{0}].
-Không có phản hồi sau 3 lần thử kết nối lại. Hãy kiểm tra nguồn điện và cáp mạng của thiết bị, sau đó nhấn [Kết nối lại] trong danh sách thiết bị.</value>
+Không có phản hồi sau 3 lần thử kết nối lại. Hãy kiểm tra nguồn điện và cáp mạng của thiết bị.
+Thiết bị chỉ nhận một kết nối, nên không thể kết nối khi máy tính hoặc chương trình khác đang kết nối.
+Hệ thống sẽ tự động thử kết nối lại cho đến khi thành công. Bạn cũng có thể nhấn [Kết nối lại] trong danh sách thiết bị để thử ngay.</value>
   </data>
   <data name="Pop_EquipmentUsable" xml:space="preserve">
     <value>Sẵn sàng</value>

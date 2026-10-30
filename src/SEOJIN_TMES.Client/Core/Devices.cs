@@ -15,6 +15,9 @@ namespace SEOJIN_TMES.Client.Core
 
         private INutrunnerManager _manager;
 
+        /// <summary>지금 장비 연결을 맡긴 화면(<see cref="Attach"/>). 이 화면만 <see cref="Detach"/>로 해제할 수 있다.</summary>
+        private object _owner;
+
         public INutrunnerManager Manager { get => _manager;}
 
         public Devices()
@@ -84,6 +87,65 @@ namespace SEOJIN_TMES.Client.Core
             //    return new List<NutrunnerInfo>();
             //}
         }
+
+        /// <summary>
+        /// 화면(POP)이 설비 목록을 넘겨 연결을 맡긴다. 이 화면이 장비의 새 주인이 된다.
+        ///
+        /// POP 화면은 동시에 둘이 될 수 있다(새 작업 진입 중에 이전 POP가 아직 닫히지 않은 경우).
+        /// 예전에는 새 POP의 등록이 "같은 ID 이미 등록"으로 건너뛰어지고, 뒤이어 닫힌 이전 POP가 매니저를
+        /// 통째로 정지 · 폐기해 새 POP에 장비가 하나도 남지 않았다. 그래서 주인을 두고, 주인만 해제할 수 있게 한다.
+        ///
+        /// 이미 같은 접속 정보(코드 · IP · 포트)로 등록된 장비는 그대로 둔다 — 장비가 접속을 1개만 받아
+        /// 끊었다 다시 붙이면 그 사이 체결 이벤트를 놓치고, 재접속이 막힐 수도 있다.
+        /// </summary>
+        public void Attach(object owner, IReadOnlyList<NutrunnerInfo> infos)
+        {
+            _owner = owner;
+
+            var wanted = new Dictionary<int, NutrunnerInfo>();
+            foreach (var info in infos)
+            {
+                if (info != null)
+                    wanted[info.Id] = info;
+            }
+
+            foreach (var id in _manager.Ids)
+            {
+                var current = _manager[id]?.Info;
+                if (current != null && wanted.TryGetValue(id, out var info) && IsSameEndpoint(current, info))
+                    continue;
+
+                _manager.Stop(id);
+                _manager.Remove(id);
+            }
+
+            foreach (var info in wanted.Values)
+            {
+                if (_manager[info.Id] == null)
+                    TryAdd(info);
+            }
+
+            _manager.StartAll();
+            AppLog.Step($"설비 {_manager.Count}대 연결 시작");
+        }
+
+        /// <summary>
+        /// 화면이 닫힐 때 장비를 정지 · 해제한다. 그 사이 다른 화면이 <see cref="Attach"/>로 넘겨받았으면 아무것도 하지 않는다.
+        /// 매니저 자체는 폐기하지 않는다 — 앱 종료 때 <see cref="Global"/>이 정리한다.
+        /// </summary>
+        public void Detach(object owner)
+        {
+            if (!ReferenceEquals(_owner, owner))
+                return;
+
+            _owner = null;
+            _manager.StopAll();
+            foreach (var id in _manager.Ids)
+                _manager.Remove(id);
+        }
+
+        private static bool IsSameEndpoint(NutrunnerInfo a, NutrunnerInfo b) =>
+            a.Code == b.Code && a.Ip == b.Ip && a.Port == b.Port && a.ResolvedEventPort == b.ResolvedEventPort;
 
         /// <summary>
         /// 장비 한 대를 등록한다. 한 대의 설정이 잘못됐다고 나머지 장비까지 못 쓰게 되지 않도록

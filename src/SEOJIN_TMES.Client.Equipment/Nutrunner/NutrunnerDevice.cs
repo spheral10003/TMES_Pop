@@ -51,7 +51,7 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
         /// </summary>
         private const ushort PresetChangeValue = 1;
 
-        /// <summary>ConnectTimeoutMs가 0 이하(접속은 OS 기본값)일 때 쓰는 요청 하나의 응답 대기 시간.</summary>
+        /// <summary>ResponseTimeoutMs가 0 이하일 때 쓰는 요청 하나의 응답 대기 시간.</summary>
         private const int DefaultResponseTimeoutMs = 1000;
 
         /// <summary>이벤트 채널 연결 후 첫 송신까지 기다리는 시간. 장비가 이벤트 세션을 준비할 여유.</summary>
@@ -117,7 +117,7 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
                    new ModbusTcpClient(requestTransport, new ModbusTcpCodec(), info.TransactionId)
                    {
                        // Alive 응답 대기(NutrunnerSequence)와 같은 기준 — 요청은 하나씩 응답을 받은 뒤 다음 것을 보낸다.
-                       ResponseTimeoutMs = info.ConnectTimeoutMs > 0 ? info.ConnectTimeoutMs : DefaultResponseTimeoutMs
+                       ResponseTimeoutMs = info.ResponseTimeoutMs > 0 ? info.ResponseTimeoutMs : DefaultResponseTimeoutMs
                    },
                    eventTransport)
         {
