@@ -582,6 +582,13 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 AppLog.Info($"[SnugAngle] : {data.SnugAngle}");
                 AppLog.Info($"[Barcode] : {data.Barcode}");
 
+                // 역방향(풀기) 동작 값은 체결 토크가 아니므로 BOM 스팩에 표기하지 않는다.
+                if (data.IsReverse)
+                {
+                    AppLog.Info($"[ID {e.Code}] 역방향 동작 - 토크 값 무시");
+                    return;
+                }
+
                 await Screen.SetTorqueFromEquipment(e.Code, (decimal)data.TorqueValue, (decimal)data.Angle3);
             }
             catch (Exception ex)

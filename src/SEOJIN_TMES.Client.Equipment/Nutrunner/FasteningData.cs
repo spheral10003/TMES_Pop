@@ -22,7 +22,7 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
         public ushort RemainScrew { get; set; }
         public ushort Error { get; set; }
 
-        /// <summary>회전 방향.</summary>
+        /// <summary>회전 방향. 0 = 정방향(체결), 1 = 역방향(풀기).</summary>
         public ushort Direction { get; set; }
 
         /// <summary>이벤트 상태.</summary>
@@ -45,5 +45,8 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
         public double TargetTorqueValue => TargetTorque / 100.0;
 
         public bool IsOk => Error == 0;
+
+        /// <summary>역방향(풀기)으로 돌린 결과인지. 체결 토크가 아니므로 결과값으로 쓰지 않는다.</summary>
+        public bool IsReverse => Direction == 1;
     }
 }
