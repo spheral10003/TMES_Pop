@@ -999,6 +999,9 @@
   <data name="Pop_ProcessMovedUnfinished" xml:space="preserve">
     <value>Moved without completing the process (work remaining).</value>
   </data>
+  <data name="Pop_SerialNotRunning" xml:space="preserve">
+    <value>Serial numbers can only be entered while the process is in progress.</value>
+  </data>
   <data name="Col_WorkQty" xml:space="preserve">
     <value>Work Qty</value>
   </data>

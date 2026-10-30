@@ -753,6 +753,15 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 return;
             }
 
+            // 서버는 진행 중이 아닌 공정의 시리얼 저장을 409(WORK_001/002)로 거절한다 —
+            // 팝업에서 다 입력한 뒤에 거절되지 않도록 열기 전에 막는다(BOM · 검사 입력과 같은 조건).
+            if (!IsProcessRunning)
+            {
+                AppLog.Info($"[POP] 공정 미진행 - 시리얼 입력 생략 ({material.MaterialCode}, 상태 {_progressState})");
+                AppMessageBox.Info(this, Language.Pop_SerialNotRunning, Language.PopSerial_Title);
+                return;
+            }
+
             List<string> serials;
             using (var form = new MaterialSerialForm())
             {
@@ -783,22 +792,32 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// 시리얼 입력이 남은 자재마다 차례로 입력 팝업을 띄우고, 모두 끝났으면 [BOM 스팩] 탭으로 넘긴다.
         /// 중간에 자동 진행으로 공정이 바뀌면(자재 목록이 새로 바뀌면) 남은 팝업은 띄우지 않는다.
         /// 공정에 들어올 때마다(진입 · 이동 · 자동 진행) 여기를 지나므로, BOM 대상 행 선택과 목표 토크도 여기서 한다.
+        ///
+        /// 진행 중이 아닌 공정(완료 · 대기 · 중지, 자동 시작 실패 포함)에서는 팝업을 띄우지 않는다 — 저장해도 서버가 409로 거절하고,
+        /// 완료된 공정에 남은 미입력 자재가 있으면 들어올 때마다 팝업과 거절이 되풀이됐다. 행 선택은 그대로 한다.
         /// </summary>
         public async Task CheckMaterialSerials()
         {
-            var materials = _materials;
-            for (int i = 0; i < materials.Count; i++)
+            if (IsProcessRunning)
             {
-                if (materials[i].IsSerialInputCompleted)
-                    continue;
+                var materials = _materials;
+                for (int i = 0; i < materials.Count; i++)
+                {
+                    if (materials[i].IsSerialInputCompleted)
+                        continue;
 
-                int rowHandle = gridViewMaterial.GetRowHandle(i);   // DataSource 인덱스 → rowHandle
-                gridViewMaterial.FocusedRowHandle = rowHandle;
-                gridViewMaterial.FocusedColumn = gridViewMaterial.Columns[SerialInputStateField];
+                    int rowHandle = gridViewMaterial.GetRowHandle(i);   // DataSource 인덱스 → rowHandle
+                    gridViewMaterial.FocusedRowHandle = rowHandle;
+                    gridViewMaterial.FocusedColumn = gridViewMaterial.Columns[SerialInputStateField];
 
-                await InputMaterialSerial(rowHandle);
-                if (IsDisposed || Disposing || !ReferenceEquals(materials, _materials))
-                    return;
+                    await InputMaterialSerial(rowHandle);
+                    if (IsDisposed || Disposing || !ReferenceEquals(materials, _materials))
+                        return;
+                }
+            }
+            else if (_materials.Any(m => !m.IsSerialInputCompleted))
+            {
+                AppLog.Info($"[POP] 공정 미진행 - 시리얼 입력 팝업 생략 ({_key?.RoutingOperation}/{_key?.PageOperation}, 상태 {_progressState})");
             }
 
             if (!ShowBomSpecTab())
@@ -827,6 +846,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             request.inputtedItemCd = material.MaterialCode;
             request.inputtedSerialList = material.SerialNumbers;
 
+            var saveFailed = false;
+            var isConflict = false;
+
             BeginResultSave();
             try
             {
@@ -838,12 +860,24 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 if (IsDisposed || Disposing) return false;
 
                 AppMessageBox.Warn(this, ex.Message, Language.PopSerial_Title);
-                return false;
+                saveFailed = true;
+                isConflict = ex.StatusCode == HttpStatusCode.Conflict;
             }
             finally
             {
                 EndResultSave();
             }
+
+            // 409는 서버가 지금 상태로는 받을 수 없다는 뜻이다 — 공정이 진행 중이 아니거나(WORK_001/002),
+            // 요청 안에 중복 시리얼 · 품목번호가 있는 경우. 대부분 화면이 아는 공정 상태가 서버와 달라서이므로
+            // 서버 상태로 다시 그려 작업자가 같은 입력을 되풀이하지 않게 한다(다시 읽으면 자재 목록도 새로 바뀐다).
+            if (isConflict)
+            {
+                await GetProcessInfo();
+                return false;
+            }
+
+            if (saveFailed) return false;
 
             if (IsDisposed || Disposing) return false;
 
