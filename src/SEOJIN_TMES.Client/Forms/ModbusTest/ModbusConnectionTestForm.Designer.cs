@@ -41,7 +41,9 @@ namespace SEOJIN_TMES.Client.Forms.ModbusTest
             this.pnlOptions = new System.Windows.Forms.Panel();
             this.lblRepeat = new System.Windows.Forms.Label();
             this.spinRepeat = new DevExpress.XtraEditors.SpinEdit();
-            this.lblTimeoutInfo = new System.Windows.Forms.Label();
+            this.lblTimeout = new System.Windows.Forms.Label();
+            this.spinTimeout = new DevExpress.XtraEditors.SpinEdit();
+            this.lblIntervalInfo = new System.Windows.Forms.Label();
             this.btnLoadEquipments = new System.Windows.Forms.Button();
             this.btnAddRow = new System.Windows.Forms.Button();
             this.btnRemoveRow = new System.Windows.Forms.Button();
@@ -57,6 +59,7 @@ namespace SEOJIN_TMES.Client.Forms.ModbusTest
             ((System.ComponentModel.ISupportInitialize)(this.memoLog.Properties)).BeginInit();
             this.pnlOptions.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.spinRepeat.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.spinTimeout.Properties)).BeginInit();
             this.pnlFooter.SuspendLayout();
             this.SuspendLayout();
             //
@@ -114,7 +117,9 @@ namespace SEOJIN_TMES.Client.Forms.ModbusTest
             //
             this.pnlOptions.Controls.Add(this.lblRepeat);
             this.pnlOptions.Controls.Add(this.spinRepeat);
-            this.pnlOptions.Controls.Add(this.lblTimeoutInfo);
+            this.pnlOptions.Controls.Add(this.lblTimeout);
+            this.pnlOptions.Controls.Add(this.spinTimeout);
+            this.pnlOptions.Controls.Add(this.lblIntervalInfo);
             this.pnlOptions.Controls.Add(this.btnLoadEquipments);
             this.pnlOptions.Controls.Add(this.btnAddRow);
             this.pnlOptions.Controls.Add(this.btnRemoveRow);
@@ -155,15 +160,52 @@ namespace SEOJIN_TMES.Client.Forms.ModbusTest
             0});
             this.spinRepeat.Size = new System.Drawing.Size(110, 26);
             this.spinRepeat.TabIndex = 1;
-            //
-            // lblTimeoutInfo
-            //
-            this.lblTimeoutInfo.Location = new System.Drawing.Point(222, 12);
-            this.lblTimeoutInfo.Name = "lblTimeoutInfo";
-            this.lblTimeoutInfo.Size = new System.Drawing.Size(360, 28);
-            this.lblTimeoutInfo.TabIndex = 2;
-            this.lblTimeoutInfo.Text = "접속 대기 2000ms · 재접속 간격 300ms";
-            this.lblTimeoutInfo.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // lblTimeout
+            // 
+            this.lblTimeout.Location = new System.Drawing.Point(226, 12);
+            this.lblTimeout.Name = "lblTimeout";
+            this.lblTimeout.Size = new System.Drawing.Size(110, 28);
+            this.lblTimeout.TabIndex = 2;
+            this.lblTimeout.Text = "접속 대기(ms)";
+            this.lblTimeout.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // spinTimeout
+            // 
+            this.spinTimeout.EditValue = new decimal(new int[] {
+            2000,
+            0,
+            0,
+            0});
+            this.spinTimeout.Location = new System.Drawing.Point(342, 13);
+            this.spinTimeout.Name = "spinTimeout";
+            this.spinTimeout.Properties.Increment = new decimal(new int[] {
+            100,
+            0,
+            0,
+            0});
+            this.spinTimeout.Properties.IsFloatValue = false;
+            this.spinTimeout.Properties.MaxValue = new decimal(new int[] {
+            60000,
+            0,
+            0,
+            0});
+            this.spinTimeout.Properties.MinValue = new decimal(new int[] {
+            100,
+            0,
+            0,
+            0});
+            this.spinTimeout.Size = new System.Drawing.Size(110, 26);
+            this.spinTimeout.TabIndex = 3;
+            // 
+            // lblIntervalInfo
+            // 
+            this.lblIntervalInfo.Location = new System.Drawing.Point(468, 12);
+            this.lblIntervalInfo.Name = "lblIntervalInfo";
+            this.lblIntervalInfo.Size = new System.Drawing.Size(260, 28);
+            this.lblIntervalInfo.TabIndex = 4;
+            this.lblIntervalInfo.Text = "재접속 간격 300ms";
+            this.lblIntervalInfo.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             //
             // btnLoadEquipments
             //
@@ -173,7 +215,7 @@ namespace SEOJIN_TMES.Client.Forms.ModbusTest
             this.btnLoadEquipments.Location = new System.Drawing.Point(738, 7);
             this.btnLoadEquipments.Name = "btnLoadEquipments";
             this.btnLoadEquipments.Size = new System.Drawing.Size(190, 39);
-            this.btnLoadEquipments.TabIndex = 3;
+            this.btnLoadEquipments.TabIndex = 5;
             this.btnLoadEquipments.Text = "등록 장비 불러오기";
             this.btnLoadEquipments.UseVisualStyleBackColor = false;
             this.btnLoadEquipments.Click += new System.EventHandler(this.btnLoadEquipments_Click);
@@ -186,7 +228,7 @@ namespace SEOJIN_TMES.Client.Forms.ModbusTest
             this.btnAddRow.Location = new System.Drawing.Point(936, 7);
             this.btnAddRow.Name = "btnAddRow";
             this.btnAddRow.Size = new System.Drawing.Size(112, 39);
-            this.btnAddRow.TabIndex = 4;
+            this.btnAddRow.TabIndex = 6;
             this.btnAddRow.Text = "행 추가";
             this.btnAddRow.UseVisualStyleBackColor = false;
             this.btnAddRow.Click += new System.EventHandler(this.btnAddRow_Click);
@@ -199,7 +241,7 @@ namespace SEOJIN_TMES.Client.Forms.ModbusTest
             this.btnRemoveRow.Location = new System.Drawing.Point(1056, 7);
             this.btnRemoveRow.Name = "btnRemoveRow";
             this.btnRemoveRow.Size = new System.Drawing.Size(112, 39);
-            this.btnRemoveRow.TabIndex = 5;
+            this.btnRemoveRow.TabIndex = 7;
             this.btnRemoveRow.Text = "행 삭제";
             this.btnRemoveRow.UseVisualStyleBackColor = false;
             this.btnRemoveRow.Click += new System.EventHandler(this.btnRemoveRow_Click);
@@ -334,6 +376,7 @@ namespace SEOJIN_TMES.Client.Forms.ModbusTest
             ((System.ComponentModel.ISupportInitialize)(this.memoLog.Properties)).EndInit();
             this.pnlOptions.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.spinRepeat.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.spinTimeout.Properties)).EndInit();
             this.pnlFooter.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -348,7 +391,9 @@ namespace SEOJIN_TMES.Client.Forms.ModbusTest
         private System.Windows.Forms.Panel pnlOptions;
         private System.Windows.Forms.Label lblRepeat;
         private DevExpress.XtraEditors.SpinEdit spinRepeat;
-        private System.Windows.Forms.Label lblTimeoutInfo;
+        private System.Windows.Forms.Label lblTimeout;
+        private DevExpress.XtraEditors.SpinEdit spinTimeout;
+        private System.Windows.Forms.Label lblIntervalInfo;
         private System.Windows.Forms.Button btnLoadEquipments;
         private System.Windows.Forms.Button btnAddRow;
         private System.Windows.Forms.Button btnRemoveRow;

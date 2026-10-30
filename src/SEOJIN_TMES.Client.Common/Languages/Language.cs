@@ -438,7 +438,8 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string StopIssue_SelectCode => Get(nameof(StopIssue_SelectCode));
         public static string ModbusTest_Title => Get(nameof(ModbusTest_Title));
         public static string ModbusTest_RepeatCount => Get(nameof(ModbusTest_RepeatCount));
-        public static string ModbusTest_TimeoutInfo => Get(nameof(ModbusTest_TimeoutInfo));
+        public static string ModbusTest_TimeoutMs => Get(nameof(ModbusTest_TimeoutMs));
+        public static string ModbusTest_IntervalInfo => Get(nameof(ModbusTest_IntervalInfo));
         public static string ModbusTest_LoadEquipments => Get(nameof(ModbusTest_LoadEquipments));
         public static string ModbusTest_AddRow => Get(nameof(ModbusTest_AddRow));
         public static string ModbusTest_RemoveRow => Get(nameof(ModbusTest_RemoveRow));

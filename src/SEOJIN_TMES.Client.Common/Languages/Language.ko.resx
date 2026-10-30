@@ -1162,8 +1162,11 @@
   <data name="ModbusTest_RepeatCount" xml:space="preserve">
     <value>반복 횟수</value>
   </data>
-  <data name="ModbusTest_TimeoutInfo" xml:space="preserve">
-    <value>접속 대기 {0}ms · 재접속 간격 {1}ms</value>
+  <data name="ModbusTest_TimeoutMs" xml:space="preserve">
+    <value>접속 대기(ms)</value>
+  </data>
+  <data name="ModbusTest_IntervalInfo" xml:space="preserve">
+    <value>재접속 간격 {0}ms</value>
   </data>
   <data name="ModbusTest_LoadEquipments" xml:space="preserve">
     <value>등록 장비 불러오기</value>

@@ -42,7 +42,7 @@ namespace SEOJIN_TMES.Client.Forms.ModbusTest
         private readonly Color _accent = AppTheme.Teal;
 
         /// <summary>창을 줄일 수 있는 한계. 이보다 작으면 옵션 줄의 버튼이 겹친다.</summary>
-        private readonly Size _minimumFormSize = new Size(860, 520);
+        private readonly Size _minimumFormSize = new Size(900, 520);
 
         private readonly BindingList<ModbusTestTarget> _targets = new BindingList<ModbusTestTarget>();
         private AppSettings _appSet;
@@ -61,8 +61,12 @@ namespace SEOJIN_TMES.Client.Forms.ModbusTest
             Text = Language.ModbusTest_Title;
             lblTitle.Text = Language.ModbusTest_Title;
             lblRepeat.Text = Language.ModbusTest_RepeatCount;
-            lblTimeoutInfo.Text = string.Format(Language.ModbusTest_TimeoutInfo,
-                _appSet.ModbusTestTimeoutMs, _appSet.ModbusTestIntervalMs);
+            lblTimeout.Text = Language.ModbusTest_TimeoutMs;
+            lblIntervalInfo.Text = string.Format(Language.ModbusTest_IntervalInfo, _appSet.ModbusTestIntervalMs);
+
+            // 접속 대기 시간은 App.config 값으로 시작하되 화면에서 바로 바꿔 시험한다 —
+            // POP와 같은 값(ModbusConnectTimeoutMs)으로 재현해 보고, 늘리면 붙는지 비교하는 용도다.
+            spinTimeout.Value = Math.Max(spinTimeout.Properties.MinValue, Math.Min(spinTimeout.Properties.MaxValue, _appSet.ModbusTestTimeoutMs));
             lblListTitle.Text = Language.ModbusTest_ListTitle;
             lblLogTitle.Text = Language.ModbusTest_LogTitle;
             btnLoadEquipments.Text = Language.ModbusTest_LoadEquipments;
@@ -106,12 +110,16 @@ namespace SEOJIN_TMES.Client.Forms.ModbusTest
                 label.Font = AppTheme.SectionFont;
             }
 
-            lblRepeat.ForeColor = AppTheme.TextPrimary;
-            lblRepeat.Font = AppTheme.BodyBoldFont;
-            lblTimeoutInfo.ForeColor = AppTheme.TextMuted;
-            lblTimeoutInfo.Font = AppTheme.BodyFont;
+            foreach (var label in new[] { lblRepeat, lblTimeout })
+            {
+                label.ForeColor = AppTheme.TextPrimary;
+                label.Font = AppTheme.BodyBoldFont;
+            }
+            lblIntervalInfo.ForeColor = AppTheme.TextMuted;
+            lblIntervalInfo.Font = AppTheme.BodyFont;
 
             AppTheme.Editor(spinRepeat);
+            AppTheme.Editor(spinTimeout);
             AppTheme.Grid(grid, gridView, _accent);
             AppTheme.Console(memoLog);
         }
@@ -226,7 +234,7 @@ namespace SEOJIN_TMES.Client.Forms.ModbusTest
                 return;
 
             var repeat = (int)spinRepeat.Value;
-            var timeoutMs = _appSet.ModbusTestTimeoutMs;
+            var timeoutMs = (int)spinTimeout.Value;
             var intervalMs = _appSet.ModbusTestIntervalMs;
 
             foreach (var target in targets)
@@ -367,6 +375,7 @@ namespace SEOJIN_TMES.Client.Forms.ModbusTest
             btnAddRow.Enabled = !running;
             btnRemoveRow.Enabled = !running;
             spinRepeat.Enabled = !running;
+            spinTimeout.Enabled = !running;
             gridView.OptionsBehavior.Editable = !running;
         }
 

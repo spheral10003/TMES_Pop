@@ -1162,8 +1162,11 @@ Không có phản hồi sau 3 lần thử kết nối lại. Hãy kiểm tra ngu
   <data name="ModbusTest_RepeatCount" xml:space="preserve">
     <value>Số lần lặp</value>
   </data>
-  <data name="ModbusTest_TimeoutInfo" xml:space="preserve">
-    <value>Chờ kết nối {0}ms · Khoảng kết nối lại {1}ms</value>
+  <data name="ModbusTest_TimeoutMs" xml:space="preserve">
+    <value>Chờ kết nối (ms)</value>
+  </data>
+  <data name="ModbusTest_IntervalInfo" xml:space="preserve">
+    <value>Khoảng kết nối lại {0}ms</value>
   </data>
   <data name="ModbusTest_LoadEquipments" xml:space="preserve">
     <value>Tải thiết bị đã đăng ký</value>
