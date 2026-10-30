@@ -21,8 +21,8 @@ namespace SEOJIN_TMES.Client.ApiClient
         /// <summary>알림 목록. 값이 있는 조건만 쿼리에 붙는다(읽음여부 전체면 아예 보내지 않는다).</summary>
         Task<List<NotificationDto>> GetNotificationsAsync(string userName, string subject, NotificationReadState readState, CancellationToken cancellationToken = default);
 
-        /// <summary>선택한 알림들을 읽음 처리한다.</summary>
-        Task MarkAsReadAsync(IEnumerable<long> notificationIds, CancellationToken cancellationToken = default);
+        /// <summary>선택한 알림들을 읽음 처리한다(목록의 <c>alarmSeqId</c>를 넘긴다).</summary>
+        Task MarkAsReadAsync(IEnumerable<string> alarmSeqIds, CancellationToken cancellationToken = default);
     }
 
     public class NotificationApiClient : ApiClientBase, INotificationApiClient
@@ -48,14 +48,15 @@ namespace SEOJIN_TMES.Client.ApiClient
                 ("subject", subject),
                 ("isRead", ReadStateValue(readState)));
 
-            var response = await GetAsync<ApiDataResponse<List<NotificationDto>>>(ApiPrefix + "notifications" + query, cancellationToken)
-                               .ConfigureAwait(false);
-            return response?.Data ?? new List<NotificationDto>();
+            // 봉투({data:[...]}) 유무가 확정되지 않았다 — GetDataAsync가 두 형태를 모두 받아 준다.
+            var list = await GetDataAsync<List<NotificationDto>>(ApiPrefix + "notifications" + query, cancellationToken)
+                           .ConfigureAwait(false);
+            return list ?? new List<NotificationDto>();
         }
 
-        public Task MarkAsReadAsync(IEnumerable<long> notificationIds, CancellationToken cancellationToken = default)
+        public Task MarkAsReadAsync(IEnumerable<string> alarmSeqIds, CancellationToken cancellationToken = default)
         {
-            var request = new NotificationReadRequest { NotificationIds = new List<long>(notificationIds).ToArray() };
+            var request = new NotificationReadRequest { NotificationIds = new List<string>(alarmSeqIds).ToArray() };
             return PostAsync(ApiPrefix + "notifications/read", request, cancellationToken);
         }
 

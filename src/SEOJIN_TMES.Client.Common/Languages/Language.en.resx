@@ -525,6 +525,15 @@
   <data name="Notification_AlreadyRead" xml:space="preserve">
     <value>The selected notifications are already read.</value>
   </data>
+  <data name="Notification_CorpCd" xml:space="preserve">
+    <value>Business</value>
+  </data>
+  <data name="Notification_IdntyTime" xml:space="preserve">
+    <value>Read At</value>
+  </data>
+  <data name="Notification_CreatedAt" xml:space="preserve">
+    <value>Created Date</value>
+  </data>
   <data name="Pop_PrevProcess" xml:space="preserve">
     <value>Previous</value>
   </data>

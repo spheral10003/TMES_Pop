@@ -20,7 +20,7 @@ namespace SEOJIN_TMES.Client.Forms.Notification
         /// 색·폰트·아이콘·문구는 NotificationForm.cs의 Initialize()에서 런타임에 넣는다.
         ///
         /// 구성: 상단 색 띠(아이콘 + 제목 + [조회][닫기]) + 조회조건 카드 + 본문 좌우 분할
-        ///       (좌: 알림 목록 그리드 + [읽음] / 우: 선택한 알림 상세).
+        ///       (좌: 알림 목록 그리드 + [읽음] / 우: 선택한 알림 상세 — 발신자 · 제목 + HTML 본문).
         /// 도킹 순서 주의: 나중에 Add한 컨트롤이 먼저 자리를 잡는다 —
         /// filterCard(Top) → listCard(Left) → detailCard(Fill) 순으로 배치되도록 역순으로 Add한다.
         /// </summary>
@@ -35,10 +35,10 @@ namespace SEOJIN_TMES.Client.Forms.Notification
             this.detailCard = new DevExpress.XtraEditors.PanelControl();
             this.lblSenderId = new DevExpress.XtraEditors.LabelControl();
             this.txtSenderId = new DevExpress.XtraEditors.TextEdit();
+            this.txtSenderName = new DevExpress.XtraEditors.TextEdit();
             this.lblDetailSubject = new DevExpress.XtraEditors.LabelControl();
             this.txtDetailSubject = new DevExpress.XtraEditors.TextEdit();
-            this.lblContent = new DevExpress.XtraEditors.LabelControl();
-            this.memoContent = new DevExpress.XtraEditors.MemoEdit();
+            this.webContent = new System.Windows.Forms.WebBrowser();
             this.spacerMiddle = new System.Windows.Forms.Panel();
             this.listCard = new DevExpress.XtraEditors.PanelControl();
             this.grid = new DevExpress.XtraGrid.GridControl();
@@ -62,8 +62,8 @@ namespace SEOJIN_TMES.Client.Forms.Notification
             ((System.ComponentModel.ISupportInitialize)(this.detailCard)).BeginInit();
             this.detailCard.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.txtSenderId.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtSenderName.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtDetailSubject.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.memoContent.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.listCard)).BeginInit();
             this.listCard.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.grid)).BeginInit();
@@ -143,75 +143,81 @@ namespace SEOJIN_TMES.Client.Forms.Notification
             //
             this.detailCard.Controls.Add(this.lblSenderId);
             this.detailCard.Controls.Add(this.txtSenderId);
+            this.detailCard.Controls.Add(this.txtSenderName);
             this.detailCard.Controls.Add(this.lblDetailSubject);
             this.detailCard.Controls.Add(this.txtDetailSubject);
-            this.detailCard.Controls.Add(this.lblContent);
-            this.detailCard.Controls.Add(this.memoContent);
+            this.detailCard.Controls.Add(this.webContent);
             this.detailCard.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.detailCard.Location = new System.Drawing.Point(750, 88);
+            this.detailCard.Location = new System.Drawing.Point(490, 88);
             this.detailCard.Name = "detailCard";
-            this.detailCard.Size = new System.Drawing.Size(452, 502);
+            this.detailCard.Size = new System.Drawing.Size(712, 502);
             this.detailCard.TabIndex = 4;
             //
             // lblSenderId
             //
             this.lblSenderId.Location = new System.Drawing.Point(20, 24);
             this.lblSenderId.Name = "lblSenderId";
-            this.lblSenderId.Size = new System.Drawing.Size(70, 14);
+            this.lblSenderId.Size = new System.Drawing.Size(90, 14);
             this.lblSenderId.TabIndex = 0;
             this.lblSenderId.Text = "발신자아이디";
             //
             // txtSenderId
             //
-            this.txtSenderId.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtSenderId.Location = new System.Drawing.Point(110, 20);
+            this.txtSenderId.Location = new System.Drawing.Point(120, 20);
             this.txtSenderId.Name = "txtSenderId";
             this.txtSenderId.Properties.ReadOnly = true;
-            this.txtSenderId.Size = new System.Drawing.Size(320, 20);
+            this.txtSenderId.Size = new System.Drawing.Size(170, 20);
             this.txtSenderId.TabIndex = 1;
+            //
+            // txtSenderName
+            //
+            this.txtSenderName.Location = new System.Drawing.Point(296, 20);
+            this.txtSenderName.Name = "txtSenderName";
+            this.txtSenderName.Properties.ReadOnly = true;
+            this.txtSenderName.Size = new System.Drawing.Size(170, 20);
+            this.txtSenderName.TabIndex = 2;
             //
             // lblDetailSubject
             //
-            this.lblDetailSubject.Location = new System.Drawing.Point(20, 62);
+            this.lblDetailSubject.Location = new System.Drawing.Point(20, 58);
             this.lblDetailSubject.Name = "lblDetailSubject";
             this.lblDetailSubject.Size = new System.Drawing.Size(28, 14);
-            this.lblDetailSubject.TabIndex = 2;
+            this.lblDetailSubject.TabIndex = 3;
             this.lblDetailSubject.Text = "제목";
             //
             // txtDetailSubject
             //
             this.txtDetailSubject.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtDetailSubject.Location = new System.Drawing.Point(110, 58);
+            this.txtDetailSubject.Location = new System.Drawing.Point(120, 54);
             this.txtDetailSubject.Name = "txtDetailSubject";
             this.txtDetailSubject.Properties.ReadOnly = true;
-            this.txtDetailSubject.Size = new System.Drawing.Size(320, 20);
-            this.txtDetailSubject.TabIndex = 3;
+            this.txtDetailSubject.Size = new System.Drawing.Size(572, 20);
+            this.txtDetailSubject.TabIndex = 4;
             //
-            // lblContent
+            // webContent
             //
-            this.lblContent.Location = new System.Drawing.Point(20, 100);
-            this.lblContent.Name = "lblContent";
-            this.lblContent.Size = new System.Drawing.Size(28, 14);
-            this.lblContent.TabIndex = 4;
-            this.lblContent.Text = "내용";
-            //
-            // memoContent
-            //
-            this.memoContent.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+            // 본문(body)은 이메일용 HTML 문서라 인라인 CSS + table 레이아웃을 그대로 그려야 한다 → WebBrowser.
+            // 바깥으로 나가는 내비게이션 · 새 창은 NotificationForm.cs의 이벤트 처리기에서 막는다.
+            this.webContent.AllowWebBrowserDrop = false;
+            this.webContent.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
             | System.Windows.Forms.AnchorStyles.Left)
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.memoContent.Location = new System.Drawing.Point(110, 96);
-            this.memoContent.Name = "memoContent";
-            this.memoContent.Properties.ReadOnly = true;
-            this.memoContent.Size = new System.Drawing.Size(320, 382);
-            this.memoContent.TabIndex = 5;
+            this.webContent.IsWebBrowserContextMenuEnabled = false;
+            this.webContent.Location = new System.Drawing.Point(20, 88);
+            this.webContent.MinimumSize = new System.Drawing.Size(20, 20);
+            this.webContent.Name = "webContent";
+            this.webContent.ScriptErrorsSuppressed = true;
+            this.webContent.Size = new System.Drawing.Size(672, 396);
+            this.webContent.TabIndex = 5;
+            this.webContent.WebBrowserShortcutsEnabled = false;
+            this.webContent.Navigating += new System.Windows.Forms.WebBrowserNavigatingEventHandler(this.webContent_Navigating);
+            this.webContent.NewWindow += new System.ComponentModel.CancelEventHandler(this.webContent_NewWindow);
             //
             // spacerMiddle
             //
             this.spacerMiddle.Dock = System.Windows.Forms.DockStyle.Left;
-            this.spacerMiddle.Location = new System.Drawing.Point(738, 88);
+            this.spacerMiddle.Location = new System.Drawing.Point(478, 88);
             this.spacerMiddle.Name = "spacerMiddle";
             this.spacerMiddle.Size = new System.Drawing.Size(12, 502);
             this.spacerMiddle.TabIndex = 3;
@@ -224,7 +230,8 @@ namespace SEOJIN_TMES.Client.Forms.Notification
             this.listCard.Location = new System.Drawing.Point(18, 88);
             this.listCard.Name = "listCard";
             this.listCard.Padding = new System.Windows.Forms.Padding(1);
-            this.listCard.Size = new System.Drawing.Size(720, 502);
+            // 폭 460 — No. · 사업부 · 제목까지만 한눈에 보이고, 나머지 열은 가로 스크롤로 본다.
+            this.listCard.Size = new System.Drawing.Size(460, 502);
             this.listCard.TabIndex = 2;
             //
             // grid
@@ -233,7 +240,7 @@ namespace SEOJIN_TMES.Client.Forms.Notification
             this.grid.Location = new System.Drawing.Point(1, 41);
             this.grid.MainView = this.gridView;
             this.grid.Name = "grid";
-            this.grid.Size = new System.Drawing.Size(718, 460);
+            this.grid.Size = new System.Drawing.Size(458, 460);
             this.grid.TabIndex = 1;
             this.grid.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
             this.gridView});
@@ -251,7 +258,7 @@ namespace SEOJIN_TMES.Client.Forms.Notification
             this.listHeader.Dock = System.Windows.Forms.DockStyle.Top;
             this.listHeader.Location = new System.Drawing.Point(1, 1);
             this.listHeader.Name = "listHeader";
-            this.listHeader.Size = new System.Drawing.Size(718, 40);
+            this.listHeader.Size = new System.Drawing.Size(458, 40);
             this.listHeader.TabIndex = 0;
             //
             // lblListTitle
@@ -267,7 +274,7 @@ namespace SEOJIN_TMES.Client.Forms.Notification
             this.btnMarkRead.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             // 폭 120 — 아이콘(16) + 간격 + "Mark read"(영어가 가장 길다)가 잘리지 않는 크기.
             // 우측 고정(Anchor Right)이라 왼쪽으로 자라며, 왼쪽에는 제목 라벨뿐이라 부딪히지 않는다.
-            this.btnMarkRead.Location = new System.Drawing.Point(584, 7);
+            this.btnMarkRead.Location = new System.Drawing.Point(324, 7);
             this.btnMarkRead.Name = "btnMarkRead";
             this.btnMarkRead.Size = new System.Drawing.Size(120, 26);
             this.btnMarkRead.TabIndex = 1;
@@ -367,8 +374,8 @@ namespace SEOJIN_TMES.Client.Forms.Notification
             this.detailCard.ResumeLayout(false);
             this.detailCard.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.txtSenderId.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txtSenderName.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtDetailSubject.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.memoContent.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.listCard)).EndInit();
             this.listCard.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.grid)).EndInit();
@@ -412,9 +419,9 @@ namespace SEOJIN_TMES.Client.Forms.Notification
         private DevExpress.XtraEditors.PanelControl detailCard;
         private DevExpress.XtraEditors.LabelControl lblSenderId;
         private DevExpress.XtraEditors.TextEdit txtSenderId;
+        private DevExpress.XtraEditors.TextEdit txtSenderName;
         private DevExpress.XtraEditors.LabelControl lblDetailSubject;
         private DevExpress.XtraEditors.TextEdit txtDetailSubject;
-        private DevExpress.XtraEditors.LabelControl lblContent;
-        private DevExpress.XtraEditors.MemoEdit memoContent;
+        private System.Windows.Forms.WebBrowser webContent;
     }
 }

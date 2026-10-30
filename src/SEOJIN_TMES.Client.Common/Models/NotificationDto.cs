@@ -7,40 +7,61 @@ namespace SEOJIN_TMES.Client.Common.Models
     /// <summary>
     /// 알림 목록/상세 한 건.
     /// 서버 조회 결과를 그대로 표시하며, 클라이언트는 판정/계산을 하지 않는다.
-    /// TODO: 실제 서버 응답 필드명이 확정되면 속성명을 맞추거나 JsonProperty로 매핑할 것.
+    ///
+    /// 속성명은 서버 필드명을 그대로 PascalCase로 옮기고 <see cref="JsonPropertyAttribute"/>로 고정한다 —
+    /// 그리드 컬럼(FieldName)이 이 속성명을 쓰므로, 이름을 "정리"하면 컬럼이 조용히 사라진다.
+    ///
+    /// 식별자·일시는 문자열로 받는다. 서버 형식(숫자/문자, 일시 서식)이 확정되지 않았는데
+    /// long·DateTime으로 받으면 한 건만 형식이 달라도 목록 전체의 역직렬화가 실패한다.
+    /// 화면은 서버가 준 값을 그대로 보여 준다.
     /// </summary>
     public class NotificationDto
     {
-        /// <summary>알림 식별자(읽음 처리에 쓴다).</summary>
-        public long NotificationId { get; set; }
+        /// <summary>사업부 — 서버 <c>corpCd</c>.</summary>
+        [JsonProperty("corpCd")]
+        public string CorpCd { get; set; }
 
-        /// <summary>법인코드.</summary>
-        public string CorpCode { get; set; }
+        /// <summary>알람 순번 — 서버 <c>alarmSeqId</c>. 읽음 처리 대상 식별에 쓴다.</summary>
+        [JsonProperty("alarmSeqId")]
+        public string AlarmSeqId { get; set; }
 
-        /// <summary>알림양식코드.</summary>
-        public string FormCode { get; set; }
+        /// <summary>알람 그룹 — 서버 <c>alarmGroupNo</c>.</summary>
+        [JsonProperty("alarmGroupNo")]
+        public string AlarmGroupNo { get; set; }
 
-        /// <summary>제목.</summary>
+        /// <summary>알람 코드 — 서버 <c>alarmFormCd</c>.</summary>
+        [JsonProperty("alarmFormCd")]
+        public string AlarmFormCd { get; set; }
+
+        /// <summary>제목 — 서버 <c>subject</c>.</summary>
+        [JsonProperty("subject")]
         public string Subject { get; set; }
 
-        /// <summary>내용(우측 상세 영역에 표시).</summary>
-        public string Content { get; set; }
+        /// <summary>본문 — 서버 <c>body</c>. 이메일용 완전한 HTML 문서로 온다(우측 상세에 렌더링).</summary>
+        [JsonProperty("body")]
+        public string Body { get; set; }
 
-        /// <summary>발신자아이디.</summary>
-        public string SenderId { get; set; }
+        /// <summary>작성자(발신자) 아이디 — 서버 <c>createdBy</c>.</summary>
+        [JsonProperty("createdBy")]
+        public string CreatedBy { get; set; }
 
-        /// <summary>수신 사용자명(조회 조건과 같은 값).</summary>
-        public string UserName { get; set; }
+        /// <summary>작성일자 — 서버 <c>createdAt</c>.</summary>
+        [JsonProperty("createdAt")]
+        public string CreatedAt { get; set; }
 
-        /// <summary>발신일시.</summary>
-        public DateTime? SentAt { get; set; }
+        /// <summary>읽음 여부 — 서버 <c>idntyYn</c>(Y/N).</summary>
+        [JsonProperty("idntyYn")]
+        public string IdntyYn { get; set; }
 
-        /// <summary>읽음 여부.</summary>
-        public bool IsRead { get; set; }
+        /// <summary>확인일자(읽은 시각) — 서버 <c>idntyTime</c>.</summary>
+        [JsonProperty("idntyTime")]
+        public string IdntyTime { get; set; }
 
-        /// <summary>그리드에 보여줄 읽음 상태 문구. 서버 값이 아니라 표시용 파생 값이다.</summary>
+        /// <summary>
+        /// 읽음 여부를 bool로 본 값. 서버의 Y/N 표기를 화면에서 매번 문자열 비교하지 않으려는 표시용 파생 값이다.
+        /// </summary>
         [JsonIgnore]
-        public string ReadStateText => IsRead ? "읽음" : "안읽음";
+        public bool IsRead => string.Equals(IdntyYn, "Y", StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>알림 조회의 읽음여부 조건.</summary>
@@ -56,11 +77,14 @@ namespace SEOJIN_TMES.Client.Common.Models
         Unread
     }
 
-    /// <summary>알림 읽음 처리 요청 바디.</summary>
+    /// <summary>
+    /// 알림 읽음 처리 요청 바디. 목록의 <c>alarmSeqId</c>를 그대로 싣는다.
+    /// TODO: 읽음 처리 경로·바디 필드명은 아직 <b>가정값</b>이다 — 서버 스펙 확정 후 맞출 것.
+    /// </summary>
     public class NotificationReadRequest
     {
         [JsonProperty("notificationIds")]
-        public long[] NotificationIds { get; set; }
+        public string[] NotificationIds { get; set; }
     }
 
     /// <summary>

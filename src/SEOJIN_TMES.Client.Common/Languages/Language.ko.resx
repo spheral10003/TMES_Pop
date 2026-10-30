@@ -525,6 +525,15 @@
   <data name="Notification_AlreadyRead" xml:space="preserve">
     <value>선택한 알림은 이미 읽음 상태입니다.</value>
   </data>
+  <data name="Notification_CorpCd" xml:space="preserve">
+    <value>사업부</value>
+  </data>
+  <data name="Notification_IdntyTime" xml:space="preserve">
+    <value>확인시간</value>
+  </data>
+  <data name="Notification_CreatedAt" xml:space="preserve">
+    <value>작성일자</value>
+  </data>
   <data name="Pop_PrevProcess" xml:space="preserve">
     <value>이전 공정</value>
   </data>

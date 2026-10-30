@@ -149,6 +149,9 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string Notification_SentAt => Get(nameof(Notification_SentAt));
         public static string Notification_SelectRow => Get(nameof(Notification_SelectRow));
         public static string Notification_AlreadyRead => Get(nameof(Notification_AlreadyRead));
+        public static string Notification_CorpCd => Get(nameof(Notification_CorpCd));
+        public static string Notification_IdntyTime => Get(nameof(Notification_IdntyTime));
+        public static string Notification_CreatedAt => Get(nameof(Notification_CreatedAt));
 
         public static string Message_TitleInfo => Get(nameof(Message_TitleInfo));
         public static string Message_TitleQuestion => Get(nameof(Message_TitleQuestion));

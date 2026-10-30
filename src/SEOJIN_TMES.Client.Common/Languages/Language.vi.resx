@@ -525,6 +525,15 @@
   <data name="Notification_AlreadyRead" xml:space="preserve">
     <value>Thông báo đã chọn đã được đọc.</value>
   </data>
+  <data name="Notification_CorpCd" xml:space="preserve">
+    <value>Bộ phận kinh doanh</value>
+  </data>
+  <data name="Notification_IdntyTime" xml:space="preserve">
+    <value>Thời gian xác nhận</value>
+  </data>
+  <data name="Notification_CreatedAt" xml:space="preserve">
+    <value>Ngày tạo</value>
+  </data>
   <data name="Pop_PrevProcess" xml:space="preserve">
     <value>Trước</value>
   </data>
