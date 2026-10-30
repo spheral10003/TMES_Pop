@@ -789,6 +789,9 @@
   <data name="PopSerial_ItemCodeIncomplete" xml:space="preserve">
     <value>Hãy nhập mã sản phẩm.</value>
   </data>
+  <data name="PopSerial_ItemCodeMismatch" xml:space="preserve">
+    <value>Mã sản phẩm không khớp với mã vật tư. Hãy kiểm tra vật tư cần đưa vào.</value>
+  </data>
   <data name="PopSerial_Save" xml:space="preserve">
     <value>Lưu</value>
   </data>

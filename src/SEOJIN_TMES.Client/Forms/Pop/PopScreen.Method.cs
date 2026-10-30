@@ -744,7 +744,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
         /// <summary>
         /// 그리드 한 줄의 &lt;투입자재 정보 입력&gt; 팝업을 띄우고, 입력한 값을 서버에 보낸다.
-        /// 시리얼 확인 자재는 시리얼번호를, 품목코드만 확인하는 자재는 품목코드를 받는다(팝업이 자재를 보고 나눈다).
+        /// 시리얼 확인 자재는 시리얼번호를, 품목코드 확인(itemCdVrfcYn=Y) 자재는 품목코드를 받는다(둘 다면 둘 다).
         /// </summary>
         public async Task InputMaterialSerial(int rowHandle)
         {
@@ -793,7 +793,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             material.SerialNumbers = serials;
             gridViewMaterial.RefreshData();
 
-            if (await SetMaterialSerials(material))
+            if (await SetMaterialSerials(material, itemCode))
                 return;
 
             if (IsDisposed || Disposing) return;
@@ -863,8 +863,12 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             return true;
         }
 
+        /// <summary>
+        /// 시리얼 확인 자재의 시리얼번호를 서버에 보낸다. 품목코드 확인 자재면 팝업에서 입력한 품목코드를 함께 싣고,
+        /// 아니면 전처럼 투입자재 코드를 그대로 싣는다.
+        /// </summary>
         /// <returns>서버에 저장됐으면 true. 실패(사유는 창으로 알린다) · 화면 닫힘이면 false.</returns>
-        private async Task<bool> SetMaterialSerials(PopInputMaterialDto material)
+        private async Task<bool> SetMaterialSerials(PopInputMaterialDto material, string itemCode)
         {
             // 공란이 섞인 목록은 보내지 않는다. 입력 팝업이 [저장]에서 이미 막지만, 서버로 나가는 곳은 여기 하나뿐이라
             // 팝업을 거치지 않는 경로가 생겨도 빈 시리얼이 실적으로 남지 않도록 마지막으로 한 번 더 막는다.
@@ -879,7 +883,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             }
 
             var request = new PopMaterialSerialSaveRequest();
-            request.inputtedItemCd = material.MaterialCode;
+            request.inputtedItemCd = string.IsNullOrWhiteSpace(itemCode) ? material.MaterialCode : itemCode.Trim();
             request.inputtedSerialList = material.SerialNumbers;
 
             return await SetMaterialInput(material, request);
@@ -887,7 +891,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
         /// <summary>
         /// 품목코드만 확인하는 자재(시리얼 확인 N · 품목코드 확인 Y)의 품목코드를 서버에 보낸다.
-        /// 시리얼 저장과 같은 API에 시리얼 목록을 비워 보낸다 — 입력한 품목코드가 자재와 맞는지는 서버가 판정한다.
+        /// 시리얼 저장과 같은 API에 시리얼 목록을 비워 보낸다. 투입자재 코드와 같은지는 팝업이 먼저 확인하고,
+        /// 최종 판정은 서버가 한다.
         /// </summary>
         /// <returns>서버에 저장됐으면 true. 실패(사유는 창으로 알린다) · 화면 닫힘이면 false.</returns>
         private async Task<bool> SetMaterialItemCode(PopInputMaterialDto material, string itemCode)

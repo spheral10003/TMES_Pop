@@ -14,11 +14,11 @@ namespace SEOJIN_TMES.Client.Forms.Pop
     /// <summary>
     /// &lt;투입자재 정보 입력&gt; 팝업 — [투입자재] 탭에서 "시리얼번호 입력상태" 셀을 클릭하면 열린다.
     ///
-    /// 자재 정보(코드/수량/품목코드)는 읽기 전용으로 보여주고, 아래 목록에 입력을 받는다.
-    /// 자재에 따라 두 가지로 나뉜다(서버 serialVrfcYn · itemCdVrfcYn):
-    /// - 시리얼 입력 : 투입수량만큼 준비된 줄에 시리얼번호를 하나씩 받는다 → <see cref="SerialNumbers"/>
-    /// - 품목코드 입력 : 시리얼 확인 없이 품목코드만 확인하는 자재는 품목코드 한 줄만 받는다 → <see cref="InputtedItemCode"/>
-    /// 바코드 스캐너를 고려해 Enter를 누르면 다음 줄로 내려간다.
+    /// 자재 정보(코드/수량)는 읽기 전용으로 보여주고, 서버 값(serialVrfcYn · itemCdVrfcYn)에 따라 입력을 받는다:
+    /// - 품목코드 : 품목코드 확인(itemCdVrfcYn=Y) 자재만 입력란이 열린다. 빈칸에서 시작하며,
+    ///              작업자가 스캔한 값이 투입자재 코드와 같은지 확인한다 → <see cref="InputtedItemCode"/>
+    /// - 시리얼   : 시리얼 확인 자재만 투입수량만큼 준비된 줄에 시리얼번호를 받는다 → <see cref="SerialNumbers"/>
+    /// 바코드 스캐너를 고려해 Enter를 누르면 다음 입력으로 넘어간다.
     /// [저장]을 누르면 DialogResult.OK로 닫힌다 — 서버 전송은 호출한 화면(<see cref="PopScreen"/>)이 맡는다.
     ///
     /// VS 디자이너 호환을 위해 매개변수 없는 생성자만 두고, 실제 내용은 Initialize()로 넣는다.
@@ -34,13 +34,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private PopInputMaterialDto _material;
         private List<MaterialSerialRow> _rows;
 
-        /// <summary>품목코드만 받는 자재인지 — 목록 제목 · 컬럼 · 줄 수 · 저장 결과가 이 값으로 갈린다.</summary>
-        private bool _isItemCodeInput;
-
-        /// <summary>[저장]으로 확정한 시리얼번호 목록(투입수량 순서). 품목코드 입력이거나 닫기/취소면 null.</summary>
+        /// <summary>[저장]으로 확정한 시리얼번호 목록(투입수량 순서). 시리얼 확인 대상이 아니거나 닫기/취소면 null.</summary>
         public List<string> SerialNumbers { get; private set; }
 
-        /// <summary>[저장]으로 확정한 품목코드. 시리얼 입력이거나 닫기/취소면 null.</summary>
+        /// <summary>[저장]으로 확정한 품목코드. 품목코드 확인 대상이 아니거나 닫기/취소면 null.</summary>
         public string InputtedItemCode { get; private set; }
 
         public MaterialSerialForm()
@@ -55,27 +52,29 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         public void Initialize(PopInputMaterialDto material)
         {
             _material = material ?? new PopInputMaterialDto();
-            _isItemCodeInput = _material.IsItemCodeInputOnly;
 
             Text = Language.PopSerial_Title;
             lblTitle.Text = Language.PopSerial_Title;
             lblMaterialCode.Text = "· " + Language.PopSerial_MaterialCode;
             lblQty.Text = "· " + Language.PopSerial_Qty;
             lblItemCode.Text = "· " + Language.PopSerial_ItemCode;
-            lblListTitle.Text = _isItemCodeInput ? Language.PopSerial_ItemCodeListTitle : Language.PopSerial_ListTitle;
+            lblListTitle.Text = Language.PopSerial_ListTitle;
             btnSave.Text = Language.PopSerial_Save;
             btnClose.Text = Language.Common_Close;
 
             txtMaterialCode.Text = _material.MaterialCode;
             txtQty.Text = _material.InputQty.ToString();
-            txtItemCode.Text = _material.ItemCode;
 
             ApplyTheme();
+            ConfigureItemCode();
             ConfigureGrid();
 
             grid.DataSource = _rows;
 
-            if (gridView.RowCount > 0)
+            // 품목코드를 확인하는 자재면 품목코드부터 스캔하게 하고, 아니면 바로 시리얼번호로 간다.
+            if (_material.ItemCodeCheckRequired)
+                ActiveControl = txtItemCode;
+            else if (gridView.RowCount > 0)
                 FocusSerialCell(0);
         }
 
@@ -102,7 +101,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             AppTheme.BodyText(lblItemCode);
             AppTheme.Editor(txtMaterialCode);
             AppTheme.Editor(txtQty);
-            AppTheme.Editor(txtItemCode);
+            AppTheme.CodeEditor(txtItemCode);
             AppTheme.Grid(grid, gridView, AppTheme.Indigo);
 
             headerIcon.SvgImage = AppIcons.Get(AppIcons.Clipboard, Color.White);
@@ -112,14 +111,79 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// 입력 줄을 만들고 입력 컬럼만 입력 가능하게 둔다.
-        /// 시리얼은 투입수량만큼(이미 입력된 값은 되살린다), 품목코드는 요청에 한 값만 실리므로 한 줄이다.
+        /// 품목코드 입력란을 서버의 품목코드 확인 여부(itemCdVrfcYn, Y일 때만)에 맞춰 열거나 닫는다.
+        /// 서버가 내려준 품목코드를 미리 채우지 않는다 — 작업자가 직접 스캔한 값으로 확인해야 의미가 있다.
+        /// </summary>
+        private void ConfigureItemCode()
+        {
+            var required = _material.ItemCodeCheckRequired;
+
+            txtItemCode.Text = string.Empty;
+            txtItemCode.Properties.ReadOnly = !required;
+            txtItemCode.Enabled = required;
+            txtItemCode.TabStop = required;
+
+            txtItemCode.KeyDown -= TxtItemCode_KeyDown;
+            if (required)
+                txtItemCode.KeyDown += TxtItemCode_KeyDown;
+        }
+
+        /// <summary>바코드 스캐너 입력은 Enter로 끝난다 — 그때 투입자재 코드와 대조하고, 맞으면 시리얼번호 첫 줄로 넘어간다.</summary>
+        private void TxtItemCode_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode != Keys.Enter)
+                return;
+
+            e.Handled = true;
+            e.SuppressKeyPress = true;
+
+            if (!CheckItemCode())
+                return;
+
+            if (gridView.RowCount > 0)
+            {
+                grid.Focus();
+                FocusSerialCell(0);
+            }
+        }
+
+        /// <summary>
+        /// 입력한 품목코드가 투입자재 코드와 같은지 확인한다. 다르면 안내하고 입력란을 비운 뒤 다시 입력받는다
+        /// (다른 자재를 투입하려는 실수를 저장 전에 막기 위함 — 최종 판정은 서버가 한다).
+        /// </summary>
+        private bool CheckItemCode()
+        {
+            var itemCode = txtItemCode.Text?.Trim();
+
+            if (string.IsNullOrEmpty(itemCode))
+            {
+                AppMessageBox.Warn(this, Language.PopSerial_ItemCodeIncomplete, Language.PopSerial_Title);
+                txtItemCode.Focus();
+                return false;
+            }
+
+            if (!string.Equals(itemCode, _material.MaterialCode?.Trim(), StringComparison.OrdinalIgnoreCase))
+            {
+                AppMessageBox.Warn(this,
+                    $"{Language.PopSerial_ItemCodeMismatch}\n({Language.PopSerial_MaterialCode}: {_material.MaterialCode} / {Language.PopSerial_ItemCode}: {itemCode})",
+                    Language.PopSerial_Title);
+                txtItemCode.Text = string.Empty;
+                txtItemCode.Focus();
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// 시리얼 확인 자재면 투입수량만큼 줄을 만들고(이미 입력된 값은 되살린다) 입력 컬럼만 입력 가능하게 둔다.
+        /// 그리드는 시리얼만 받는다 — 품목코드만 확인하는 자재는 줄이 없다.
         /// </summary>
         private void ConfigureGrid()
         {
             _rows = new List<MaterialSerialRow>();
-            var saved = _isItemCodeInput ? new List<string>() : (_material.SerialNumbers ?? new List<string>());
-            var rowCount = _isItemCodeInput ? 1 : Math.Max(_material.InputQty, 1);
+            var saved = _material.SerialNumbers ?? new List<string>();
+            var rowCount = _material.SerialCheckRequired ? Math.Max(_material.InputQty, 1) : 0;
 
             for (var i = 0; i < rowCount; i++)
             {
@@ -131,7 +195,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 컬럼이 만들어지도록 빈 목록을 먼저 물린 뒤 구성한다(다른 화면과 같은 방식).
             grid.DataSource = new List<MaterialSerialRow>();
             GridColumns.Apply(gridView, Language.Col_No,
-                GridColumns.Left(InputField, _isItemCodeInput ? Language.PopSerial_ItemCodeListTitle : Language.Col_SerialNumber, 420));
+                GridColumns.Left(InputField, Language.Col_SerialNumber, 420));
 
             gridView.OptionsBehavior.Editable = true;
             GridColumns.FitToWidth(gridView);
@@ -202,53 +266,47 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// 입력값을 확정한다. 빈칸이 남아 있거나 같은 시리얼번호가 두 번 들어오면 안내만 하고 창은 유지한다
+        /// 입력값을 확정한다. 품목코드가 투입자재 코드와 다르거나, 시리얼 빈칸이 남아 있거나,
+        /// 같은 시리얼번호가 두 번 들어오면 안내만 하고 창은 유지한다
         /// (최종 유효성 판정은 서버가 하지만, 명백한 입력 실수는 여기서 먼저 걸러 준다).
-        /// 품목코드가 자재와 맞는지는 서버가 판정한다 — 여기서는 공란만 막는다.
         /// </summary>
         private void btnSave_Click(object sender, EventArgs e)
         {
             gridView.CloseEditor();
             gridView.UpdateCurrentRow();
 
-            if (_isItemCodeInput)
-            {
-                var itemCode = _rows.Count > 0 ? _rows[0].InputValue?.Trim() : null;
-                if (string.IsNullOrEmpty(itemCode))
-                {
-                    AppMessageBox.Warn(this, Language.PopSerial_ItemCodeIncomplete, Language.PopSerial_Title);
-                    return;
-                }
-
-                InputtedItemCode = itemCode;
-                DialogResult = DialogResult.OK;
-                Close();
+            // Enter 없이 손으로 치고 바로 [저장]을 누른 경우도 있으므로 여기서 한 번 더 대조한다.
+            if (_material.ItemCodeCheckRequired && !CheckItemCode())
                 return;
-            }
 
-            var serials = new List<string>();
-            var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-
-            foreach (var row in _rows)
+            List<string> serials = null;
+            if (_material.SerialCheckRequired)
             {
-                var serial = row.InputValue?.Trim();
+                serials = new List<string>();
+                var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-                if (string.IsNullOrEmpty(serial))
+                foreach (var row in _rows)
                 {
-                    AppMessageBox.Warn(this, Language.PopSerial_Incomplete, Language.PopSerial_Title);
-                    return;
-                }
+                    var serial = row.InputValue?.Trim();
 
-                if (!seen.Add(serial))
-                {
-                    AppMessageBox.Warn(this, $"{Language.PopSerial_Duplicated} ({serial})", Language.PopSerial_Title);
-                    return;
-                }
+                    if (string.IsNullOrEmpty(serial))
+                    {
+                        AppMessageBox.Warn(this, Language.PopSerial_Incomplete, Language.PopSerial_Title);
+                        return;
+                    }
 
-                serials.Add(serial);
+                    if (!seen.Add(serial))
+                    {
+                        AppMessageBox.Warn(this, $"{Language.PopSerial_Duplicated} ({serial})", Language.PopSerial_Title);
+                        return;
+                    }
+
+                    serials.Add(serial);
+                }
             }
 
             SerialNumbers = serials;
+            InputtedItemCode = _material.ItemCodeCheckRequired ? txtItemCode.Text.Trim() : null;
             DialogResult = DialogResult.OK;
             Close();
         }
@@ -257,7 +315,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
     /// <summary>&lt;투입자재 정보 입력&gt; 그리드의 한 줄(순번 컬럼은 GridColumns가 만들어 준다).</summary>
     public class MaterialSerialRow
     {
-        /// <summary>입력값 — 시리얼 입력이면 시리얼번호, 품목코드 입력이면 품목코드.</summary>
+        /// <summary>입력값 — 시리얼번호.</summary>
         public string InputValue { get; set; }
     }
 }
