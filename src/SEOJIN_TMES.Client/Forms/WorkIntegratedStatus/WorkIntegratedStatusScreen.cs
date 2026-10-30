@@ -2,7 +2,6 @@ using DevExpress.Utils;
 using DevExpress.XtraEditors;
 using DevExpress.XtraTreeList;
 using DevExpress.XtraTreeList.Columns;
-using DevExpress.XtraTreeList.Nodes;
 using SEOJIN_TMES.Client.ApiClient;
 using SEOJIN_TMES.Client.Common.Configuration;
 using SEOJIN_TMES.Client.Common.Languages;
@@ -276,8 +275,14 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
         private void ExportOverviewToXlsx(string fileName)
         {
             var writer = new XlsxOutlineWriter(Language.WorkIntegrated_OverviewTitle, BuildExportColumns());
-            AppendNodes(writer, treeOverview.Nodes);
+            var rowCount = AppendNodes(writer, _node, 0);
+
+            // 조회 결과가 있는데 한 줄도 못 옮겼다면 제목행만 있는 빈 파일이 된다 — 저장하지 않고 실패로 알린다.
+            if (rowCount == 0)
+                throw new InvalidOperationException(Language.WorkIntegrated_ExportEmpty);
+
             writer.Save(fileName);
+            AppLog.Info($"[작업통합] 엑셀 행 수 - {rowCount}/{_workIntegrateds.Count}");
         }
 
         /// <summary>내보낼 컬럼 구성 — 화면 컬럼의 제목·폭·정렬을 그대로 옮긴다(언어를 바꾸면 제목도 함께 바뀐다).</summary>
@@ -295,45 +300,63 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
         }
 
         /// <summary>
-        /// 트리를 화면에 보이는 순서 그대로 재귀로 훑어 한 줄씩 넘긴다.
-        /// 노드의 <see cref="TreeListNode.Level"/>이 그대로 엑셀 아웃라인 레벨이 된다.
+        /// 트리에 물린 노드(<see cref="_node"/>)를 화면과 같은 순서로 재귀로 훑어 한 줄씩 넘기고, 넘긴 줄 수를 돌려준다.
+        /// 재귀 깊이가 그대로 엑셀 아웃라인 레벨이 된다.
+        ///
+        /// 트리 컨트롤(<c>treeOverview.Nodes</c> → <c>GetDataRecordByNode</c>)을 거치지 않는 이유:
+        /// 트리는 <see cref="WorkIntegratedNode"/>에 바인딩되어 있어 <c>as WorkIntegratedDto</c>가 늘 null이었고,
+        /// 행이 조용히 전부 빠져 제목행만 있는 빈 파일이 만들어졌다. 바인딩한 목록을 직접 쓰면 형식이 어긋날 일이 없다.
         /// </summary>
-        private void AppendNodes(XlsxOutlineWriter writer, TreeListNodes nodes)
+        private int AppendNodes(XlsxOutlineWriter writer, List<WorkIntegratedNode> nodes, int level)
         {
-            foreach (TreeListNode node in nodes)
+            var count = 0;
+            foreach (var node in nodes)
             {
-                var dto = treeOverview.GetDataRecordByNode(node) as WorkIntegratedDto;
-                if (dto != null)
-                    writer.AddRow(node.Level, BuildExportValues(dto));
-
-                if (node.Nodes.Count > 0)
-                    AppendNodes(writer, node.Nodes);
+                writer.AddRow(level, BuildExportValues(node));
+                count++;
+                count += AppendNodes(writer, node.Children, level + 1);
             }
+            return count;
         }
 
         /// <summary>
-        /// 한 줄의 값. 값이 있는 칸은 <b>숫자 그대로</b> 넘겨 엑셀에서 계산·비교가 되게 하고,
+        /// 한 줄의 값 — 순서는 <see cref="ConfigureTree"/>의 컬럼 순서와 같아야 한다.
+        /// 값이 있는 칸은 <b>숫자 그대로</b> 넘겨 엑셀에서 계산·비교가 되게 하고,
         /// 값이 없는 칸은 화면과 같이 ".."로 채운다.
         /// </summary>
-        private static object[] BuildExportValues(WorkIntegratedDto dto)
+        private object[] BuildExportValues(WorkIntegratedNode node)
         {
             return new object[]
             {
-                dto.NodeCode ?? string.Empty,
-                string.IsNullOrEmpty(dto.NodeDescription) ? EmptyValueText : dto.NodeDescription,
-                ValueOrPlaceholder(dto.TorqueResult),
-                ValueOrPlaceholder(dto.TorqueTarget),
-                ValueOrPlaceholder(dto.TorqueLower),
-                ValueOrPlaceholder(dto.TorqueUpper),
-                ValueOrPlaceholder(dto.AngleTarget),
-                ValueOrPlaceholder(dto.AngleLower),
-                ValueOrPlaceholder(dto.AngleUpper),
-                ValueOrPlaceholder(dto.AngleResult)
+                TextOrPlaceholder(node.Name),
+                node.Code ?? string.Empty,
+                ValueOrPlaceholder(node.UsageQty),
+                TextOrPlaceholder(node.Unit),
+                ValueOrPlaceholder(node.TorqueResult),
+                ValueOrPlaceholder(node.TorqueTarget),
+                ValueOrPlaceholder(node.TorqueLower),
+                ValueOrPlaceholder(node.TorqueUpper),
+                ValueOrPlaceholder(node.AngleTarget),
+                ValueOrPlaceholder(node.AngleLower),
+                ValueOrPlaceholder(node.AngleUpper),
+                ValueOrPlaceholder(node.AngleResult)
             };
         }
 
         /// <summary>값이 있으면 <see cref="decimal"/>(숫자 칸), 없으면 ".." 문자열.</summary>
-        private static object ValueOrPlaceholder(decimal? value) =>
-            value.HasValue ? (object)value.Value : EmptyValueText;
+        private object ValueOrPlaceholder(decimal? value)
+        {
+            if (value.HasValue)
+                return value.Value;
+            return EmptyValueText;
+        }
+
+        /// <summary>문자 칸 — 비어 있으면 화면과 같이 "..".</summary>
+        private string TextOrPlaceholder(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+                return EmptyValueText;
+            return text;
+        }
     }
 }

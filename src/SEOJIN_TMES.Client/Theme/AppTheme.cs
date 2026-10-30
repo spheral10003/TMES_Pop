@@ -1110,8 +1110,10 @@ namespace SEOJIN_TMES.Client.Theme
             tree.OptionsView.ShowHorzLines = true;
             tree.OptionsView.ShowVertLines = true;
             tree.OptionsBehavior.Editable = false;
-            tree.RowHeight = 34;
-            tree.ColumnPanelRowHeight = 38;
+            // 행 높이는 그리드(34)보다 낮춘다 — 트리는 품목→공정→자재→스팩까지 펼치면 줄 수가 많아
+            // 34로는 한 화면에 몇 단계밖에 안 보인다. 9.5pt 본문 글꼴이 잘리지 않는 선에서 줄였다.
+            tree.RowHeight = 26;
+            tree.ColumnPanelRowHeight = 32;
 
             Paint(tree.Appearance.HeaderPanel, GridHeaderBack, TextPrimary, BodyBoldFont);
             tree.Appearance.HeaderPanel.BorderColor = GridLine;
