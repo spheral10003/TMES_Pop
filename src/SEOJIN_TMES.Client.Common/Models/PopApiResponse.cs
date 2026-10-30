@@ -67,6 +67,12 @@ namespace SEOJIN_TMES.Client.Common.Models
         [JsonProperty("indctLoc")] public string IndctLoc { get; set; }        // 투입위치
         [JsonProperty("serialVrfcYn")] public string SerialVrfcYn { get; set; }
         [JsonProperty("inputtedSerials")] public string InputtedSerials { get; set; } // 구분자 형식은 서버 확인 필요
+
+        /// <summary>품목번호 확인 대상 여부(Y/N). 서버는 이 확인도 공정의 할 일로 센다 — 빠뜨리면 완료가 WORK_005로 거절된다.</summary>
+        [JsonProperty("itemCdVrfcYn")] public string ItemCdVrfcYn { get; set; }
+
+        /// <summary>품목번호 입력이 끝났는지(서버 판정). 확인 대상이 아니거나 아직 입력 전이면 null로 온다.</summary>
+        [JsonProperty("itemCdInputCompleted")] public bool? ItemCdInputCompleted { get; set; }
     }
 
     public class BomInspSpecGroupApi
@@ -173,6 +179,8 @@ namespace SEOJIN_TMES.Client.Common.Models
                     InputUnit = m.Unit,
                     InputPosition = m.IndctLoc,
                     SerialCheckRequired = m.SerialVrfcYn == "Y",
+                    ItemCodeCheckRequired = m.ItemCdVrfcYn == "Y",
+                    ItemCodeInputCompleted = m.ItemCdInputCompleted == true,
                     SerialNumbers = string.IsNullOrWhiteSpace(m.InputtedSerials)
                         ? new List<string>()
                         : m.InputtedSerials.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)

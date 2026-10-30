@@ -124,6 +124,21 @@ namespace SEOJIN_TMES.Client.Common.Models
         /// <summary>입력이 끝난 시리얼번호 목록. 검사 대상이 아니면 비어 있다.</summary>
         public List<string> SerialNumbers { get; set; } = new List<string>();
 
+        /// <summary>품목번호 확인 대상 여부(서버 itemCdVrfcYn). 시리얼 확인과 별개로 서버가 공정의 할 일로 센다.</summary>
+        public bool ItemCodeCheckRequired { get; set; }
+
+        /// <summary>
+        /// 품목번호 입력이 끝났는지 — 서버가 내려준 값(itemCdInputCompleted)이고, 화면이 판정하지 않는다.
+        /// 시리얼 저장이 품목번호(inputtedItemCd)를 함께 보내므로, 그 저장이 성공하면 화면도 완료로 바꿔 둔다.
+        /// </summary>
+        public bool ItemCodeInputCompleted { get; set; }
+
+        /// <summary>작업자가 입력해야 할 것이 있는 자재인지(시리얼 확인 또는 품목번호 확인 대상).</summary>
+        public bool HasInputItem => SerialCheckRequired || ItemCodeCheckRequired;
+
+        /// <summary>이 자재의 입력이 모두 끝났는지 — 시리얼(대상이면) · 품목번호(대상이면) 둘 다.</summary>
+        public bool IsInputCompleted => IsSerialInputCompleted && (!ItemCodeCheckRequired || ItemCodeInputCompleted);
+
         /// <summary>[투입자재] 그리드의 "시리얼번호 검사여부" 표시 문구.</summary>
         public string SerialCheckText => SerialCheckRequired ? "검사필요" : "검사불필요";
 

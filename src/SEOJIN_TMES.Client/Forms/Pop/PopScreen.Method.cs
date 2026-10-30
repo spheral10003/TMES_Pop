@@ -688,13 +688,15 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// 작업자가 입력할 항목이 있는 공정인지 — 시리얼 확인이 필요한 자재 · BOM 스팩 · 검사 항목 중 하나라도 있으면 true.
-        /// 탭의 행 수로 보면 안 된다: 시리얼 확인이 필요 없는 자재(serialVrfcYn=N)는 행이 있어도 입력할 것이 없고
+        /// 작업자가 입력할 항목이 있는 공정인지 — 시리얼 또는 품목번호 확인이 필요한 자재 · BOM 스팩 · 검사 항목 중 하나라도 있으면 true.
+        /// 탭의 행 수로 보면 안 된다: 확인이 필요 없는 자재(serialVrfcYn=N · itemCdVrfcYn=N)는 행이 있어도 입력할 것이 없고
         /// 처음부터 "입력 완료"로 셈해져, 그런 자재만 있는 공정이 들어가자마자 자동 완료됐다.
+        /// 품목번호 확인(itemCdVrfcYn=Y)도 서버는 할 일로 센다 — 빼고 세면 "입력할 것 없음"으로 보고 이동 때 완료를 보내
+        /// WORK_005로 거절됐다(SUB20/0019).
         /// </summary>
         private bool HasInputItems()
         {
-            return _materials.Any(m => m.SerialCheckRequired) || _bomSpecs.Count > 0 || _inspections.Count > 0;
+            return _materials.Any(m => m.HasInputItem) || _bomSpecs.Count > 0 || _inspections.Count > 0;
         }
 
         /// <summary>
@@ -706,7 +708,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (!HasInputItems())
                 return false;
 
-            var materialsDone = _materials.All(m => m.IsSerialInputCompleted);
+            var materialsDone = _materials.All(m => m.IsInputCompleted);
             var bomSpecsDone = _bomSpecs.All(IsBomSpecPassed);
             var inspectionsDone = _inspections.All(IsInspectionEntered);
 
@@ -842,6 +844,18 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// <returns>서버에 저장됐으면 true. 실패(사유는 창으로 알린다) · 화면 닫힘이면 false.</returns>
         private async Task<bool> SetMaterialSerials(PopInputMaterialDto material)
         {
+            // 공란이 섞인 목록은 보내지 않는다. 입력 팝업이 [저장]에서 이미 막지만, 서버로 나가는 곳은 여기 하나뿐이라
+            // 팝업을 거치지 않는 경로가 생겨도 빈 시리얼이 실적으로 남지 않도록 마지막으로 한 번 더 막는다.
+            var serials = material.SerialNumbers ?? new List<string>();
+            if (serials.Count < Math.Max(material.InputQty, 1) || serials.Any(string.IsNullOrWhiteSpace))
+            {
+                AppLog.Info($"[POP] 시리얼 공란 - 저장 안 함 ({material.MaterialCode}, 입력 {serials.Count(s => !string.IsNullOrWhiteSpace(s))}/{material.InputQty})");
+                if (IsDisposed || Disposing) return false;
+
+                AppMessageBox.Warn(this, Language.PopSerial_Incomplete, Language.PopSerial_Title);
+                return false;
+            }
+
             var request = new PopMaterialSerialSaveRequest();
             request.inputtedItemCd = material.MaterialCode;
             request.inputtedSerialList = material.SerialNumbers;
@@ -880,6 +894,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (saveFailed) return false;
 
             if (IsDisposed || Disposing) return false;
+
+            // 시리얼 저장은 품목번호(inputtedItemCd)도 함께 보낸다 — 서버가 받았으므로 다시 조회하지 않고 완료로 옮겨 둔다.
+            material.ItemCodeInputCompleted = true;
 
             AppMessageBox.Success(this, Language.PopSerial_Saved, Language.PopSerial_Title);
             await TryAutoProgress();
