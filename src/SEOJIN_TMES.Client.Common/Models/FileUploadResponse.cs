@@ -8,16 +8,39 @@ using System.Threading.Tasks;
 namespace SEOJIN_TMES.Client.Common.Models
 {
     /// <summary>
-    /// 파일 업로드 응답.
-    /// TODO: 필드명은 <b>가정값</b>이다 — 서버 스펙이 확정되면 [JsonProperty] 이름을 맞출 것.
+    /// 첨부 업로드 응답의 data — 작업지시 키와 이번에 올라간 파일 목록.
+    /// data가 배열이 아니라 이 객체로 오므로 List로 읽으면 서버엔 저장됐는데 클라이언트만 실패로 본다(2026-10-29 로그).
+    /// </summary>
+    public class FileUploadResult
+    {
+        [JsonProperty("corpCd")]
+        public string CorpCode { get; set; }
+
+        [JsonProperty("woNo")]
+        public string WorkOrderNo { get; set; }
+
+        [JsonProperty("sn")]
+        public string SerialNo { get; set; }
+
+        [JsonProperty("woRef")]
+        public string WorkOrderRef { get; set; }
+
+        [JsonProperty("uploadedAttachmentList")]
+        public List<FileUploadResponse> Files { get; set; } = new List<FileUploadResponse>();
+    }
+
+    /// <summary>
+    /// 업로드된 파일 한 건(업로드 응답의 uploadedAttachmentList 항목).
+    /// sysObjId · atchRef · fileNm · fileSize는 서버 응답으로 확인했다.
+    /// TODO: 나머지 필드명은 <b>가정값</b>이다 — 서버 스펙이 확정되면 [JsonProperty] 이름을 맞출 것.
     /// </summary>
     public class FileUploadResponse
     {
         /// <summary>서버가 저장한 파일의 식별자. 이후 조회·삭제·다른 업무 데이터와 연결할 때 이 값을 쓴다.</summary>
-        [JsonProperty("fileId")]
+        [JsonProperty("sysObjId")]
         public string FileId { get; set; }
 
-        [JsonProperty("fileName")]
+        [JsonProperty("fileNm")]
         public string FileName { get; set; }
 
         [JsonProperty("fileExtension")]

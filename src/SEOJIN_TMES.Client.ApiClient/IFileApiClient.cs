@@ -55,7 +55,9 @@ namespace SEOJIN_TMES.Client.ApiClient
                 filePart.Headers.ContentType = new MediaTypeHeaderValue(file.ContentType);
                 form.Add(filePart, FilesField, file.FileName);
 
-                return await PostMultipartAsync<FileUploadResponse>(url, form, cancellationToken).ConfigureAwait(false);
+                // 응답 data는 파일 목록을 품은 객체다(UploadManyAsync 참고) — 한 건만 올렸으니 첫 항목이 그 파일이다.
+                var result = await PostMultipartAsync<FileUploadResult>(url, form, cancellationToken).ConfigureAwait(false);
+                return result?.Files?.FirstOrDefault();
             }
         }
 
@@ -80,8 +82,10 @@ namespace SEOJIN_TMES.Client.ApiClient
                 }
 
                 // 업무 키는 URL(경로 + corpCd/sn)로 이미 전달됐으므로 본문에는 파일만 담는다.
-                // TODO: 응답 형식(배열/단건/없음)은 가정값 — 서버 스펙에 맞출 것.
-                return await PostMultipartAsync<List<FileUploadResponse>>(url, form, cancellationToken).ConfigureAwait(false);
+                // 응답 data는 배열이 아니라 { corpCd, woNo, sn, woRef, uploadedAttachmentList:[...] } 객체다.
+                // 배열로 읽으면 서버엔 저장됐는데 해석 실패로 업로드 실패 창이 떴다.
+                var result = await PostMultipartAsync<FileUploadResult>(url, form, cancellationToken).ConfigureAwait(false);
+                return result?.Files ?? new List<FileUploadResponse>();
             }
         }
 
