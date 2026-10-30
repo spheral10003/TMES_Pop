@@ -279,6 +279,7 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string Pop_ReconnectColumn => Get(nameof(Pop_ReconnectColumn));
         public static string Pop_ReconnectButton => Get(nameof(Pop_ReconnectButton));
         public static string Pop_ReconnectFailed => Get(nameof(Pop_ReconnectFailed));
+        public static string Pop_EquipmentConnectFailed => Get(nameof(Pop_EquipmentConnectFailed));
         public static string Pop_EquipmentUsable => Get(nameof(Pop_EquipmentUsable));
         public static string Pop_EquipmentUnusable => Get(nameof(Pop_EquipmentUnusable));
         public static string Upload_ConnectionError => Get(nameof(Upload_ConnectionError));

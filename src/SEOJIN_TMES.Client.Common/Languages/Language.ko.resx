@@ -669,6 +669,10 @@
   <data name="Pop_ReconnectFailed" xml:space="preserve">
     <value>장비 재연결을 시작하지 못했습니다.</value>
   </data>
+  <data name="Pop_EquipmentConnectFailed" xml:space="preserve">
+    <value>장비 [{0}]에 연결하지 못했습니다.
+재연결을 3회 시도했지만 응답이 없습니다. 장비 전원 · 랜선을 확인한 뒤 설비 목록의 [재연결]을 눌러 주세요.</value>
+  </data>
   <data name="Pop_EquipmentUsable" xml:space="preserve">
     <value>가동가능</value>
   </data>

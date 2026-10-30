@@ -366,7 +366,12 @@ namespace SEOJIN_TMES.Client.Sockets
 
                 ApplyKeepAlive(client);
 
-                _conn = client;
+                // 이전 소켓이 남아 있으면 정리한다 — 바뀐 뒤라 그 소켓의 수신 실패는 HandleBroken이 무시한다.
+                Socket old = Interlocked.Exchange(ref _conn, client);
+                if (old != null && old != client)
+                {
+                    try { old.Close(); } catch { /* 이미 닫힌 소켓 */ }
+                }
 
                 // 연결에 성공하였다면, 데이터 수신을 대기한다.
                 Receive();
@@ -434,17 +439,23 @@ namespace SEOJIN_TMES.Client.Sockets
         /// </summary>
         public void Receive()
         {
+            Receive(_conn);
+        }
+
+        private void Receive(Socket worker)
+        {
+            if (worker == null)
+                return;
+
             try
             {
-                StateObject so = new StateObject(_conn);
+                StateObject so = new StateObject(worker);
 
                 so.Worker.BeginReceive(so.Buffer, 0, so.BufferSize, 0, new AsyncCallback(OnReceiveCallBack), so);
             }
             catch (System.Exception e)
             {
-                AsyncSocketErrorEventArgs eev = new AsyncSocketErrorEventArgs(this._id, e);
-
-                ErrorOccured(eev);
+                HandleBroken(worker, e);
             }
         }
 
@@ -454,30 +465,63 @@ namespace SEOJIN_TMES.Client.Sockets
         /// <param name="ar"></param>
         private void OnReceiveCallBack(IAsyncResult ar)
         {
+            StateObject so = (StateObject)ar.AsyncState;
+            int bytesRead;
+
             try
             {
-                StateObject so = (StateObject)ar.AsyncState;
-
-                int bytesRead = so.Worker.EndReceive(ar);
-                byte[] buf = new byte[bytesRead];
-
-                Array.Copy(so.Buffer, buf, bytesRead);
-
-                AsyncSocketReceiveEventArgs rev = new AsyncSocketReceiveEventArgs(this._id, bytesRead, buf);
-
-                // 데이터 수신 이벤트를 처리한다.
-                if (bytesRead > 0)
-                    Received(rev);
-
-                // 다음 읽을 데이터를 처리한다.
-                Receive();
+                bytesRead = so.Worker.EndReceive(ar);
             }
             catch (System.Exception e)
             {
-                AsyncSocketErrorEventArgs eev = new AsyncSocketErrorEventArgs(this._id, e);
-
-                ErrorOccured(eev);
+                // 연결 리셋 · 소켓 오류 — 수신 대기를 다시 걸 수 없으니 끊긴 것으로 처리한다.
+                HandleBroken(so.Worker, e);
+                return;
             }
+
+            // 0바이트 = 상대가 연결을 닫음(FIN). 여기서 다시 Receive()를 걸면 즉시 0으로 끝나기를 무한 반복하고
+            // OnClose도 올라가지 않아, 장비가 끊은 것을 상위가 모른다.
+            if (bytesRead == 0)
+            {
+                HandleBroken(so.Worker, null);
+                return;
+            }
+
+            byte[] buf = new byte[bytesRead];
+
+            Array.Copy(so.Buffer, buf, bytesRead);
+
+            try
+            {
+                // 데이터 수신 이벤트를 처리한다.
+                Received(new AsyncSocketReceiveEventArgs(this._id, bytesRead, buf));
+            }
+            catch (System.Exception e)
+            {
+                // 받는 쪽 처리 오류는 연결과 무관하다 — 알리기만 하고 수신은 계속한다(멈추면 이후 응답을 영영 못 받는다).
+                ErrorOccured(new AsyncSocketErrorEventArgs(this._id, e));
+            }
+
+            // 다음 읽을 데이터를 처리한다.
+            Receive(so.Worker);
+        }
+
+        /// <summary>
+        /// 송수신 중 소켓이 끊긴 것을 알았을 때 — 오류를 알리고 소켓을 닫은 뒤 OnClose를 올린다.
+        /// 지금 쓰고 있는 소켓일 때만 처리한다: 직접 닫았거나(Close) 새 소켓으로 바뀐 뒤 늦게 온 실패는 무시한다.
+        /// </summary>
+        /// <param name="reason">끊김 원인. 상대가 정상 종료(FIN)한 경우 null.</param>
+        private void HandleBroken(Socket worker, Exception reason)
+        {
+            if (worker == null || Interlocked.CompareExchange(ref _conn, null, worker) != worker)
+                return;
+
+            if (reason != null)
+                ErrorOccured(new AsyncSocketErrorEventArgs(this._id, reason));
+
+            try { worker.Close(); } catch { /* 이미 닫힌 소켓 */ }
+
+            Closed(new AsyncSocketConnectionEventArgs(this._id));
         }
 
         /// <summary>
@@ -487,17 +531,21 @@ namespace SEOJIN_TMES.Client.Sockets
         /// <returns></returns>
         public bool Send(byte[] buffer)
         {
+            Socket client = _conn;
+
+            if (client == null)
+            {
+                ErrorOccured(new AsyncSocketErrorEventArgs(this._id, new SocketException((int)SocketError.NotConnected)));
+                return false;
+            }
+
             try
             {
-                Socket client = _conn;
-
                 client.BeginSend(buffer, 0, buffer.Length, 0, new AsyncCallback(OnSendCallBack), client);
             }
             catch (System.Exception e)
             {
-                AsyncSocketErrorEventArgs eev = new AsyncSocketErrorEventArgs(this._id, e);
-
-                ErrorOccured(eev);
+                HandleBroken(client, e);
 
                 return false;
             }
@@ -511,10 +559,10 @@ namespace SEOJIN_TMES.Client.Sockets
         /// <param name="ar"></param>
         private void OnSendCallBack(IAsyncResult ar)
         {
+            Socket client = (Socket)ar.AsyncState;
+
             try
             {
-                Socket client = (Socket)ar.AsyncState;
-
                 int bytesWritten = client.EndSend(ar);
 
                 AsyncSocketSendEventArgs sev = new AsyncSocketSendEventArgs(this._id, bytesWritten);
@@ -523,55 +571,28 @@ namespace SEOJIN_TMES.Client.Sockets
             }
             catch (System.Exception e)
             {
-                AsyncSocketErrorEventArgs eev = new AsyncSocketErrorEventArgs(this._id, e);
-
-                ErrorOccured(eev);
+                HandleBroken(client, e);
             }
         }
 
         /// <summary>
-        /// 소켓 연결을 비동기적으로 종료
+        /// 소켓 연결을 종료한다.
         /// </summary>
+        /// <remarks>
+        /// 소켓을 먼저 떼어 내(_conn = null) 수신 콜백의 "닫힘" 처리와 겹치지 않게 한다.
+        /// 끊긴 소켓은 Shutdown이 예외를 던지는데, 예전에는 거기서 멈춰 소켓이 닫히지 않고 OnClose도 올라가지 않았다 —
+        /// 이미 끊긴 연결을 정리하는 것이 목적이므로 Shutdown 실패와 상관없이 닫고 OnClose를 올린다.
+        /// </remarks>
         public void Close()
         {
-            try
-            {
-                Socket client = _conn;
+            Socket client = Interlocked.Exchange(ref _conn, null);
+            if (client == null)
+                return;
 
-                client.Shutdown(SocketShutdown.Both);
-                client.BeginDisconnect(false, new AsyncCallback(OnCloseCallBack), client);
-            }
-            catch (System.Exception e)
-            {
-                AsyncSocketErrorEventArgs eev = new AsyncSocketErrorEventArgs(this._id, e);
+            try { client.Shutdown(SocketShutdown.Both); } catch { /* 이미 끊긴 소켓 */ }
+            try { client.Close(); } catch { /* 이미 닫힌 소켓 */ }
 
-                ErrorOccured(eev);
-            }
-        }
-
-        /// <summary>
-        /// 소켓 연결 종료를 처리하는 콜백 함수
-        /// </summary>
-        /// <param name="ar"></param>
-        private void OnCloseCallBack(IAsyncResult ar)
-        {
-            try
-            {
-                Socket client = (Socket)ar.AsyncState;
-
-                client.EndDisconnect(ar);
-                client.Close();
-
-                AsyncSocketConnectionEventArgs cev = new AsyncSocketConnectionEventArgs(this._id);
-
-                Closed(cev);
-            }
-            catch (System.Exception e)
-            {
-                AsyncSocketErrorEventArgs eev = new AsyncSocketErrorEventArgs(this._id, e);
-
-                ErrorOccured(eev);
-            }
+            Closed(new AsyncSocketConnectionEventArgs(this._id));
         }
 
     } // end of class AsyncSocketClient

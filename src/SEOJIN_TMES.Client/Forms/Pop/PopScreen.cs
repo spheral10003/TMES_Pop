@@ -551,10 +551,23 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             InvokeIfRequired(HandleConnectionChanged, e);
         }
 
-        /// <summary>알람은 로그만 남긴다 — 화면을 건드리지 않으므로 스레드를 옮기지 않는다.</summary>
+        /// <summary>
+        /// 알람은 로그로 남긴다. 재연결을 3회 실패한 알람(ConnectFailed)만 작업자에게 창으로 알린다 —
+        /// 시퀀스가 멈춰 [재연결]을 누르기 전에는 다시 붙지 않으므로 알아채야 한다.
+        /// </summary>
         private void OnErrorOccurred(object sender, AlarmEventArgs e)
         {
             AppLog.Warn($"[ALARM] [{e.OccurredAt} / {e.Code}] {e.Message}");
+
+            if (e.Code == AlarmCode.ConnectFailed)
+                InvokeIfRequired(ShowConnectFailed, e);
+        }
+
+        private void ShowConnectFailed(AlarmEventArgs e)
+        {
+            // AlarmEventArgs.Code는 알람 코드라 장비 코드는 기반 클래스에서 읽는다.
+            string equipmentCode = ((EquipmentEventArgs)e).Code;
+            AppMessageBox.Warn(this, string.Format(Language.Pop_EquipmentConnectFailed, equipmentCode), Language.Pop_Title);
         }
 
         /// <summary>체결 결과 한 건 — 원본을 로그로 남기고 토크 · 각도(Angle3)를 BOM 스팩에 채운다.</summary>
