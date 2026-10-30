@@ -619,7 +619,7 @@
     <value>Enter</value>
   </data>
   <data name="Pop_SerialNotRequired" xml:space="preserve">
-    <value>This material does not require serial numbers.</value>
+    <value>This material does not require serial numbers or an item code.</value>
   </data>
   <data name="Pop_NoProcessList" xml:space="preserve">
     <value>No process information for this work order.</value>
@@ -782,6 +782,12 @@
   </data>
   <data name="PopSerial_ListTitle" xml:space="preserve">
     <value>Serial Numbers</value>
+  </data>
+  <data name="PopSerial_ItemCodeListTitle" xml:space="preserve">
+    <value>Item Code</value>
+  </data>
+  <data name="PopSerial_ItemCodeIncomplete" xml:space="preserve">
+    <value>Enter the item code.</value>
   </data>
   <data name="PopSerial_Save" xml:space="preserve">
     <value>Save</value>

@@ -328,6 +328,8 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string PopSerial_Qty => Get(nameof(PopSerial_Qty));
         public static string PopSerial_ItemCode => Get(nameof(PopSerial_ItemCode));
         public static string PopSerial_ListTitle => Get(nameof(PopSerial_ListTitle));
+        public static string PopSerial_ItemCodeListTitle => Get(nameof(PopSerial_ItemCodeListTitle));
+        public static string PopSerial_ItemCodeIncomplete => Get(nameof(PopSerial_ItemCodeIncomplete));
         public static string PopSerial_Save => Get(nameof(PopSerial_Save));
         public static string PopSerial_Incomplete => Get(nameof(PopSerial_Incomplete));
         public static string PopSerial_Duplicated => Get(nameof(PopSerial_Duplicated));

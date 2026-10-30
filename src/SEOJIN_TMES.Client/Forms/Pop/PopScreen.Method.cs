@@ -742,14 +742,17 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         //  실적 — 투입자재 시리얼
         // ─────────────────────────────────────────────────────────────────────────
 
-        /// <summary>그리드 한 줄의 &lt;투입자재 정보 입력&gt; 팝업을 띄우고, 입력한 시리얼번호를 서버에 보낸다.</summary>
+        /// <summary>
+        /// 그리드 한 줄의 &lt;투입자재 정보 입력&gt; 팝업을 띄우고, 입력한 값을 서버에 보낸다.
+        /// 시리얼 확인 자재는 시리얼번호를, 품목코드만 확인하는 자재는 품목코드를 받는다(팝업이 자재를 보고 나눈다).
+        /// </summary>
         public async Task InputMaterialSerial(int rowHandle)
         {
             var material = gridViewMaterial.GetRow(rowHandle) as PopInputMaterialDto;
             if (material == null)
                 return;
 
-            if (!material.SerialCheckRequired)
+            if (!material.HasInputItem)
             {
                 AppMessageBox.Info(this, Language.Pop_SerialNotRequired, Language.PopSerial_Title);
                 return;
@@ -765,6 +768,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             }
 
             List<string> serials;
+            string itemCode;
             using (var form = new MaterialSerialForm())
             {
                 form.Initialize(material);
@@ -773,6 +777,14 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                     return;
 
                 serials = form.SerialNumbers;
+                itemCode = form.InputtedItemCode;
+            }
+
+            // 품목코드는 화면에 따로 담아 두지 않으므로 실패해도 되돌릴 값이 없다(완료 표시는 저장 성공 때만 바뀐다).
+            if (material.IsItemCodeInputOnly)
+            {
+                await SetMaterialItemCode(material, itemCode);
+                return;
             }
 
             // 저장이 실패하면 입력 전 값으로 되돌린다 — 그대로 두면 서버에는 없는 시리얼로 "완료"가 표시되고,
@@ -805,7 +817,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 var materials = _materials;
                 for (int i = 0; i < materials.Count; i++)
                 {
-                    if (materials[i].IsSerialInputCompleted)
+                    if (IsMaterialPopupDone(materials[i]))
                         continue;
 
                     int rowHandle = gridViewMaterial.GetRowHandle(i);   // DataSource 인덱스 → rowHandle
@@ -817,9 +829,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                         return;
                 }
             }
-            else if (_materials.Any(m => !m.IsSerialInputCompleted))
+            else if (!_materials.All(IsMaterialPopupDone))
             {
-                AppLog.Info($"[POP] 공정 미진행 - 시리얼 입력 팝업 생략 ({_key?.RoutingOperation}/{_key?.PageOperation}, 상태 {_progressState})");
+                AppLog.Info($"[POP] 공정 미진행 - 투입자재 입력 팝업 생략 ({_key?.RoutingOperation}/{_key?.PageOperation}, 상태 {_progressState})");
             }
 
             if (!ShowBomSpecTab())
@@ -827,13 +839,23 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// 투입자재 시리얼 입력이 모두 끝났으면 [BOM 스팩] 탭으로 넘기고 체결할 행 · 목표 토크를 맞춘다.
-        /// 시리얼 확인이 필요한 자재가 없으면 탭을 옮기지 않는다(작업자가 보던 탭을 그대로 둔다).
+        /// 입력 팝업으로 받을 것이 끝난 자재인지 — 품목코드만 받는 자재는 품목코드, 그 밖에는 시리얼 기준.
+        /// 시리얼 자재의 품목코드 완료는 시리얼 저장에 함께 실리므로 여기서 따로 보지 않는다
+        /// (서버 값이 늦게 오는 경우 시리얼을 다 넣은 자재에 팝업이 되풀이되지 않게).
+        /// </summary>
+        private static bool IsMaterialPopupDone(PopInputMaterialDto material)
+        {
+            return material.IsItemCodeInputOnly ? material.ItemCodeInputCompleted : material.IsSerialInputCompleted;
+        }
+
+        /// <summary>
+        /// 투입자재 입력(시리얼 · 품목코드)이 모두 끝났으면 [BOM 스팩] 탭으로 넘기고 체결할 행 · 목표 토크를 맞춘다.
+        /// 투입자재가 없으면 탭을 옮기지 않는다(작업자가 보던 탭을 그대로 둔다).
         /// </summary>
         /// <returns>탭을 옮겼으면 true.</returns>
         public bool ShowBomSpecTab()
         {
-            if (_materials.Count == 0 || !_materials.All(m => m.IsSerialInputCompleted))
+            if (_materials.Count == 0 || !_materials.All(IsMaterialPopupDone))
                 return false;
 
             tabSpec.SelectedTabPage = pageBom;
@@ -860,6 +882,35 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             request.inputtedItemCd = material.MaterialCode;
             request.inputtedSerialList = material.SerialNumbers;
 
+            return await SetMaterialInput(material, request);
+        }
+
+        /// <summary>
+        /// 품목코드만 확인하는 자재(시리얼 확인 N · 품목코드 확인 Y)의 품목코드를 서버에 보낸다.
+        /// 시리얼 저장과 같은 API에 시리얼 목록을 비워 보낸다 — 입력한 품목코드가 자재와 맞는지는 서버가 판정한다.
+        /// </summary>
+        /// <returns>서버에 저장됐으면 true. 실패(사유는 창으로 알린다) · 화면 닫힘이면 false.</returns>
+        private async Task<bool> SetMaterialItemCode(PopInputMaterialDto material, string itemCode)
+        {
+            if (string.IsNullOrWhiteSpace(itemCode))
+            {
+                AppLog.Info($"[POP] 품목코드 공란 - 저장 안 함 ({material.MaterialCode})");
+                if (IsDisposed || Disposing) return false;
+
+                AppMessageBox.Warn(this, Language.PopSerial_ItemCodeIncomplete, Language.PopSerial_Title);
+                return false;
+            }
+
+            var request = new PopMaterialSerialSaveRequest();
+            request.inputtedItemCd = itemCode.Trim();
+
+            return await SetMaterialInput(material, request);
+        }
+
+        /// <summary>투입자재 입력(시리얼 · 품목코드) 저장 요청을 보내고, 성공하면 품목코드 완료로 두고 자동 진행을 시도한다.</summary>
+        /// <returns>서버에 저장됐으면 true. 실패(사유는 창으로 알린다) · 화면 닫힘이면 false.</returns>
+        private async Task<bool> SetMaterialInput(PopInputMaterialDto material, PopMaterialSerialSaveRequest request)
+        {
             var saveFailed = false;
             var isConflict = false;
 
@@ -870,7 +921,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             }
             catch (ApiException ex)
             {
-                AppLog.Warn($"[POP] 투입자재 시리얼 저장 실패 - {material.MaterialCode} : {ex.Message}");
+                AppLog.Warn($"[POP] 투입자재 입력 저장 실패 -{material.MaterialCode} : {ex.Message}");
                 if (IsDisposed || Disposing) return false;
 
                 AppMessageBox.Warn(this, ex.Message, Language.PopSerial_Title);
@@ -895,7 +946,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
             if (IsDisposed || Disposing) return false;
 
-            // 시리얼 저장은 품목번호(inputtedItemCd)도 함께 보낸다 — 서버가 받았으므로 다시 조회하지 않고 완료로 옮겨 둔다.
+            // 시리얼 저장 · 품목코드 저장 모두 품목코드(inputtedItemCd)를 보낸다 — 서버가 받았으므로 다시 조회하지 않고 완료로 옮겨 둔다.
             material.ItemCodeInputCompleted = true;
 
             AppMessageBox.Success(this, Language.PopSerial_Saved, Language.PopSerial_Title);

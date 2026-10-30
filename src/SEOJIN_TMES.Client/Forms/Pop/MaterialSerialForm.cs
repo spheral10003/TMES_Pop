@@ -14,10 +14,12 @@ namespace SEOJIN_TMES.Client.Forms.Pop
     /// <summary>
     /// &lt;투입자재 정보 입력&gt; 팝업 — [투입자재] 탭에서 "시리얼번호 입력상태" 셀을 클릭하면 열린다.
     ///
-    /// 자재 정보(코드/수량/품목코드)는 읽기 전용으로 보여주고, 투입수량만큼 준비된 줄에
-    /// 시리얼번호를 하나씩 입력받는다(바코드 스캐너를 고려해 Enter를 누르면 다음 줄로 내려간다).
-    /// [저장]을 누르면 결과가 <see cref="SerialNumbers"/>에 담기고 DialogResult.OK로 닫힌다 —
-    /// 서버 전송은 호출한 화면(<see cref="PopScreen"/>)이 맡는다.
+    /// 자재 정보(코드/수량/품목코드)는 읽기 전용으로 보여주고, 아래 목록에 입력을 받는다.
+    /// 자재에 따라 두 가지로 나뉜다(서버 serialVrfcYn · itemCdVrfcYn):
+    /// - 시리얼 입력 : 투입수량만큼 준비된 줄에 시리얼번호를 하나씩 받는다 → <see cref="SerialNumbers"/>
+    /// - 품목코드 입력 : 시리얼 확인 없이 품목코드만 확인하는 자재는 품목코드 한 줄만 받는다 → <see cref="InputtedItemCode"/>
+    /// 바코드 스캐너를 고려해 Enter를 누르면 다음 줄로 내려간다.
+    /// [저장]을 누르면 DialogResult.OK로 닫힌다 — 서버 전송은 호출한 화면(<see cref="PopScreen"/>)이 맡는다.
     ///
     /// VS 디자이너 호환을 위해 매개변수 없는 생성자만 두고, 실제 내용은 Initialize()로 넣는다.
     /// </summary>
@@ -26,11 +28,20 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// <summary>창을 줄일 수 있는 한계 — 크기를 통일하기 전 원래 크기(테두리 포함). 이보다 작으면 자재 정보 칸이 잘린다.</summary>
         private readonly Size _minimumFormSize = new Size(622, 522);
 
+        /// <summary>입력 컬럼의 필드명(<see cref="MaterialSerialRow.InputValue"/>).</summary>
+        private const string InputField = "InputValue";
+
         private PopInputMaterialDto _material;
         private List<MaterialSerialRow> _rows;
 
-        /// <summary>[저장]으로 확정한 시리얼번호 목록(투입수량 순서). 닫기/취소면 null.</summary>
+        /// <summary>품목코드만 받는 자재인지 — 목록 제목 · 컬럼 · 줄 수 · 저장 결과가 이 값으로 갈린다.</summary>
+        private bool _isItemCodeInput;
+
+        /// <summary>[저장]으로 확정한 시리얼번호 목록(투입수량 순서). 품목코드 입력이거나 닫기/취소면 null.</summary>
         public List<string> SerialNumbers { get; private set; }
+
+        /// <summary>[저장]으로 확정한 품목코드. 시리얼 입력이거나 닫기/취소면 null.</summary>
+        public string InputtedItemCode { get; private set; }
 
         public MaterialSerialForm()
         {
@@ -44,13 +55,14 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         public void Initialize(PopInputMaterialDto material)
         {
             _material = material ?? new PopInputMaterialDto();
+            _isItemCodeInput = _material.IsItemCodeInputOnly;
 
             Text = Language.PopSerial_Title;
             lblTitle.Text = Language.PopSerial_Title;
             lblMaterialCode.Text = "· " + Language.PopSerial_MaterialCode;
             lblQty.Text = "· " + Language.PopSerial_Qty;
             lblItemCode.Text = "· " + Language.PopSerial_ItemCode;
-            lblListTitle.Text = Language.PopSerial_ListTitle;
+            lblListTitle.Text = _isItemCodeInput ? Language.PopSerial_ItemCodeListTitle : Language.PopSerial_ListTitle;
             btnSave.Text = Language.PopSerial_Save;
             btnClose.Text = Language.Common_Close;
 
@@ -100,29 +112,31 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// 투입수량만큼 빈 줄을 만들고(이미 입력된 값은 되살린다), 시리얼번호 컬럼만 입력 가능하게 둔다.
+        /// 입력 줄을 만들고 입력 컬럼만 입력 가능하게 둔다.
+        /// 시리얼은 투입수량만큼(이미 입력된 값은 되살린다), 품목코드는 요청에 한 값만 실리므로 한 줄이다.
         /// </summary>
         private void ConfigureGrid()
         {
             _rows = new List<MaterialSerialRow>();
-            var saved = _material.SerialNumbers ?? new List<string>();
+            var saved = _isItemCodeInput ? new List<string>() : (_material.SerialNumbers ?? new List<string>());
+            var rowCount = _isItemCodeInput ? 1 : Math.Max(_material.InputQty, 1);
 
-            for (var i = 0; i < Math.Max(_material.InputQty, 1); i++)
+            for (var i = 0; i < rowCount; i++)
             {
                 var row = new MaterialSerialRow();
-                row.SerialNo = i < saved.Count ? saved[i] : null;
+                row.InputValue = i < saved.Count ? saved[i] : null;
                 _rows.Add(row);
             }
 
             // 컬럼이 만들어지도록 빈 목록을 먼저 물린 뒤 구성한다(다른 화면과 같은 방식).
             grid.DataSource = new List<MaterialSerialRow>();
             GridColumns.Apply(gridView, Language.Col_No,
-                GridColumns.Left("SerialNo", Language.Col_SerialNumber, 420));
+                GridColumns.Left(InputField, _isItemCodeInput ? Language.PopSerial_ItemCodeListTitle : Language.Col_SerialNumber, 420));
 
             gridView.OptionsBehavior.Editable = true;
             GridColumns.FitToWidth(gridView);
 
-            var serialColumn = gridView.Columns.ColumnByFieldName("SerialNo");
+            var serialColumn = gridView.Columns.ColumnByFieldName(InputField);
             if (serialColumn != null)
             {
                 serialColumn.OptionsColumn.AllowEdit = true;
@@ -161,7 +175,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// <summary>지정한 줄의 시리얼번호 칸으로 포커스를 옮기고 바로 입력 상태로 만든다.</summary>
         private void FocusSerialCell(int rowHandle)
         {
-            var serialColumn = gridView.Columns.ColumnByFieldName("SerialNo");
+            var serialColumn = gridView.Columns.ColumnByFieldName(InputField);
             if (serialColumn == null)
                 return;
 
@@ -190,18 +204,34 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// <summary>
         /// 입력값을 확정한다. 빈칸이 남아 있거나 같은 시리얼번호가 두 번 들어오면 안내만 하고 창은 유지한다
         /// (최종 유효성 판정은 서버가 하지만, 명백한 입력 실수는 여기서 먼저 걸러 준다).
+        /// 품목코드가 자재와 맞는지는 서버가 판정한다 — 여기서는 공란만 막는다.
         /// </summary>
         private void btnSave_Click(object sender, EventArgs e)
         {
             gridView.CloseEditor();
             gridView.UpdateCurrentRow();
 
+            if (_isItemCodeInput)
+            {
+                var itemCode = _rows.Count > 0 ? _rows[0].InputValue?.Trim() : null;
+                if (string.IsNullOrEmpty(itemCode))
+                {
+                    AppMessageBox.Warn(this, Language.PopSerial_ItemCodeIncomplete, Language.PopSerial_Title);
+                    return;
+                }
+
+                InputtedItemCode = itemCode;
+                DialogResult = DialogResult.OK;
+                Close();
+                return;
+            }
+
             var serials = new List<string>();
             var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
             foreach (var row in _rows)
             {
-                var serial = row.SerialNo?.Trim();
+                var serial = row.InputValue?.Trim();
 
                 if (string.IsNullOrEmpty(serial))
                 {
@@ -227,6 +257,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
     /// <summary>&lt;투입자재 정보 입력&gt; 그리드의 한 줄(순번 컬럼은 GridColumns가 만들어 준다).</summary>
     public class MaterialSerialRow
     {
-        public string SerialNo { get; set; }
+        /// <summary>입력값 — 시리얼 입력이면 시리얼번호, 품목코드 입력이면 품목코드.</summary>
+        public string InputValue { get; set; }
     }
 }

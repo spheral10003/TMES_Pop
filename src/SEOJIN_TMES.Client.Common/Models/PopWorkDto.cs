@@ -143,13 +143,21 @@ namespace SEOJIN_TMES.Client.Common.Models
         public string SerialCheckText => SerialCheckRequired ? "검사필요" : "검사불필요";
 
         /// <summary>
+        /// 품목코드만 받는 자재인지(시리얼 확인 N · 품목코드 확인 Y). 입력 팝업이 시리얼 대신 품목코드 한 줄을 받는다.
+        /// 시리얼 확인 대상이면 시리얼 저장이 품목코드도 함께 보내므로 시리얼 입력으로 처리한다.
+        /// </summary>
+        public bool IsItemCodeInputOnly => !SerialCheckRequired && ItemCodeCheckRequired;
+
+        /// <summary>
         /// [투입자재] 그리드의 "시리얼번호 입력상태" 표시 문구.
-        /// 검사 대상이 아니면 "-", 수량만큼 다 채웠으면 "완료", 아니면 "미완료".
+        /// 입력 대상이 아니면 "-", 다 입력했으면 "완료", 아니면 "미완료".
+        /// 품목코드만 받는 자재는 서버가 내려준 품목코드 완료 여부를 보여 준다.
         /// </summary>
         public string SerialInputStateText
         {
             get
             {
+                if (IsItemCodeInputOnly) return ItemCodeInputCompleted ? "완료" : "미완료";
                 if (!SerialCheckRequired) return "-";
                 return IsSerialInputCompleted ? "완료" : "미완료";
             }
