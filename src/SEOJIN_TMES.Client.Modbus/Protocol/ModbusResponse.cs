@@ -19,7 +19,7 @@ namespace SEOJIN_TMES.Client.Modbus.Protocol
         public bool IsError { get; set; }
 
         /// <summary>
-        /// 응답 프레임 자체에는 주소가 실려오지 않으므로, 요청 시 사용한 시작 주소를 그대로 돌려준다.
+        /// 쓰기 응답은 프레임에 실려 온 주소, 읽기 · 오류 응답은 프레임에 주소가 없으므로 그 응답의 요청 주소.
         /// </summary>
         public ushort StartAddress { get; set; }
 

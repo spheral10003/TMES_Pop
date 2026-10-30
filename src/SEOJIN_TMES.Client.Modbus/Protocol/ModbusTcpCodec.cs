@@ -119,7 +119,8 @@ namespace SEOJIN_TMES.Client.Modbus.Protocol
                 UnitId = unitId,
                 FunctionCode = functionCode,
                 IsError = isError,
-                StartAddress = lastRequest.Address,
+                // 쓰기 응답은 장비가 돌려준 주소를 쓴다 — 요청 주소를 그대로 붙이면 연달아 쓴 응답이 모두 마지막 주소로 찍혔다.
+                StartAddress = startAddress,
                 Data = data
             };
         }

@@ -188,7 +188,8 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
 
         /// <summary>
         /// Request 채널의 응답 수신(수신 스레드). 어떤 응답이든 장비가 살아 있다는 뜻이라 Alive 대기를 끝낸다 —
-        /// Alive 응답만 골라내지 않는 것은, 토크 쓰기 등 다른 요청과 겹치면 응답의 시작 주소가 바뀌어 나오기 때문이다.
+        /// Alive 응답만 골라내지 않는 것은, 요청이 하나씩 차례로 나가므로(ModbusTcpClient) 토크 쓰기 등 앞선 요청이 밀려 있으면
+        /// Alive 응답이 대기 시간보다 늦게 오는데, 그동안 받은 다른 응답도 장비가 살아 있다는 증거이기 때문이다.
         /// </summary>
         private void OnRegisterDataReceived(object? sender, NutrunnerRegisterEventArgs e)
         {

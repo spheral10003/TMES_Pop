@@ -45,6 +45,15 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
         /// </summary>
         private const ushort DriverLockValue = 3;
 
+        /// <summary>
+        /// PresetChange 레지스터 값 — 1 = 방금 쓴 토크 설정을 장비 프리셋에 적용.
+        /// 토크 레지스터만 쓰면 장비가 새 목표 토크로 바꾸지 않아서 함께 보낸다.
+        /// </summary>
+        private const ushort PresetChangeValue = 1;
+
+        /// <summary>ConnectTimeoutMs가 0 이하(접속은 OS 기본값)일 때 쓰는 요청 하나의 응답 대기 시간.</summary>
+        private const int DefaultResponseTimeoutMs = 1000;
+
         /// <summary>이벤트 채널 연결 후 첫 송신까지 기다리는 시간. 장비가 이벤트 세션을 준비할 여유.</summary>
         private const double EventEnableDelayMs = 300;
 
@@ -105,7 +114,11 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
 
         private NutrunnerDevice(NutrunnerInfo info, IModbusTransport requestTransport, IModbusTransport eventTransport)
             : this(info,
-                   new ModbusTcpClient(requestTransport, new ModbusTcpCodec(), info.TransactionId),
+                   new ModbusTcpClient(requestTransport, new ModbusTcpCodec(), info.TransactionId)
+                   {
+                       // Alive 응답 대기(NutrunnerSequence)와 같은 기준 — 요청은 하나씩 응답을 받은 뒤 다음 것을 보낸다.
+                       ResponseTimeoutMs = info.ConnectTimeoutMs > 0 ? info.ConnectTimeoutMs : DefaultResponseTimeoutMs
+                   },
                    eventTransport)
         {
             // 직접 만든 Request 전송은 이 클래스가 Dispose 책임을 진다.
@@ -203,6 +216,11 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
 
             WriteRegister(NutrunnerRegister.Torque, (ushort) raw);
             RaiseSettingWritten(NutrunnerRegister.Torque, false, true, new[] { (ushort)raw });
+
+            // 목표 토크를 쓴 다음에 프리셋 변경을 알린다 — 순서가 바뀌면 이전 토크로 프리셋이 적용된다.
+            // 요청은 ModbusTcpClient가 하나씩 응답을 받은 뒤 보내므로 토크 쓰기가 끝난 뒤에 나간다.
+            WriteRegister(NutrunnerRegister.PresetChange, PresetChangeValue);
+            RaiseSettingWritten(NutrunnerRegister.PresetChange, false, true, new[] { PresetChangeValue });
             return true;
         }
 
@@ -316,6 +334,7 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
             // 설정 레지스터 쓰기의 응답만 이력으로 올린다(핸드셰이크 · Ack · Alive 응답은 제외).
             if (response.FunctionCode == ModbusFunctionCode.WriteSingleRegister
                 && (response.StartAddress == (ushort)NutrunnerRegister.Torque
+                    || response.StartAddress == (ushort)NutrunnerRegister.PresetChange
                     || response.StartAddress == (ushort)NutrunnerRegister.DriverLock))
             {
                 RaiseSettingWritten((NutrunnerRegister)response.StartAddress, true, !response.IsError, response.Data);
