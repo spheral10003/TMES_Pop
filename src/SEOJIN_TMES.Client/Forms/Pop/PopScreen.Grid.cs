@@ -436,13 +436,16 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 gridViewBomSpec.RefreshData();
 
                 // 앞 공정에서 쓰던 행 위치를 그대로 들고 오면 새 공정의 마지막 행(또는 범위 밖)에 결과가 채워진다.
-                // 목표 토크는 공정이 시작된 뒤 SelectBomSpecRow가 쓴다.
                 FocusBomSpecRow(FindBomSpecTargetRow());
             }
             finally
             {
                 EndBomSpecRedraw();
             }
+
+            // 공정이 바뀌면 시작 여부와 상관없이 바로 새 목표 토크를 쓴다 — 자동 시작이 늦거나 실패해도
+            // 장비가 앞 공정의 토크로 남지 않게. 시작 뒤 SelectBomSpecRow가 행을 다시 고르면 한 번 더 쓴다.
+            Screen.WriteBomSpecTorque();
         }
 
         /// <summary>값만 바뀐 행을 다시 그린다 — 포커스 이벤트는 올리지 않는다.</summary>
@@ -600,14 +603,12 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         //  [BOM 스팩] 그리드 이벤트
         // ─────────────────────────────────────────────────────────────────────────
 
-        /// <summary>작업자가 고른 행을 설비 체결 결과를 채울 행으로 삼는다.</summary>
+        /// <summary>
+        /// 작업자가 고른 행을 설비 체결 결과를 채울 행으로 삼는다. 공정 상태와 상관없이 고른다 —
+        /// 진행 중이 아닐 때 들어온 체결 결과는 <see cref="PopScreen.SetTorqueFromEquipment"/>가 따로 버린다.
+        /// </summary>
         private void GridViewBomSpec_RowClick(object sender, RowClickEventArgs e)
         {
-            if (!IsProcessRunning)
-            {
-                AppLog.Info($"[POP] 공정 미시작 - ( 상태 {_progressState})");
-                return;
-            }
             if (e.RowHandle < 0)
                 return;
 
@@ -615,17 +616,15 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             AppLog.Info($"[POP] 선택한 Row - ( Row 값 {_bomSpecSelectedRow})");
         }
 
-        /// <summary>포커스가 옮겨 간 행의 목표 토크를 너트러너에 써 둔다.</summary>
+        /// <summary>
+        /// 포커스가 옮겨 간 행의 목표 토크를 너트러너에 써 둔다. 공정 상태와 상관없이 쓴다
+        /// (<see cref="PopScreen.WriteBomSpecTorque"/>와 같은 이유 — 장비는 조이기 전에 맞춰져 있어야 한다).
+        /// </summary>
         private void GridViewBomSpec_FocusedRowChanged(object sender, FocusedRowChangedEventArgs e)
         {
             // 바인딩 · RefreshData로 다시 그리는 중에 생긴 포커스 이동은 작업자가 고른 것이 아니다.
             if (IsBomSpecRedrawing)
                 return;
-            if (!IsProcessRunning)
-            {
-                AppLog.Info($"[POP] 공정 미시작 - ( 상태 {_progressState})");
-                return;
-            }
             if (e.FocusedRowHandle < 0)
                 return;
 
@@ -639,7 +638,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             try
             {
                 // 목표 토크는 서버 기준정보 값을 그대로 쓴다(클라이언트가 계산하지 않는다).
-                if (Screen.WriteTorqueToEquipment(spec.TorqueTarget.Value) == null)
+                if (Screen.WriteTorqueToEquipment(spec.TorqueTarget.Value).Count == 0)
                     AppMessageBox.Warn(this, "사용 할 수 있는 너트러너가 없습니다.", Language.Pop_Title);
             }
             catch (Exception ex)

@@ -1,5 +1,6 @@
 ﻿using SEOJIN_TMES.Client.ApiClient;
 using SEOJIN_TMES.Client.Common.Models;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace SEOJIN_TMES.Client.Forms.Pop
@@ -43,7 +44,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
         // 설비
         Task SetTorqueFromEquipment(string equipmentId, decimal torqueValue, decimal angleValue);
-        string WriteTorqueToEquipment(decimal torqueTarget);
+        IReadOnlyList<string> WriteTorqueToEquipment(decimal torqueTarget);
         void WriteBomSpecTorque();
 
         // 도면(공유 폴더 파일)

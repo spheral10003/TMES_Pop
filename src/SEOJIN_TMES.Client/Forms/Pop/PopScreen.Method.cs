@@ -1101,12 +1101,14 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
         /// <summary>
         /// 지금 고른 [BOM 스팩] 행의 목표 토크를 너트러너에 쓴다(공정 이동 · 행 자동 선택 · 장비 연결 시).
-        /// 진행 중인 공정이 아니거나 연결된 너트러너가 없으면 쓰지 않는다 — 자동으로 부르는 곳이라 창도 띄우지 않는다.
+        /// 공정 상태(대기 · 진행 · 중지 · 완료)와 상관없이 쓴다 — 장비는 작업자가 조이기 전에 이미 맞춰져 있어야 하고,
+        /// 상태를 따지면 자동 시작이 늦거나 실패한 공정에서 장비가 앞 공정의 토크로 남았다(체결 실적 반영은 따로 진행 중일 때만).
+        /// 연결된 너트러너가 없으면 쓰지 않는다 — 자동으로 부르는 곳이라 창도 띄우지 않는다.
         /// 작업자가 행을 직접 고를 때는 <see cref="GridViewBomSpec_FocusedRowChanged"/>가 써 주고 실패도 알린다.
         /// </summary>
         public void WriteBomSpecTorque()
         {
-            if (!IsProcessRunning || !HasConnectedNutrunner())
+            if (!HasConnectedNutrunner())
                 return;
 
             var spec = gridViewBomSpec.GetRow(_bomSpecSelectedRow) as PopBomSpecDto;
@@ -1133,21 +1135,20 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// 목표 토크(<paramref name="torqueTarget"/>)를 쓸 너트러너를 하나 골라 토크를 설정하고 잠금을 푼다.
-        /// 나머지 연결된 너트러너는 잠가서, 작업자가 맞지 않는 공구로 체결하지 못하게 한다.
+        /// 목표 토크(<paramref name="torqueTarget"/>)를 받을 수 있는 너트러너 <b>전부</b>에 토크를 설정하고 잠금을 푼다.
+        /// 범위 밖의 연결된 너트러너는 잠가서, 작업자가 맞지 않는 공구로 체결하지 못하게 한다.
         ///
         ///  - 대상: 네트워크(Request 채널)에 연결된 장비만 — 끊긴 장비에는 어떤 값도 전달되지 않는다.
-        ///  - 선택: 서버 기준정보의 가동범위(RangeLower ~ RangeUpper, 경계 포함) 안에 목표 토크가 드는 첫 장비
-        ///          → Torque = 목표 토크, DriverLock = 0(해제)
-        ///  - 그 외(범위 밖 · 범위가 비어 있음 · 두 번째 이후 범위 안 장비) → DriverLock = 3(잠금)
+        ///  - 활성: 서버 기준정보의 가동범위(RangeLower ~ RangeUpper, 경계 포함) 안에 목표 토크가 드는 모든 장비
+        ///          → Torque = 목표 토크, PresetChange = 1, DriverLock = 0(해제)
+        ///  - 그 외(범위 밖 · 범위가 비어 있음 · 토크 쓰기 실패) → DriverLock = 3(잠금)
         /// </summary>
-        /// <returns>선택된 장비코드. 범위에 맞는 연결 장비가 없으면 null(이때 연결된 장비는 전부 잠긴다).</returns>
-        public string WriteTorqueToEquipment(decimal torqueTarget)
+        /// <returns>활성화한 장비코드 목록. 범위에 맞는 연결 장비가 없으면 빈 목록(이때 연결된 장비는 전부 잠긴다).</returns>
+        public IReadOnlyList<string> WriteTorqueToEquipment(decimal torqueTarget)
         {
+            var activated = new List<string>();
             if (_equip?.Manager == null)
-                return null;
-
-            string selectedCode = null;
+                return activated;
 
             foreach (var equipment in _equipments)
             {
@@ -1157,19 +1158,19 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 if (!_equip.Manager.TryGet(code, out INutrunner nutrunner) || !nutrunner.IsConnected)
                     continue;
 
-                if (selectedCode == null && IsInTorqueRange(equipment, torqueTarget))
+                if (IsInTorqueRange(equipment, torqueTarget))
                 {
                     // 토크를 먼저 쓰고 잠금을 푼다 — 해제 직후 이전 토크로 체결되는 틈을 없앤다.
                     if (_equip.Manager.SetTorque(code, torqueTarget)
                         && _equip.Manager.SetDriverLock(code, false))
                     {
-                        selectedCode = code;
+                        activated.Add(code);
                         AppLog.Info($"[POP] 토크 설정 · 잠금 해제 - {code} : {torqueTarget} " +
                                     $"(범위 {equipment.RangeLower} ~ {equipment.RangeUpper})");
                         continue;
                     }
 
-                    // 쓰기 실패(레지스터 범위 초과 등) — 이 장비는 잠그고 다음 장비를 찾는다.
+                    // 쓰기 실패(레지스터 범위 초과 등) — 이 장비는 잠근다.
                     AppLog.Warn($"[POP] 토크 설정 실패 - {code} : {torqueTarget}");
                 }
 
@@ -1177,10 +1178,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 AppLog.Info($"[POP] 너트러너 잠금 - {code} (범위 {equipment.RangeLower} ~ {equipment.RangeUpper}, 목표 {torqueTarget})");
             }
 
-            if (selectedCode == null)
+            if (activated.Count == 0)
                 AppLog.Warn($"[POP] 토크 설정 실패 - 목표 {torqueTarget} 를 받을 수 있는 연결된 장비가 없음");
 
-            return selectedCode;
+            return activated;
         }
 
         /// <summary>
