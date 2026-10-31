@@ -1119,7 +1119,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             WriteTorqueToEquipment(spec.TorqueTarget.Value);
         }
 
-        /// <summary>이 공정의 너트러너 중 Request 채널이 연결된 것이 하나라도 있는지.</summary>
+        /// <summary>이 공정의 너트러너 중 작업에 쓸 수 있는(<see cref="INutrunner.IsReady"/>) 것이 하나라도 있는지.</summary>
         private bool HasConnectedNutrunner()
         {
             if (_equip?.Manager == null)
@@ -1127,7 +1127,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
             foreach (var equipment in _equipments)
             {
-                if (_equip.Manager.TryGet(equipment.EquipmentCode, out INutrunner nutrunner) && nutrunner.IsConnected)
+                if (_equip.Manager.TryGet(equipment.EquipmentCode, out INutrunner nutrunner) && nutrunner.IsReady)
                     return true;
             }
 
@@ -1138,7 +1138,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// 목표 토크(<paramref name="torqueTarget"/>)를 받을 수 있는 너트러너 <b>전부</b>에 토크를 설정하고 잠금을 푼다.
         /// 범위 밖의 연결된 너트러너는 잠가서, 작업자가 맞지 않는 공구로 체결하지 못하게 한다.
         ///
-        ///  - 대상: 네트워크(Request 채널)에 연결된 장비만 — 끊긴 장비에는 어떤 값도 전달되지 않는다.
+        ///  - 대상: 작업에 쓸 수 있는(<see cref="INutrunner.IsReady"/>) 장비만 — 그리드의 "사용 가능"과 같은 기준.
+        ///          연결됐지만 이벤트 수신 확인 전인 장비는 확인되는 순간(HandleReadyChanged) 써 준다.
         ///  - 활성: 서버 기준정보의 가동범위(RangeLower ~ RangeUpper, 경계 포함) 안에 목표 토크가 드는 모든 장비
         ///          → Torque = 목표 토크, PresetChange = 1, DriverLock = 0(해제)
         ///  - 그 외(범위 밖 · 범위가 비어 있음 · 토크 쓰기 실패) → DriverLock = 3(잠금)
@@ -1154,8 +1155,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             {
                 var code = equipment.EquipmentCode;
 
-                // 연결 안 된 장비는 잠금도 보낼 수 없으므로 건너뛴다.
-                if (!_equip.Manager.TryGet(code, out INutrunner nutrunner) || !nutrunner.IsConnected)
+                // 아직 쓸 수 없는 장비는 건너뛴다 — 핸드셰이크(EventDataEnable)보다 먼저 줄을 서지 않게.
+                if (!_equip.Manager.TryGet(code, out INutrunner nutrunner) || !nutrunner.IsReady)
                     continue;
 
                 if (IsInTorqueRange(equipment, torqueTarget))

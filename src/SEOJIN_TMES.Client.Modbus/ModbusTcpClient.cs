@@ -57,6 +57,11 @@ namespace SEOJIN_TMES.Client.Modbus
 
         public bool IsConnected => _transport.IsConnected;
 
+        public bool HasPendingRequests
+        {
+            get { lock (_txSync) { return _inFlight.HasValue || _pending.Count > 0; } }
+        }
+
         /// <summary>
         /// 이 클라이언트가 보내는 모든 요청에 사용할 Transaction ID.
         /// 기존 구현과 동일하게 요청마다 증가시키지 않고, 장비(연결)를 구분하는

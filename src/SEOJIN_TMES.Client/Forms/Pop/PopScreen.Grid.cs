@@ -510,7 +510,11 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
         /// <summary>
         /// [연결 장비] 탭의 통신상태/장비상태를 현재 Modbus 연결 상태로 덮어쓴다.
-        /// 표준 채널이 연결되고 이벤트 수신이 켜져 있어야 "연결 성공"으로 본다.
+        ///  - 사용 가능(<see cref="INutrunner.IsReady"/>)         → 연결 성공 / 사용 가능
+        ///  - Request 채널만 붙고 이벤트 수신 확인 전             → 연결 중 / 사용불가
+        ///    (예전에는 이 구간도 "연결 실패"로 그려 연결 직후 빨갛게 보였다)
+        ///  - 그 외                                              → 연결 실패 / 사용불가
+        /// ReadyChanged · ConnectionChanged가 올 때 부른다.
         /// </summary>
         public void RefreshEquipmentStates()
         {
@@ -522,10 +526,15 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 if (!_equip.Manager.TryGet(equipment.EquipmentCode, out INutrunner nutrunner) || nutrunner == null)
                     continue;
 
-                if (nutrunner.IsConnected && nutrunner.IsEventEnabled)
+                if (nutrunner.IsReady)
                 {
                     equipment.CommunicationState = Language.Pop_CommConnected;
                     equipment.EquipmentState = Language.Pop_EquipmentUsable;
+                }
+                else if (nutrunner.IsConnected)
+                {
+                    equipment.CommunicationState = Language.Pop_CommConnecting;
+                    equipment.EquipmentState = Language.Pop_EquipmentUnusable;
                 }
                 else
                 {
@@ -903,7 +912,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         //  [연결 장비] 그리드 이벤트
         // ─────────────────────────────────────────────────────────────────────────
 
-        /// <summary>연결 실패/사용불가 상태는 붉은 글씨로 눈에 띄게 한다(상태 표시일 뿐 판정은 아니다).</summary>
+        /// <summary>
+        /// 연결 실패/사용불가 상태는 붉은 글씨로 눈에 띄게 한다(상태 표시일 뿐 판정은 아니다).
+        /// 연결 중(이벤트 수신 확인 대기)은 곧 바뀔 상태라 실패와 구분해 주황으로 둔다.
+        /// </summary>
         private void GridViewEquipment_RowCellStyle(object sender, RowCellStyleEventArgs e)
         {
             if (e.Column.FieldName != "CommunicationState" && e.Column.FieldName != "EquipmentState")
@@ -913,8 +925,12 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (equipment == null)
                 return;
 
-            var connected = equipment.CommunicationState == Language.Pop_CommConnected;
-            e.Appearance.ForeColor = connected ? AppTheme.Emerald : AppTheme.Rose;
+            if (equipment.CommunicationState == Language.Pop_CommConnected)
+                e.Appearance.ForeColor = AppTheme.Emerald;
+            else if (equipment.CommunicationState == Language.Pop_CommConnecting)
+                e.Appearance.ForeColor = AppTheme.Amber;
+            else
+                e.Appearance.ForeColor = AppTheme.Rose;
         }
 
         /// <summary>

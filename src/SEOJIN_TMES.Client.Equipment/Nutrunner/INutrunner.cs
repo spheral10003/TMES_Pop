@@ -26,6 +26,18 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
 
         bool IsEventEnabled { get; }
 
+        /// <summary>
+        /// 작업에 쓸 수 있는 상태인지 — Request 채널이 연결돼 있고 장비가 EventDataEnable을 받아들였다(체결 결과가 올라온다).
+        /// 화면의 "사용 가능" 표시와 토크 · 잠금 쓰기 대상은 이 값 하나로 정한다.
+        /// </summary>
+        bool IsReady { get; }
+
+        /// <summary>
+        /// <see cref="IsReady"/>가 바뀌었을 때(연결 · 끊김 · 이벤트 수신 확인 · 이벤트 채널 끊김).
+        /// 인자의 IsConnected는 바뀐 뒤의 <see cref="IsReady"/>다. 수신 스레드 · 시퀀스 스레드에서 올라온다.
+        /// </summary>
+        event EventHandler<EquipmentConnectionEventArgs>? ReadyChanged;
+
         /// <summary>Event Transport 채널만 다시 연결한다.</summary>
         void ConnectEventChannel();
 

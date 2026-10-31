@@ -21,6 +21,9 @@ namespace SEOJIN_TMES.Client.Equipment.Management
         INutrunner? this[int id] { get; }
 
         event EventHandler<EquipmentConnectionEventArgs>? ConnectionChanged;
+
+        /// <summary>장비의 <see cref="INutrunner.IsReady"/>가 바뀌었을 때. 화면의 장비 상태 표시는 이 이벤트로 갱신한다.</summary>
+        event EventHandler<EquipmentConnectionEventArgs>? ReadyChanged;
         event EventHandler<NutrunnerRegisterEventArgs>? RegisterDataReceived;
         event EventHandler<NutrunnerFasteningEventArgs>? FasteningReceived;
         event EventHandler<AlarmEventArgs>? AlarmOccurred;

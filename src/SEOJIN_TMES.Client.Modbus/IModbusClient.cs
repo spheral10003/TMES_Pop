@@ -17,6 +17,13 @@ namespace SEOJIN_TMES.Client.Modbus
     {
         bool IsConnected { get; }
 
+        /// <summary>
+        /// 응답을 기다리거나 보낼 차례를 기다리는 요청이 있는지.
+        /// 요청은 하나씩 응답을 받은 뒤 다음 것을 보내므로, 같은 요청을 다시 보낼지 정할 때
+        /// 앞서 보낸 것이 아직 줄에 있는지 확인하는 데 쓴다.
+        /// </summary>
+        bool HasPendingRequests { get; }
+
         event EventHandler? Connected;
         event EventHandler? Disconnected;
         event EventHandler<Exception>? ErrorOccurred;

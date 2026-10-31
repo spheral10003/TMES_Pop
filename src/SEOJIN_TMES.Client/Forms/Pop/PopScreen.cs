@@ -214,6 +214,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
             // 시작 직후의 첫 연결 이벤트를 놓치지 않도록 구독을 먼저 한다.
             _equip.Manager.ConnectionChanged += OnConnectionChanged;
+            _equip.Manager.ReadyChanged += OnReadyChanged;
             _equip.Manager.AlarmOccurred += OnErrorOccurred;
             _equip.Manager.RegisterDataReceived += OnRegisterDataReceived;
             _equip.Manager.FasteningReceived += OnFasteningReceived;
@@ -229,6 +230,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private void UnwireEquipmentEvents()
         {
             _equip.Manager.ConnectionChanged -= OnConnectionChanged;
+            _equip.Manager.ReadyChanged -= OnReadyChanged;
             _equip.Manager.AlarmOccurred -= OnErrorOccurred;
             _equip.Manager.RegisterDataReceived -= OnRegisterDataReceived;
             _equip.Manager.FasteningReceived -= OnFasteningReceived;
@@ -557,6 +559,11 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             InvokeIfRequired(HandleConnectionChanged, e);
         }
 
+        private void OnReadyChanged(object sender, EquipmentConnectionEventArgs e)
+        {
+            InvokeIfRequired(HandleReadyChanged, e);
+        }
+
         /// <summary>
         /// 알람은 로그로 남긴다. 재연결을 3회 연속 실패한 알람(ConnectFailed)만 작업자에게 창으로 알린다 —
         /// 재연결은 뒤에서 계속되지만(NutrunnerSequence) 그동안 체결이 들어오지 않으므로 알아채야 한다.
@@ -622,7 +629,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (!e.Success)
                 return;
 
-            Screen.RefreshEquipmentStates();
+            // 장비 상태 표시는 ReadyChanged · ConnectionChanged로 갱신한다 — 응답마다 그리드를 다시 그리지 않는다.
 
             // Alive(상태 레지스터 읽기)는 5초마다 와서 로그 · 콘솔을 덮는다 — 연결 확인에만 쓰고 기록하지 않는다.
             if (e.StartAddress == (ushort)NutrunnerRegister.Status)
@@ -637,8 +644,18 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         {
             AppLog.Info($"[ID {e.Code}] {(e.IsConnected ? "연결 됨" : "연결 끊김")}");
             Screen.RefreshEquipmentStates();
+        }
 
-            // 화면 진입 직후에는 너트러너가 아직 붙기 전이라 행을 골라도 목표 토크를 쓰지 못한다 — 붙는 순간 써 준다.
+        /// <summary>
+        /// 장비가 작업에 쓸 수 있게 되거나(이벤트 수신 확인) 쓸 수 없게 된 순간.
+        /// 목표 토크는 연결 직후가 아니라 여기서 쓴다 — 연결 직후에 쓰면 토크 · 프리셋 · 잠금 쓰기 3건이
+        /// EventDataEnable보다 먼저 줄을 서서, 장비가 하나라도 응답하지 않으면 "사용 가능" 표시가 그만큼(건당 응답 대기) 늦었다.
+        /// </summary>
+        private void HandleReadyChanged(EquipmentConnectionEventArgs e)
+        {
+            AppLog.Info($"[ID {e.Code}] {(e.IsConnected ? "사용 가능(이벤트 수신 확인)" : "사용 불가")}");
+            Screen.RefreshEquipmentStates();
+
             if (e.IsConnected)
                 Screen.WriteBomSpecTorque();
         }

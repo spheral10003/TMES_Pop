@@ -19,6 +19,7 @@ namespace SEOJIN_TMES.Client.Equipment.Management
         private bool _disposed;
 
         public event EventHandler<EquipmentConnectionEventArgs>? ConnectionChanged;
+        public event EventHandler<EquipmentConnectionEventArgs>? ReadyChanged;
         public event EventHandler<NutrunnerRegisterEventArgs>? RegisterDataReceived;
         public event EventHandler<NutrunnerFasteningEventArgs>? FasteningReceived;
         public event EventHandler<AlarmEventArgs>? AlarmOccurred;
@@ -51,6 +52,7 @@ namespace SEOJIN_TMES.Client.Equipment.Management
             // 딕셔너리에 넣기 전에 구독을 끝내야 Start() 직후의 첫 이벤트를 놓치지 않는다.
             device.Connected += OnConnectionChanged;
             device.Disconnected += OnConnectionChanged;
+            device.ReadyChanged += OnReadyChanged;
             device.RegisterDataReceived += OnRegisterDataReceived;
             device.FasteningReceived += OnFasteningReceived;
             device.ConnectAttempted += OnConnectAttempted;
@@ -259,6 +261,7 @@ namespace SEOJIN_TMES.Client.Equipment.Management
 
             device.Connected -= OnConnectionChanged;
             device.Disconnected -= OnConnectionChanged;
+            device.ReadyChanged -= OnReadyChanged;
             device.RegisterDataReceived -= OnRegisterDataReceived;
             device.FasteningReceived -= OnFasteningReceived;
             device.ConnectAttempted -= OnConnectAttempted;
@@ -268,6 +271,9 @@ namespace SEOJIN_TMES.Client.Equipment.Management
 
         private void OnConnectionChanged(object? sender, EquipmentConnectionEventArgs e)
             => ConnectionChanged?.Invoke(this, e);
+
+        private void OnReadyChanged(object? sender, EquipmentConnectionEventArgs e)
+            => ReadyChanged?.Invoke(this, e);
 
         private void OnRegisterDataReceived(object? sender, NutrunnerRegisterEventArgs e)
             => RegisterDataReceived?.Invoke(this, e);

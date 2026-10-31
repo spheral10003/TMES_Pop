@@ -68,6 +68,10 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
         private volatile bool _eventEnabled;
         private int _eventEnableRetry;
 
+        /// <summary>마지막으로 알린 <see cref="IsReady"/>. 바뀔 때만 <see cref="ReadyChanged"/>를 올리려고 둔다.</summary>
+        private bool _lastReady;
+        private readonly object _readySync = new();
+
         /// <summary>
         /// 각 채널이 접속을 시도하는 중인지. 접속 실패는 별도 이벤트 없이 ErrorOccurred로만 올라오므로,
         /// 시도 중에 난 오류를 "접속 실패"로 한 번만 보고하기 위해 둔다.
@@ -79,6 +83,10 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
 
         /// <summary>장비가 EventDataEnable 쓰기를 받았음을 응답으로 확인했는지 여부.</summary>
         public bool IsEventEnabled => _eventEnabled;
+
+        public bool IsReady => _client.IsConnected && _eventEnabled;
+
+        public event EventHandler<EquipmentConnectionEventArgs>? ReadyChanged;
 
         public event EventHandler<EquipmentConnectionEventArgs>? Connected;
         public event EventHandler<EquipmentConnectionEventArgs>? Disconnected;
@@ -245,6 +253,30 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
                 _eventEnableRetry = 0;
                 _eventEnableTimer.Restart();
             }
+
+            UpdateReady();
+        }
+
+        /// <summary>
+        /// <see cref="IsReady"/>가 마지막으로 알린 값과 다르면 <see cref="ReadyChanged"/>를 올린다.
+        /// 화면은 이 이벤트로만 장비 상태를 다시 그린다 — 예전에는 Alive 응답에 얹혀 다시 그려서
+        /// 이벤트 채널이 끊기거나 핸드셰이크가 끝난 것이 다음 응답(최대 5초)까지 화면에 늦게 나왔다.
+        /// </summary>
+        private void UpdateReady()
+        {
+            bool ready;
+            lock (_readySync)
+            {
+                ready = IsReady;
+                if (ready == _lastReady)
+                {
+                    return;
+                }
+
+                _lastReady = ready;
+            }
+
+            ReadyChanged?.Invoke(this, new EquipmentConnectionEventArgs(Info.Code, ready));
         }
 
         /// <summary>
@@ -262,6 +294,14 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
             {
                 double wait = _eventEnableRetry == 0 ? EventEnableDelayMs : EventEnableTimeoutMs;
                 if (_eventEnableTimer.Elapsed.TotalMilliseconds < wait)
+                {
+                    return;
+                }
+
+                // 다시 보낼 때는 앞서 보낸 요청이 모두 끝난(응답 · 시간 초과) 뒤에만 보낸다.
+                // 요청은 하나씩 응답을 기다려(응답 대기 2000ms) 1초마다 보내면 처리보다 빨리 쌓이고,
+                // 장비가 다시 응답해도 쌓인 4015를 다 비울 때까지 "사용 가능"이 늦게 떴다(2026-10-31 로그).
+                if (_eventEnableRetry > 0 && _client.HasPendingRequests)
                 {
                     return;
                 }
@@ -296,6 +336,9 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
         private void OnClientDisconnected(object? sender, EventArgs e)
         {
             _eventTransport.Disconnect();
+
+            // 이벤트 채널이 끊김 이벤트 없이 정리되더라도 "사용 가능"이 남지 않게 여기서도 핸드셰이크를 되돌린다.
+            ResetEventHandshake();
             Disconnected?.Invoke(this, new EquipmentConnectionEventArgs(Info.Code, false));
         }
 
@@ -329,6 +372,9 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
                 && response.StartAddress == (ushort)NutrunnerRegister.EventDataEnable)
             {
                 _eventEnabled = true;
+
+                // 응답 이벤트(RegisterDataReceived)보다 먼저 알린다 — 화면이 "사용 가능"으로 바꾸고 토크를 쓰는 시점.
+                UpdateReady();
             }
 
             // 설정 레지스터 쓰기의 응답만 이력으로 올린다(핸드셰이크 · Ack · Alive 응답은 제외).
