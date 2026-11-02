@@ -432,6 +432,11 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             gridViewInspection.RefreshData();
             gridViewEquipment.RefreshData();
 
+            // 서버가 새로 준 장비 목록은 통신상태가 "Disconnected"로 비어 있다. 이미 연결된 장비는
+            // ReadyChanged · ConnectionChanged가 다시 오지 않으므로, 재조회(상태 전이 · 공정 이동 · 409 재조회)마다
+            // 현재 Modbus 상태로 바로 채운다 — 그러지 않으면 연결돼 있는데도 "연결 실패/사용불가"로 남는다.
+            RefreshEquipmentStates();
+
             // 바인딩 중 포커스가 움직여도 너트러너에 토크를 쓰지 않는다.
             BeginBomSpecRedraw();
             try
