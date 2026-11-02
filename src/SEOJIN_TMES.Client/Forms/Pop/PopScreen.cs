@@ -123,6 +123,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 btnZoomIn.Click += BtnZoomIn_Click;
                 btnZoomOut.Click += BtnZoomOut_Click;
                 btnFit.Click += BtnFit_Click;
+
+                // ImageBox는 기본값(AllowDoubleClick=false)이면 DoubleClick 이벤트 자체를 올리지 않는다.
+                picView.AllowDoubleClick = true;
+                picView.DoubleClick += PicView_DoubleClick;
             }
         }
 
@@ -601,6 +605,34 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private void BtnFit_Click(object sender, EventArgs e)
         {
             _viewer?.ZoomToFit();
+        }
+
+        /// <summary>
+        /// 도면 더블클릭 → 도면이 떠 있는 모니터 전체로 크게 본다.
+        /// 전체화면 창은 받은 그림을 소유·해제하므로 원본이 아닌 복사본을 넘긴다(<see cref="DrawingFullScreenForm"/> 참고).
+        /// </summary>
+        private void PicView_DoubleClick(object sender, EventArgs e)
+        {
+            if (_viewer == null || !_viewer.HasImage || picView.Image == null) return;
+
+            Image copy = null;
+            try
+            {
+                copy = new Bitmap(picView.Image);
+                using (var form = new DrawingFullScreenForm())
+                {
+                    form.Initialize(copy, System.Windows.Forms.Screen.FromControl(picView));   // Screen은 이 화면의 IPopScreen 속성과 이름이 겹친다
+                    copy = null;   // 이제 form 소유 — 닫힐 때 form이 해제한다
+                    form.ShowDialog(FindForm());
+                }
+            }
+            catch (Exception ex)
+            {
+                copy?.Dispose();
+                AppLog.Error("[POP] 도면 전체화면 표시 실패", ex);
+                if (IsDisposed || Disposing) return;
+                AppMessageBox.Warn(this, Language.Pop_DrawingLoadFailed);
+            }
         }
 
         // ─────────────────────────────────────────────────────────────────────────
