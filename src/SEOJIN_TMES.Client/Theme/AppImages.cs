@@ -240,6 +240,24 @@ namespace SEOJIN_TMES.Client.Theme
         public static Image Icon(string resourceName, int size, Color tint) =>
             Raster(resourceName, new Size(size, size), tint);
 
+        /// <summary>
+        /// 이미 읽어 둔 그림(디자이너 resx의 버튼 아이콘 등)을 지정 크기로 다시 그린 새 비트맵.
+        /// 화면 비율 스케일(<see cref="Forms.Common.ScreenScaler"/>)이 배율이 바뀔 때마다 부르므로 캐시하지 않는다 —
+        /// 돌려받은 그림은 <b>호출한 쪽이 Dispose</b>한다.
+        /// </summary>
+        public static Image Resized(Image source, Size size)
+        {
+            var scaled = new Bitmap(Math.Max(1, size.Width), Math.Max(1, size.Height), System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            using (var graphics = Graphics.FromImage(scaled))
+            {
+                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                graphics.PixelOffsetMode = PixelOffsetMode.HighQuality;
+                graphics.DrawImage(source, new Rectangle(Point.Empty, scaled.Size));
+            }
+
+            return scaled;
+        }
+
         /// <summary>언어 국기 아이콘. 원래 색을 그대로 살려야 하므로 칠하지 않고 크기만 맞춘다.</summary>
         public static Image Flag(string twoLetterCode, int size) =>
             Raster(FlagResourcePrefix + twoLetterCode + ".png", new Size(size, size), Color.Empty);

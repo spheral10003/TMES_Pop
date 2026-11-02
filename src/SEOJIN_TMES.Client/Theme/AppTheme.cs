@@ -217,6 +217,21 @@ namespace SEOJIN_TMES.Client.Theme
         public static Font CardTitleFont => new Font(FontFamily, 14F, FontStyle.Bold);
 
         /// <summary>
+        /// 화면 비율 축소 · 다국어 글자 축소가 내려갈 수 있는 가장 작은 글자 크기(pt).
+        /// 1280×1024 같은 작은 화면에서 비율대로만 줄이면 6pt 아래로 내려가는데, 그러면 현장 거리에서 읽을 수 없다.
+        /// 이보다 더 좁으면 글자를 줄이지 않고 잘리게(말줄임) 둔다.
+        /// </summary>
+        public const float MinScaledFontSize = 6F;
+
+        /// <summary>
+        /// 글꼴 · 스타일은 그대로 두고 크기만 바꾼 새 글꼴(<see cref="MinScaledFontSize"/> 아래로는 내려가지 않는다).
+        /// 화면 비율 스케일(<see cref="Forms.Common.ScreenScaler"/>)과 다국어 글자 맞춤(<see cref="Forms.Common.TextFitter"/>)이 쓴다.
+        /// 돌려받은 글꼴은 <b>호출한 쪽이 Dispose</b>한다 — 크기가 바뀔 때마다 새로 만들기 때문이다.
+        /// </summary>
+        public static Font ResizedFont(Font source, float emSize) =>
+            new Font(source.FontFamily, Math.Max(MinScaledFontSize, emSize), source.Style, source.Unit, source.GdiCharSet, source.GdiVerticalFont);
+
+        /// <summary>
         /// 전역 스킨 + SVG 팔레트를 적용한다(DevExpress 벡터 스킨 기능).
         /// Basic 스킨의 VioletLight/VioletDark 팔레트를 쓰면 시안의 남보라 톤과 자연스럽게 이어진다.
         /// </summary>
@@ -1089,6 +1104,26 @@ namespace SEOJIN_TMES.Client.Theme
             e.Appearance.BackColor = GridNgRow;
             e.Appearance.Options.UseBackColor = true;
             e.HighPriority = true;
+        }
+
+        /// <summary>
+        /// 다국어로 글자 길이가 달라질 때의 그리드 규칙.
+        ///  - 머리글 : <b>줄바꿈</b>. 컬럼 폭은 화면 폭에 맞춰 나눠 갖기(ColumnAutoWidth) 때문에 좁은 화면 · 긴 번역에서
+        ///            머리글이 잘리는데, 머리글 줄 높이는 자동이라 두 줄로 내려 쓰면 뜻이 다 보인다.
+        ///            글자를 줄이면 컬럼마다 크기가 달라져 표가 들쭉날쭉해진다.
+        ///  - 셀     : <b>말줄임(…) + 힌트</b>. 행 높이는 모든 행이 같아야 해서 줄바꿈 · 축소 모두 맞지 않는다.
+        ///            잘린 칸은 마우스를 올리면 전체 값이 힌트로 뜬다.
+        /// </summary>
+        public static void GridTextFit(GridView view)
+        {
+            view.Appearance.HeaderPanel.TextOptions.WordWrap = WordWrap.Wrap;
+            view.Appearance.HeaderPanel.Options.UseTextOptions = true;
+
+            view.Appearance.Row.TextOptions.Trimming = Trimming.EllipsisCharacter;
+            view.Appearance.Row.Options.UseTextOptions = true;
+
+            view.OptionsHint.ShowCellHints = true;
+            view.OptionsHint.ShowColumnHeaderHints = true;
         }
 
         /// <summary>

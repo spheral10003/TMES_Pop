@@ -357,9 +357,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 
             this.lblWorkOrderNo.Appearance.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblWorkOrderNo.Appearance.Options.UseFont = true;
+            this.lblWorkOrderNo.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.None;
             this.lblWorkOrderNo.Location = new System.Drawing.Point(14, 14);
             this.lblWorkOrderNo.Name = "lblWorkOrderNo";
-            this.lblWorkOrderNo.Size = new System.Drawing.Size(88, 18);
+            this.lblWorkOrderNo.Size = new System.Drawing.Size(190, 18);
             this.lblWorkOrderNo.TabIndex = 0;
             this.lblWorkOrderNo.Text = "· 작업지시번호";
             // 
@@ -380,9 +381,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 
             this.lblItemCode.Appearance.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblItemCode.Appearance.Options.UseFont = true;
+            this.lblItemCode.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.None;
             this.lblItemCode.Location = new System.Drawing.Point(14, 49);
             this.lblItemCode.Name = "lblItemCode";
-            this.lblItemCode.Size = new System.Drawing.Size(88, 18);
+            this.lblItemCode.Size = new System.Drawing.Size(190, 18);
             this.lblItemCode.TabIndex = 2;
             this.lblItemCode.Text = "· 생산품목코드";
             // 
@@ -403,9 +405,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 
             this.lblProductSerialNo.Appearance.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblProductSerialNo.Appearance.Options.UseFont = true;
+            this.lblProductSerialNo.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.None;
             this.lblProductSerialNo.Location = new System.Drawing.Point(14, 84);
             this.lblProductSerialNo.Name = "lblProductSerialNo";
-            this.lblProductSerialNo.Size = new System.Drawing.Size(132, 18);
+            this.lblProductSerialNo.Size = new System.Drawing.Size(190, 18);
             this.lblProductSerialNo.TabIndex = 4;
             this.lblProductSerialNo.Text = "· 생산품목 시리얼번호";
             // 
@@ -426,9 +429,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 
             this.lblRoutingGroup.Appearance.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblRoutingGroup.Appearance.Options.UseFont = true;
+            this.lblRoutingGroup.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.None;
             this.lblRoutingGroup.Location = new System.Drawing.Point(14, 119);
             this.lblRoutingGroup.Name = "lblRoutingGroup";
-            this.lblRoutingGroup.Size = new System.Drawing.Size(80, 18);
+            this.lblRoutingGroup.Size = new System.Drawing.Size(190, 18);
             this.lblRoutingGroup.TabIndex = 6;
             this.lblRoutingGroup.Text = "· 라우팅 그룹";
             // 
@@ -449,9 +453,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 
             this.lblRoutingOperation.Appearance.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblRoutingOperation.Appearance.Options.UseFont = true;
+            this.lblRoutingOperation.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.None;
             this.lblRoutingOperation.Location = new System.Drawing.Point(14, 154);
             this.lblRoutingOperation.Name = "lblRoutingOperation";
-            this.lblRoutingOperation.Size = new System.Drawing.Size(80, 18);
+            this.lblRoutingOperation.Size = new System.Drawing.Size(190, 18);
             this.lblRoutingOperation.TabIndex = 8;
             this.lblRoutingOperation.Text = "· 라우팅 공정";
             // 
@@ -472,9 +477,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 
             this.lblPageOperation.Appearance.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblPageOperation.Appearance.Options.UseFont = true;
+            this.lblPageOperation.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.None;
             this.lblPageOperation.Location = new System.Drawing.Point(14, 189);
             this.lblPageOperation.Name = "lblPageOperation";
-            this.lblPageOperation.Size = new System.Drawing.Size(80, 18);
+            this.lblPageOperation.Size = new System.Drawing.Size(190, 18);
             this.lblPageOperation.TabIndex = 10;
             this.lblPageOperation.Text = "· 페이지 공정";
             // 
@@ -495,9 +501,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 
             this.lblPageStartTime.Appearance.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblPageStartTime.Appearance.Options.UseFont = true;
+            this.lblPageStartTime.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.None;
             this.lblPageStartTime.Location = new System.Drawing.Point(14, 224);
             this.lblPageStartTime.Name = "lblPageStartTime";
-            this.lblPageStartTime.Size = new System.Drawing.Size(137, 18);
+            this.lblPageStartTime.Size = new System.Drawing.Size(190, 18);
             this.lblPageStartTime.TabIndex = 12;
             this.lblPageStartTime.Text = "· 페이지 공정 시작시각";
             // 
@@ -518,9 +525,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 
             this.lblPageEndTime.Appearance.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblPageEndTime.Appearance.Options.UseFont = true;
+            this.lblPageEndTime.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.None;
             this.lblPageEndTime.Location = new System.Drawing.Point(14, 259);
             this.lblPageEndTime.Name = "lblPageEndTime";
-            this.lblPageEndTime.Size = new System.Drawing.Size(137, 18);
+            this.lblPageEndTime.Size = new System.Drawing.Size(190, 18);
             this.lblPageEndTime.TabIndex = 14;
             this.lblPageEndTime.Text = "· 페이지 공정 종료시각";
             // 
@@ -541,9 +549,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 
             this.lblPageRunTime.Appearance.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblPageRunTime.Appearance.Options.UseFont = true;
+            this.lblPageRunTime.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.None;
             this.lblPageRunTime.Location = new System.Drawing.Point(14, 294);
             this.lblPageRunTime.Name = "lblPageRunTime";
-            this.lblPageRunTime.Size = new System.Drawing.Size(137, 18);
+            this.lblPageRunTime.Size = new System.Drawing.Size(190, 18);
             this.lblPageRunTime.TabIndex = 16;
             this.lblPageRunTime.Text = "· 페이지 공정 가동시간";
             // 
@@ -564,9 +573,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 
             this.lblPageIdleTime.Appearance.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblPageIdleTime.Appearance.Options.UseFont = true;
+            this.lblPageIdleTime.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.None;
             this.lblPageIdleTime.Location = new System.Drawing.Point(14, 329);
             this.lblPageIdleTime.Name = "lblPageIdleTime";
-            this.lblPageIdleTime.Size = new System.Drawing.Size(150, 18);
+            this.lblPageIdleTime.Size = new System.Drawing.Size(190, 18);
             this.lblPageIdleTime.TabIndex = 18;
             this.lblPageIdleTime.Text = "· 페이지 공정 비가동시간";
             // 
@@ -587,9 +597,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 
             this.lblPageWorkTime.Appearance.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblPageWorkTime.Appearance.Options.UseFont = true;
+            this.lblPageWorkTime.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.None;
             this.lblPageWorkTime.Location = new System.Drawing.Point(14, 364);
             this.lblPageWorkTime.Name = "lblPageWorkTime";
-            this.lblPageWorkTime.Size = new System.Drawing.Size(137, 18);
+            this.lblPageWorkTime.Size = new System.Drawing.Size(190, 18);
             this.lblPageWorkTime.TabIndex = 20;
             this.lblPageWorkTime.Text = "· 페이지 공정 작업시간";
             // 

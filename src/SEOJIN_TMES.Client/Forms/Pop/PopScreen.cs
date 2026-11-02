@@ -73,6 +73,15 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// <summary>서버가 이 공정에서 [수동 렌치]를 허용했는지.</summary>
         private bool _bomManualEnabled;
 
+        /// <summary>
+        /// 기준 해상도(1920×1080) 대비 비율로 화면 전체를 확대 · 축소한다. 생성자에서 디자이너 값을 기준으로 잡고,
+        /// Load에서 contentHost에 붙인다(<see cref="AttachScaling"/>).
+        /// </summary>
+        private readonly ScreenScaler _scaler;
+
+        /// <summary>다국어 문구가 칸을 넘으면 글자를 줄인다(배율 적용 글꼴 기준).</summary>
+        private readonly TextFitter _textFitter;
+
         /// <summary>이벤트 핸들러가 처리를 부르는 창구 — 구현이 Grid / Method 중 어디에 있는지 몰라도 되게 한다.</summary>
         private IPopScreen Screen => this;
 
@@ -84,6 +93,11 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         {
             InitializeComponent();
             _entry = entry;
+
+            // 디자이너 값 그대로일 때 기준을 잡아야 한다 — contentHost에 붙어 늘어난 뒤에는 앵커 위치가 이미 움직여 있다.
+            _scaler = new ScreenScaler(this);
+            _scaler.Rescaled += Scaler_Rescaled;
+            _textFitter = new TextFitter(_scaler);
         }
 
         // ─────────────────────────────────────────────────────────────────────────
@@ -178,6 +192,39 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             viewerSurface.Invalidate();
         }
 
+        /// <summary>
+        /// 화면을 contentHost 크기에 맞춰 비율 스케일하고, 다국어 문구 맞춤 대상을 등록한다.
+        /// 테마 · 그리드 구성 뒤에 불러야 한다 — 그때의 글꼴 · 행 높이가 배율 1.0의 기준이 된다.
+        /// </summary>
+        private void AttachScaling()
+        {
+            if (Parent == null)
+                return;
+
+            _scaler.Attach(Parent);
+
+            // 한 줄 칸(버튼 · 상태 표시 · 항목 이름)은 글자 축소, 안내 문구 상자는 줄바꿈 우선.
+            // 제목(lblInfoTitle)은 자동 크기 라벨이라 대상이 아니다 — 카드 폭에 비해 짧아 넘칠 일도 없다.
+            _textFitter.Register(TextFitMode.Shrink,
+                btnPrevProcess, btnNextProcess, btnStopProcess, btnProcessList, btnAdminAlarm,
+                lblWorkerTile, lblWorker, lblWorkstation, lblProgressState,
+                lblWorkOrderNo, lblItemCode, lblProductSerialNo, lblRoutingGroup, lblRoutingOperation,
+                lblPageOperation, lblPageStartTime, lblPageEndTime, lblPageRunTime, lblPageIdleTime, lblPageWorkTime,
+                chkManualWrench);
+            _textFitter.Register(TextFitMode.Wrap, lblMessage);
+        }
+
+        /// <summary>
+        /// 배율을 다시 맞추면 크기가 디자이너 값(펼친 상태) × 배율로 돌아간다 — 접어 둔 패널은 다시 접는다.
+        /// </summary>
+        private void Scaler_Rescaled(object sender, EventArgs e)
+        {
+            if (!_infoExpanded)
+                SetInfoExpanded(false);
+            if (!_bottomExpanded)
+                SetBottomExpanded(false);
+        }
+
         /// <summary>중지 버튼이 서버에 요청할 동작. 서버 상태에 따라 stop ↔ resume으로 바뀐다.</summary>
         private void InitActionTiles()
         {
@@ -265,6 +312,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 // 도면을 넓게 보는 것이 먼저라 우측 공정 정보는 접힌 채로 시작한다(손잡이로 펼친다).
                 SetInfoExpanded(false);
 
+                AttachScaling();
+
                 // 화면 틀을 먼저 보여 준 뒤 조회한다(ScreenLoad 참고).
                 ScreenLoad.AfterPaint(this, ShowInitialData);
             }
@@ -309,6 +358,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 들고 있던 도면 이미지를 해제한다.
             _viewer?.Dispose();
             _viewer = null;
+
+            // contentHost는 앱이 끝날 때까지 남으므로 Resize 구독을 끊어야 닫힌 화면이 붙들려 있지 않는다.
+            _textFitter.Dispose();
+            _scaler.Dispose();
         }
 
         // ─────────────────────────────────────────────────────────────────────────

@@ -34,6 +34,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// <summary>기준정보에 설비 포트가 없거나 숫자가 아닐 때 쓰는 Modbus 포트(이벤트 포트는 +1).</summary>
         private const int DefaultEquipmentPort = 5000;
 
+        // 아래 폭 · 높이는 디자이너(배율 1.0) 기준이다 — 넣을 때 _scaler.Scale()로 지금 배율에 맞춘다.
+
         /// <summary>접었을 때 남기는 우측 패널 폭 = 세로 손잡이 띠의 폭.</summary>
         private const int InfoCollapsedWidth = 26;
 
@@ -1347,7 +1349,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 lblInfoTitle.Visible = expanded;
                 fieldPanel.Visible = expanded;
 
-                infoCard.Width = expanded ? InfoExpandedWidth : InfoCollapsedWidth;
+                infoCard.Width = _scaler.Scale(expanded ? InfoExpandedWidth : InfoCollapsedWidth);
                 spacerMain.Visible = expanded;
             }
             finally
@@ -1370,8 +1372,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             {
                 // 접었을 때 높이 = 탭 줄 + 카드 안쪽 여백(위/아래).
                 bottomCard.Height = expanded
-                    ? BottomExpandedHeight
-                    : bottomCard.Padding.Vertical + 4 + pnlTabHead.Height;
+                    ? _scaler.Scale(BottomExpandedHeight)
+                    : bottomCard.Padding.Vertical + _scaler.Scale(4) + pnlTabHead.Height;
             }
             finally
             {

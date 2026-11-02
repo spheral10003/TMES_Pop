@@ -97,7 +97,12 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             InitEquipmentGrid();
 
             foreach (var view in new GridView[] { gridViewMaterial, gridViewBomSpec, gridViewInspection, gridViewEquipment })
+            {
                 LockGridCustomization(view);
+
+                // 다국어 · 작은 화면에서 머리글은 줄바꿈, 셀은 말줄임 + 힌트(AppTheme.GridTextFit 참고).
+                AppTheme.GridTextFit(view);
+            }
         }
 
         /// <summary>
