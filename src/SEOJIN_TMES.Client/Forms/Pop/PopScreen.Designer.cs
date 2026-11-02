@@ -35,13 +35,12 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PopScreen));
-            ImageBoxExtensions.DefaultGifAnimator defaultGifAnimator4 = new ImageBoxExtensions.DefaultGifAnimator();
+            ImageBoxExtensions.DefaultGifAnimator defaultGifAnimator2 = new ImageBoxExtensions.DefaultGifAnimator();
             this.btnPrevProcess = new System.Windows.Forms.Button();
             this.spacerTop = new System.Windows.Forms.Panel();
             this.mainPanel = new DevExpress.XtraEditors.PanelControl();
             this.viewerCard = new DevExpress.XtraEditors.PanelControl();
             this.viewerSurface = new System.Windows.Forms.Panel();
-            this.panelControl1 = new DevExpress.XtraEditors.PanelControl();
             this.btnFit = new System.Windows.Forms.Button();
             this.btnZoomOut = new System.Windows.Forms.Button();
             this.btnZoomIn = new System.Windows.Forms.Button();
@@ -110,8 +109,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             ((System.ComponentModel.ISupportInitialize)(this.viewerCard)).BeginInit();
             this.viewerCard.SuspendLayout();
             this.viewerSurface.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.panelControl1)).BeginInit();
-            this.panelControl1.SuspendLayout();
             this.menuView.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.infoCard)).BeginInit();
             this.infoCard.SuspendLayout();
@@ -201,7 +198,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 
             // viewerSurface
             // 
-            this.viewerSurface.Controls.Add(this.panelControl1);
             this.viewerSurface.Controls.Add(this.picView);
             this.viewerSurface.Dock = System.Windows.Forms.DockStyle.Fill;
             this.viewerSurface.Location = new System.Drawing.Point(3, 3);
@@ -211,17 +207,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.viewerSurface.Paint += new System.Windows.Forms.PaintEventHandler(this.ViewerSurface_Paint);
             this.viewerSurface.Resize += new System.EventHandler(this.ViewerSurface_Resize);
             // 
-            // panelControl1
-            // 
-            this.panelControl1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.panelControl1.Controls.Add(this.btnFit);
-            this.panelControl1.Controls.Add(this.btnZoomOut);
-            this.panelControl1.Controls.Add(this.btnZoomIn);
-            this.panelControl1.Location = new System.Drawing.Point(798, 543);
-            this.panelControl1.Name = "panelControl1";
-            this.panelControl1.Size = new System.Drawing.Size(273, 37);
-            this.panelControl1.TabIndex = 2;
-            // 
             // btnFit
             // 
             this.btnFit.BackColor = System.Drawing.Color.DimGray;
@@ -230,9 +215,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.btnFit.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnFit.Font = new System.Drawing.Font("Noto Sans KR", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.btnFit.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
-            this.btnFit.Location = new System.Drawing.Point(190, 5);
+            this.btnFit.Location = new System.Drawing.Point(186, 2);
             this.btnFit.Name = "btnFit";
-            this.btnFit.Size = new System.Drawing.Size(78, 27);
+            this.btnFit.Size = new System.Drawing.Size(78, 24);
             this.btnFit.TabIndex = 2;
             this.btnFit.Text = "Fit";
             this.btnFit.UseVisualStyleBackColor = false;
@@ -245,9 +230,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.btnZoomOut.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnZoomOut.Font = new System.Drawing.Font("Noto Sans KR", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.btnZoomOut.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
-            this.btnZoomOut.Location = new System.Drawing.Point(96, 5);
+            this.btnZoomOut.Location = new System.Drawing.Point(92, 2);
             this.btnZoomOut.Name = "btnZoomOut";
-            this.btnZoomOut.Size = new System.Drawing.Size(91, 27);
+            this.btnZoomOut.Size = new System.Drawing.Size(91, 24);
             this.btnZoomOut.TabIndex = 1;
             this.btnZoomOut.Text = "Zoom Out";
             this.btnZoomOut.UseVisualStyleBackColor = false;
@@ -260,16 +245,16 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.btnZoomIn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnZoomIn.Font = new System.Drawing.Font("Noto Sans KR", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.btnZoomIn.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
-            this.btnZoomIn.Location = new System.Drawing.Point(5, 5);
+            this.btnZoomIn.Location = new System.Drawing.Point(4, 2);
             this.btnZoomIn.Name = "btnZoomIn";
-            this.btnZoomIn.Size = new System.Drawing.Size(85, 27);
+            this.btnZoomIn.Size = new System.Drawing.Size(85, 24);
             this.btnZoomIn.TabIndex = 0;
             this.btnZoomIn.Text = "Zoom In";
             this.btnZoomIn.UseVisualStyleBackColor = false;
             // 
             // picView
             // 
-            this.picView.Animator = defaultGifAnimator4;
+            this.picView.Animator = defaultGifAnimator2;
             this.picView.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.picView.ContextMenuStrip = this.menuView;
             this.picView.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -616,13 +601,12 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.txtPageWorkTime.Properties.ReadOnly = true;
             this.txtPageWorkTime.Size = new System.Drawing.Size(160, 24);
             this.txtPageWorkTime.TabIndex = 21;
-            //
-            // lblMessage — 자동 시작/재시작/종료 등 안내 문구. 입력칸 아래 빈 공간을 채우도록 네 변에 앵커를 건다.
-            //
-            this.lblMessage.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-            | System.Windows.Forms.AnchorStyles.Left)
+            // 
+            // lblMessage
+            // 
+            this.lblMessage.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblMessage.AutoSize = false;
             this.lblMessage.BackColor = System.Drawing.Color.White;
             this.lblMessage.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.lblMessage.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -823,16 +807,19 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // pnlTabHead
             // 
             this.pnlTabHead.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.pnlTabHead.Controls.Add(this.btnZoomIn);
+            this.pnlTabHead.Controls.Add(this.btnZoomOut);
+            this.pnlTabHead.Controls.Add(this.btnFit);
             this.pnlTabHead.Controls.Add(this.chkManualWrench);
             this.pnlTabHead.Controls.Add(this.btnTabsAccordion);
-            this.pnlTabHead.Location = new System.Drawing.Point(1119, 3);
+            this.pnlTabHead.Location = new System.Drawing.Point(1013, 3);
             this.pnlTabHead.Name = "pnlTabHead";
-            this.pnlTabHead.Size = new System.Drawing.Size(388, 28);
+            this.pnlTabHead.Size = new System.Drawing.Size(494, 28);
             this.pnlTabHead.TabIndex = 4;
             // 
             // chkManualWrench
             // 
-            this.chkManualWrench.Location = new System.Drawing.Point(41, 5);
+            this.chkManualWrench.Location = new System.Drawing.Point(272, 5);
             this.chkManualWrench.Name = "chkManualWrench";
             this.chkManualWrench.Properties.Appearance.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.chkManualWrench.Properties.Appearance.Options.UseFont = true;
@@ -850,7 +837,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.btnTabsAccordion.Edge = SEOJIN_TMES.Client.Forms.Common.AccordionEdge.Left;
             this.btnTabsAccordion.Expanded = true;
             this.btnTabsAccordion.Font = new System.Drawing.Font("맑은 고딕", 8.5F);
-            this.btnTabsAccordion.Location = new System.Drawing.Point(282, 2);
+            this.btnTabsAccordion.Location = new System.Drawing.Point(388, 2);
             this.btnTabsAccordion.Name = "btnTabsAccordion";
             this.btnTabsAccordion.Size = new System.Drawing.Size(104, 24);
             this.btnTabsAccordion.TabIndex = 24;
@@ -1008,15 +995,12 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             ((System.ComponentModel.ISupportInitialize)(this.viewerCard)).EndInit();
             this.viewerCard.ResumeLayout(false);
             this.viewerSurface.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.panelControl1)).EndInit();
-            this.panelControl1.ResumeLayout(false);
             this.menuView.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.infoCard)).EndInit();
             this.infoCard.ResumeLayout(false);
             this.infoCard.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.fieldPanel)).EndInit();
             this.fieldPanel.ResumeLayout(false);
-            this.fieldPanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.txtWorkOrderNo.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtItemCode.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtProductSerialNo.Properties)).EndInit();
@@ -1121,7 +1105,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private System.Windows.Forms.ContextMenuStrip menuView;
         private System.Windows.Forms.ToolStripMenuItem mnuFit;
         private System.Windows.Forms.ToolStripMenuItem mnuActual;
-        private DevExpress.XtraEditors.PanelControl panelControl1;
         private System.Windows.Forms.Button btnZoomOut;
         private System.Windows.Forms.Button btnZoomIn;
         private System.Windows.Forms.Button btnFit;
