@@ -1024,7 +1024,7 @@ Reconnection continues automatically until it succeeds. You can also press [Reco
     <value>Moved without completing the process (work remaining).</value>
   </data>
   <data name="Pop_SerialNotRunning" xml:space="preserve">
-    <value>Serial numbers can only be entered while the process is in progress.</value>
+    <value>Input materials cannot be entered while the process is stopped. Restart the process first.</value>
   </data>
   <data name="Col_WorkQty" xml:space="preserve">
     <value>Work Qty</value>

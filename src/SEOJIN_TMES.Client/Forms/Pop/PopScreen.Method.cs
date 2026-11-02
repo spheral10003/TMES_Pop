@@ -760,11 +760,11 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 return;
             }
 
-            // 서버는 진행 중이 아닌 공정의 시리얼 저장을 409(WORK_001/002)로 거절한다 —
-            // 팝업에서 다 입력한 뒤에 거절되지 않도록 열기 전에 막는다(BOM · 검사 입력과 같은 조건).
-            if (!IsProcessRunning)
+            // 중지된 공정은 팝업에서 다 입력한 뒤에 거절되지 않도록 열기 전에 막는다(BOM · 검사 입력과 같은 조건).
+            // 그 밖의 상태에서 서버가 거절하면(409) SetMaterialInput이 사유를 알리고 서버 상태로 다시 그린다.
+            if (!IsInputAllowed)
             {
-                AppLog.Info($"[POP] 공정 미진행 - 시리얼 입력 생략 ({material.MaterialCode}, 상태 {_progressState})");
+                AppLog.Info($"[POP] 공정 중지 - 시리얼 입력 생략 ({material.MaterialCode}, 상태 {_progressState})");
                 AppMessageBox.Info(this, Language.Pop_SerialNotRunning, Language.PopSerial_Title);
                 return;
             }
@@ -1001,13 +1001,13 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// <summary>
         /// 검사 스팩 한 줄의 결과를 서버에 보낸다 — 정량 검사는 판정 · 결과값 · 비고, 정성 검사는 판정 · 비고.
         /// 검사 항목 코드는 URL 경로로만 보내고 Body에는 담지 않는다.
-        /// 공정이 진행 중이 아니면 보내지 않는다 — 편집 도중 서버 상태가 바뀐 경우를 막는다.
+        /// 공정이 중지 상태면 보내지 않는다 — 편집 도중 중지된 경우를 막는다.
         /// </summary>
         public async Task SetInspectionResult(PopInspectionSpecDto spec, string fieldName)
         {
-            if (!IsProcessRunning)
+            if (!IsInputAllowed)
             {
-                AppLog.Info($"[POP] 공정 미시작 - 검사 결과 전송 생략 (상태 {_progressState})");
+                AppLog.Info($"[POP] 공정 중지 - 검사 결과 전송 생략 (상태 {_progressState})");
                 return;
             }
 

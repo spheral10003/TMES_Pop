@@ -89,6 +89,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
         public bool IsProcessRunning => IsProgressState(StateProgress);
 
+        public bool IsInputAllowed => !IsProgressState(StateStopped);
+
         public PopScreen(WorkEntryContext entry = null)
         {
             InitializeComponent();

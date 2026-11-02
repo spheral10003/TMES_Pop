@@ -662,14 +662,13 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// 공정이 진행 중(<see cref="IsProcessRunning"/>)일 때만 "토크 결과값" · "각도 결과값" 칸의 편집기를 연다.
-        /// 공정 전 · 중지 · 완료 상태에서 들어온 값은 실적이 아니므로 입력 자체를 막는다 —
-        /// 그래서 ValidatingEditor · CellValueChanged에서는 공정 상태를 다시 확인하지 않는다.
+        /// 공정이 중지 상태가 아닐 때(<see cref="IsInputAllowed"/>) "토크 결과값" · "각도 결과값" 칸의 편집기를 연다.
+        /// 중지 상태에서는 입력 자체를 막는다 — 그래서 ValidatingEditor · CellValueChanged에서는 공정 상태를 다시 확인하지 않는다.
         /// [입력] 버튼 컬럼도 편집기가 열려야 눌리므로 같은 조건으로 막힌다.
         /// </summary>
         private void GridViewBomSpec_ShowingEditor(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (!IsProcessRunning)
+            if (!IsInputAllowed)
             {
                 e.Cancel = true;
                 return;
@@ -851,8 +850,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
         private void GridViewInspection_ShowingEditor(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            // 공정이 진행 중일 때만 결과를 받는다 — 대기·중지·완료 상태의 입력은 실적에 붙을 곳이 없다.
-            if (!IsProcessRunning)
+            // 중지된 공정만 입력을 막는다 — 그 밖의 상태에서 받을지는 서버가 판정한다.
+            if (!IsInputAllowed)
             {
                 e.Cancel = true;
                 return;

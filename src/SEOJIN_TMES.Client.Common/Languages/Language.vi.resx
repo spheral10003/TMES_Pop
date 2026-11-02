@@ -1024,7 +1024,7 @@ Hệ thống sẽ tự động thử kết nối lại cho đến khi thành cô
     <value>Đã chuyển mà chưa hoàn thành công đoạn (còn việc chưa làm).</value>
   </data>
   <data name="Pop_SerialNotRunning" xml:space="preserve">
-    <value>Chỉ có thể nhập số sê-ri khi công đoạn đang tiến hành.</value>
+    <value>Không thể nhập vật tư khi công đoạn đang dừng. Hãy khởi động lại công đoạn trước.</value>
   </data>
   <data name="Col_WorkQty" xml:space="preserve">
     <value>Work Qty</value>
