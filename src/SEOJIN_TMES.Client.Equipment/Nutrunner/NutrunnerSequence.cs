@@ -14,7 +14,7 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
     ///  3. Alive 응답이 응답 대기 시간(App.config ModbusResponseTimeoutMs) 안에 오지 않으면 바로 다시 보낸다.
     ///     <see cref="AliveMaxRetry"/>(3)회 다시 보내도 응답이 없으면 연결 상태를 확인하고 끊은 뒤 재연결한다.
     ///  4. 통신이 끊기면 Disconnect 이벤트 핸들러가 동작해서 재연결을 시도한다.
-    ///  5. 재연결은 <b>연결될 때까지 계속</b>한다. <see cref="MaxRetryCount"/>(3)회를 5초 간격으로 시도하고,
+    ///  5. 재연결은 <b>연결될 때까지 계속</b>한다. <see cref="MaxRetryCount"/>(3)회를 2초 간격으로 시도하고,
     ///     3회 모두 실패하면 설정된 대기 시간(App.config ModbusReconnectWaitMs) 뒤 다시 3회를 시도한다 — 이를 반복한다.
     ///     대기 시간은 실패 횟수와 무관하게 고정이다. 처음 3회 실패 때 연결 실패 Alarm을 <b>한 번</b> 올린다.
     ///
@@ -30,11 +30,14 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
         /// <summary>Alive 응답이 없을 때 다시 보내는 횟수. 이 횟수를 넘기면 연결을 끊고 재연결한다.</summary>
         public const int AliveMaxRetry = 3;
 
-        /// <summary>재연결 기본 간격. 장비가 접속 실패 뒤 다시 받기까지 3~6초가 걸려 그보다 짧으면 연달아 실패한다.</summary>
-        private const double RetryIntervalMs = 5000;
+        /// <summary>
+        /// 한 묶음(3회) 안의 재연결 간격. 접속 대기(ConnectTimeoutMs 기본 2000)와 같아 앞 시도가 끝나자마자 다음을 시도한다.
+        /// 장비는 접속 실패 뒤 3~6초 동안 새 접속을 받지 않을 수 있어 한 묶음이 연달아 실패할 수 있다 — 그때는 묶음 사이 대기(ReconnectWaitMs)가 받쳐 준다.
+        /// </summary>
+        private const double RetryIntervalMs = 2000;
 
         /// <summary>ReconnectWaitMs가 0 이하일 때 쓰는, 3회 실패 뒤 다음 3회까지의 대기 시간.</summary>
-        private const double DefaultReconnectWaitMs = 30000;
+        private const double DefaultReconnectWaitMs = 10000;
 
         private const double AliveIntervalMs = 5000;
 
