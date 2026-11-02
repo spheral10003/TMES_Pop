@@ -67,7 +67,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             this.headerPanel.Dock = System.Windows.Forms.DockStyle.Top;
             this.headerPanel.Location = new System.Drawing.Point(0, 0);
             this.headerPanel.Name = "headerPanel";
-            this.headerPanel.Size = new System.Drawing.Size(620, 56);
+            this.headerPanel.Size = new System.Drawing.Size(1200, 56);
             this.headerPanel.TabIndex = 0;
             // 
             // headerIcon
@@ -94,7 +94,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             this.bodyPanel.Location = new System.Drawing.Point(0, 56);
             this.bodyPanel.Name = "bodyPanel";
             this.bodyPanel.Padding = new System.Windows.Forms.Padding(16, 12, 16, 8);
-            this.bodyPanel.Size = new System.Drawing.Size(620, 380);
+            this.bodyPanel.Size = new System.Drawing.Size(1200, 580);
             this.bodyPanel.TabIndex = 1;
             // 
             // listCard
@@ -105,7 +105,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             this.listCard.Location = new System.Drawing.Point(18, 86);
             this.listCard.Name = "listCard";
             this.listCard.Padding = new System.Windows.Forms.Padding(1);
-            this.listCard.Size = new System.Drawing.Size(584, 284);
+            this.listCard.Size = new System.Drawing.Size(1164, 484);
             this.listCard.TabIndex = 2;
             // 
             // grid
@@ -114,7 +114,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             this.grid.Location = new System.Drawing.Point(3, 35);
             this.grid.MainView = this.gridView;
             this.grid.Name = "grid";
-            this.grid.Size = new System.Drawing.Size(578, 246);
+            this.grid.Size = new System.Drawing.Size(1158, 446);
             this.grid.TabIndex = 1;
             this.grid.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
             this.gridView});
@@ -141,7 +141,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             this.spacer.Dock = System.Windows.Forms.DockStyle.Top;
             this.spacer.Location = new System.Drawing.Point(18, 76);
             this.spacer.Name = "spacer";
-            this.spacer.Size = new System.Drawing.Size(584, 10);
+            this.spacer.Size = new System.Drawing.Size(1164, 10);
             this.spacer.TabIndex = 1;
             // 
             // searchCard
@@ -155,16 +155,17 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             this.searchCard.Location = new System.Drawing.Point(18, 14);
             this.searchCard.Name = "searchCard";
             this.searchCard.Padding = new System.Windows.Forms.Padding(1);
-            this.searchCard.Size = new System.Drawing.Size(584, 62);
+            this.searchCard.Size = new System.Drawing.Size(1164, 62);
             this.searchCard.TabIndex = 0;
             // 
             // btnSearch
             // 
+            this.btnSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnSearch.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
             this.btnSearch.FlatAppearance.MouseOverBackColor = System.Drawing.Color.MediumSeaGreen;
             this.btnSearch.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSearch.Font = new System.Drawing.Font("Noto Sans KR", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSearch.Location = new System.Drawing.Point(490, 12);
+            this.btnSearch.Location = new System.Drawing.Point(1070, 12);
             this.btnSearch.Name = "btnSearch";
             this.btnSearch.Size = new System.Drawing.Size(83, 30);
             this.btnSearch.TabIndex = 7;
@@ -209,16 +210,16 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             this.footerPanel.Controls.Add(this.btnSelect);
             this.footerPanel.Controls.Add(this.btnClose);
             this.footerPanel.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.footerPanel.Location = new System.Drawing.Point(0, 436);
+            this.footerPanel.Location = new System.Drawing.Point(0, 636);
             this.footerPanel.Name = "footerPanel";
-            this.footerPanel.Size = new System.Drawing.Size(620, 64);
+            this.footerPanel.Size = new System.Drawing.Size(1200, 64);
             this.footerPanel.TabIndex = 2;
             // 
             // btnSelect
             // 
             this.btnSelect.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnSelect.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnSelect.Location = new System.Drawing.Point(508, 16);
+            this.btnSelect.Location = new System.Drawing.Point(984, 16);
             this.btnSelect.Name = "btnSelect";
             this.btnSelect.Size = new System.Drawing.Size(96, 32);
             this.btnSelect.TabIndex = 0;
@@ -230,7 +231,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             this.btnClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnClose.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnClose.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnClose.Location = new System.Drawing.Point(404, 16);
+            this.btnClose.Location = new System.Drawing.Point(1088, 16);
             this.btnClose.Name = "btnClose";
             this.btnClose.Size = new System.Drawing.Size(96, 32);
             this.btnClose.TabIndex = 1;

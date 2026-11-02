@@ -63,9 +63,9 @@ namespace SEOJIN_TMES.Client.Forms
             this.pnlError.SuspendLayout();
             this.pnlStatus.SuspendLayout();
             this.SuspendLayout();
-            //
+            // 
             // pnlTitle
-            //
+            // 
             this.pnlTitle.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(27)))), ((int)(((byte)(58)))), ((int)(((byte)(82)))));
             this.pnlTitle.Controls.Add(this.picTitleIcon);
             this.pnlTitle.Controls.Add(this.lblTitle);
@@ -78,18 +78,18 @@ namespace SEOJIN_TMES.Client.Forms
             this.pnlTitle.MouseDown += new System.Windows.Forms.MouseEventHandler(this.LoginForm_MouseDown);
             this.pnlTitle.MouseMove += new System.Windows.Forms.MouseEventHandler(this.LoginForm_MouseMove);
             this.pnlTitle.MouseUp += new System.Windows.Forms.MouseEventHandler(this.LoginForm_MouseUp);
-            //
+            // 
             // picTitleIcon
-            //
+            // 
             this.picTitleIcon.Location = new System.Drawing.Point(11, 9);
             this.picTitleIcon.Name = "picTitleIcon";
             this.picTitleIcon.Size = new System.Drawing.Size(20, 20);
             this.picTitleIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.picTitleIcon.TabIndex = 0;
             this.picTitleIcon.TabStop = false;
-            //
+            // 
             // lblTitle
-            //
+            // 
             this.lblTitle.Font = new System.Drawing.Font("맑은 고딕", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lblTitle.ForeColor = System.Drawing.Color.White;
             this.lblTitle.Location = new System.Drawing.Point(36, 7);
@@ -101,9 +101,9 @@ namespace SEOJIN_TMES.Client.Forms
             this.lblTitle.MouseDown += new System.Windows.Forms.MouseEventHandler(this.LoginForm_MouseDown);
             this.lblTitle.MouseMove += new System.Windows.Forms.MouseEventHandler(this.LoginForm_MouseMove);
             this.lblTitle.MouseUp += new System.Windows.Forms.MouseEventHandler(this.LoginForm_MouseUp);
-            //
+            // 
             // lblBadge
-            //
+            // 
             this.lblBadge.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(194)))), ((int)(((byte)(65)))), ((int)(((byte)(12)))));
             this.lblBadge.Font = new System.Drawing.Font("맑은 고딕", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lblBadge.ForeColor = System.Drawing.Color.White;
@@ -113,9 +113,9 @@ namespace SEOJIN_TMES.Client.Forms
             this.lblBadge.TabIndex = 2;
             this.lblBadge.Text = "TEST";
             this.lblBadge.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            //
+            // 
             // btnClose
-            //
+            // 
             this.btnClose.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(27)))), ((int)(((byte)(58)))), ((int)(((byte)(82)))));
             this.btnClose.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnClose.FlatAppearance.BorderSize = 0;
@@ -131,9 +131,9 @@ namespace SEOJIN_TMES.Client.Forms
             this.btnClose.Text = "✕";
             this.btnClose.UseVisualStyleBackColor = false;
             this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
-            //
+            // 
             // lblLanguage
-            //
+            // 
             this.lblLanguage.Appearance.BackColor = System.Drawing.Color.White;
             this.lblLanguage.Appearance.Font = new System.Drawing.Font("맑은 고딕", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lblLanguage.Appearance.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(55)))), ((int)(((byte)(67)))));
@@ -148,18 +148,18 @@ namespace SEOJIN_TMES.Client.Forms
             this.lblLanguage.Size = new System.Drawing.Size(114, 26);
             this.lblLanguage.TabIndex = 10;
             this.lblLanguage.Text = "언어";
-            //
+            // 
             // pnlLanguage
-            //
+            // 
             this.pnlLanguage.BackColor = System.Drawing.Color.White;
             this.pnlLanguage.Controls.Add(this.cboLanguage);
             this.pnlLanguage.Location = new System.Drawing.Point(456, 133);
             this.pnlLanguage.Name = "pnlLanguage";
             this.pnlLanguage.Size = new System.Drawing.Size(360, 26);
             this.pnlLanguage.TabIndex = 0;
-            //
+            // 
             // cboLanguage
-            //
+            // 
             this.cboLanguage.BackColor = System.Drawing.Color.White;
             this.cboLanguage.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.cboLanguage.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
@@ -172,9 +172,9 @@ namespace SEOJIN_TMES.Client.Forms
             this.cboLanguage.TabIndex = 0;
             this.cboLanguage.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.cboItem_DrawItem);
             this.cboLanguage.SelectedIndexChanged += new System.EventHandler(this.cboLanguage_SelectedIndexChanged);
-            //
+            // 
             // lblCorp
-            //
+            // 
             this.lblCorp.Appearance.BackColor = System.Drawing.Color.White;
             this.lblCorp.Appearance.Font = new System.Drawing.Font("맑은 고딕", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lblCorp.Appearance.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(55)))), ((int)(((byte)(67)))));
@@ -189,18 +189,18 @@ namespace SEOJIN_TMES.Client.Forms
             this.lblCorp.Size = new System.Drawing.Size(114, 26);
             this.lblCorp.TabIndex = 11;
             this.lblCorp.Text = "사업부";
-            //
+            // 
             // pnlCorp
-            //
+            // 
             this.pnlCorp.BackColor = System.Drawing.Color.White;
             this.pnlCorp.Controls.Add(this.cboCorp);
             this.pnlCorp.Location = new System.Drawing.Point(456, 177);
             this.pnlCorp.Name = "pnlCorp";
             this.pnlCorp.Size = new System.Drawing.Size(360, 26);
             this.pnlCorp.TabIndex = 1;
-            //
+            // 
             // cboCorp
-            //
+            // 
             this.cboCorp.BackColor = System.Drawing.Color.White;
             this.cboCorp.DrawMode = System.Windows.Forms.DrawMode.OwnerDrawFixed;
             this.cboCorp.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
@@ -212,9 +212,9 @@ namespace SEOJIN_TMES.Client.Forms
             this.cboCorp.Size = new System.Drawing.Size(390, 30);
             this.cboCorp.TabIndex = 0;
             this.cboCorp.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.cboItem_DrawItem);
-            //
+            // 
             // lblUserId
-            //
+            // 
             this.lblUserId.Appearance.BackColor = System.Drawing.Color.White;
             this.lblUserId.Appearance.Font = new System.Drawing.Font("맑은 고딕", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lblUserId.Appearance.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(55)))), ((int)(((byte)(67)))));
@@ -229,9 +229,9 @@ namespace SEOJIN_TMES.Client.Forms
             this.lblUserId.Size = new System.Drawing.Size(114, 26);
             this.lblUserId.TabIndex = 12;
             this.lblUserId.Text = "ID";
-            //
+            // 
             // txtUserId
-            //
+            // 
             this.txtUserId.BackColor = System.Drawing.Color.White;
             this.txtUserId.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.txtUserId.Font = new System.Drawing.Font("맑은 고딕", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
@@ -239,9 +239,9 @@ namespace SEOJIN_TMES.Client.Forms
             this.txtUserId.Name = "txtUserId";
             this.txtUserId.Size = new System.Drawing.Size(366, 19);
             this.txtUserId.TabIndex = 2;
-            //
+            // 
             // lblPassword
-            //
+            // 
             this.lblPassword.Appearance.BackColor = System.Drawing.Color.White;
             this.lblPassword.Appearance.Font = new System.Drawing.Font("맑은 고딕", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lblPassword.Appearance.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(43)))), ((int)(((byte)(55)))), ((int)(((byte)(67)))));
@@ -256,9 +256,9 @@ namespace SEOJIN_TMES.Client.Forms
             this.lblPassword.Size = new System.Drawing.Size(114, 26);
             this.lblPassword.TabIndex = 13;
             this.lblPassword.Text = "Password";
-            //
+            // 
             // txtPassword
-            //
+            // 
             this.txtPassword.BackColor = System.Drawing.Color.White;
             this.txtPassword.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.txtPassword.Font = new System.Drawing.Font("맑은 고딕", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
@@ -267,9 +267,9 @@ namespace SEOJIN_TMES.Client.Forms
             this.txtPassword.Size = new System.Drawing.Size(366, 19);
             this.txtPassword.TabIndex = 3;
             this.txtPassword.UseSystemPasswordChar = true;
-            //
+            // 
             // chkRememberId
-            //
+            // 
             this.chkRememberId.BackColor = System.Drawing.Color.White;
             this.chkRememberId.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.chkRememberId.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(59)))), ((int)(((byte)(71)))), ((int)(((byte)(84)))));
@@ -279,9 +279,9 @@ namespace SEOJIN_TMES.Client.Forms
             this.chkRememberId.TabIndex = 4;
             this.chkRememberId.Text = "아이디 저장";
             this.chkRememberId.UseVisualStyleBackColor = false;
-            //
+            // 
             // pnlError
-            //
+            // 
             this.pnlError.BackColor = System.Drawing.Color.White;
             this.pnlError.Controls.Add(this.lblMessage);
             this.pnlError.Location = new System.Drawing.Point(335, 338);
@@ -289,9 +289,9 @@ namespace SEOJIN_TMES.Client.Forms
             this.pnlError.Size = new System.Drawing.Size(500, 74);
             this.pnlError.TabIndex = 14;
             this.pnlError.Paint += new System.Windows.Forms.PaintEventHandler(this.pnlError_Paint);
-            //
+            // 
             // lblMessage
-            //
+            // 
             this.lblMessage.Appearance.Font = new System.Drawing.Font("맑은 고딕", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lblMessage.Appearance.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(155)))), ((int)(((byte)(41)))), ((int)(((byte)(20)))));
             this.lblMessage.Appearance.Options.UseFont = true;
@@ -306,9 +306,9 @@ namespace SEOJIN_TMES.Client.Forms
             this.lblMessage.TabIndex = 0;
             this.lblMessage.Text = "Error";
             this.lblMessage.TextChanged += new System.EventHandler(this.lblMessage_TextChanged);
-            //
+            // 
             // btnConnect
-            //
+            // 
             this.btnConnect.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(93)))), ((int)(((byte)(123)))));
             this.btnConnect.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnConnect.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(45)))), ((int)(((byte)(93)))), ((int)(((byte)(123)))));
@@ -326,11 +326,12 @@ namespace SEOJIN_TMES.Client.Forms
             this.btnConnect.UseVisualStyleBackColor = false;
             this.btnConnect.EnabledChanged += new System.EventHandler(this.btnConnect_EnabledChanged);
             this.btnConnect.Click += new System.EventHandler(this.btnConnect_Click);
-            //
+            // 
             // btnExit
-            //
+            // 
             this.btnExit.BackColor = System.Drawing.Color.White;
             this.btnExit.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnExit.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.btnExit.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(169)))), ((int)(((byte)(182)))), ((int)(((byte)(194)))));
             this.btnExit.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(238)))), ((int)(((byte)(242)))), ((int)(((byte)(246)))));
             this.btnExit.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
@@ -343,9 +344,9 @@ namespace SEOJIN_TMES.Client.Forms
             this.btnExit.Text = "종료";
             this.btnExit.UseVisualStyleBackColor = false;
             this.btnExit.Click += new System.EventHandler(this.btnClose_Click);
-            //
+            // 
             // lblKeyHint
-            //
+            // 
             this.lblKeyHint.BackColor = System.Drawing.Color.White;
             this.lblKeyHint.Font = new System.Drawing.Font("맑은 고딕", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lblKeyHint.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(101)))), ((int)(((byte)(104)))), ((int)(((byte)(117)))));
@@ -355,9 +356,9 @@ namespace SEOJIN_TMES.Client.Forms
             this.lblKeyHint.TabIndex = 15;
             this.lblKeyHint.Text = "Enter: 로그인 · Esc: 종료";
             this.lblKeyHint.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            //
+            // 
             // pnlStatus
-            //
+            // 
             this.pnlStatus.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(238)))), ((int)(((byte)(242)))), ((int)(((byte)(246)))));
             this.pnlStatus.Controls.Add(this.lblNetworkDot);
             this.pnlStatus.Controls.Add(this.lblNetwork);
@@ -366,9 +367,9 @@ namespace SEOJIN_TMES.Client.Forms
             this.pnlStatus.Name = "pnlStatus";
             this.pnlStatus.Size = new System.Drawing.Size(878, 26);
             this.pnlStatus.TabIndex = 16;
-            //
+            // 
             // lblNetworkDot
-            //
+            // 
             this.lblNetworkDot.Font = new System.Drawing.Font("맑은 고딕", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lblNetworkDot.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(46)))), ((int)(((byte)(158)))), ((int)(((byte)(79)))));
             this.lblNetworkDot.Location = new System.Drawing.Point(8, 3);
@@ -377,9 +378,9 @@ namespace SEOJIN_TMES.Client.Forms
             this.lblNetworkDot.TabIndex = 0;
             this.lblNetworkDot.Text = "●";
             this.lblNetworkDot.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            //
+            // 
             // lblNetwork
-            //
+            // 
             this.lblNetwork.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lblNetwork.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(59)))), ((int)(((byte)(71)))), ((int)(((byte)(84)))));
             this.lblNetwork.Location = new System.Drawing.Point(24, 3);
@@ -388,9 +389,9 @@ namespace SEOJIN_TMES.Client.Forms
             this.lblNetwork.TabIndex = 1;
             this.lblNetwork.Text = "온라인";
             this.lblNetwork.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            //
+            // 
             // lblVersion
-            //
+            // 
             this.lblVersion.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lblVersion.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(59)))), ((int)(((byte)(71)))), ((int)(((byte)(84)))));
             this.lblVersion.Location = new System.Drawing.Point(478, 3);
@@ -399,9 +400,9 @@ namespace SEOJIN_TMES.Client.Forms
             this.lblVersion.TabIndex = 2;
             this.lblVersion.Text = "Ver. 1.0.0.0";
             this.lblVersion.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            //
+            // 
             // LoginForm
-            //
+            // 
             this.AcceptButton = this.btnConnect;
             this.Appearance.Options.UseFont = true;
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;

@@ -35,15 +35,12 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PopScreen));
-            ImageBoxExtensions.DefaultGifAnimator defaultGifAnimator2 = new ImageBoxExtensions.DefaultGifAnimator();
+            ImageBoxExtensions.DefaultGifAnimator defaultGifAnimator1 = new ImageBoxExtensions.DefaultGifAnimator();
             this.btnPrevProcess = new System.Windows.Forms.Button();
             this.spacerTop = new System.Windows.Forms.Panel();
             this.mainPanel = new DevExpress.XtraEditors.PanelControl();
             this.viewerCard = new DevExpress.XtraEditors.PanelControl();
             this.viewerSurface = new System.Windows.Forms.Panel();
-            this.btnFit = new System.Windows.Forms.Button();
-            this.btnZoomOut = new System.Windows.Forms.Button();
-            this.btnZoomIn = new System.Windows.Forms.Button();
             this.picView = new ImageBoxExtensions.ImageBoxEx();
             this.menuView = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.mnuFit = new System.Windows.Forms.ToolStripMenuItem();
@@ -76,6 +73,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.lblMessage = new System.Windows.Forms.Label();
             this.lblInfoTitle = new DevExpress.XtraEditors.LabelControl();
             this.btnInfoAccordion = new SEOJIN_TMES.Client.Forms.Common.AccordionHandle();
+            this.btnFit = new System.Windows.Forms.Button();
+            this.btnZoomOut = new System.Windows.Forms.Button();
+            this.btnZoomIn = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
             this.lblProgressState = new System.Windows.Forms.Label();
             this.lblWorkstation = new System.Windows.Forms.Label();
@@ -207,54 +207,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.viewerSurface.Paint += new System.Windows.Forms.PaintEventHandler(this.ViewerSurface_Paint);
             this.viewerSurface.Resize += new System.EventHandler(this.ViewerSurface_Resize);
             // 
-            // btnFit
-            // 
-            this.btnFit.BackColor = System.Drawing.Color.DimGray;
-            this.btnFit.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
-            this.btnFit.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Silver;
-            this.btnFit.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnFit.Font = new System.Drawing.Font("Noto Sans KR", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.btnFit.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
-            this.btnFit.Location = new System.Drawing.Point(186, 2);
-            this.btnFit.Name = "btnFit";
-            this.btnFit.Size = new System.Drawing.Size(78, 24);
-            this.btnFit.TabIndex = 2;
-            this.btnFit.Text = "Fit";
-            this.btnFit.UseVisualStyleBackColor = false;
-            // 
-            // btnZoomOut
-            // 
-            this.btnZoomOut.BackColor = System.Drawing.Color.DimGray;
-            this.btnZoomOut.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
-            this.btnZoomOut.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Silver;
-            this.btnZoomOut.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnZoomOut.Font = new System.Drawing.Font("Noto Sans KR", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.btnZoomOut.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
-            this.btnZoomOut.Location = new System.Drawing.Point(92, 2);
-            this.btnZoomOut.Name = "btnZoomOut";
-            this.btnZoomOut.Size = new System.Drawing.Size(91, 24);
-            this.btnZoomOut.TabIndex = 1;
-            this.btnZoomOut.Text = "Zoom Out";
-            this.btnZoomOut.UseVisualStyleBackColor = false;
-            // 
-            // btnZoomIn
-            // 
-            this.btnZoomIn.BackColor = System.Drawing.Color.DimGray;
-            this.btnZoomIn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
-            this.btnZoomIn.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Silver;
-            this.btnZoomIn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnZoomIn.Font = new System.Drawing.Font("Noto Sans KR", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.btnZoomIn.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
-            this.btnZoomIn.Location = new System.Drawing.Point(4, 2);
-            this.btnZoomIn.Name = "btnZoomIn";
-            this.btnZoomIn.Size = new System.Drawing.Size(85, 24);
-            this.btnZoomIn.TabIndex = 0;
-            this.btnZoomIn.Text = "Zoom In";
-            this.btnZoomIn.UseVisualStyleBackColor = false;
-            // 
             // picView
             // 
-            this.picView.Animator = defaultGifAnimator2;
+            this.picView.Animator = defaultGifAnimator1;
             this.picView.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.picView.ContextMenuStrip = this.menuView;
             this.picView.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -645,6 +600,54 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.btnInfoAccordion.Size = new System.Drawing.Size(26, 583);
             this.btnInfoAccordion.TabIndex = 20;
             this.btnInfoAccordion.Click += new System.EventHandler(this.btnInfoAccordion_Click);
+            // 
+            // btnFit
+            // 
+            this.btnFit.BackColor = System.Drawing.Color.DimGray;
+            this.btnFit.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
+            this.btnFit.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Silver;
+            this.btnFit.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnFit.Font = new System.Drawing.Font("Noto Sans KR", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.btnFit.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.btnFit.Location = new System.Drawing.Point(186, 2);
+            this.btnFit.Margin = new System.Windows.Forms.Padding(1);
+            this.btnFit.Name = "btnFit";
+            this.btnFit.Size = new System.Drawing.Size(78, 24);
+            this.btnFit.TabIndex = 2;
+            this.btnFit.Text = "Fit";
+            this.btnFit.UseVisualStyleBackColor = false;
+            // 
+            // btnZoomOut
+            // 
+            this.btnZoomOut.BackColor = System.Drawing.Color.DimGray;
+            this.btnZoomOut.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
+            this.btnZoomOut.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Silver;
+            this.btnZoomOut.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnZoomOut.Font = new System.Drawing.Font("Noto Sans KR", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.btnZoomOut.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.btnZoomOut.Location = new System.Drawing.Point(92, 2);
+            this.btnZoomOut.Margin = new System.Windows.Forms.Padding(0);
+            this.btnZoomOut.Name = "btnZoomOut";
+            this.btnZoomOut.Size = new System.Drawing.Size(91, 24);
+            this.btnZoomOut.TabIndex = 1;
+            this.btnZoomOut.Text = "Zoom Out";
+            this.btnZoomOut.UseVisualStyleBackColor = false;
+            // 
+            // btnZoomIn
+            // 
+            this.btnZoomIn.BackColor = System.Drawing.Color.DimGray;
+            this.btnZoomIn.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
+            this.btnZoomIn.FlatAppearance.MouseOverBackColor = System.Drawing.Color.Silver;
+            this.btnZoomIn.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnZoomIn.Font = new System.Drawing.Font("Noto Sans KR", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.btnZoomIn.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.btnZoomIn.Location = new System.Drawing.Point(4, 2);
+            this.btnZoomIn.Margin = new System.Windows.Forms.Padding(1);
+            this.btnZoomIn.Name = "btnZoomIn";
+            this.btnZoomIn.Size = new System.Drawing.Size(85, 24);
+            this.btnZoomIn.TabIndex = 0;
+            this.btnZoomIn.Text = "Zoom In";
+            this.btnZoomIn.UseVisualStyleBackColor = false;
             // 
             // panel1
             // 

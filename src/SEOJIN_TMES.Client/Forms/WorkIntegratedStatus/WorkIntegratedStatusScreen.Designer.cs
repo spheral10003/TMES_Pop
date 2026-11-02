@@ -88,8 +88,9 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
             // 
             // btnSearch
             // 
+            this.btnSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnSearch.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnSearch.Location = new System.Drawing.Point(456, 47);
+            this.btnSearch.Location = new System.Drawing.Point(1240, 44);
             this.btnSearch.Name = "btnSearch";
             this.btnSearch.Size = new System.Drawing.Size(104, 28);
             this.btnSearch.TabIndex = 3;
@@ -98,8 +99,9 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
             // 
             // btnExcelExport
             // 
+            this.btnExcelExport.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnExcelExport.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnExcelExport.Location = new System.Drawing.Point(568, 47);
+            this.btnExcelExport.Location = new System.Drawing.Point(1352, 44);
             this.btnExcelExport.Name = "btnExcelExport";
             this.btnExcelExport.Size = new System.Drawing.Size(136, 28);
             this.btnExcelExport.TabIndex = 4;

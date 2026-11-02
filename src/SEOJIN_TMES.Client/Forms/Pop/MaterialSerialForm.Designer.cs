@@ -43,6 +43,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.lblItemCode = new DevExpress.XtraEditors.LabelControl();
             this.txtItemCode = new DevExpress.XtraEditors.TextEdit();
             this.footerPanel = new DevExpress.XtraEditors.PanelControl();
+            this.pnlGrip = new System.Windows.Forms.Panel();
             this.btnSave = new System.Windows.Forms.Button();
             this.btnClose = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.headerPanel)).BeginInit();
@@ -61,7 +62,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             ((System.ComponentModel.ISupportInitialize)(this.txtItemCode.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.footerPanel)).BeginInit();
             this.footerPanel.SuspendLayout();
-            this.pnlGrip = new System.Windows.Forms.Panel();
             this.SuspendLayout();
             // 
             // headerPanel
@@ -231,9 +231,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 
             // btnSave
             // 
-            this.btnSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnSave.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnSave.Location = new System.Drawing.Point(1088, 16);
+            this.btnSave.Location = new System.Drawing.Point(984, 16);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(96, 32);
             this.btnSave.TabIndex = 0;
@@ -242,10 +242,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 
             // btnClose
             // 
-            this.btnClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnClose.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnClose.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnClose.Location = new System.Drawing.Point(984, 16);
+            this.btnClose.Location = new System.Drawing.Point(1088, 16);
             this.btnClose.Name = "btnClose";
             this.btnClose.Size = new System.Drawing.Size(96, 32);
             this.btnClose.TabIndex = 1;

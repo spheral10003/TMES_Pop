@@ -457,7 +457,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             await MoveToProcess(selected);
             if (IsDisposed || Disposing) return;
 
-            AppMessageBox.Info(this, Language.Pop_ProcessMoved, Language.Pop_Title);
+            //AppMessageBox.Info(this, Language.Pop_ProcessMoved, Language.Pop_Title);
             if (IsDisposed || Disposing) return;
 
             await StartEnteredProcess();

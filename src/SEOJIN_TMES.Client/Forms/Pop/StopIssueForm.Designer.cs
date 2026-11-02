@@ -53,7 +53,7 @@
             this.pnlTitle.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlTitle.Location = new System.Drawing.Point(0, 0);
             this.pnlTitle.Name = "pnlTitle";
-            this.pnlTitle.Size = new System.Drawing.Size(900, 48);
+            this.pnlTitle.Size = new System.Drawing.Size(1200, 48);
             this.pnlTitle.TabIndex = 0;
             // 
             // lblClose
@@ -61,7 +61,7 @@
             this.lblClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.lblClose.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.lblClose.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.lblClose.Location = new System.Drawing.Point(856, 8);
+            this.lblClose.Location = new System.Drawing.Point(1156, 8);
             this.lblClose.Name = "lblClose";
             this.lblClose.Size = new System.Drawing.Size(32, 32);
             this.lblClose.TabIndex = 1;
@@ -77,7 +77,7 @@
             this.lblTitle.Location = new System.Drawing.Point(0, 0);
             this.lblTitle.Name = "lblTitle";
             this.lblTitle.Padding = new System.Windows.Forms.Padding(16, 0, 0, 0);
-            this.lblTitle.Size = new System.Drawing.Size(900, 48);
+            this.lblTitle.Size = new System.Drawing.Size(1200, 48);
             this.lblTitle.TabIndex = 0;
             this.lblTitle.Text = "공정 정지 사유";
             this.lblTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -92,7 +92,7 @@
             this.pnlBody.Location = new System.Drawing.Point(0, 48);
             this.pnlBody.Name = "pnlBody";
             this.pnlBody.Padding = new System.Windows.Forms.Padding(16, 4, 16, 8);
-            this.pnlBody.Size = new System.Drawing.Size(900, 448);
+            this.pnlBody.Size = new System.Drawing.Size(1200, 588);
             this.pnlBody.TabIndex = 1;
             // 
             // flowCodes
@@ -101,16 +101,16 @@
             this.flowCodes.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowCodes.Location = new System.Drawing.Point(16, 36);
             this.flowCodes.Name = "flowCodes";
-            this.flowCodes.Size = new System.Drawing.Size(868, 268);
+            this.flowCodes.Size = new System.Drawing.Size(1168, 408);
             this.flowCodes.TabIndex = 1;
             this.flowCodes.SizeChanged += new System.EventHandler(this.flowCodes_SizeChanged);
             // 
             // lblRemarkTitle
             // 
             this.lblRemarkTitle.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.lblRemarkTitle.Location = new System.Drawing.Point(16, 304);
+            this.lblRemarkTitle.Location = new System.Drawing.Point(16, 444);
             this.lblRemarkTitle.Name = "lblRemarkTitle";
-            this.lblRemarkTitle.Size = new System.Drawing.Size(868, 32);
+            this.lblRemarkTitle.Size = new System.Drawing.Size(1168, 32);
             this.lblRemarkTitle.TabIndex = 2;
             this.lblRemarkTitle.Text = "비고";
             this.lblRemarkTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -119,10 +119,10 @@
             // 
             this.txtRemark.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.txtRemark.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.txtRemark.Location = new System.Drawing.Point(16, 336);
+            this.txtRemark.Location = new System.Drawing.Point(16, 476);
             this.txtRemark.MaxLength = 5000;
             this.txtRemark.Name = "txtRemark";
-            this.txtRemark.Size = new System.Drawing.Size(868, 104);
+            this.txtRemark.Size = new System.Drawing.Size(1168, 104);
             this.txtRemark.TabIndex = 3;
             this.txtRemark.Text = "";
             // 
@@ -131,7 +131,7 @@
             this.lblCodeTitle.Dock = System.Windows.Forms.DockStyle.Top;
             this.lblCodeTitle.Location = new System.Drawing.Point(16, 4);
             this.lblCodeTitle.Name = "lblCodeTitle";
-            this.lblCodeTitle.Size = new System.Drawing.Size(868, 32);
+            this.lblCodeTitle.Size = new System.Drawing.Size(1168, 32);
             this.lblCodeTitle.TabIndex = 0;
             this.lblCodeTitle.Text = "정지 사유";
             this.lblCodeTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -142,26 +142,26 @@
             this.pnlFooter.Controls.Add(this.btnOK);
             this.pnlFooter.Controls.Add(this.btnCancel);
             this.pnlFooter.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.pnlFooter.Location = new System.Drawing.Point(0, 496);
+            this.pnlFooter.Location = new System.Drawing.Point(0, 636);
             this.pnlFooter.Name = "pnlFooter";
-            this.pnlFooter.Size = new System.Drawing.Size(900, 64);
+            this.pnlFooter.Size = new System.Drawing.Size(1200, 64);
             this.pnlFooter.TabIndex = 2;
             // 
             // pnlGrip
             // 
             this.pnlGrip.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.pnlGrip.Location = new System.Drawing.Point(884, 48);
+            this.pnlGrip.Location = new System.Drawing.Point(1184, 48);
             this.pnlGrip.Name = "pnlGrip";
             this.pnlGrip.Size = new System.Drawing.Size(16, 16);
             this.pnlGrip.TabIndex = 2;
             // 
             // btnOK
             // 
-            this.btnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnOK.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnOK.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnOK.Enabled = false;
             this.btnOK.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnOK.Location = new System.Drawing.Point(746, 12);
+            this.btnOK.Location = new System.Drawing.Point(900, 12);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(138, 39);
             this.btnOK.TabIndex = 0;
@@ -171,11 +171,11 @@
             // 
             // btnCancel
             // 
-            this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnCancel.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.btnCancel.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnCancel.Location = new System.Drawing.Point(600, 12);
+            this.btnCancel.Location = new System.Drawing.Point(1046, 12);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(138, 39);
             this.btnCancel.TabIndex = 1;

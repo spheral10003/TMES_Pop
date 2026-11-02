@@ -111,10 +111,11 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             // 
             // btnSearch
             // 
+            this.btnSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnSearch.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
             this.btnSearch.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.btnSearch.Font = new System.Drawing.Font("Noto Sans KR", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnSearch.Location = new System.Drawing.Point(21, 19);
+            this.btnSearch.Location = new System.Drawing.Point(1391, 13);
             this.btnSearch.Name = "btnSearch";
             this.btnSearch.Size = new System.Drawing.Size(103, 68);
             this.btnSearch.TabIndex = 15;
@@ -124,7 +125,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             // 
             // lblOrderDate
             // 
-            this.lblOrderDate.Location = new System.Drawing.Point(140, 24);
+            this.lblOrderDate.Location = new System.Drawing.Point(24, 27);
             this.lblOrderDate.Name = "lblOrderDate";
             this.lblOrderDate.Size = new System.Drawing.Size(65, 14);
             this.lblOrderDate.TabIndex = 1;
@@ -133,7 +134,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             // dateFrom
             // 
             this.dateFrom.EditValue = null;
-            this.dateFrom.Location = new System.Drawing.Point(244, 20);
+            this.dateFrom.Location = new System.Drawing.Point(128, 23);
             this.dateFrom.Name = "dateFrom";
             this.dateFrom.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
@@ -142,7 +143,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             // 
             // lblDateTilde
             // 
-            this.lblDateTilde.Location = new System.Drawing.Point(376, 24);
+            this.lblDateTilde.Location = new System.Drawing.Point(260, 27);
             this.lblDateTilde.Name = "lblDateTilde";
             this.lblDateTilde.Size = new System.Drawing.Size(9, 14);
             this.lblDateTilde.TabIndex = 3;
@@ -151,7 +152,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             // dateTo
             // 
             this.dateTo.EditValue = null;
-            this.dateTo.Location = new System.Drawing.Point(394, 20);
+            this.dateTo.Location = new System.Drawing.Point(278, 23);
             this.dateTo.Name = "dateTo";
             this.dateTo.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
@@ -160,7 +161,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             // 
             // lblWorkOrderNo
             // 
-            this.lblWorkOrderNo.Location = new System.Drawing.Point(556, 24);
+            this.lblWorkOrderNo.Location = new System.Drawing.Point(440, 27);
             this.lblWorkOrderNo.Name = "lblWorkOrderNo";
             this.lblWorkOrderNo.Size = new System.Drawing.Size(68, 14);
             this.lblWorkOrderNo.TabIndex = 5;
@@ -168,14 +169,14 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             // 
             // txtWorkOrderNo
             // 
-            this.txtWorkOrderNo.Location = new System.Drawing.Point(660, 20);
+            this.txtWorkOrderNo.Location = new System.Drawing.Point(544, 23);
             this.txtWorkOrderNo.Name = "txtWorkOrderNo";
             this.txtWorkOrderNo.Size = new System.Drawing.Size(170, 20);
             this.txtWorkOrderNo.TabIndex = 6;
             // 
             // lblItem
             // 
-            this.lblItem.Location = new System.Drawing.Point(866, 24);
+            this.lblItem.Location = new System.Drawing.Point(750, 27);
             this.lblItem.Name = "lblItem";
             this.lblItem.Size = new System.Drawing.Size(48, 14);
             this.lblItem.TabIndex = 7;
@@ -183,14 +184,14 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             // 
             // txtItemCode
             // 
-            this.txtItemCode.Location = new System.Drawing.Point(946, 20);
+            this.txtItemCode.Location = new System.Drawing.Point(830, 23);
             this.txtItemCode.Name = "txtItemCode";
             this.txtItemCode.Size = new System.Drawing.Size(110, 20);
             this.txtItemCode.TabIndex = 8;
             // 
             // txtItemName
             // 
-            this.txtItemName.Location = new System.Drawing.Point(1062, 20);
+            this.txtItemName.Location = new System.Drawing.Point(946, 23);
             this.txtItemName.Name = "txtItemName";
             this.txtItemName.Properties.ReadOnly = true;
             this.txtItemName.Size = new System.Drawing.Size(140, 20);
@@ -198,7 +199,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             // 
             // btnItemPick
             // 
-            this.btnItemPick.Location = new System.Drawing.Point(1208, 17);
+            this.btnItemPick.Location = new System.Drawing.Point(1092, 20);
             this.btnItemPick.Name = "btnItemPick";
             this.btnItemPick.Size = new System.Drawing.Size(34, 28);
             this.btnItemPick.TabIndex = 10;
@@ -206,7 +207,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             // 
             // lblSerialNo
             // 
-            this.lblSerialNo.Location = new System.Drawing.Point(140, 62);
+            this.lblSerialNo.Location = new System.Drawing.Point(24, 65);
             this.lblSerialNo.Name = "lblSerialNo";
             this.lblSerialNo.Size = new System.Drawing.Size(102, 14);
             this.lblSerialNo.TabIndex = 11;
@@ -214,14 +215,14 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             // 
             // txtSerialNo
             // 
-            this.txtSerialNo.Location = new System.Drawing.Point(288, 58);
+            this.txtSerialNo.Location = new System.Drawing.Point(172, 61);
             this.txtSerialNo.Name = "txtSerialNo";
             this.txtSerialNo.Size = new System.Drawing.Size(232, 20);
             this.txtSerialNo.TabIndex = 12;
             // 
             // lblStatus
             // 
-            this.lblStatus.Location = new System.Drawing.Point(556, 62);
+            this.lblStatus.Location = new System.Drawing.Point(440, 65);
             this.lblStatus.Name = "lblStatus";
             this.lblStatus.Size = new System.Drawing.Size(72, 14);
             this.lblStatus.TabIndex = 13;
@@ -229,7 +230,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             // 
             // cboStatus
             // 
-            this.cboStatus.Location = new System.Drawing.Point(660, 58);
+            this.cboStatus.Location = new System.Drawing.Point(544, 61);
             this.cboStatus.Name = "cboStatus";
             this.cboStatus.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
