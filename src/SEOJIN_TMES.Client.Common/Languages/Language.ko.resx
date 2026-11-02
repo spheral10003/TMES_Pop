@@ -1233,6 +1233,9 @@
   <data name="ModbusTest_Timeout" xml:space="preserve">
     <value>접속 시간 초과({0}ms)</value>
   </data>
+  <data name="ModbusTest_NoResponse" xml:space="preserve">
+    <value>접속됨, 읽기 응답 없음({0}ms)</value>
+  </data>
   <data name="ModbusTest_NoTargets" xml:space="preserve">
     <value>테스트할 IP와 포트를 입력하세요.</value>
   </data>

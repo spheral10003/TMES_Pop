@@ -303,6 +303,11 @@ namespace SEOJIN_TMES.Client.Forms.ModbusTest
             var port = result.FailedChannel == ProbeChannel.Event
                 ? Language.ModbusTest_ColEventPort
                 : Language.ModbusTest_ColPort;
+
+            // 접속은 됐는데 읽기 응답이 없는 경우 — 접속 시간 초과와 구분해야 원인(장비가 세션을 붙잡음 등)을 가릴 수 있다.
+            if (result.FailedChannel == ProbeChannel.Response)
+                return string.Format(Language.ModbusTest_ResultFail, port, string.Format(Language.ModbusTest_NoResponse, timeoutMs));
+
             var reason = result.TimedOut
                 ? string.Format(Language.ModbusTest_Timeout, timeoutMs)
                 : result.ErrorMessage;

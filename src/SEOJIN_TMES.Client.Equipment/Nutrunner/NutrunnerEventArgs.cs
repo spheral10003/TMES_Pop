@@ -36,7 +36,8 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
     /// </summary>
     public sealed class NutrunnerConnectAttemptEventArgs : EquipmentEventArgs
     {
-        public NutrunnerConnectAttemptEventArgs(string code, string channel, string host, int port, bool success, string? reason)
+        public NutrunnerConnectAttemptEventArgs(string code, string channel, string host, int port, bool success, string? reason,
+            string? localEndPoint = null)
             : base(code)
         {
             Channel = channel;
@@ -44,6 +45,7 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
             Port = port;
             Success = success;
             Reason = reason;
+            LocalEndPoint = localEndPoint;
         }
 
         /// <summary><c>Request</c>(레지스터 Read/Write) / <c>Event</c>(체결 결과 Push).</summary>
@@ -57,6 +59,9 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
 
         /// <summary>실패 사유. 성공이면 null.</summary>
         public string? Reason { get; }
+
+        /// <summary>이 PC 쪽 소켓 주소(<c>IP:포트</c>). 접속에 성공했을 때만 있다.</summary>
+        public string? LocalEndPoint { get; }
     }
 
     /// <summary>

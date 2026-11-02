@@ -1233,6 +1233,9 @@ Reconnection continues automatically until it succeeds. You can also press [Reco
   <data name="ModbusTest_Timeout" xml:space="preserve">
     <value>Timed out ({0}ms)</value>
   </data>
+  <data name="ModbusTest_NoResponse" xml:space="preserve">
+    <value>Connected, no read response ({0}ms)</value>
+  </data>
   <data name="ModbusTest_NoTargets" xml:space="preserve">
     <value>Enter the IP and port to test.</value>
   </data>

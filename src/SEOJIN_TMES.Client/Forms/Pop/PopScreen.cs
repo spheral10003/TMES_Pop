@@ -49,6 +49,13 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private PopProcessInfoDto _info;
 
         /// <summary>
+        /// 연결 실패 창을 이미 띄운 장비. "사용 가능"이 될 때까지 다시 띄우지 않는다.
+        /// 시퀀스는 TCP가 붙을 때마다 실패 알람 상태를 초기화하는데, 장비가 접속만 받고 응답하지 않으면
+        /// 붙음 → 응답 없음 → 재연결이 반복되어 같은 창이 오전 내내 47번 떴다(2026-11-02 현장 로그).
+        /// </summary>
+        private readonly HashSet<string> _connectFailedShown = new HashSet<string>();
+
+        /// <summary>
         /// 도면 이미지 뷰어(확대/축소 · 화면 맞춤 · 드래그 이동). 배율 계산과 그림의 소유 · 해제는 이쪽이 맡는다.
         /// <see cref="Init"/>에서 만든다.
         /// </summary>
@@ -567,7 +574,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// <summary>
         /// 알람은 로그로 남긴다. 재연결을 3회 연속 실패한 알람(ConnectFailed)만 작업자에게 창으로 알린다 —
         /// 재연결은 뒤에서 계속되지만(NutrunnerSequence) 그동안 체결이 들어오지 않으므로 알아채야 한다.
-        /// 다시 붙을 때까지 같은 알람은 한 번만 온다.
+        /// 창은 장비마다 "사용 가능"이 될 때까지 한 번만 띄운다(<see cref="_connectFailedShown"/>).
         /// </summary>
         private void OnErrorOccurred(object sender, AlarmEventArgs e)
         {
@@ -581,6 +588,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         {
             // AlarmEventArgs.Code는 알람 코드라 장비 코드는 기반 클래스에서 읽는다.
             string equipmentCode = ((EquipmentEventArgs)e).Code;
+            if (!_connectFailedShown.Add(equipmentCode))
+                return;
+
             AppMessageBox.Warn(this, string.Format(Language.Pop_EquipmentConnectFailed, equipmentCode), Language.Pop_Title);
         }
 
@@ -657,7 +667,11 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             Screen.RefreshEquipmentStates();
 
             if (e.IsConnected)
+            {
+                // 실제로 응답을 주고받았으니 다음 끊김에는 다시 알린다.
+                _connectFailedShown.Remove(e.Code);
                 Screen.WriteBomSpecTorque();
+            }
         }
 
         /// <summary>설비 수신 스레드에서 올라온 처리를 화면 스레드로 넘긴다. 화면이 이미 닫혔으면 버린다.</summary>

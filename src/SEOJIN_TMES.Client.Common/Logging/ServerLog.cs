@@ -112,11 +112,16 @@ namespace SEOJIN_TMES.Client.Common.Logging
             Enqueue(log);
         }
 
-        /// <summary>설비 접속 성공/실패. 실패 사유는 <paramref name="reason"/>에.</summary>
-        public static void EquipmentConnected(string equipmentId, string channel, string host, int port, bool success, string reason = null)
+        /// <summary>
+        /// 설비 접속 성공/실패. 실패 사유는 <paramref name="reason"/>에.
+        /// <paramref name="localEndPoint"/>(이 PC의 IP:포트)는 장비 화면의 접속 마스터 · netstat과 맞춰 보려고 남긴다.
+        /// </summary>
+        public static void EquipmentConnected(string equipmentId, string channel, string host, int port, bool success,
+            string reason = null, string localEndPoint = null)
         {
+            var local = string.IsNullOrEmpty(localEndPoint) ? string.Empty : $" (로컬 {localEndPoint})";
             var summary = success
-                ? $"설비 접속 성공 - {equipmentId}/{channel} {host}:{port}"
+                ? $"설비 접속 성공 - {equipmentId}/{channel} {host}:{port}{local}"
                 : $"설비 접속 실패 - {equipmentId}/{channel} {host}:{port} :: {reason}";
 
             if (success)

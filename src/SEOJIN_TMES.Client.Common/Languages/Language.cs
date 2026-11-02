@@ -461,6 +461,7 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string ModbusTest_ResultOk => Get(nameof(ModbusTest_ResultOk));
         public static string ModbusTest_ResultFail => Get(nameof(ModbusTest_ResultFail));
         public static string ModbusTest_Timeout => Get(nameof(ModbusTest_Timeout));
+        public static string ModbusTest_NoResponse => Get(nameof(ModbusTest_NoResponse));
         public static string ModbusTest_NoTargets => Get(nameof(ModbusTest_NoTargets));
         public static string ModbusTest_InvalidTarget => Get(nameof(ModbusTest_InvalidTarget));
         public static string ModbusTest_NoEquipments => Get(nameof(ModbusTest_NoEquipments));

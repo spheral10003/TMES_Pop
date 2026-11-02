@@ -2,7 +2,10 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using SEOJIN_TMES.Client.Equipment.Nutrunner;
+using SEOJIN_TMES.Client.Modbus;
 using SEOJIN_TMES.Client.Modbus.Abstractions;
+using SEOJIN_TMES.Client.Modbus.Protocol;
 using SEOJIN_TMES.Client.Modbus.Transport;
 
 namespace SEOJIN_TMES.Client.Equipment.Diagnostics
@@ -13,7 +16,11 @@ namespace SEOJIN_TMES.Client.Equipment.Diagnostics
     /// 소켓을 직접 열지 않고 운영과 같은 <see cref="TcpModbusTransport"/>를 쓴다 — 현장에서 "가끔 안 붙는다"를 재현하려면
     /// 실제 접속 코드(접속 제한 시간 처리 포함)를 그대로 타야 의미가 있다.
     /// <see cref="Nutrunner.NutrunnerSequence"/>(재연결 · Alive · 알람)는 거치지 않는다. 회차마다 새 전송 객체로 붙였다가 버린다.
-    /// 프레임은 주고받지 않는다(TCP 접속 성립 여부만 본다).
+    ///
+    /// Request 포트에 붙으면 Alive와 같은 상태 레지스터 읽기를 한 번 보내 응답까지 확인한다.
+    /// 예전에는 TCP 접속만 봤는데, 현장(2026-11-02 로그)에서 장비가 접속은 받으면서 Modbus 요청에는 1시간 넘게 응답하지 않았고
+    /// 그동안에도 이 테스트는 "성공 10/10"을 보여 원인을 가리는 데 방해가 됐다.
+    /// 주의: 너트러너는 Request 포트에 접속을 하나만 받으므로, POP가 연결 중인 장비에 돌리면 POP 연결을 방해할 수 있다.
     /// </summary>
     public static class ModbusConnectionProbe
     {
@@ -39,6 +46,10 @@ namespace SEOJIN_TMES.Client.Equipment.Diagnostics
                 if (failure != null)
                     return ConnectionProbeResult.Fail(ProbeChannel.Request, failure, stopwatch.ElapsedMilliseconds);
 
+                failure = await TryReadStatus(request, timeoutMs, cancellationToken).ConfigureAwait(false);
+                if (failure != null)
+                    return ConnectionProbeResult.Fail(ProbeChannel.Response, failure, stopwatch.ElapsedMilliseconds);
+
                 using (var events = new TcpModbusTransport(1, timeoutMs))
                 {
                     failure = await TryConnect(events, host, eventPort, timeoutMs, cancellationToken).ConfigureAwait(false);
@@ -48,6 +59,38 @@ namespace SEOJIN_TMES.Client.Equipment.Diagnostics
             }
 
             return ConnectionProbeResult.Ok(stopwatch.ElapsedMilliseconds);
+        }
+
+        /// <summary>
+        /// 붙어 있는 Request 채널로 상태 레지스터(Alive와 같은 FC04 3200, 1개)를 읽는다. 응답이 오면 null, 안 오면 그 사유.
+        /// 오류 응답(Exception 코드)도 성공으로 본다 — 장비가 요청을 받아 처리한다는 것만 확인하면 된다.
+        /// </summary>
+        private static async Task<ProbeFailure?> TryReadStatus(IModbusTransport transport, int timeoutMs, CancellationToken cancellationToken)
+        {
+            var result = new TaskCompletionSource<ProbeFailure?>(TaskCreationOptions.RunContinuationsAsynchronously);
+
+            // 전송 객체는 Probe가 정리한다(주입 생성자는 전송을 Dispose하지 않는다).
+            using (var client = new ModbusTcpClient(transport, new ModbusTcpCodec()) { ResponseTimeoutMs = timeoutMs })
+            {
+                client.ResponseReceived += (s, response) => result.TrySetResult(null);
+                client.ErrorOccurred += (s, ex) => result.TrySetResult(new ProbeFailure(ex is TimeoutException, ex.Message));
+
+                client.ReadRegisters((ushort)NutrunnerRegister.Status, 1);
+
+                using (var delayCancel = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken))
+                {
+                    var finished = await Task.WhenAny(result.Task, Task.Delay(timeoutMs + ResultGraceMs, delayCancel.Token)).ConfigureAwait(false);
+                    delayCancel.Cancel();
+
+                    if (finished != result.Task)
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+                        return new ProbeFailure(true, null);
+                    }
+                }
+
+                return await result.Task.ConfigureAwait(false);
+            }
         }
 
         /// <summary>접속에 성공하면 null, 실패하면 그 사유를 돌려준다.</summary>
@@ -92,6 +135,9 @@ namespace SEOJIN_TMES.Client.Equipment.Diagnostics
     {
         /// <summary>레지스터 Read/Write 요청 채널(Port).</summary>
         Request,
+
+        /// <summary>Request 채널에 붙었지만 상태 레지스터 읽기에 응답이 없음(TCP 접속만으로는 정상이 아니다).</summary>
+        Response,
 
         /// <summary>체결 결과 Push 채널(EventPort, 기본 Port + 1).</summary>
         Event

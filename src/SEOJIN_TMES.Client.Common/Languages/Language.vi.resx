@@ -1233,6 +1233,9 @@ Hệ thống sẽ tự động thử kết nối lại cho đến khi thành cô
   <data name="ModbusTest_Timeout" xml:space="preserve">
     <value>Hết thời gian chờ ({0}ms)</value>
   </data>
+  <data name="ModbusTest_NoResponse" xml:space="preserve">
+    <value>Đã kết nối, không có phản hồi đọc ({0}ms)</value>
+  </data>
   <data name="ModbusTest_NoTargets" xml:space="preserve">
     <value>Hãy nhập IP và cổng cần kiểm tra.</value>
   </data>

@@ -14,6 +14,12 @@ namespace SEOJIN_TMES.Client.Modbus.Abstractions
     {
         bool IsConnected { get; }
 
+        /// <summary>
+        /// 이 PC 쪽 소켓 주소(<c>IP:포트</c>). 붙어 있지 않으면 null.
+        /// 장비가 어떤 연결을 붙잡고 있는지 장비 화면 · netstat과 맞춰 보려고 접속 로그에 남긴다.
+        /// </summary>
+        string? LocalEndPoint { get; }
+
         event EventHandler? Connected;
         event EventHandler? Disconnected;
         event EventHandler<byte[]>? DataReceived;

@@ -24,6 +24,22 @@ namespace SEOJIN_TMES.Client.Modbus.Transport
 
         public bool IsConnected => _sock.IsConnected;
 
+        public string? LocalEndPoint
+        {
+            get
+            {
+                try
+                {
+                    return _sock.Connection?.LocalEndPoint?.ToString();
+                }
+                catch (ObjectDisposedException)
+                {
+                    // 닫히는 중인 소켓 — 진단용 값이라 없으면 그만이다.
+                    return null;
+                }
+            }
+        }
+
         /// <param name="connectTimeoutMs">접속 제한 시간(ms). 0 이하면 OS 기본값(약 21초).</param>
         /// <param name="keepAliveTimeMs">무통신 후 첫 TCP KeepAlive 확인까지의 시간(ms). 0 이하면 KeepAlive 끔.</param>
         /// <param name="keepAliveIntervalMs">KeepAlive 재확인 간격(ms).</param>

@@ -326,7 +326,8 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
         private void OnClientConnected(object? sender, EventArgs e)
         {
             _requestConnecting = false;
-            RaiseConnectAttempted("Request", Info.Port, true, null);
+            // 주입 생성자(테스트 더블)는 전송 객체를 모르므로 로컬 주소 없이 남는다.
+            RaiseConnectAttempted("Request", Info.Port, true, null, _ownedRequestTransport?.LocalEndPoint);
 
             // Request 채널이 붙으면 Event Transport 채널도 연결한다.
             ConnectEventTransport();
@@ -345,7 +346,7 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
         private void OnEventTransportConnected(object? sender, EventArgs e)
         {
             _eventConnecting = false;
-            RaiseConnectAttempted("Event", Info.ResolvedEventPort, true, null);
+            RaiseConnectAttempted("Event", Info.ResolvedEventPort, true, null, _eventTransport.LocalEndPoint);
 
             // 이벤트 채널 핸드셰이크: EventDataEnable 레지스터 ON.
             ResetEventHandshake();
@@ -428,8 +429,8 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
             ErrorOccurred?.Invoke(this, exception);
         }
 
-        private void RaiseConnectAttempted(string channel, int port, bool success, string? reason)
-            => ConnectAttempted?.Invoke(this, new NutrunnerConnectAttemptEventArgs(Info.Code, channel, Info.Ip, port, success, reason));
+        private void RaiseConnectAttempted(string channel, int port, bool success, string? reason, string? localEndPoint = null)
+            => ConnectAttempted?.Invoke(this, new NutrunnerConnectAttemptEventArgs(Info.Code, channel, Info.Ip, port, success, reason, localEndPoint));
 
         private void RaiseSettingWritten(NutrunnerRegister register, bool isResponse, bool success, IReadOnlyList<ushort> values)
             => SettingWritten?.Invoke(this, new NutrunnerSettingWriteEventArgs(Info.Code, Info.Ip, Info.Port, register, isResponse, success, values));

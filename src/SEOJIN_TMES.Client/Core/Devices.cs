@@ -5,6 +5,8 @@ using SEOJIN_TMES.Client.Equipment.Nutrunner;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Net.NetworkInformation;
+using System.Threading.Tasks;
 
 namespace SEOJIN_TMES.Client.Core
 {
@@ -20,9 +22,41 @@ namespace SEOJIN_TMES.Client.Core
 
         public INutrunnerManager Manager { get => _manager;}
 
+        /// <summary>마지막으로 남긴 네트워크 상태. 주소 변경 알림은 한 번 바뀔 때 여러 번 오므로 달라졌을 때만 남긴다.</summary>
+        private string? _lastNetwork;
+        private readonly object _networkLogSync = new object();
+
         public Devices()
         {
             Init();
+
+            // Wi-Fi 재연결 · SSID 변경으로 IP가 바뀌는 순간을 로그에 남긴다 — 장비 응답이 끊기고 돌아오는 시점과 맞춰 보기 위해서다.
+            // Devices는 앱이 끝날 때까지 하나만 살아 있어 해제하지 않는다(Init은 다시 불릴 수 있어 생성자에서 건다).
+            NetworkChange.NetworkAddressChanged += OnNetworkAddressChanged;
+        }
+
+        private void OnNetworkAddressChanged(object sender, EventArgs e)
+        {
+            LogNetwork("네트워크 변경");
+        }
+
+        /// <summary>
+        /// PC의 IP · SSID를 로그에 남긴다. netsh를 띄우므로 화면 스레드를 막지 않게 백그라운드에서 돈다.
+        /// </summary>
+        private void LogNetwork(string reason)
+        {
+            Task.Run(() =>
+            {
+                var snapshot = NetworkSnapshot.Describe();
+                lock (_networkLogSync)
+                {
+                    if (reason == "네트워크 변경" && snapshot == _lastNetwork)
+                        return;
+                    _lastNetwork = snapshot;
+                }
+
+                AppLog.Info($"[네트워크] {reason} - {snapshot}");
+            });
         }
 
         /// <summary>
@@ -51,7 +85,7 @@ namespace SEOJIN_TMES.Client.Core
         /// <summary>장비 접속 성공/실패 — IP·포트와 함께 서버로 보낸다(통신 스레드에서 불린다).</summary>
         private void OnConnectAttempted(object sender, NutrunnerConnectAttemptEventArgs e)
         {
-            ServerLog.EquipmentConnected(e.Code, e.Channel, e.Host, e.Port, e.Success, e.Reason);
+            ServerLog.EquipmentConnected(e.Code, e.Channel, e.Host, e.Port, e.Success, e.Reason, e.LocalEndPoint);
         }
 
         /// <summary>설정 레지스터 쓰기의 송신 · 응답 이력 — 서버로 보낸다(통신 스레드에서 불린다).</summary>
@@ -127,6 +161,7 @@ namespace SEOJIN_TMES.Client.Core
 
             _manager.StartAll();
             AppLog.Step($"설비 {_manager.Count}대 연결 시작");
+            LogNetwork("설비 연결 시작");
         }
 
         /// <summary>
