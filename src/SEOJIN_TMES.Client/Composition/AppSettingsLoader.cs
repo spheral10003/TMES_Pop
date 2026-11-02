@@ -53,6 +53,9 @@ namespace SEOJIN_TMES.Client.Composition
             if (int.TryParse(ConfigurationManager.AppSettings["ModbusReconnectWaitMs"], out var reconnectWaitMs))
                 settings.ModbusReconnectWaitMs = reconnectWaitMs;
 
+            if (int.TryParse(ConfigurationManager.AppSettings["ModbusEventConnectDelayMs"], out var eventConnectDelayMs))
+                settings.ModbusEventConnectDelayMs = eventConnectDelayMs;
+
             if (int.TryParse(ConfigurationManager.AppSettings["ModbusTestTimeoutMs"], out var testTimeoutMs))
                 settings.ModbusTestTimeoutMs = testTimeoutMs;
 

@@ -79,6 +79,13 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
         private volatile bool _requestConnecting;
         private volatile bool _eventConnecting;
 
+        /// <summary>
+        /// Request 채널이 붙은 뒤 Event 채널 접속을 미뤄 둔 상태인지(<see cref="NutrunnerInfo.EventConnectDelayMs"/>).
+        /// 대기가 끝나면 시퀀스 tick(<see cref="ProcessEventHandshake"/>)에서 연다 — 수신 스레드를 붙잡고 기다리지 않으려고.
+        /// </summary>
+        private volatile bool _eventConnectPending;
+        private readonly Stopwatch _eventConnectDelayTimer = new();
+
         private bool _disposed;
 
         /// <summary>장비가 EventDataEnable 쓰기를 받았음을 응답으로 확인했는지 여부.</summary>
@@ -163,7 +170,8 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
 
         public void ConnectEventChannel()
         {
-            if (!_client.IsConnected || _eventTransport.IsConnected)
+            // 접속 직후 대기 중이면 KeepAlive 쪽에서 먼저 열지 않는다 — 대기가 끝나면 ProcessEventHandshake가 연다.
+            if (!_client.IsConnected || _eventTransport.IsConnected || _eventConnectPending)
             {
                 return;
             }
@@ -285,6 +293,13 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
         /// </summary>
         public void ProcessEventHandshake()
         {
+            if (_eventConnectPending && _eventConnectDelayTimer.Elapsed.TotalMilliseconds >= Info.EventConnectDelayMs)
+            {
+                _eventConnectPending = false;
+                ConnectEventChannel();
+                return;
+            }
+
             if (_eventEnabled || !_client.IsConnected || !_eventTransport.IsConnected)
             {
                 return;
@@ -330,12 +345,22 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
             RaiseConnectAttempted("Request", Info.Port, true, null, _ownedRequestTransport?.LocalEndPoint);
 
             // Request 채널이 붙으면 Event Transport 채널도 연결한다.
-            ConnectEventTransport();
+            // 두 포트를 연달아 열면 Event 포트 접속을 받지 못하는 장비가 있어, 설정(App.config ModbusEventConnectDelayMs)만큼 뒤에 연다.
+            if (Info.EventConnectDelayMs > 0)
+            {
+                _eventConnectDelayTimer.Restart();
+                _eventConnectPending = true;
+            }
+            else
+            {
+                ConnectEventTransport();
+            }
             Connected?.Invoke(this, new EquipmentConnectionEventArgs(Info.Code, true));
         }
 
         private void OnClientDisconnected(object? sender, EventArgs e)
         {
+            _eventConnectPending = false;
             _eventTransport.Disconnect();
 
             // 이벤트 채널이 끊김 이벤트 없이 정리되더라도 "사용 가능"이 남지 않게 여기서도 핸드셰이크를 되돌린다.

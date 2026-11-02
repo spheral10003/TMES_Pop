@@ -70,6 +70,12 @@ namespace SEOJIN_TMES.Client.Common.Configuration
         public int ModbusReconnectWaitMs { get; set; } = 10000;
 
         /// <summary>
+        /// 설비 Request 채널(Port, 예 5000) 접속 완료 후 Event 채널(Port+1, 예 5001) 접속을 시작하기까지의 대기 시간(ms). 기본 1000.
+        /// 두 포트를 연달아 열면 Event 포트 접속을 받지 못하는 장비가 있어 순서를 두고 연다. 0 이하면 기다리지 않는다.
+        /// </summary>
+        public int ModbusEventConnectDelayMs { get; set; } = 1000;
+
+        /// <summary>
         /// 설비 접속 테스트 팝업에서 포트 하나에 접속을 기다리는 시간(ms). 이 안에 붙지 않으면 실패로 센다. 기본 2000.
         /// 운영 연결의 <see cref="ModbusConnectTimeoutMs"/>와 따로 둔다 — 테스트는 "느리지만 붙는지"까지 보려고 넉넉히 기다린다.
         /// </summary>

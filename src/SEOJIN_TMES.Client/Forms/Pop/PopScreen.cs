@@ -267,6 +267,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 info.ConnectTimeoutMs = _appSet.AppSet.ModbusConnectTimeoutMs;
                 info.ResponseTimeoutMs = _appSet.AppSet.ModbusResponseTimeoutMs;
                 info.ReconnectWaitMs = _appSet.AppSet.ModbusReconnectWaitMs;
+                info.EventConnectDelayMs = _appSet.AppSet.ModbusEventConnectDelayMs;
                 info.KeepAliveTimeMs = _appSet.AppSet.ModbusKeepAliveTimeMs;
                 info.KeepAliveIntervalMs = _appSet.AppSet.ModbusKeepAliveIntervalMs;
 
