@@ -262,6 +262,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 info.ModelName = eq.EquipmentModel;
                 info.ConnectTimeoutMs = _appSet.AppSet.ModbusConnectTimeoutMs;
                 info.ResponseTimeoutMs = _appSet.AppSet.ModbusResponseTimeoutMs;
+                info.ReconnectWaitMs = _appSet.AppSet.ModbusReconnectWaitMs;
                 info.KeepAliveTimeMs = _appSet.AppSet.ModbusKeepAliveTimeMs;
                 info.KeepAliveIntervalMs = _appSet.AppSet.ModbusKeepAliveIntervalMs;
 

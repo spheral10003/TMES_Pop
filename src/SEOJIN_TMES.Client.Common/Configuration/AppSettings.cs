@@ -64,6 +64,12 @@ namespace SEOJIN_TMES.Client.Common.Configuration
         public int ModbusResponseTimeoutMs { get; set; } = 2000;
 
         /// <summary>
+        /// 설비 재연결 3회(5초 간격)가 모두 실패한 뒤 다음 3회를 시작하기까지 쉬는 시간(ms). 기본 30000. 0 이하면 30000.
+        /// 실패 횟수가 늘어도 이 시간은 바꾸지 않는다.
+        /// </summary>
+        public int ModbusReconnectWaitMs { get; set; } = 30000;
+
+        /// <summary>
         /// 설비 접속 테스트 팝업에서 포트 하나에 접속을 기다리는 시간(ms). 이 안에 붙지 않으면 실패로 센다. 기본 2000.
         /// 운영 연결의 <see cref="ModbusConnectTimeoutMs"/>와 따로 둔다 — 테스트는 "느리지만 붙는지"까지 보려고 넉넉히 기다린다.
         /// </summary>

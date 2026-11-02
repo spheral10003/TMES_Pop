@@ -41,6 +41,12 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
         /// </summary>
         public int ResponseTimeoutMs { get; set; } = 2000;
 
+        /// <summary>
+        /// 재연결 <c>3회</c>가 모두 실패한 뒤 다음 3회를 시작하기까지 쉬는 시간(ms). App.config <c>ModbusReconnectWaitMs</c>에서 온다.
+        /// 0 이하면 30000.
+        /// </summary>
+        public int ReconnectWaitMs { get; set; } = 30000;
+
         /// <summary>무통신 후 첫 TCP KeepAlive 확인까지의 시간(ms). App.config <c>ModbusKeepAliveTimeMs</c>에서 온다.</summary>
         public int KeepAliveTimeMs { get; set; } = 5000;
 
