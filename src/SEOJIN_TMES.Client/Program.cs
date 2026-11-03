@@ -35,6 +35,9 @@ namespace SEOJIN_TMES.Client
 
                     Global.Initialize();
 
+                    // 로그인 대기 중에도 화면 보호기가 뜨지 않도록 로그인 창보다 먼저 건다
+                    DisplayKeeper.Keep();
+
                     AppLog.Step("로그인 화면 표시");
                     using (var loginForm = new LoginForm())
                     {
@@ -58,6 +61,7 @@ namespace SEOJIN_TMES.Client
                     AppLog.Step("설비 Modbus 매니저 · 문서 공유 폴더 정리 및 애플리케이션 종료");
                     // 초기화가 실패했어도 안전하게 돈다
                     Global.Shutdown();
+                    DisplayKeeper.Release();
                     // 로그 파일은 마지막에 닫는다 — 위 정리 과정에서 나는 로그까지 파일에 남겨야 한다.
                     AppLog.Close();
                     
