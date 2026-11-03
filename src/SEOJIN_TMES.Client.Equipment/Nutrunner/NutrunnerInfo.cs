@@ -51,7 +51,7 @@ namespace SEOJIN_TMES.Client.Equipment.Nutrunner
         /// Request 채널 접속 완료 후 Event 채널 접속을 시작하기까지의 대기 시간(ms). App.config <c>ModbusEventConnectDelayMs</c>에서 온다.
         /// 0 이하면 기다리지 않고 바로 연다.
         /// </summary>
-        public int EventConnectDelayMs { get; set; } = 1000;
+        public int EventConnectDelayMs { get; set; } = 500;
 
         /// <summary>무통신 후 첫 TCP KeepAlive 확인까지의 시간(ms). App.config <c>ModbusKeepAliveTimeMs</c>에서 온다.</summary>
         public int KeepAliveTimeMs { get; set; } = 5000;
