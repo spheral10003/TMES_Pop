@@ -489,11 +489,17 @@ namespace SEOJIN_TMES.Client.Theme
         /// 상단 바에 얹히는 콤보(언어 선택) — 입력칸처럼 보이지 않게 테두리를 없애고 배경을 상단 바와 맞춘다.
         /// 목록에서 고르기만 하는 컨트롤이라 직접 입력은 막는다.
         /// </summary>
-        public static void TopBarCombo(ComboBoxEdit combo)
+        /// <param name="testServer">
+        /// 테스트 서버면 상단 바가 <see cref="TestServerTopBar"/>(주황)이므로 콤보도 같은 색으로 칠한다
+        /// — <see cref="TopBarPanel"/>과 같은 값을 넘겨야 콤보만 파랗게 떠 보이지 않는다.
+        /// </param>
+        public static void TopBarCombo(ComboBoxEdit combo, bool testServer = false)
         {
+            var back = testServer ? TestServerTopBar : TopBar;
+
             combo.Properties.Appearance.Font = BodyFont;
             combo.Properties.Appearance.ForeColor = TopBarFore;
-            combo.Properties.Appearance.BackColor = TopBar;
+            combo.Properties.Appearance.BackColor = back;
             combo.Properties.Appearance.Options.UseFont = true;
             combo.Properties.Appearance.Options.UseForeColor = true;
             combo.Properties.Appearance.Options.UseBackColor = true;
@@ -508,7 +514,7 @@ namespace SEOJIN_TMES.Client.Theme
             combo.Properties.AppearanceDropDown.Options.UseForeColor = true;
             combo.Properties.AppearanceDropDown.Options.UseBackColor = true;
 
-            combo.BackColor = TopBar;
+            combo.BackColor = back;
         }
 
         /// <summary>색을 채운 주요 실행 버튼(시작/정지/조회 등).</summary>
@@ -874,12 +880,13 @@ namespace SEOJIN_TMES.Client.Theme
             label.IndentBetweenImageAndText = 6;
         }
 
-        /// <summary>상단바 세션 남은 시간(고정폭 숫자라 초가 바뀌어도 글자가 흔들리지 않는다).</summary>
+        /// <summary>
+        /// 상단바 가운데 시계. 글자색만 입히고 글꼴 · 크기는 건드리지 않는다 —
+        /// 크기는 MainForm 디자이너에서 정한 값을 그대로 쓴다(여기서 덮어쓰면 디자이너에서 바꿔도 반영되지 않는다).
+        /// </summary>
         public static void SessionTime(LabelControl label)
         {
-            label.Appearance.Font = new Font("Consolas", 11F, FontStyle.Bold);
             label.Appearance.ForeColor = TopBarFore;
-            label.Appearance.Options.UseFont = true;
             label.Appearance.Options.UseForeColor = true;
         }
 

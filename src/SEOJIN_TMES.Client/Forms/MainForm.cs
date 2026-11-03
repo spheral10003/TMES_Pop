@@ -583,8 +583,7 @@ namespace SEOJIN_TMES.Client.Forms
 
         /// <summary>
         /// 남은 시간을 상단 바 가로 가운데에 놓는다.
-        /// 시각은 1초마다 바뀌지만 고정폭 글꼴(Consolas)에 자릿수도 일정해서 폭은 그대로다 —
-        /// 그래도 글꼴이 없는 PC에서 대체 글꼴이 쓰일 수 있으므로 갱신할 때마다 다시 맞춘다.
+        /// 글꼴은 디자이너 값(비례폭일 수 있다)이라 숫자에 따라 폭이 조금씩 달라지므로 갱신할 때마다 다시 맞춘다.
         /// </summary>
         private void CenterSessionTime()
         {

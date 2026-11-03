@@ -126,7 +126,7 @@ namespace SEOJIN_TMES.Client.Forms
             // 우측 상단 정보 묶음: 언어 · 접속 테스트 · 알림 · "{이름} 님 환영합니다." · 사용자 · 창 버튼 · 로그아웃 (현재 일시는 상단 바 가운데)
             AppTheme.TopBarText(lblWelcome);
             AppTheme.SessionTime(lblSessionTime);
-            AppTheme.TopBarCombo(cboLanguage);
+            AppTheme.TopBarCombo(cboLanguage, IsTestServer);   // 배경을 panelTop과 같은 색으로
             cboLanguage.ToolTip = Language.MainForm_LanguageHint;
             AppTheme.ImageIconButton(btnUser, AppImages.IconUser, AppTheme.TopBarFore, 18);
             btnUser.ToolTip = Language.UserProfile_Title;
