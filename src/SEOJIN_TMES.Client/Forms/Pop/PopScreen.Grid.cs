@@ -899,11 +899,13 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (spec == null)
                 return;
 
-            // 정량 검사는 판정과 결과값을 함께 보내야 한다 — 결과값이 비어 있으면 아직 보내지 않고,
-            // 결과값이 들어오는 순간(이 이벤트가 다시 올라올 때) 판정과 함께 보낸다.
-            if (spec.IsQuantitative && string.IsNullOrWhiteSpace(spec.ResultValue))
+            // 정량 검사는 판정과 결과값을 함께 보내야 한다 — 둘 중 하나라도 비어 있으면 아직 보내지 않고,
+            // 나머지가 들어오는 순간(이 이벤트가 다시 올라올 때) 함께 보낸다.
+            // 입력 순서는 정해져 있지 않다(결과값을 먼저 넣고 판정을 나중에 고를 수도 있다).
+            if (spec.IsQuantitative
+                && (string.IsNullOrWhiteSpace(spec.ResultState) || string.IsNullOrWhiteSpace(spec.ResultValue)))
             {
-                AppLog.Info($"[POP] 정량 검사 결과값 미입력 - 전송 보류 ({spec.InspectionItemCode}, {fieldName})");
+                AppLog.Info($"[POP] 정량 검사 판정/결과값 미입력 - 전송 보류 ({spec.InspectionItemCode}, {fieldName})");
                 return;
             }
 
