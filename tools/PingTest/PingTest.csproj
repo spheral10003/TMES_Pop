@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    SEOJIN_MEIS 솔루션과 무관한 단독 도구.
+    현장 POP PC에 .NET Framework 4.7.2가 이미 깔려 있으므로 런타임 설치 없이 exe 하나만 복사해 쓰도록 net472로 둔다.
+  -->
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net472</TargetFramework>
+    <LangVersion>7.3</LangVersion>
+    <AssemblyName>PingTest</AssemblyName>
+    <RootNamespace>PingTest</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="System.Configuration" />
+  </ItemGroup>
+
+</Project>
