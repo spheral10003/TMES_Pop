@@ -1023,6 +1023,9 @@
   <data name="Pop_ProcessMovedUnfinished" xml:space="preserve">
     <value>공정을 완료하지 못한 채 이동했습니다(남은 작업 있음).</value>
   </data>
+  <data name="Pop_ProcessIncompleteMoveConfirm" xml:space="preserve">
+    <value>현재 공정이 아직 완료되지 않았습니다. 남은 작업이 있어도 다른 공정으로 이동하시겠습니까?</value>
+  </data>
   <data name="Pop_SerialNotRunning" xml:space="preserve">
     <value>중지된 공정에서는 투입자재를 입력할 수 없습니다. 공정을 재시작한 뒤 입력하세요.</value>
   </data>

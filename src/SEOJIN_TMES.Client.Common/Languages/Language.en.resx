@@ -1023,6 +1023,9 @@ Reconnection continues automatically until it succeeds. You can also press [Reco
   <data name="Pop_ProcessMovedUnfinished" xml:space="preserve">
     <value>Moved without completing the process (work remaining).</value>
   </data>
+  <data name="Pop_ProcessIncompleteMoveConfirm" xml:space="preserve">
+    <value>The current process is not completed yet. Do you want to move to another process anyway?</value>
+  </data>
   <data name="Pop_SerialNotRunning" xml:space="preserve">
     <value>Input materials cannot be entered while the process is stopped. Restart the process first.</value>
   </data>

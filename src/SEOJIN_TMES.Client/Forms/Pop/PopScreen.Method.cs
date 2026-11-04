@@ -411,6 +411,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 return;
             }
 
+            if (!ConfirmIncompleteMove())
+                return;
+
             if (!await EndCurrentProcess())
                 return;
 
@@ -451,6 +454,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
             // 지금 공정을 다시 고른 것은 공정을 바꾼 것이 아니므로 완료하지 않는다.
             var isSameProcess = string.Equals(selected.SubRoutingReference, _key.SubRoutingRef, StringComparison.OrdinalIgnoreCase);
+            if (!isSameProcess && !ConfirmIncompleteMove())
+                return;
+
             if (!isSameProcess && !await EndCurrentProcess())
                 return;
 
@@ -521,6 +527,26 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             }
 
             return -1;
+        }
+
+        /// <summary>
+        /// 지금 공정이 끝나지 않은 채 다른 공정으로 옮기려 하면 경고하고 계속할지 묻는다.
+        /// 남은 작업을 두고 실수로 넘어가는 것을 막으려는 것이라, 막지는 않고 작업자가 고르게 한다.
+        /// 완료(Finished)된 공정과, 이동하면서 <see cref="EndCurrentProcess"/>가 완료를 보내는 공정
+        /// (진행 중이고 입력할 항목이 없는 공정)은 묻지 않는다.
+        /// </summary>
+        /// <returns>이동을 계속하면 true.</returns>
+        private bool ConfirmIncompleteMove()
+        {
+            if (IsProgressState(StateFinished))
+                return true;
+
+            if (IsProcessRunning && !HasInputItems())
+                return true;
+
+            AppLog.Info($"[POP] 미완료 공정 이동 확인 - {_key.RoutingOperation}/{_key.PageOperation} ({_progressState})");
+            return AppMessageBox.Show(this, Language.Pop_ProcessIncompleteMoveConfirm, Language.Pop_Title,
+                                      AppMessageKind.Warning, AppMessageButtons.OkCancel) == DialogResult.OK;
         }
 
         /// <summary>

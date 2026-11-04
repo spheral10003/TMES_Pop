@@ -1023,6 +1023,9 @@ Hệ thống sẽ tự động thử kết nối lại cho đến khi thành cô
   <data name="Pop_ProcessMovedUnfinished" xml:space="preserve">
     <value>Đã chuyển mà chưa hoàn thành công đoạn (còn việc chưa làm).</value>
   </data>
+  <data name="Pop_ProcessIncompleteMoveConfirm" xml:space="preserve">
+    <value>Công đoạn hiện tại chưa hoàn thành. Bạn vẫn muốn chuyển sang công đoạn khác?</value>
+  </data>
   <data name="Pop_SerialNotRunning" xml:space="preserve">
     <value>Không thể nhập vật tư khi công đoạn đang dừng. Hãy khởi động lại công đoạn trước.</value>
   </data>
