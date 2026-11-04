@@ -1026,8 +1026,8 @@
   <data name="Pop_ProcessIncompleteMoveConfirm" xml:space="preserve">
     <value>현재 공정이 아직 완료되지 않았습니다. 남은 작업이 있어도 다른 공정으로 이동하시겠습니까?</value>
   </data>
-  <data name="Pop_SerialNotRunning" xml:space="preserve">
-    <value>중지된 공정에서는 투입자재를 입력할 수 없습니다. 공정을 재시작한 뒤 입력하세요.</value>
+  <data name="Pop_InputNotAllowed" xml:space="preserve">
+    <value>완료 · 중지된 공정에서는 값을 입력할 수 없습니다. 중지된 공정은 재시작, 완료된 공정은 [리웍]으로 진행 중으로 바꾼 뒤 입력하세요.</value>
   </data>
   <data name="Col_WorkQty" xml:space="preserve">
     <value>작업지시 수량</value>

@@ -89,7 +89,11 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
         public bool IsProcessRunning => IsProgressState(StateProgress);
 
-        public bool IsInputAllowed => !IsProgressState(StateStopped);
+        /// <summary>
+        /// 값을 입력할 수 있는 상태인지 — 완료(Finished) · 중지(Stopped)된 공정은 막는다.
+        /// 완료된 공정을 고치려면 [리웍]으로 진행 중(Progress)으로 되돌린다 — 서버가 돌려준 상태가 진행 중이면 다시 열린다.
+        /// </summary>
+        public bool IsInputAllowed => !IsProgressState(StateStopped) && !IsProgressState(StateFinished);
 
         public PopScreen(WorkEntryContext entry = null)
         {

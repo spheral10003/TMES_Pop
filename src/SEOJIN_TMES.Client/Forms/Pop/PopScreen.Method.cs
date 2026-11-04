@@ -448,6 +448,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// <summary>
         /// [공정 목록] — 공정(라우팅) 목록을 조회해 &lt;작업 진입 확인&gt; 팝업을 띄우고,
         /// [이동]으로 고른 공정으로 화면을 다시 읽는다.
+        /// 목록은 누를 때마다 서버에서 새로 받는다 — 팝업에 공정마다 진행 상태가 보이는데, 처음 받아 둔 목록을 그대로 쓰면
+        /// 그동안 완료 · 중지 · 리웍한 공정이 예전 상태로 보였다(진입 화면 WorkOrderEntryScreen과 같은 API · 같은 방식).
         /// </summary>
         public async Task ShowProcessList()
         {
@@ -457,7 +459,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 return;
             }
 
-            if (!await GetProcesses())
+            if (!await GetProcesses(refresh: true))
                 return;
 
             RoutingProcessDto selected;
@@ -492,12 +494,14 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// 공정 목록을 확보한다(이미 읽어 뒀으면 그대로 쓴다).
+        /// 공정 목록을 확보한다. 이미 읽어 뒀으면 그대로 쓰고(이전/다음 · 자동 진행은 순서만 필요하다),
+        /// <paramref name="refresh"/>면 서버에서 다시 받는다([공정 목록] — 진행 상태까지 보여 주므로).
+        /// 다시 받을 때는 진입 화면과 같이 취소할 수 있는 대기 표시를 띄운다 — 취소하면 이전 목록을 그대로 두고 false.
         /// 조회에 실패하거나 목록이 비면 사유를 알리고 false를 돌려준다.
         /// </summary>
-        private async Task<bool> GetProcesses()
+        private async Task<bool> GetProcesses(bool refresh = false)
         {
-            if (_processes.Count > 0)
+            if (!refresh && _processes.Count > 0)
                 return true;
 
             btnPrevProcess.Enabled = false;
@@ -507,8 +511,18 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             {
                 string corpCode = _entry?.WorkOrder?.CorpCode;
                 string workstationRef = _appSet?.CurrentUser?.WorkstationInfo?.WorkstationRef;
-                _processes = await _apiClient.WorkOrderApiClient.GetRoutingProcessesAsync(corpCode, workstationRef, _key.SerialNo)
-                             ?? new List<RoutingProcessDto>();
+
+                // 목록을 받아 오는 것뿐이라(공정 상태는 바꾸지 않는다) 취소해도 남는 것이 없다.
+                using (var busy = BusyOverlay.Show(this, cancelable: true))
+                {
+                    _processes = await _apiClient.WorkOrderApiClient.GetRoutingProcessesAsync(corpCode, workstationRef, _key.SerialNo, busy.Token)
+                                 ?? new List<RoutingProcessDto>();
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                AppLog.Info("[POP] 공정 목록 조회 취소");
+                return false;
             }
             catch (ApiException ex)
             {
@@ -818,12 +832,12 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 return;
             }
 
-            // 중지된 공정은 팝업에서 다 입력한 뒤에 거절되지 않도록 열기 전에 막는다(BOM · 검사 입력과 같은 조건).
-            // 그 밖의 상태에서 서버가 거절하면(409) SetMaterialInput이 사유를 알리고 서버 상태로 다시 그린다.
+            // 완료 · 중지된 공정은 팝업에서 다 입력한 뒤에 거절되지 않도록 열기 전에 막는다(BOM · 검사 입력과 같은 조건).
+            // 완료된 공정은 [리웍]으로 진행 중이 되면 열린다. 그 밖의 상태에서 서버가 거절하면(409) SetMaterialInput이 사유를 알린다.
             if (!IsInputAllowed)
             {
-                AppLog.Info($"[POP] 공정 중지 - 시리얼 입력 생략 ({material.MaterialCode}, 상태 {_progressState})");
-                AppMessageBox.Info(this, Language.Pop_SerialNotRunning, Language.PopSerial_Title);
+                AppLog.Info($"[POP] 공정 완료 · 중지 - 시리얼 입력 생략 ({material.MaterialCode}, 상태 {_progressState})");
+                AppMessageBox.Info(this, Language.Pop_InputNotAllowed, Language.PopSerial_Title);
                 return;
             }
 
@@ -1059,13 +1073,13 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// <summary>
         /// 검사 스팩 한 줄의 결과를 서버에 보낸다 — 정량 검사는 판정 · 결과값 · 비고, 정성 검사는 판정 · 비고.
         /// 검사 항목 코드는 URL 경로로만 보내고 Body에는 담지 않는다.
-        /// 공정이 중지 상태면 보내지 않는다 — 편집 도중 중지된 경우를 막는다.
+        /// 공정이 완료 · 중지 상태면 보내지 않는다 — 편집 도중 상태가 바뀐 경우를 막는다.
         /// </summary>
         public async Task SetInspectionResult(PopInspectionSpecDto spec, string fieldName)
         {
             if (!IsInputAllowed)
             {
-                AppLog.Info($"[POP] 공정 중지 - 검사 결과 전송 생략 (상태 {_progressState})");
+                AppLog.Info($"[POP] 공정 완료 · 중지 - 검사 결과 전송 생략 (상태 {_progressState})");
                 return;
             }
 

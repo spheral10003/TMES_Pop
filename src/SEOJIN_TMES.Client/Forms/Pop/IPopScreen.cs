@@ -20,8 +20,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         bool IsProcessRunning { get; }
 
         /// <summary>
-        /// 그리드 · 투입자재 팝업에서 값을 입력받을 수 있는지 — 중지(Stopped) 상태만 막는다(사용자 요구).
-        /// 대기 · 완료 상태에서 들어온 입력을 받을지는 서버가 판정한다(거절되면 사유를 창으로 알린다).
+        /// 그리드 · 투입자재 팝업에서 값을 입력받을 수 있는지 — 완료(Finished) · 중지(Stopped) 상태는 막는다(사용자 요구).
+        /// 완료된 공정은 [리웍]으로 진행 중이 되면 다시 입력할 수 있다. 대기 상태의 입력을 받을지는 서버가 판정한다.
         /// </summary>
         bool IsInputAllowed { get; }
 

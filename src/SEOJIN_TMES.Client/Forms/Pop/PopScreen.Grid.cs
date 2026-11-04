@@ -673,21 +673,25 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// 공정이 중지 상태가 아닐 때(<see cref="IsInputAllowed"/>) "토크 결과값" · "각도 결과값" 칸의 편집기를 연다.
-        /// 중지 상태에서는 입력 자체를 막는다 — 그래서 ValidatingEditor · CellValueChanged에서는 공정 상태를 다시 확인하지 않는다.
+        /// 공정이 완료 · 중지 상태가 아닐 때(<see cref="IsInputAllowed"/>) "토크 결과값" · "각도 결과값" 칸의 편집기를 연다.
+        /// 완료 · 중지 상태에서는 입력 자체를 막는다([리웍]으로 진행 중이 되면 열린다) —
+        /// 그래서 ValidatingEditor · CellValueChanged에서는 공정 상태를 다시 확인하지 않는다.
         /// [입력] 버튼 컬럼도 편집기가 열려야 눌리므로 같은 조건으로 막힌다.
         /// </summary>
         private void GridViewBomSpec_ShowingEditor(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (!IsInputAllowed)
+            var fieldName = gridViewBomSpec.FocusedColumn?.FieldName;
+            if (fieldName != TorqueResultField && fieldName != AngleResultField && fieldName != ResultInputField)
             {
                 e.Cancel = true;
                 return;
             }
 
-            var fieldName = gridViewBomSpec.FocusedColumn?.FieldName;
-            if (fieldName != TorqueResultField && fieldName != AngleResultField && fieldName != ResultInputField)
+            if (!IsInputAllowed)
+            {
                 e.Cancel = true;
+                ShowMessage(Language.Pop_InputNotAllowed);
+            }
         }
 
         /// <summary>
@@ -937,18 +941,20 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
         private void GridViewInspection_ShowingEditor(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            // 중지된 공정만 입력을 막는다 — 그 밖의 상태에서 받을지는 서버가 판정한다.
-            if (!IsInputAllowed)
-            {
-                e.Cancel = true;
-                return;
-            }
-
             var view = (GridView)sender;
             var fieldName = view.FocusedColumn?.FieldName;
             if (fieldName == null || !_inspectionInputFields.Contains(fieldName))
             {
                 e.Cancel = true;
+                return;
+            }
+
+            // 완료 · 중지된 공정은 입력을 막는다([리웍]으로 진행 중이 되면 열린다). 대기 상태에서 받을지는 서버가 판정한다.
+            // 칸을 누를 때마다 불리므로 창 대신 안내 칸에만 남긴다.
+            if (!IsInputAllowed)
+            {
+                e.Cancel = true;
+                ShowMessage(Language.Pop_InputNotAllowed);
                 return;
             }
 

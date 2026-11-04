@@ -1026,8 +1026,8 @@ Hệ thống sẽ tự động thử kết nối lại cho đến khi thành cô
   <data name="Pop_ProcessIncompleteMoveConfirm" xml:space="preserve">
     <value>Công đoạn hiện tại chưa hoàn thành. Bạn vẫn muốn chuyển sang công đoạn khác?</value>
   </data>
-  <data name="Pop_SerialNotRunning" xml:space="preserve">
-    <value>Không thể nhập vật tư khi công đoạn đang dừng. Hãy khởi động lại công đoạn trước.</value>
+  <data name="Pop_InputNotAllowed" xml:space="preserve">
+    <value>Không thể nhập giá trị khi công đoạn đã hoàn thành hoặc đang dừng. Hãy khởi động lại công đoạn đang dừng, hoặc dùng [Gia công lại] để đưa công đoạn đã hoàn thành về trạng thái đang thực hiện.</value>
   </data>
   <data name="Col_WorkQty" xml:space="preserve">
     <value>Work Qty</value>
