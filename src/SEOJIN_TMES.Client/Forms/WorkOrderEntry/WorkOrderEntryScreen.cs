@@ -63,7 +63,8 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             txtSerialNo.KeyDown += Condition_KeyDown;
 
             // 목록에서 더블클릭하면 [작업]과 같게 동작한다.
-            gridView.DoubleClick += async (s, e) => await StartWorkAsync();
+            // 헤더 · 빈 영역 더블클릭에는 반응하지 않도록 RowDoubleClick을 쓴다(MeisGridView 참고).
+            gridView.RowDoubleClick += gridView_RowDoubleClick;
         }
 
         /// <summary>현재 테마 색을 화면에 입힌다(포인트 컬러: Indigo).</summary>
@@ -121,6 +122,19 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
 
         private async void btnSearch_Click(object sender, EventArgs e) => await SearchAsync();
         private async void btnWork_Click(object sender, EventArgs e) => await StartWorkAsync();
+
+        private async void gridView_RowDoubleClick(object sender, EventArgs e)
+        {
+            try
+            {
+                await StartWorkAsync();
+            }
+            catch (Exception ex)
+            {
+                // async void에서 예외가 새면 앱이 그대로 종료된다.
+                AppLog.Error("작업 진입 화면 - 목록 더블클릭 처리 실패", ex);
+            }
+        }
 
         /// <summary>
         /// 작업지시 조회. 두 조건 중 최소 하나는 입력해야 한다

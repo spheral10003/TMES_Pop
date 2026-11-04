@@ -1,4 +1,7 @@
+using System;
 using System.Drawing;
+using System.Windows.Forms;
+using DevExpress.Utils;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Views.Base;
 using DevExpress.XtraGrid.Views.Grid;
@@ -31,6 +34,16 @@ namespace SEOJIN_TMES.Client.Forms.Common
 
         private Color _accent = AppTheme.Indigo;
 
+        /// <summary>
+        /// <b>데이터 행</b>을 왼쪽 버튼으로 더블클릭했을 때만 발생한다.
+        ///
+        /// 표준 <c>DoubleClick</c>은 컬럼 헤더 · 빈 영역 · 그룹 행을 더블클릭해도 발생하는데,
+        /// 화면은 포커스된 행으로 동작하므로 헤더를 더블클릭(정렬 · 폭 맞춤)하면
+        /// 이미 선택돼 있던 행으로 [작업] · [이동] · [선택]이 실행돼 버렸다.
+        /// 더블클릭을 "이 행 실행"으로 쓰는 목록은 <c>DoubleClick</c> 대신 이 이벤트를 구독할 것.
+        /// </summary>
+        public event EventHandler RowDoubleClick;
+
         public MeisGridView()
         {
             WireCustomDraw();
@@ -49,6 +62,7 @@ namespace SEOJIN_TMES.Client.Forms.Common
         {
             CustomDrawColumnHeader += MeisGridView_CustomDrawColumnHeader;
             CustomDrawCell += MeisGridView_CustomDrawCell;
+            DoubleClick += MeisGridView_DoubleClick;
 
             // 앱의 모든 목록에서 컬럼을 끌어 지우는 조작은 막는다(GridColumnGuard 참고).
             GridColumnGuard.Apply(this);
@@ -105,6 +119,24 @@ namespace SEOJIN_TMES.Client.Forms.Common
 
             using (var brush = new SolidBrush(_accent))
                 e.Cache.FillRectangle(brush, line);
+        }
+
+        /// <summary>더블클릭한 위치를 확인해 데이터 행일 때만 <see cref="RowDoubleClick"/>을 올린다.</summary>
+        private void MeisGridView_DoubleClick(object sender, EventArgs e)
+        {
+            if (GridControl == null)
+                return;
+
+            var mouse = DXMouseEventArgs.GetMouseArgs(GridControl, e);
+            if (mouse.Button != MouseButtons.Left)
+                return;
+
+            // InDataRow: 헤더(InColumnPanel) · 빈 영역 · 그룹 행 · 필터 행은 모두 false.
+            var hit = CalcHitInfo(mouse.Location);
+            if (!hit.InDataRow)
+                return;
+
+            RowDoubleClick?.Invoke(this, EventArgs.Empty);
         }
 
         /// <summary>포커스 행의 첫 컬럼 왼쪽에 굵은 색 띠를 그린다.</summary>

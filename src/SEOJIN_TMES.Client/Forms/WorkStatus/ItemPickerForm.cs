@@ -64,7 +64,8 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             txtItemCode.KeyDown += Keyword_KeyDown;
 
             // 목록을 더블클릭하면 [선택]과 같게 동작한다.
-            gridView.DoubleClick += (s, e) => ConfirmSelection();
+            // 헤더 · 빈 영역 더블클릭에는 반응하지 않도록 RowDoubleClick을 쓴다(MeisGridView 참고).
+            gridView.RowDoubleClick += gridView_RowDoubleClick;
 
             //Load += async (s, e) => await SearchAsync();
         }
@@ -185,6 +186,8 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
         }
 
         private void btnSelect_Click(object sender, EventArgs e) => ConfirmSelection();
+
+        private void gridView_RowDoubleClick(object sender, EventArgs e) => ConfirmSelection();
 
         private void btnClose_Click(object sender, EventArgs e)
         {

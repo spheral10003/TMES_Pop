@@ -61,7 +61,8 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
                 gridView.FocusedRowHandle = 0;
 
             // 행을 더블클릭하면 [이동]과 같게 동작한다.
-            gridView.DoubleClick += (s, e) => MoveToSelectedProcess();
+            // 헤더 · 빈 영역 더블클릭에는 반응하지 않도록 RowDoubleClick을 쓴다(MeisGridView 참고).
+            gridView.RowDoubleClick += gridView_RowDoubleClick;
         }
 
         private void ApplyTheme()
@@ -99,6 +100,8 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
         }
 
         private void btnMove_Click(object sender, EventArgs e) => MoveToSelectedProcess();
+
+        private void gridView_RowDoubleClick(object sender, EventArgs e) => MoveToSelectedProcess();
 
         private void btnClose_Click(object sender, EventArgs e)
         {
