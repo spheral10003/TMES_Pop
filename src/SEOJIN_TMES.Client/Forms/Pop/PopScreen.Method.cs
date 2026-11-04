@@ -532,13 +532,13 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// <summary>
         /// 지금 공정이 끝나지 않은 채 다른 공정으로 옮기려 하면 경고하고 계속할지 묻는다.
         /// 남은 작업을 두고 실수로 넘어가는 것을 막으려는 것이라, 막지는 않고 작업자가 고르게 한다.
-        /// 완료(Finished)된 공정과, 이동하면서 <see cref="EndCurrentProcess"/>가 완료를 보내는 공정
-        /// (진행 중이고 입력할 항목이 없는 공정)은 묻지 않는다.
+        /// 완료(Finished)된 공정, 중지(Stopped)된 공정(작업자가 사유를 남기고 일부러 멈춘 것이다),
+        /// 이동하면서 <see cref="EndCurrentProcess"/>가 완료를 보내는 공정(진행 중이고 입력할 항목이 없는 공정)은 묻지 않는다.
         /// </summary>
         /// <returns>이동을 계속하면 true.</returns>
         private bool ConfirmIncompleteMove()
         {
-            if (IsProgressState(StateFinished))
+            if (IsProgressState(StateFinished) || IsProgressState(StateStopped))
                 return true;
 
             if (IsProcessRunning && !HasInputItems())
