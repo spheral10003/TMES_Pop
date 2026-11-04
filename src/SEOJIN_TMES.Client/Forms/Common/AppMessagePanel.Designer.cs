@@ -105,18 +105,18 @@ namespace SEOJIN_TMES.Client.Forms.Common
             // 
             // btnOk
             // 
-            this.btnOk.Location = new System.Drawing.Point(244, 16);
+            this.btnOk.Location = new System.Drawing.Point(220, 14);
             this.btnOk.Name = "btnOk";
-            this.btnOk.Size = new System.Drawing.Size(76, 32);
+            this.btnOk.Size = new System.Drawing.Size(88, 36);
             this.btnOk.TabIndex = 0;
             this.btnOk.Text = "확인";
             this.btnOk.Click += new System.EventHandler(this.btnOk_Click);
             // 
             // btnCancel
             // 
-            this.btnCancel.Location = new System.Drawing.Point(328, 16);
+            this.btnCancel.Location = new System.Drawing.Point(316, 14);
             this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(76, 32);
+            this.btnCancel.Size = new System.Drawing.Size(88, 36);
             this.btnCancel.TabIndex = 1;
             this.btnCancel.Text = "취소";
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);

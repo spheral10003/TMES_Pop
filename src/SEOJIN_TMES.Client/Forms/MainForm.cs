@@ -526,6 +526,7 @@ namespace SEOJIN_TMES.Client.Forms
 
             // 세로 위치는 좌표를 박지 않고 <b>바 높이에서 계산</b>한다 —
             // 예전에는 11/15/21 같은 값이 박혀 있어 바 높이를 줄이자 요소들이 아래로 삐져나왔다.
+            // 가로 간격은 상단 바 글자를 12pt(AppTheme.ChromeFont)로 키우면서 함께 넓혔다 — 큰 글자 옆에서 좁은 간격은 붙어 보인다.
 
             // 프로그램 종료
             // 로그아웃이 맨 오른쪽 끝이다(가장 자주 쓰는 버튼이라 위치를 고정해 둔다).
@@ -535,34 +536,34 @@ namespace SEOJIN_TMES.Client.Forms
             // 창 버튼(최소화 · 최대화)은 그 왼쪽에 붙이되, 업무 버튼과 한 칸 띄워
             // "창 조작"과 "화면 조작"이 섞여 보이지 않게 한다.
             btnMaximize.Top = CenterTop(btnMaximize);
-            btnMaximize.Left = btnLogout.Left - 12 - btnMaximize.Width;
+            btnMaximize.Left = btnLogout.Left - 16 - btnMaximize.Width;
 
             btnMinimize.Top = CenterTop(btnMinimize);
-            btnMinimize.Left = btnMaximize.Left - 2 - btnMinimize.Width;
+            btnMinimize.Left = btnMaximize.Left - 4 - btnMinimize.Width;
 
             // 사용자 정보 창 호출
             btnUser.Top = CenterTop(btnUser);
-            btnUser.Left = btnMinimize.Left - 12 - btnUser.Width;
+            btnUser.Left = btnMinimize.Left - 16 - btnUser.Width;
 
             // 아이디 표시 - 환영 문구
             lblWelcome.Top = CenterTop(lblWelcome);
-            lblWelcome.Left = btnUser.Left - 10 - lblWelcome.Width;
+            lblWelcome.Left = btnUser.Left - 14 - lblWelcome.Width;
 
             // 알림창 호출
             btnAlerts.Top = CenterTop(btnAlerts);
-            btnAlerts.Left = lblWelcome.Left - 14 - btnAlerts.Width;
+            btnAlerts.Left = lblWelcome.Left - 18 - btnAlerts.Width;
 
             // 읽지 않은 알람 숫자
-            lblAlertBadge.Top = btnAlerts.Top - 1;
-            lblAlertBadge.Left = btnAlerts.Right - 13;
+            lblAlertBadge.Top = btnAlerts.Top + 2;
+            lblAlertBadge.Left = btnAlerts.Right - 16;
 
             // 설비 접속 테스트
             btnModbusTest.Top = CenterTop(btnModbusTest);
-            btnModbusTest.Left = btnAlerts.Left - 12 - btnModbusTest.Width;
+            btnModbusTest.Left = btnAlerts.Left - 16 - btnModbusTest.Width;
 
             // 언어
             cboLanguage.Top = CenterTop(cboLanguage);
-            cboLanguage.Left = btnModbusTest.Left - 12 - cboLanguage.Width;
+            cboLanguage.Left = btnModbusTest.Left - 16 - cboLanguage.Width;
 
             CenterSessionTime();
         }
@@ -592,8 +593,8 @@ namespace SEOJIN_TMES.Client.Forms
             // 기본은 상단 바 한가운데. 다만 창이 좁으면 좌측 브레드크럼이나 우측 묶음과 겹치므로
             // 두 이웃 사이 구간 안으로 가둔다(글자가 겹쳐 뭉개지는 것보다 조금 치우치는 편이 낫다).
             var centered = (panelTop.Width - lblSessionTime.Width) / 2;
-            var leftLimit = lblBreadcrumb.Right + 12;
-            var rightLimit = cboLanguage.Left - 12 - lblSessionTime.Width;
+            var leftLimit = lblBreadcrumb.Right + 16;
+            var rightLimit = cboLanguage.Left - 16 - lblSessionTime.Width;
 
             lblSessionTime.Left = rightLimit < leftLimit
                 ? leftLimit
@@ -657,6 +658,12 @@ namespace SEOJIN_TMES.Client.Forms
             accordion.OptionsMinimizing.AllowMinimizing = true;
             accordion.OptionsMinimizing.MinimizedWidth = SidebarCollapsedWidth;
             accordion.OptionsMinimizing.NormalWidth = SidebarWidth;
+
+            // 접힌 메뉴에서 분류를 누르면 오른쪽에 뜨는 팝업은 기본(None)이 고정 높이라
+            // 화면이 몇 개만 있어도 스크롤이 생겼다. 내용 높이에 맞춰 늘어나게 해 메뉴를 한 번에 다 보여 주고,
+            // 스크롤은 팝업이 화면보다 길어질 때만 생기게 한다.
+            accordion.OptionsMinimizing.PopupFormAutoHeightMode = AccordionPopupFormAutoHeightMode.FitContent;
+
             accordion.OptionsMinimizing.State = _sidebarCollapsed
                 ? AccordionControlState.Minimized
                 : AccordionControlState.Normal;
@@ -964,8 +971,10 @@ namespace SEOJIN_TMES.Client.Forms
             if (isLeaf)
             {
                 // 리프는 "트리 가지(└) + 화면별 색 점"을 쓴다 — 상위 분류에 매달린 계층이 눈에 보인다.
-                element.ImageOptions.SvgImage = AppIcons.TreeLeaf(node.Accent, AppTheme.SidebarGuide, lastChild);
-                element.ImageOptions.SvgImageSize = new Size(24, 34);
+                // 그림 높이를 행 높이와 같게 해야 세로 안내선이 위아래 항목과 끊김 없이 이어진다.
+                var rowHeight = AppTheme.MenuRowHeight(level);
+                element.ImageOptions.SvgImage = AppIcons.TreeLeaf(node.Accent, AppTheme.SidebarGuide, lastChild, rowHeight);
+                element.ImageOptions.SvgImageSize = new Size(24, rowHeight);
             }
             else
             {

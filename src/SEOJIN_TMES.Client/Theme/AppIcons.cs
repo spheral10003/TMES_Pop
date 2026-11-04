@@ -119,23 +119,25 @@ namespace SEOJIN_TMES.Client.Theme
         /// 세로 안내선이 아이콘 높이(행 높이와 동일)를 가득 채우므로, 항목이 연달아 있으면 선이 이어져
         /// 상위 분류 아래에 매달린 계층 구조가 눈에 보인다. 마지막 항목은 선을 중간까지만 그려 "└" 모양이 된다.
         /// </summary>
-        public static SvgImage TreeLeaf(Color dot, Color guide, bool lastChild)
+        /// <param name="height">행 높이(px). 그림을 늘려 맞추면 점이 타원으로 찌그러지므로 viewBox 자체를 행 높이로 그린다.</param>
+        public static SvgImage TreeLeaf(Color dot, Color guide, bool lastChild, int height = 34)
         {
             var dotHex = ToHex(dot);
             var guideHex = ToHex(guide);
-            var key = $"tree|{dotHex}|{guideHex}|{lastChild}";
+            var key = $"tree|{dotHex}|{guideHex}|{lastChild}|{height}";
 
             lock (Cache)
             {
                 if (Cache.TryGetValue(key, out var cached))
                     return cached;
 
-                var vertical = lastChild ? "M7 0 V17" : "M7 0 V34";
+                var middle = height / 2;
+                var vertical = lastChild ? $"M7 0 V{middle}" : $"M7 0 V{height}";
                 var svg =
-                    "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 34\" fill=\"none\">" +
+                    $"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 {height}\" fill=\"none\">" +
                     $"<path d=\"{vertical}\" stroke=\"{guideHex}\" stroke-width=\"1.2\"/>" +
-                    $"<path d=\"M7 17 H12.6\" stroke=\"{guideHex}\" stroke-width=\"1.2\"/>" +
-                    $"<circle cx=\"16.6\" cy=\"17\" r=\"3.4\" fill=\"{dotHex}\"/>" +
+                    $"<path d=\"M7 {middle} H12.6\" stroke=\"{guideHex}\" stroke-width=\"1.2\"/>" +
+                    $"<circle cx=\"16.6\" cy=\"{middle}\" r=\"3.4\" fill=\"{dotHex}\"/>" +
                     "</svg>";
 
                 using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(svg)))

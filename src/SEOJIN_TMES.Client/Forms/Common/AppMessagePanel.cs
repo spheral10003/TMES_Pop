@@ -87,11 +87,17 @@ namespace SEOJIN_TMES.Client.Forms.Common
             AppTheme.StandardButton(btnOk);
             AppTheme.StandardButton(btnCancel);
 
+            // 메시지 창은 현장에서 멀리서도 읽혀야 해서 제목 · 본문 · 버튼 모두 12pt(AppTheme.ChromeFont)로 둔다.
+            // 공용 팝업 헤더(DialogHeaderTitle)와 버튼(StandardButton)의 기본 글꼴은 다른 창과 함께 쓰므로 여기서만 덮어쓴다.
+            lblTitle.Appearance.Font = AppTheme.ChromeBoldFont;
+            btnOk.Font = AppTheme.ChromeBoldFont;
+            btnCancel.Font = AppTheme.ChromeBoldFont;
+
             headerIcon.SvgImage = AppIcons.Get(IconOf(kind), Color.White);
             headerIcon.SizeMode = SvgImageSizeMode.Stretch;
             headerIcon.BackColor = Color.Transparent;
 
-            lblMessage.Appearance.Font = AppTheme.BodyFont;
+            lblMessage.Appearance.Font = AppTheme.ChromeFont;
             lblMessage.Appearance.ForeColor = AppTheme.TextPrimary;
             lblMessage.Appearance.Options.UseFont = true;
             lblMessage.Appearance.Options.UseForeColor = true;
@@ -150,6 +156,9 @@ namespace SEOJIN_TMES.Client.Forms.Common
             btnClose.Left = Width - SidePadding + 6 - btnClose.Width;
             btnClose.Top = (HeaderHeight - btnClose.Height) / 2;
 
+            // 제목 글자가 커져 디자이너 위치(y=20) 그대로면 아래로 처지므로 헤더 높이 기준으로 가운데에 둔다.
+            lblTitle.Top = (HeaderHeight - lblTitle.Height) / 2;
+
             var top = (FooterHeight - btnOk.Height) / 2;
             if (_buttons == AppMessageButtons.OkCancel)
             {
@@ -174,11 +183,11 @@ namespace SEOJIN_TMES.Client.Forms.Common
             var textWidth = Math.Max(80, width - (SidePadding * 2));
             var textSize = TextRenderer.MeasureText(
                 message ?? string.Empty,
-                AppTheme.BodyFont,
+                AppTheme.ChromeFont,
                 new Size(textWidth, int.MaxValue),
                 TextFormatFlags.WordBreak);
 
-            var bodyHeight = Math.Max(44, textSize.Height + 16);
+            var bodyHeight = Math.Max(52, textSize.Height + 16);
             return HeaderHeight + bodyHeight + FooterHeight;
         }
 

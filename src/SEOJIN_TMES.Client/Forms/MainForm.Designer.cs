@@ -159,9 +159,9 @@ namespace SEOJIN_TMES.Client.Forms
             this.rightPanel.Controls.Add(this.contentHost);
             this.rightPanel.Controls.Add(this.tabStrip);
             this.rightPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.rightPanel.Location = new System.Drawing.Point(2, 36);
+            this.rightPanel.Location = new System.Drawing.Point(2, 46);
             this.rightPanel.Name = "rightPanel";
-            this.rightPanel.Size = new System.Drawing.Size(1036, 762);
+            this.rightPanel.Size = new System.Drawing.Size(1036, 752);
             this.rightPanel.TabIndex = 1;
             // 
             // contentHost
@@ -199,14 +199,14 @@ namespace SEOJIN_TMES.Client.Forms
             this.panelTop.Dock = System.Windows.Forms.DockStyle.Top;
             this.panelTop.Location = new System.Drawing.Point(2, 2);
             this.panelTop.Name = "panelTop";
-            this.panelTop.Size = new System.Drawing.Size(1036, 34);
+            this.panelTop.Size = new System.Drawing.Size(1036, 44);
             this.panelTop.TabIndex = 0;
             // 
             // btnMenuToggle
             // 
             this.btnMenuToggle.Location = new System.Drawing.Point(5, 5);
             this.btnMenuToggle.Name = "btnMenuToggle";
-            this.btnMenuToggle.Size = new System.Drawing.Size(22, 22);
+            this.btnMenuToggle.Size = new System.Drawing.Size(30, 30);
             this.btnMenuToggle.TabIndex = 0;
             this.btnMenuToggle.Click += new System.EventHandler(this.btnMenuToggle_Click);
             // 
@@ -221,7 +221,7 @@ namespace SEOJIN_TMES.Client.Forms
             // 
             this.btnAlerts.Location = new System.Drawing.Point(802, 4);
             this.btnAlerts.Name = "btnAlerts";
-            this.btnAlerts.Size = new System.Drawing.Size(24, 24);
+            this.btnAlerts.Size = new System.Drawing.Size(30, 30);
             this.btnAlerts.TabIndex = 3;
             this.btnAlerts.Click += new System.EventHandler(this.btnAlerts_Click);
             //
@@ -229,7 +229,7 @@ namespace SEOJIN_TMES.Client.Forms
             //
             this.btnModbusTest.Location = new System.Drawing.Point(772, 4);
             this.btnModbusTest.Name = "btnModbusTest";
-            this.btnModbusTest.Size = new System.Drawing.Size(24, 24);
+            this.btnModbusTest.Size = new System.Drawing.Size(30, 30);
             this.btnModbusTest.TabIndex = 12;
             this.btnModbusTest.Click += new System.EventHandler(this.btnModbusTest_Click);
             // 
@@ -251,11 +251,11 @@ namespace SEOJIN_TMES.Client.Forms
             // 
             // lblSessionTime
             // 
-            this.lblSessionTime.Appearance.Font = new System.Drawing.Font("Noto Sans KR Medium", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.lblSessionTime.Appearance.Font = new System.Drawing.Font("Noto Sans KR", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lblSessionTime.Appearance.Options.UseFont = true;
-            this.lblSessionTime.Location = new System.Drawing.Point(259, 4);
+            this.lblSessionTime.Location = new System.Drawing.Point(259, 7);
             this.lblSessionTime.Name = "lblSessionTime";
-            this.lblSessionTime.Size = new System.Drawing.Size(64, 24);
+            this.lblSessionTime.Size = new System.Drawing.Size(86, 30);
             this.lblSessionTime.TabIndex = 6;
             this.lblSessionTime.Text = "00:00:00";
             // 
@@ -263,14 +263,14 @@ namespace SEOJIN_TMES.Client.Forms
             // 
             this.cboLanguage.Location = new System.Drawing.Point(651, 7);
             this.cboLanguage.Name = "cboLanguage";
-            this.cboLanguage.Size = new System.Drawing.Size(118, 20);
+            this.cboLanguage.Size = new System.Drawing.Size(140, 26);
             this.cboLanguage.TabIndex = 7;
             // 
             // btnUser
             // 
             this.btnUser.Location = new System.Drawing.Point(889, 4);
             this.btnUser.Name = "btnUser";
-            this.btnUser.Size = new System.Drawing.Size(24, 24);
+            this.btnUser.Size = new System.Drawing.Size(30, 30);
             this.btnUser.TabIndex = 8;
             this.btnUser.Click += new System.EventHandler(this.btnUser_Click);
             // 
@@ -283,7 +283,7 @@ namespace SEOJIN_TMES.Client.Forms
             this.btnLogout.Appearance.Options.UseBorderColor = true;
             this.btnLogout.Location = new System.Drawing.Point(979, 3);
             this.btnLogout.Name = "btnLogout";
-            this.btnLogout.Size = new System.Drawing.Size(24, 24);
+            this.btnLogout.Size = new System.Drawing.Size(30, 30);
             this.btnLogout.TabIndex = 9;
             this.btnLogout.Click += new System.EventHandler(this.btnLogout_Click);
             // 
@@ -291,7 +291,7 @@ namespace SEOJIN_TMES.Client.Forms
             // 
             this.btnMinimize.Location = new System.Drawing.Point(919, 3);
             this.btnMinimize.Name = "btnMinimize";
-            this.btnMinimize.Size = new System.Drawing.Size(24, 24);
+            this.btnMinimize.Size = new System.Drawing.Size(30, 30);
             this.btnMinimize.TabIndex = 10;
             this.btnMinimize.Click += new System.EventHandler(this.btnMinimize_Click);
             // 
@@ -299,7 +299,7 @@ namespace SEOJIN_TMES.Client.Forms
             // 
             this.btnMaximize.Location = new System.Drawing.Point(949, 3);
             this.btnMaximize.Name = "btnMaximize";
-            this.btnMaximize.Size = new System.Drawing.Size(24, 24);
+            this.btnMaximize.Size = new System.Drawing.Size(30, 30);
             this.btnMaximize.TabIndex = 11;
             this.btnMaximize.Click += new System.EventHandler(this.btnMaximize_Click);
             // 

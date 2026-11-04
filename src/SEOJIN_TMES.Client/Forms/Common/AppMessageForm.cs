@@ -16,7 +16,8 @@ namespace SEOJIN_TMES.Client.Forms.Common
     /// </summary>
     public partial class AppMessageForm : XtraForm
     {
-        private const int DefaultWidth = 420;
+        /// <summary>창 폭. 메시지 글자를 12pt로 키우면서 한 줄에 들어가는 글자 수가 줄어 420에서 넓혔다.</summary>
+        private const int DefaultWidth = 460;
 
         private AppMessagePanel _panel;
 

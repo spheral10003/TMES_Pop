@@ -286,7 +286,7 @@ namespace SEOJIN_TMES.Client.Forms
                 btnMaximize,
                 maximized ? AppIcons.WindowRestore : AppIcons.WindowMaximize,
                 AppTheme.TopBarFore,
-                16);
+                18);
 
             btnMaximize.ToolTip = maximized ? Language.MainForm_Restore : Language.MainForm_Maximize;
         }

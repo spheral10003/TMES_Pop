@@ -217,6 +217,14 @@ namespace SEOJIN_TMES.Client.Theme
         public static Font CardTitleFont => new Font(FontFamily, 14F, FontStyle.Bold);
 
         /// <summary>
+        /// 메인 화면 틀(상단 바 · 좌측 메뉴)과 공통 메시지 창 글자.
+        /// 본문(9.5pt)으로는 현장 터치 화면에서 메뉴 · 안내 문구가 잘 읽히지 않아 12pt로 키웠다(14pt는 현장 화면에서 너무 커서 12pt로 정했다).
+        /// 글자가 커진 만큼 메뉴 행 높이 · 상단 바 높이 · 버튼 크기도 함께 늘려 두었으니 크기를 바꿀 때 같이 볼 것.
+        /// </summary>
+        public static Font ChromeFont => new Font(FontFamily, 12F, FontStyle.Regular);
+        public static Font ChromeBoldFont => new Font(FontFamily, 12F, FontStyle.Bold);
+
+        /// <summary>
         /// 화면 비율 축소 · 다국어 글자 축소가 내려갈 수 있는 가장 작은 글자 크기(pt).
         /// 1280×1024 같은 작은 화면에서 비율대로만 줄이면 6pt 아래로 내려가는데, 그러면 현장 거리에서 읽을 수 없다.
         /// 이보다 더 좁으면 글자를 줄이지 않고 잘리게(말줄임) 둔다.
@@ -282,7 +290,11 @@ namespace SEOJIN_TMES.Client.Theme
         private static readonly int[] MenuIndents = { 4, 18, 36 };
 
         /// <summary>깊이별 행 높이(px). 아래로 갈수록 조금씩 낮아져 계층이 눈에 들어온다.</summary>
-        private static readonly int[] MenuHeights = { 44, 40, 34 };
+        /// 12pt 메뉴 글자(<see cref="ChromeFont"/>, 줄 높이 약 21px) 위아래에 여백이 남도록 잡은 값이다.
+        private static readonly int[] MenuHeights = { 48, 44, 38 };
+
+        /// <summary>깊이별 메뉴 행 높이 — 리프의 트리 가지 그림을 행 높이에 맞춰 그릴 때 쓴다.</summary>
+        public static int MenuRowHeight(int level) => MenuHeights[Math.Max(0, Math.Min(level, MenuHeights.Length - 1))];
 
         /// <summary>
         /// 화면(리프) 항목이 대분류 아래에 "들어가 있는" 느낌을 주는 배경.
@@ -312,9 +324,9 @@ namespace SEOJIN_TMES.Client.Theme
             accordion.Appearance.AccordionControl.GradientMode = LinearGradientMode.Vertical;
             accordion.Appearance.AccordionControl.Options.UseBackColor = true;
 
-            StyleAccordionElement(accordion.Appearance.Group, SidebarText, BodyBoldFont);
-            StyleAccordionElement(accordion.Appearance.Item, SidebarTextMuted, BodyFont);
-            StyleAccordionElement(accordion.Appearance.ItemWithContainer, SidebarTextMuted, BodyFont);
+            StyleAccordionElement(accordion.Appearance.Group, SidebarText, ChromeBoldFont);
+            StyleAccordionElement(accordion.Appearance.Item, SidebarTextMuted, ChromeFont);
+            StyleAccordionElement(accordion.Appearance.ItemWithContainer, SidebarTextMuted, ChromeFont);
         }
 
         /// <summary>
@@ -353,7 +365,7 @@ namespace SEOJIN_TMES.Client.Theme
             element.HeaderIndent = MenuIndents[depth];
             element.Height = MenuHeights[depth];
 
-            var font = isLeaf ? BodyFont : BodyBoldFont;
+            var font = isLeaf ? ChromeFont : ChromeBoldFont;
 
             // 최상위("MEIS")는 예전 진한 사이드바에서 흰 글자였다. 밝은 바탕에서는 보이지 않으므로
             // 다른 항목과 같은 진한 글자로 두되, 굵기로 계층을 구분한다.
@@ -397,7 +409,7 @@ namespace SEOJIN_TMES.Client.Theme
 
             // 파스텔 바탕이라 선택 항목도 흰 글자가 아니라 진한 글자로 둔다(흰 글자는 옅은 배경에서 안 읽힌다).
             var fore = selected ? SidebarText : SidebarTextMuted;
-            Paint(element.Appearance.Normal, back, fore, selected ? BodyBoldFont : BodyFont);
+            Paint(element.Appearance.Normal, back, fore, selected ? ChromeBoldFont : ChromeFont);
         }
 
         /// <summary>상단바(밝은 배경 + 아래쪽 구분선 느낌).</summary>
@@ -413,14 +425,14 @@ namespace SEOJIN_TMES.Client.Theme
         /// <summary>상단 바 위의 본문 글자(환영 문구 등). 파란 바탕이라 흰 글자를 쓴다.</summary>
         public static void TopBarText(LabelControl label)
         {
-            label.Appearance.Font = BodyBoldFont;
+            label.Appearance.Font = ChromeBoldFont;
             label.Appearance.ForeColor = TopBarFore;
             label.Appearance.Options.UseFont = true;
             label.Appearance.Options.UseForeColor = true;
         }
 
         /// <summary>브레드크럼 아이콘 한 변(px). 상단 바 글자 높이에 맞춘 크기다.</summary>
-        private const int BreadcrumbIconSize = 14;
+        private const int BreadcrumbIconSize = 16;
 
         /// <summary>
         /// 브레드크럼(홈 / 대분류 / 화면) 텍스트.
@@ -429,7 +441,7 @@ namespace SEOJIN_TMES.Client.Theme
         /// </summary>
         public static void Breadcrumb(LabelControl label)
         {
-            label.Appearance.Font = BodyFont;
+            label.Appearance.Font = ChromeFont;
             label.Appearance.ForeColor = TopBarForeMuted;
             label.Appearance.Options.UseFont = true;
             label.Appearance.Options.UseForeColor = true;
@@ -497,7 +509,7 @@ namespace SEOJIN_TMES.Client.Theme
         {
             var back = testServer ? TestServerTopBar : TopBar;
 
-            combo.Properties.Appearance.Font = BodyFont;
+            combo.Properties.Appearance.Font = ChromeFont;
             combo.Properties.Appearance.ForeColor = TopBarFore;
             combo.Properties.Appearance.BackColor = back;
             combo.Properties.Appearance.Options.UseFont = true;
@@ -507,7 +519,7 @@ namespace SEOJIN_TMES.Client.Theme
             combo.Properties.TextEditStyle = TextEditStyles.DisableTextEditor;
 
             // 펼친 목록은 상단 바가 아니라 카드 위에 뜨는 것이므로 카드 배경/본문 글자색을 쓴다.
-            combo.Properties.AppearanceDropDown.Font = BodyFont;
+            combo.Properties.AppearanceDropDown.Font = ChromeFont;
             combo.Properties.AppearanceDropDown.ForeColor = TextPrimary;
             combo.Properties.AppearanceDropDown.BackColor = Card;
             combo.Properties.AppearanceDropDown.Options.UseFont = true;

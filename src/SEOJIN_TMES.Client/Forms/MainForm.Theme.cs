@@ -113,14 +113,14 @@ namespace SEOJIN_TMES.Client.Forms
             AppTheme.ContentSurface(contentHost);
             AppTheme.TabStrip(tabStrip);
 
-            AppTheme.IconButton(btnMenuToggle, AppIcons.Menu, AppTheme.TopBarFore, 16);
+            AppTheme.IconButton(btnMenuToggle, AppIcons.Menu, AppTheme.TopBarFore, 18);
 
             // 알림/사용자/로그아웃은 Images 폴더의 PNG 아이콘을 쓴다(모양만 쓰고 색은 테마에서 받는다).
-            AppTheme.ImageIconButton(btnAlerts, AppImages.IconBell, AppTheme.TopBarFore, 18);
+            AppTheme.ImageIconButton(btnAlerts, AppImages.IconBell, AppTheme.TopBarFore, 20);
             AppTheme.Badge(lblAlertBadge, 16);
 
             // 설비 접속 테스트는 업무 화면이 아니라 점검 도구라 메뉴(탭) 대신 상단 바에서 팝업으로 연다.
-            AppTheme.IconButton(btnModbusTest, AppIcons.Network, AppTheme.TopBarFore, 18);
+            AppTheme.IconButton(btnModbusTest, AppIcons.Network, AppTheme.TopBarFore, 20);
             btnModbusTest.ToolTip = Language.ModbusTest_Title;
 
             // 우측 상단 정보 묶음: 언어 · 접속 테스트 · 알림 · "{이름} 님 환영합니다." · 사용자 · 창 버튼 · 로그아웃 (현재 일시는 상단 바 가운데)
@@ -128,13 +128,13 @@ namespace SEOJIN_TMES.Client.Forms
             AppTheme.SessionTime(lblSessionTime);
             AppTheme.TopBarCombo(cboLanguage, IsTestServer);   // 배경을 panelTop과 같은 색으로
             cboLanguage.ToolTip = Language.MainForm_LanguageHint;
-            AppTheme.ImageIconButton(btnUser, AppImages.IconUser, AppTheme.TopBarFore, 18);
+            AppTheme.ImageIconButton(btnUser, AppImages.IconUser, AppTheme.TopBarFore, 20);
             btnUser.ToolTip = Language.UserProfile_Title;
-            AppTheme.ImageIconButton(btnLogout, AppImages.IconPowerOff, AppTheme.TopBarForeMuted, 18);
+            AppTheme.ImageIconButton(btnLogout, AppImages.IconPowerOff, AppTheme.TopBarForeMuted, 20);
             btnLogout.ToolTip = Language.Common_Logout;
 
             // 창 버튼(최소화 · 최대화/복원) — 제목 줄이 없어 상단 바가 대신 낸다. MainForm.Window.cs 참고.
-            AppTheme.IconButton(btnMinimize, AppIcons.WindowMinimize, AppTheme.TopBarFore, 16);
+            AppTheme.IconButton(btnMinimize, AppIcons.WindowMinimize, AppTheme.TopBarFore, 18);
             btnMinimize.ToolTip = Language.MainForm_Minimize;
             ApplyWindowStatePresentation();   // 최대화 버튼은 상태에 따라 아이콘·툴팁이 달라진다
 
