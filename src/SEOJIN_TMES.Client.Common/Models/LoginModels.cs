@@ -68,7 +68,7 @@ namespace SEOJIN_TMES.Client.Common.Models
 
     public class RefreshTokenRequest
     {
-        [JsonProperty("refreshToken")]
-        public string RefreshToken { get; set; }
+        [JsonProperty("refresh_token")]
+        public string refresh_token { get; set; }
     }
 }

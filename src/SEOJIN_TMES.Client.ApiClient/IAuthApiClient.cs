@@ -89,7 +89,7 @@ namespace SEOJIN_TMES.Client.ApiClient
 
         public async Task<LoginResponse> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default)
         {
-            var request = new RefreshTokenRequest { RefreshToken = refreshToken };
+            var request = new RefreshTokenRequest { refresh_token = refreshToken };
 
             // 경로는 auth/refresh 가 아니라 auth/login/refresh 다(Swagger: POST /api/v1.0/auth/login/refresh).
             // 응답 봉투도 로그인과 같다.

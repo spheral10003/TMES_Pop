@@ -95,8 +95,8 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
         {
             grid.DataSource = new List<WorkOrderEntryDto>();
             GridColumns.Apply(gridView, Language.Col_No,
-                GridColumns.Text("WorkOrderNo", Language.Col_WorkOrderNo, 140),
                 GridColumns.Text("ItemCode", Language.Col_ItemCode, 100),
+                GridColumns.Text("WorkOrderNo", Language.Col_WorkOrderNo, 140),
                 GridColumns.Text("SerialNo", Language.Col_SerialNo, 110),
                 GridColumns.Number("OrderQty", Language.Col_OrderQty, 110),
                 GridColumns.Text("SalesOrderNo", Language.Col_SalesOrderNo, 110),
