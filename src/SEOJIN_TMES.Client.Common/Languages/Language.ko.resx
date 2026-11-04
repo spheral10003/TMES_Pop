@@ -1254,4 +1254,13 @@
   <data name="ModbusTest_ReportLine" xml:space="preserve">
     <value>{0}  성공 {1} / 실패 {2} (총 {3}회)</value>
   </data>
+  <data name="Col_MaterialGroup" xml:space="preserve">
+    <value>자재그룹</value>
+  </data>
+  <data name="Pop_Rework" xml:space="preserve">
+    <value>리 웍</value>
+  </data>
+  <data name="Pop_ReworkStarted" xml:space="preserve">
+    <value>리웍을 시작했습니다. 값을 고친 뒤 공정을 이동하세요 — 모두 OK면 이동할 때 완료됩니다.</value>
+  </data>
 </root>

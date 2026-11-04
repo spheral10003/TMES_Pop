@@ -35,6 +35,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         // 공정
         Task GetProcessInfo();
         Task<bool> SetProcessAction(PopProcessAction action);
+        Task StartRework();
         Task MoveProcess(int offset);
         Task ShowProcessList();
         Task StartEnteredProcess();

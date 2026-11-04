@@ -468,5 +468,8 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string ModbusTest_NoEquipments => Get(nameof(ModbusTest_NoEquipments));
         public static string ModbusTest_ReportStopped => Get(nameof(ModbusTest_ReportStopped));
         public static string ModbusTest_ReportLine => Get(nameof(ModbusTest_ReportLine));
+        public static string Col_MaterialGroup => Get(nameof(Col_MaterialGroup));
+        public static string Pop_Rework => Get(nameof(Pop_Rework));
+        public static string Pop_ReworkStarted => Get(nameof(Pop_ReworkStarted));
     }
 }

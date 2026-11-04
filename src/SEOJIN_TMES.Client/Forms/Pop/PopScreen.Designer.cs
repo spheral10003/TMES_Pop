@@ -82,6 +82,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.lblWorker = new System.Windows.Forms.Label();
             this.lblWorkerTile = new System.Windows.Forms.Label();
             this.btnAdminAlarm = new System.Windows.Forms.Button();
+            this.btnRework = new System.Windows.Forms.Button();
             this.btnProcessList = new System.Windows.Forms.Button();
             this.btnNextProcess = new System.Windows.Forms.Button();
             this.btnStopProcess = new System.Windows.Forms.Button();
@@ -655,6 +656,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.panel1.Controls.Add(this.lblWorkstation);
             this.panel1.Controls.Add(this.lblWorker);
             this.panel1.Controls.Add(this.lblWorkerTile);
+            this.panel1.Controls.Add(this.btnRework);
             this.panel1.Controls.Add(this.btnAdminAlarm);
             this.panel1.Controls.Add(this.btnProcessList);
             this.panel1.Controls.Add(this.btnNextProcess);
@@ -733,6 +735,21 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.btnAdminAlarm.Text = "알   림";
             this.btnAdminAlarm.UseVisualStyleBackColor = false;
             this.btnAdminAlarm.Click += new System.EventHandler(this.btnAdminAlarm_Click);
+            // 
+            // btnRework
+            // 
+            this.btnRework.BackColor = System.Drawing.Color.Gray;
+            this.btnRework.FlatAppearance.MouseOverBackColor = System.Drawing.Color.LightGray;
+            this.btnRework.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnRework.Font = new System.Drawing.Font("Noto Sans KR Medium", 9.75F, System.Drawing.FontStyle.Bold);
+            this.btnRework.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.btnRework.Location = new System.Drawing.Point(663, 7);
+            this.btnRework.Name = "btnRework";
+            this.btnRework.Size = new System.Drawing.Size(99, 31);
+            this.btnRework.TabIndex = 28;
+            this.btnRework.Text = "리 웍";
+            this.btnRework.UseVisualStyleBackColor = false;
+            this.btnRework.Click += new System.EventHandler(this.btnRework_Click);
             // 
             // btnProcessList
             // 
@@ -1094,6 +1111,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private System.Windows.Forms.Button btnNextProcess;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Button btnAdminAlarm;
+        private System.Windows.Forms.Button btnRework;
         private System.Windows.Forms.Button btnProcessList;
         private System.Windows.Forms.Label lblWorkerTile;
         private DevExpress.XtraEditors.PanelControl toolbarCard;

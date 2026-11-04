@@ -60,6 +60,12 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private bool _processMoving;
 
         /// <summary>
+        /// 지금 공정을 [리웍]으로 다시 연 상태인지. 리웍 중에는 자동 완료 · 자동 이동을 하지 않고
+        /// 작업자가 공정을 옮길 때 완료 여부를 판단한다(<see cref="EndCurrentProcess"/>). 다른 공정으로 옮기면 풀린다.
+        /// </summary>
+        private bool _reworking;
+
+        /// <summary>
         /// 서버에 보내는 중인 실적 저장(시리얼 · 토크 · 검사) 개수.
         /// 화면 값은 저장 응답 전에 이미 채워져 있으므로, 응답을 기다리지 않고 완료를 보내면
         /// 서버에는 마지막 실적이 없는 채로 공정이 끝날 수 있다 — 0일 때만 완료를 보낸다.
@@ -326,6 +332,22 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             return true;
         }
 
+        /// <summary>
+        /// [리웍] — 서버에 rework를 요청해 공정을 진행 중으로 되돌리고 값을 다시 고칠 수 있게 한다(요청 경로 · 조건은 resume과 같다).
+        /// 리웍은 자동 완료 · 자동 이동을 하지 않는다. 작업자가 값을 고친 뒤 공정을 옮기면, 그때 모든 항목이 OK면 완료를 보내고
+        /// NG나 입력하지 않은 항목이 남아 있으면 완료하지 않고 옮긴다(<see cref="EndCurrentProcess"/>).
+        /// 리웍이 가능한 상태인지는 서버가 판단한다(거절되면 사유를 창으로 알린다).
+        /// </summary>
+        public async Task StartRework()
+        {
+            if (!await SetProcessAction(PopProcessAction.rework))
+                return;
+
+            _reworking = true;
+            AppLog.Step($"[POP] 공정 리웍 - {_key.RoutingOperation}/{_key.PageOperation} → {_progressState}");
+            ShowMessage(Language.Pop_ReworkStarted);
+        }
+
         /// <summary>상태 전이 응답의 상태 · 시각 · 시간 집계만 지금 공정 정보에 옮겨 우측 카드를 다시 채운다(탭 · 도면은 그대로).</summary>
         private void SetStateChange(PopProcessInfoDto changed)
         {
@@ -533,7 +555,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// 지금 공정이 끝나지 않은 채 다른 공정으로 옮기려 하면 경고하고 계속할지 묻는다.
         /// 남은 작업을 두고 실수로 넘어가는 것을 막으려는 것이라, 막지는 않고 작업자가 고르게 한다.
         /// 완료(Finished)된 공정, 중지(Stopped)된 공정(작업자가 사유를 남기고 일부러 멈춘 것이다),
-        /// 이동하면서 <see cref="EndCurrentProcess"/>가 완료를 보내는 공정(진행 중이고 입력할 항목이 없는 공정)은 묻지 않는다.
+        /// 이동하면서 <see cref="EndCurrentProcess"/>가 완료를 보내는 공정(진행 중이고 입력할 항목이 없거나 모두 OK인 공정 — 리웍 등)은 묻지 않는다.
         /// </summary>
         /// <returns>이동을 계속하면 true.</returns>
         private bool ConfirmIncompleteMove()
@@ -541,7 +563,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (IsProgressState(StateFinished) || IsProgressState(StateStopped))
                 return true;
 
-            if (IsProcessRunning && !HasInputItems())
+            if (IsProcessRunning && (!HasInputItems() || IsAllTabsCompleted()))
                 return true;
 
             AppLog.Info($"[POP] 미완료 공정 이동 확인 - {_key.RoutingOperation}/{_key.PageOperation} ({_progressState})");
@@ -556,6 +578,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// 거절하고, 그 거절로 이동까지 막히면 작업자가 그 공정을 벗어날 수 없었다. 입력을 다 마치면 자동 완료된다.
         /// 대기 · 중지 · 완료 상태도 그대로 두고 옮긴다.
         ///
+        /// 진행 중이고 탭 3개가 <b>모두 OK</b>(<see cref="IsAllTabsCompleted"/>)인 공정도 완료를 보낸다 —
+        /// 보통은 자동 완료로 이미 끝나 있지만, [리웍]은 자동 완료를 하지 않으므로 이 이동이 완료할 유일한 계기다.
+        /// NG나 입력하지 않은 항목이 남은 리웍 공정은 완료하지 않고 옮긴다.
+        ///
         /// 서버가 완료를 <b>업무 사유로 거절(400)</b>해도 이동은 계속한다. "입력할 항목이 없다"는 것은 화면이 받은 탭 기준의
         /// 추정일 뿐이라 서버의 할 일(WORK_005)과 어긋날 수 있는데, 그 거절로 이동까지 막으면 작업자가 공정을 벗어날 수 없었다.
         /// 완료 여부는 서버 판단을 그대로 따르고(공정은 진행 중으로 남는다) 안내 칸에만 남긴다.
@@ -565,10 +591,14 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// <returns>이동을 계속해도 되면 true. 통신 실패 · 서버 장애로 완료 결과를 알 수 없거나 화면이 닫혔으면 false.</returns>
         private async Task<bool> EndCurrentProcess()
         {
-            if (!IsProcessRunning || HasInputItems())
+            if (!IsProcessRunning || (HasInputItems() && !IsAllTabsCompleted()))
+            {
+                if (_reworking)
+                    AppLog.Info($"[POP] 리웍 공정 미완료(NG · 미입력 남음) - 완료하지 않고 이동 ({_key.RoutingOperation}/{_key.PageOperation})");
                 return true;
+            }
 
-            AppLog.Step($"[POP] 공정 변경으로 완료 - {_key.RoutingOperation}/{_key.PageOperation}");
+            AppLog.Step($"[POP] 공정 변경으로 완료{(_reworking ? "(리웍)" : string.Empty)} - {_key.RoutingOperation}/{_key.PageOperation}");
             try
             {
                 await _apiClient.PopApiClient.ChangeProcessStateAsync(_key, PopProcessAction.end);
@@ -601,6 +631,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         {
             _entry.Process = process;
             _key = BuildKey();
+            _reworking = false;   // 리웍은 그 공정에 머무는 동안만이다
 
             AppLog.Step($"[POP] 공정 이동 - {_key.RoutingOperation}/{_key.PageOperation}");
             await GetProcessInfo();
@@ -683,7 +714,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// </summary>
         public async Task TryAutoProgress()
         {
-            if (_autoProgressing || _pendingResultSaves > 0)
+            // 리웍은 자동 완료 · 이동을 하지 않는다 — 작업자가 공정을 옮길 때 EndCurrentProcess가 완료를 판단한다.
+            if (_autoProgressing || _pendingResultSaves > 0 || _reworking)
                 return;
 
             _autoProgressing = true;

@@ -140,6 +140,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             gridMaterial.DataSource = new List<PopInputMaterialDto>();
             GridColumns.Apply(gridViewMaterial, Language.Col_No,
                 GridColumns.Text("MaterialCode", Language.Col_MaterialCode, 200),
+                GridColumns.Text("MaterialGroup", Language.Col_MaterialGroup, 140),
                 GridColumns.Number("InputQty", Language.Col_InputQty, 110),
                 GridColumns.Text("InputUnit", Language.Col_InputUnit, 100),
                 GridColumns.Text("InputPosition", Language.Col_InputPosition, 110),
@@ -821,12 +822,18 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// [입력] 버튼 → 그 줄의 토크 하한값과 상한값의 중간값을 토크 결과값에, 목표 각도를 각도 결과값에 채운다.
-        /// 수동 렌치로 조립할 때는 규격 한가운데를 목표로 조이므로 숫자를 다시 치는 과정을 줄인 것이다.
+        /// [입력] 버튼 → 누른 줄과 <b>같은 자재코드(MaterialCode)</b>인 줄을 한 번에 채운다(일괄 입력).
+        /// 각 줄의 토크 결과값은 하한~상한의 중간값, 각도 결과값은 목표 각도 — 수동 렌치로 조립할 때는 규격 한가운데를
+        /// 목표로 조이므로 같은 자재의 체결 점마다 숫자를 다시 치는 과정을 줄인 것이다.
+        ///  - 이미 값(토크 또는 각도)이 들어 있는 줄은 건너뛴다 — 설비 · 직접 입력으로 넣은 실측값을 덮어쓰지 않는다.
+        ///  - 토크 하한/상한이 없는 줄도 중간값을 낼 수 없어 건너뛴다.
+        ///  - 채운 값은 직접 입력과 같이 수동 입력(<see cref="ManualEquipmentCode"/>)으로 서버에 저장한다.
+        ///  - 끝나면 그 자재의 마지막 줄 <b>바로 다음 줄</b>로 포커스를 옮긴다(다음 자재로 넘어가는 순서 — 마지막이면 그대로).
+        /// 수동 렌치가 꺼져 있으면 동작하지 않는다(컬럼도 숨겨진다 — <see cref="SetResultInputColumnVisible"/>).
         /// 여기서 내는 값은 <b>입력 편의를 위한 기본값</b>일 뿐이고(합·불 판정은 서버 몫),
         /// 다르게 넣어야 하면 "토크 결과값" 칸을 눌러 직접 고쳐 쓰면 된다.
         /// </summary>
-        private void ResultInput_ButtonClick(object sender, ButtonPressedEventArgs e)
+        private async void ResultInput_ButtonClick(object sender, ButtonPressedEventArgs e)
         {
             if (!chkManualWrench.Checked)
             {
@@ -834,24 +841,94 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 return;
             }
 
-            var spec = gridViewBomSpec.GetFocusedRow() as PopBomSpecDto;
-            if (spec == null)
+            var focused = gridViewBomSpec.GetFocusedRow() as PopBomSpecDto;
+            if (focused == null)
                 return;
 
-            if (spec.TorqueLower == null || spec.TorqueUpper == null)
+            // [입력] 칸의 버튼 에디터가 열린 채로 다른 줄을 고치면 그리드가 포커스를 엉뚱하게 되돌린다.
+            gridViewBomSpec.CloseEditor();
+
+            var group = GetSameMaterialRows(focused.MaterialCode);
+            var targets = new List<PopBomSpecDto>();
+            var rangeMissing = false;
+            foreach (var rowHandle in group)
             {
-                AppMessageBox.Info(this, Language.Pop_TorqueRangeMissing, Language.PopTorque_Title);
+                var spec = (PopBomSpecDto)gridViewBomSpec.GetRow(rowHandle);
+                if (spec.TorqueResult != null || spec.AngleResult != null)
+                    continue;
+
+                if (spec.TorqueLower == null || spec.TorqueUpper == null)
+                {
+                    rangeMissing = true;
+                    continue;
+                }
+
+                targets.Add(spec);
+            }
+
+            if (targets.Count == 0)
+            {
+                AppLog.Info($"[POP] 수동 렌치 일괄 입력 - 대상 없음 ({focused.MaterialCode}, 같은 자재 {group.Count}줄, 범위 없음 {rangeMissing})");
+                if (rangeMissing)
+                    AppMessageBox.Info(this, Language.Pop_TorqueRangeMissing, Language.PopTorque_Title);
+                FocusBomSpecRow(GetRowAfterMaterial(group));
                 return;
             }
 
-            spec.TorqueResult = CeilTorque((spec.TorqueLower.Value + spec.TorqueUpper.Value) / 2m);
-            spec.AngleResult = spec.AngleTarget;
-            spec.IsManualInput = true;
-            spec.EquipmentCode = ManualEquipmentCode;
+            try
+            {
+                foreach (var spec in targets)
+                {
+                    var torque = CeilTorque((spec.TorqueLower.Value + spec.TorqueUpper.Value) / 2m);
+                    var angle = spec.AngleTarget;
 
-            RefreshBomSpecGrid();
-            AppLog.Info($"[POP] 수동 렌치 중간값 입력 - {spec.BomSpecName}/{spec.InputPosition} = {spec.TorqueResult} " +
-                        $"(하한 {spec.TorqueLower} ~ 상한 {spec.TorqueUpper})");
+                    spec.TorqueResult = torque;
+                    spec.AngleResult = angle;
+                    spec.IsManualInput = true;
+                    spec.EquipmentCode = ManualEquipmentCode;
+                    RefreshBomSpecGrid();
+
+                    // 실패하면 그 줄에서 멈춘다 — 사유는 SetBomSpecResult가 창으로 알린다.
+                    if (!await Screen.SetBomSpecResult(spec, torque, angle, ManualEquipmentCode))
+                        return;
+
+                    AppLog.Info($"[POP] 수동 렌치 일괄 입력 - {spec.MaterialCode} {spec.BomSpecName}/{spec.InputPosition} = {torque} " +
+                                $"(하한 {spec.TorqueLower} ~ 상한 {spec.TorqueUpper}, 각도 {angle})");
+                }
+
+                if (IsDisposed || Disposing) return;
+
+                FocusBomSpecRow(GetRowAfterMaterial(GetSameMaterialRows(focused.MaterialCode)));
+                await Screen.TryAutoProgress();
+            }
+            catch (Exception ex)
+            {
+                HandleError("수동 렌치 일괄 입력", ex);
+            }
+        }
+
+        /// <summary>[BOM 스팩] 그리드에서 자재코드가 같은 줄의 행 핸들(화면 순서).</summary>
+        private List<int> GetSameMaterialRows(string materialCode)
+        {
+            var rows = new List<int>();
+            for (int rowHandle = 0; rowHandle < gridViewBomSpec.RowCount; rowHandle++)
+            {
+                if (gridViewBomSpec.GetRow(rowHandle) is PopBomSpecDto spec
+                    && string.Equals(spec.MaterialCode, materialCode, StringComparison.OrdinalIgnoreCase))
+                    rows.Add(rowHandle);
+            }
+
+            return rows;
+        }
+
+        /// <summary>같은 자재 줄 중 마지막 줄의 바로 다음 줄. 마지막 줄이 그리드 끝이면 그 줄 그대로.</summary>
+        private int GetRowAfterMaterial(List<int> sameMaterialRows)
+        {
+            if (sameMaterialRows.Count == 0)
+                return gridViewBomSpec.FocusedRowHandle;
+
+            var last = sameMaterialRows[sameMaterialRows.Count - 1];
+            return last + 1 < gridViewBomSpec.RowCount ? last + 1 : last;
         }
 
         // ─────────────────────────────────────────────────────────────────────────

@@ -118,6 +118,9 @@ namespace SEOJIN_TMES.Client.Common.Models
         /// <summary>투입 위치(서버 indctLoc).</summary>
         public string InputPosition { get; set; }
 
+        /// <summary>자재 그룹(서버 inputItemGrp) — 서버 값을 그대로 보여 준다.</summary>
+        public string MaterialGroup { get; set; }
+
         /// <summary>시리얼번호 검사 대상 여부.</summary>
         public bool SerialCheckRequired { get; set; }
 

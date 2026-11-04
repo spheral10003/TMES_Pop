@@ -1254,4 +1254,13 @@ Reconnection continues automatically until it succeeds. You can also press [Reco
   <data name="ModbusTest_ReportLine" xml:space="preserve">
     <value>{0}  OK {1} / Failed {2} ({3} total)</value>
   </data>
+  <data name="Col_MaterialGroup" xml:space="preserve">
+    <value>Material Group</value>
+  </data>
+  <data name="Pop_Rework" xml:space="preserve">
+    <value>Rework</value>
+  </data>
+  <data name="Pop_ReworkStarted" xml:space="preserve">
+    <value>Rework started. Fix the values, then move to another process — it is completed on move if everything is OK.</value>
+  </data>
 </root>

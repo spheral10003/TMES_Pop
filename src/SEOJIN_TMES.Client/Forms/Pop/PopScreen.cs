@@ -138,6 +138,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             btnStopProcess.Text = Language.Pop_StopProcess;
             btnProcessList.Text = Language.Pop_ProcessList;
             btnAdminAlarm.Text = Language.Pop_AdminAlarm;
+            btnRework.Text = Language.Pop_Rework;
 
             lblWorkerTile.Text = Language.Pop_Worker;
             lblWorker.Text = ResolveWorkerName();
@@ -190,7 +191,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             picView.BackColor = AppTheme.ImageViewerBack;
 
             // 버튼 색은 앱 공통(#6D7C92 + 흰 글자). 글꼴은 Designer에서 버튼마다 정해 둔 값을 그대로 쓴다.
-            foreach (var button in new[] { btnPrevProcess, btnNextProcess, btnStopProcess, btnProcessList, btnAdminAlarm,
+            foreach (var button in new[] { btnPrevProcess, btnNextProcess, btnStopProcess, btnProcessList, btnAdminAlarm, btnRework,
                                             btnFit, btnZoomIn, btnZoomOut })
                 AppTheme.StandardButton(button, keepFont: true);
 
@@ -212,7 +213,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 한 줄 칸(버튼 · 상태 표시 · 항목 이름)은 글자 축소, 안내 문구 상자는 줄바꿈 우선.
             // 제목(lblInfoTitle)은 자동 크기 라벨이라 대상이 아니다 — 카드 폭에 비해 짧아 넘칠 일도 없다.
             _textFitter.Register(TextFitMode.Shrink,
-                btnPrevProcess, btnNextProcess, btnStopProcess, btnProcessList, btnAdminAlarm,
+                btnPrevProcess, btnNextProcess, btnStopProcess, btnProcessList, btnAdminAlarm, btnRework,
                 lblWorkerTile, lblWorker, lblWorkstation, lblProgressState,
                 lblWorkOrderNo, lblItemCode, lblProductSerialNo, lblRoutingGroup, lblRoutingOperation,
                 lblPageOperation, lblPageStartTime, lblPageEndTime, lblPageRunTime, lblPageIdleTime, lblPageWorkTime,
@@ -397,6 +398,22 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             catch (Exception ex)
             {
                 HandleError("공정 상태 전이", ex);
+            }
+        }
+
+        /// <summary>
+        /// [리웍] — 공정을 진행 중으로 되돌려 값을 다시 고칠 수 있게 한다. 재시작과 달리 바로 완료 검사(TryAutoProgress)를 하지 않는다 —
+        /// 리웍은 작업자가 값을 고친 뒤 직접 공정을 옮기고, 그때 완료 여부를 판단한다.
+        /// </summary>
+        private async void btnRework_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                await Screen.StartRework();
+            }
+            catch (Exception ex)
+            {
+                HandleError("공정 리웍", ex);
             }
         }
 

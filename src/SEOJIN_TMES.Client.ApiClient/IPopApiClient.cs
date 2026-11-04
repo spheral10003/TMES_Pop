@@ -48,7 +48,7 @@ namespace SEOJIN_TMES.Client.ApiClient
         Task SaveInspectionResultAsync(PopProcessKey key, string inspectionItemCode, PopInspectionResult result, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// 공정 상태 전이 요청 — 시작/중지/생략/이전/다음.
+        /// 공정 상태 전이 요청 — 시작/중지/재시작/리웍/종료.
         /// 전이 가능 여부와 실적 기록은 전부 서버가 판단한다(클라이언트는 요청만 보낸다).
         /// 반환값은 바뀐 진행 상태 · 시각 · 시간 집계뿐이다(탭 목록 · 도면 경로는 오지 않는다).
         /// </summary>
@@ -73,6 +73,8 @@ namespace SEOJIN_TMES.Client.ApiClient
         start,
         stop,
         resume,
+        /// <summary>리웍 — 완료된 공정을 진행 중으로 되돌려 값을 다시 고칠 수 있게 한다(resume과 같은 경로 · 조건 쿼리).</summary>
+        rework,
         end,
         Previous,
         Next

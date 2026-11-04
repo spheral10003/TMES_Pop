@@ -1254,4 +1254,13 @@ Hệ thống sẽ tự động thử kết nối lại cho đến khi thành cô
   <data name="ModbusTest_ReportLine" xml:space="preserve">
     <value>{0}  Thành công {1} / Thất bại {2} (tổng {3} lần)</value>
   </data>
+  <data name="Col_MaterialGroup" xml:space="preserve">
+    <value>Nhóm vật tư</value>
+  </data>
+  <data name="Pop_Rework" xml:space="preserve">
+    <value>Gia công lại</value>
+  </data>
+  <data name="Pop_ReworkStarted" xml:space="preserve">
+    <value>Đã bắt đầu gia công lại. Sửa giá trị rồi chuyển công đoạn — nếu tất cả OK, công đoạn sẽ hoàn thành khi chuyển.</value>
+  </data>
 </root>

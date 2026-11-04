@@ -65,6 +65,7 @@ namespace SEOJIN_TMES.Client.Common.Models
         [JsonProperty("usageQty")] public decimal UsageQty { get; set; }
         [JsonProperty("unit")] public string Unit { get; set; }
         [JsonProperty("indctLoc")] public string IndctLoc { get; set; }        // 투입위치
+        [JsonProperty("inputItemGrp")] public string InputItemGrp { get; set; } // 자재그룹
         [JsonProperty("serialVrfcYn")] public string SerialVrfcYn { get; set; }
         [JsonProperty("inputtedSerials")] public string InputtedSerials { get; set; } // 구분자 형식은 서버 확인 필요
 
@@ -178,6 +179,7 @@ namespace SEOJIN_TMES.Client.Common.Models
                     InputQty = (int)m.UsageQty,
                     InputUnit = m.Unit,
                     InputPosition = m.IndctLoc,
+                    MaterialGroup = m.InputItemGrp,
                     SerialCheckRequired = m.SerialVrfcYn == "Y",
                     ItemCodeCheckRequired = m.ItemCdVrfcYn == "Y",
                     ItemCodeInputCompleted = m.ItemCdInputCompleted == true,
