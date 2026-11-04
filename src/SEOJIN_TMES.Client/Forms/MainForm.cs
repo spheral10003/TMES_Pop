@@ -745,7 +745,7 @@ namespace SEOJIN_TMES.Client.Forms
             _notificationTimer = new System.Windows.Forms.Timer();
             _notificationTimer.Interval = seconds * 1000;
             _notificationTimer.Tick += async (s, e) => await RefreshUnreadCountAsync();
-            //_notificationTimer.Start();
+            _notificationTimer.Start();
 
             FormClosed += (s, e) =>
             {
@@ -762,7 +762,7 @@ namespace SEOJIN_TMES.Client.Forms
         {
             try
             {
-                var summary = await _setting.ApiClients.NotificationApiClient.GetMyAlarmsAsync();
+                var summary = await _setting.ApiClients.NotificationApiClient.GetMyAlarms();
 
                 if (IsDisposed)
                     return;

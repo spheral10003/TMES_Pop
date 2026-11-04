@@ -520,10 +520,10 @@
     <value>발신일시</value>
   </data>
   <data name="Notification_SelectRow" xml:space="preserve">
-    <value>읽음 처리할 알림을 선택하세요.</value>
+    <value>읽음 처리할 알림을 체크하세요.</value>
   </data>
   <data name="Notification_AlreadyRead" xml:space="preserve">
-    <value>선택한 알림은 이미 읽음 상태입니다.</value>
+    <value>체크한 알림은 이미 읽음 상태입니다.</value>
   </data>
   <data name="Notification_CorpCd" xml:space="preserve">
     <value>사업부</value>

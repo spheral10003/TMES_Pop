@@ -30,6 +30,15 @@ namespace SEOJIN_TMES.Client.ApiClient
             var authenticatedHandler = new AuthTokenHandler(TokenProvider, AuthApiClient, NewLoggingHandler(options));
             var authenticatedClient = new HttpClient(authenticatedHandler) { BaseAddress = options.BaseUri, Timeout = options.Timeout };
 
+            // 업로드 전용. HttpClient.Timeout은 첫 요청 뒤에 바꿀 수 없고 요청 전체(전송 포함)에 걸리므로,
+            // 무제한으로 두고 제한 시간은 FileApiClient가 본문 크기에 맞춰 호출마다 건다.
+            // 핸들러(토큰 · 로그)는 같은 것을 쓴다 — 이쪽이 정리되며 공유 핸들러를 닫지 않게 disposeHandler: false.
+            var uploadClient = new HttpClient(authenticatedHandler, disposeHandler: false)
+            {
+                BaseAddress = options.BaseUri,
+                Timeout = System.Threading.Timeout.InfiniteTimeSpan
+            };
+
             WorkOrderApiClient = new WorkOrderApiClient(authenticatedClient);
             ProductionApiClient = new ProductionApiClient(authenticatedClient);
             EquipmentStatusApiClient = new EquipmentStatusApiClient(authenticatedClient);
@@ -37,7 +46,7 @@ namespace SEOJIN_TMES.Client.ApiClient
             NotificationApiClient = new NotificationApiClient(authenticatedClient);
             PopApiClient = new PopApiClient(authenticatedClient);
             WorkStatusApiClient = new WorkStatusApiClient(authenticatedClient);
-            FileApiClient = new FileApiClient(authenticatedClient);
+            FileApiClient = new FileApiClient(authenticatedClient, uploadClient, options);
             MenuApiClient = new MenuApiClient(authenticatedClient);
             ClientLogApiClient = new ClientLogApiClient(authenticatedClient);
         }

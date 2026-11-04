@@ -50,8 +50,14 @@ namespace SEOJIN_TMES.Client.Forms.Common
         /// </summary>
         private const int CancelStripHeight = 24;
 
+        /// <summary>진행률 막대 — [취소] 띠에 얹는다. 업로드처럼 진행 정도를 알 수 있는 처리에서만 보인다.</summary>
+        private const int BarSideMargin = 16;
+        private const int BarHeight = 8;
+        private const int BarToCancelGap = 10;
+
         private readonly ProgressPanel _progress;
         private readonly HyperlinkLabelControl _cancel;
+        private readonly ProgressBarControl _bar;
 
         /// <summary>[취소]를 눌렀을 때.</summary>
         public event EventHandler CancelRequested;
@@ -75,6 +81,58 @@ namespace SEOJIN_TMES.Client.Forms.Common
             _cancel = CreateCancelLink();
             Controls.Add(_cancel);
             PlaceCancelLink();
+
+            _bar = CreateProgressBar();
+            Controls.Add(_bar);
+        }
+
+        /// <summary>
+        /// 진행률을 보여 준다. 처음 부를 때 막대가 나타나고, 문구 둘째 줄(처리 중...)이 <paramref name="description"/>으로 바뀐다.
+        /// 스피너는 그대로 돈다 — 막대가 한동안 멈춰 있어도(서버가 저장 중) 화면이 굳은 게 아님을 보여 준다.
+        /// </summary>
+        public void SetProgress(int percent, string description)
+        {
+            if (!_bar.Visible)
+            {
+                PlaceProgressBar();
+                _bar.Visible = true;
+            }
+
+            _bar.Position = Math.Max(0, Math.Min(100, percent));
+
+            if (description != null)
+                _progress.Description = description;
+        }
+
+        /// <summary>
+        /// 시안 포인트 색의 얇은 막대. 스킨을 끄는 이유는 ProgressPanel과 같다(카드 흰색과 어긋난 회색 바탕이 생긴다).
+        /// </summary>
+        private static ProgressBarControl CreateProgressBar()
+        {
+            var bar = new ProgressBarControl();
+            bar.Visible = false;
+            bar.Properties.Minimum = 0;
+            bar.Properties.Maximum = 100;
+            bar.Properties.ShowTitle = false;
+            bar.Properties.ProgressViewStyle = ProgressViewStyle.Solid;
+            bar.Properties.BorderStyle = BorderStyles.NoBorder;
+            bar.Properties.LookAndFeel.UseDefaultLookAndFeel = false;
+            bar.Properties.LookAndFeel.Style = LookAndFeelStyle.Flat;
+            bar.Properties.StartColor = AppTheme.Indigo;
+            bar.Properties.EndColor = AppTheme.Indigo;
+            bar.Properties.Appearance.BackColor = AppTheme.Blend(AppTheme.Indigo, AppTheme.Card, 0.15f);
+            bar.Properties.Appearance.Options.UseBackColor = true;
+            return bar;
+        }
+
+        /// <summary>[취소] 띠 세로 가운데. [취소]가 보이면 그 왼쪽까지만 쓴다.</summary>
+        private void PlaceProgressBar()
+        {
+            int right = _cancel.Visible ? _cancel.Left - BarToCancelGap : ClientSize.Width - BarSideMargin;
+            int top = ClientSize.Height - CancelStripHeight + (CancelStripHeight - BarHeight) / 2;
+
+            _bar.Bounds = new Rectangle(BarSideMargin, top, Math.Max(0, right - BarSideMargin), BarHeight);
+            _bar.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
         }
 
         /// <summary>

@@ -322,7 +322,7 @@ namespace SEOJIN_TMES.Client.Common.Models
     public class PopInspectionResult
     {
         /// <summary>판정(결과상태) — OK / NG 만 보낸다.</summary>
-        public string JgmtRslt { get; set; } = string.Empty;
+        public string jgmtRslt { get; set; } = string.Empty;
 
         /// <summary>결과값. 정량 검사에서만 보내고, 정성 검사는 null이라 Body에서 빠진다.</summary>
         //[JsonProperty(NullValueHandling = NullValueHandling.Ignore)]

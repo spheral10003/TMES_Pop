@@ -34,9 +34,9 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.gridView = new SEOJIN_TMES.Client.Forms.Common.MeisGridView();
             this.lblListTitle = new DevExpress.XtraEditors.LabelControl();
             this.footerPanel = new DevExpress.XtraEditors.PanelControl();
+            this.pnlGrip = new System.Windows.Forms.Panel();
             this.btnMove = new System.Windows.Forms.Button();
             this.btnClose = new System.Windows.Forms.Button();
-            this.pnlGrip = new System.Windows.Forms.Panel();
             ((System.ComponentModel.ISupportInitialize)(this.headerPanel)).BeginInit();
             this.headerPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.headerIcon)).BeginInit();

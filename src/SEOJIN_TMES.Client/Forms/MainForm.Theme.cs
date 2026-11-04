@@ -68,7 +68,7 @@ namespace SEOJIN_TMES.Client.Forms
             // 테스트 서버(App.config의 IsTestServer)면 TMES_TEST.ico — 작업 표시줄에서도 운용 서버와 구분된다.
             Icon = AppImages.AppIcon(IsTestServer);
 
-            lblBrand.Text = "MEIS POP";
+            lblBrand.Text = "TMES POP";
             lblBrandSub.Text = "MANUFACTURING SYSTEM";
             SetBreadcrumb(string.Empty);
             lblVersion.Text = string.Format(Language.MainForm_VersionFormat, AppVersion.Current);

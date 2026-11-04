@@ -520,10 +520,10 @@
     <value>Sent At</value>
   </data>
   <data name="Notification_SelectRow" xml:space="preserve">
-    <value>Select the notifications to mark as read.</value>
+    <value>Check the notifications to mark as read.</value>
   </data>
   <data name="Notification_AlreadyRead" xml:space="preserve">
-    <value>The selected notifications are already read.</value>
+    <value>The checked notifications are already read.</value>
   </data>
   <data name="Notification_CorpCd" xml:space="preserve">
     <value>Business</value>

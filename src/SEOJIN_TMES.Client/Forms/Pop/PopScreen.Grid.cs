@@ -140,7 +140,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             gridMaterial.DataSource = new List<PopInputMaterialDto>();
             GridColumns.Apply(gridViewMaterial, Language.Col_No,
                 GridColumns.Text("MaterialCode", Language.Col_MaterialCode, 200),
-                GridColumns.Text("MaterialGroup", Language.Col_MaterialGroup, 140),
+                GridColumns.Text("MaterialGroup", Language.Col_MaterialGroup, 100),
                 GridColumns.Number("InputQty", Language.Col_InputQty, 110),
                 GridColumns.Text("InputUnit", Language.Col_InputUnit, 100),
                 GridColumns.Text("InputPosition", Language.Col_InputPosition, 110),
@@ -221,7 +221,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 GridColumns.Text("InspectionUpper", Language.Col_InspectionUpper, 110),
                 GridColumns.Text("InspectionTarget", Language.Col_InspectionTarget, 110),
                 GridColumns.Text("ResultValue", Language.Col_ResultValue, 130),
-                GridColumns.Text("InspectionResultRemark", Language.Col_InspectionRemark, 300));
+                GridColumns.Text("InspectionResultRemark", Language.Col_InspectionRemark, 120));
 
             gridViewInspection.OptionsView.ColumnAutoWidth = true;
             NumericFormat(gridViewInspection, "InspectionLower", "InspectionUpper", "InspectionTarget");

@@ -131,19 +131,18 @@ namespace SEOJIN_TMES.Client.Forms
             this.brandIcon.Name = "brandIcon";
             this.brandIcon.Size = new System.Drawing.Size(36, 36);
             this.brandIcon.TabIndex = 0;
-            //
-            // brandLogo — 메뉴를 접었을 때만 보이는 로고(PNG). 그림은 MainForm.cs의 ApplyBrandLogo()에서 넣는다.
-            //
+            // 
+            // brandLogo
+            // 
             this.brandLogo.Location = new System.Drawing.Point(12, 17);
             this.brandLogo.Name = "brandLogo";
             this.brandLogo.Properties.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder;
-            this.brandLogo.Properties.ShowMenu = false;
             this.brandLogo.Properties.ReadOnly = true;
+            this.brandLogo.Properties.ShowMenu = false;
             this.brandLogo.Size = new System.Drawing.Size(40, 40);
             this.brandLogo.TabIndex = 3;
-            this.brandLogo.TabStop = false;
             this.brandLogo.Visible = false;
-            //
+            // 
             // mainArea
             // 
             this.mainArea.Controls.Add(this.rightPanel);
@@ -224,9 +223,9 @@ namespace SEOJIN_TMES.Client.Forms
             this.btnAlerts.Size = new System.Drawing.Size(30, 30);
             this.btnAlerts.TabIndex = 3;
             this.btnAlerts.Click += new System.EventHandler(this.btnAlerts_Click);
-            //
+            // 
             // btnModbusTest
-            //
+            // 
             this.btnModbusTest.Location = new System.Drawing.Point(772, 4);
             this.btnModbusTest.Name = "btnModbusTest";
             this.btnModbusTest.Size = new System.Drawing.Size(30, 30);

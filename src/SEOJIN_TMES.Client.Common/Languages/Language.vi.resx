@@ -520,10 +520,10 @@
     <value>Thời điểm gửi</value>
   </data>
   <data name="Notification_SelectRow" xml:space="preserve">
-    <value>Hãy chọn thông báo cần đánh dấu đã đọc.</value>
+    <value>Hãy đánh dấu chọn thông báo cần đánh dấu đã đọc.</value>
   </data>
   <data name="Notification_AlreadyRead" xml:space="preserve">
-    <value>Thông báo đã chọn đã được đọc.</value>
+    <value>Thông báo đã đánh dấu chọn đã được đọc.</value>
   </data>
   <data name="Notification_CorpCd" xml:space="preserve">
     <value>Bộ phận kinh doanh</value>

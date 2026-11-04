@@ -65,6 +65,31 @@ namespace SEOJIN_TMES.Client.ApiClient
             }, cancellationToken);
 
         /// <summary>
+        /// 큰 파일용 multipart POST. <see cref="PostMultipartAsync{TData}(string, MultipartFormDataContent, CancellationToken)"/>와 같되
+        /// 두 가지가 다르다.
+        ///  - 제한 시간을 호출마다 받는다. <paramref name="client"/>는 Timeout이 무제한인 업로드 전용 HttpClient여야 하고,
+        ///    시간 초과는 여기서 건 토큰이 낸다. 호출자 토큰은 ExecuteAsync에 그대로 넘기므로
+        ///    시간 초과는 "취소"가 아니라 다른 호출과 똑같이 ApiException(서버 응답 시간 초과)으로 올라간다.
+        ///  - 보낸 바이트 수를 <paramref name="progress"/>로 알린다(null이면 알리지 않는다).
+        /// </summary>
+        protected Task<TData> PostMultipartAsync<TData>(HttpClient client, string relativeUrl, MultipartFormDataContent content,
+            TimeSpan timeout, IProgress<TransferProgress> progress, CancellationToken cancellationToken = default) =>
+            ExecuteAsync("POST", relativeUrl, async () =>
+            {
+                using (var timeoutSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken))
+                {
+                    timeoutSource.CancelAfter(timeout);
+
+                    HttpContent body = progress == null ? (HttpContent)content : new ProgressContent(content, progress);
+                    using (var response = await client.PostAsync(relativeUrl, body, timeoutSource.Token).ConfigureAwait(false))
+                    {
+                        var responseBody = await ReadBodyAsync(response).ConfigureAwait(false);
+                        return Parse(response, responseBody, Unwrap<TData>);
+                    }
+                }
+            }, cancellationToken);
+
+        /// <summary>
         /// GET 후 <b>알맹이</b>만 돌려준다. 이 서버는 응답을 <c>{ "data": ... }</c>로 싸는 곳과
         /// 그냥 내려주는 곳이 섞여 있고, Swagger 선언도 일관되지 않다
         /// (같은 엔드포인트가 알맹이 타입으로 선언돼 있는데 실제로는 봉투로 오는 경우가 있었다).
@@ -157,6 +182,22 @@ namespace SEOJIN_TMES.Client.ApiClient
             {
                 // request를 Dispose하면 Content도 함께 정리된다.
                 using (var request = new HttpRequestMessage(HttpMethod.Delete, relativeUrl) { Content = ToJsonContent(body) })
+                using (var response = await HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false))
+                {
+                    await EnsureSuccessAsync(response).ConfigureAwait(false);
+                    return true;
+                }
+            }, cancellationToken);
+
+        /// <summary>
+        /// 바디(JSON)를 실어 PATCH한다. .NET Framework 4.7.2의 HttpClient에는 PatchAsync도, HttpMethod.Patch도 없어서
+        /// 메서드 이름으로 요청 메시지를 직접 만든다. 실패는 다른 호출과 똑같이 ApiException으로 올린다.
+        /// </summary>
+        protected Task PatchAsync<TRequest>(string relativeUrl, TRequest body, CancellationToken cancellationToken = default) =>
+            ExecuteAsync("PATCH", relativeUrl, async () =>
+            {
+                // request를 Dispose하면 Content도 함께 정리된다.
+                using (var request = new HttpRequestMessage(new HttpMethod("PATCH"), relativeUrl) { Content = ToJsonContent(body) })
                 using (var response = await HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false))
                 {
                     await EnsureSuccessAsync(response).ConfigureAwait(false);

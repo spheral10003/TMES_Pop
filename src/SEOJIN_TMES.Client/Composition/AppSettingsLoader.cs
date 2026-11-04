@@ -23,6 +23,12 @@ namespace SEOJIN_TMES.Client.Composition
             if (int.TryParse(ConfigurationManager.AppSettings["ApiTimeoutSeconds"], out var timeout))
                 settings.ApiTimeoutSeconds = timeout;
 
+            if (int.TryParse(ConfigurationManager.AppSettings["ApiUploadTimeoutSeconds"], out var uploadTimeout))
+                settings.ApiUploadTimeoutSeconds = uploadTimeout;
+
+            if (int.TryParse(ConfigurationManager.AppSettings["ApiUploadMinKBytesPerSecond"], out var uploadMinKBps))
+                settings.ApiUploadMinKBytesPerSecond = uploadMinKBps;
+
             if (int.TryParse(ConfigurationManager.AppSettings["SessionTimeoutMinutes"], out var sessionTimeout))
                 settings.SessionTimeoutMinutes = sessionTimeout;
 

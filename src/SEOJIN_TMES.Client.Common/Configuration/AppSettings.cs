@@ -9,6 +9,15 @@ namespace SEOJIN_TMES.Client.Common.Configuration
         public int ApiTimeoutSeconds { get; set; } = 30;
 
         /// <summary>
+        /// 파일 업로드 제한 시간 = <see cref="ApiUploadTimeoutSeconds"/> + 본문 크기 ÷ <see cref="ApiUploadMinKBytesPerSecond"/>.
+        /// 업로드는 <see cref="ApiTimeoutSeconds"/>를 쓰지 않는다 — 큰 파일은 보내는 데만 30초를 넘긴다.
+        /// </summary>
+        public int ApiUploadTimeoutSeconds { get; set; } = 60;
+
+        /// <summary>업로드 제한 시간을 잡을 때 가정하는 최저 전송 속도(KB/초).</summary>
+        public int ApiUploadMinKBytesPerSecond { get; set; } = 512;
+
+        /// <summary>
         /// API 응답 본문을 로그에 남길지 여부. 서버 연동을 맞추는 동안 응답 모양을 확인하려고 켠다.
         /// 비밀번호·토큰 같은 필드는 기록 전에 가려지지만, <b>업무 데이터는 그대로 남으므로</b>
         /// 현장 운영에서는 끄는 것을 권한다(로그 용량도 크게 늘어난다).

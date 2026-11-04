@@ -15,6 +15,9 @@ namespace SEOJIN_TMES.Client.Forms.Common
     ///
     /// using (var busy = BusyOverlay.Show(this, cancelable: true))// 조회 — [취소] 제공
     ///     var rows = await api.SearchAsync(cond, busy.Token);
+    ///
+    /// using (var busy = BusyOverlay.Show(this))                  // 업로드 — 진행률 막대
+    ///     await api.UploadManyAsync(files, key, new Progress&lt;TransferProgress&gt;(p => busy?.SetProgress(p.Percent, ...)));
     /// </code>
     ///
     /// <b>탭 화면(UserControl)과 팝업(Form) 양쪽에 그대로 쓴다</b> — 대상 컨트롤 위에 덮개를 얹는 방식이라
@@ -170,6 +173,19 @@ namespace SEOJIN_TMES.Client.Forms.Common
             {
                 _indicator.StopAnimation();
             }
+        }
+
+        /// <summary>
+        /// 진행률 막대를 띄우고 값을 바꾼다. UI 스레드에서 불러야 한다 —
+        /// <c>Progress&lt;T&gt;</c>를 화면에서 만들면 보고가 UI 스레드로 넘어오므로 그대로 부르면 된다.
+        /// 덮개가 이미 걷힌 뒤에 늦게 도착한 보고는 무시한다.
+        /// </summary>
+        public void SetProgress(int percent, string description = null)
+        {
+            if (_disposed || _indicator.IsDisposed)
+                return;
+
+            _indicator.SetProgress(percent, description);
         }
 
         private void Cancel()

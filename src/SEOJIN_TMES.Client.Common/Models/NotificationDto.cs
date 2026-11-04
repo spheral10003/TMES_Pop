@@ -21,9 +21,16 @@ namespace SEOJIN_TMES.Client.Common.Models
         [JsonProperty("corpCd")]
         public string CorpCd { get; set; }
 
-        /// <summary>알람 순번 — 서버 <c>alarmSeqId</c>. 읽음 처리 대상 식별에 쓴다.</summary>
+        /// <summary>알람 순번 — 서버 <c>alarmSeqId</c>.</summary>
         [JsonProperty("alarmSeqId")]
         public string AlarmSeqId { get; set; }
+
+        /// <summary>
+        /// 발송 참조키(alarmSendRef) — 조회(<c>GetNotificationsItem</c>) 응답의 <c>sysObjId</c> 값을 담는다.
+        /// 읽음 처리(PATCH)가 순번이 아니라 이 값의 배열을 받기 때문에 따로 받아 둔다.
+        /// </summary>
+        [JsonProperty("sysObjId")]
+        public string AlarmSendRef { get; set; }
 
         /// <summary>알람 그룹 — 서버 <c>alarmGroupNo</c>.</summary>
         [JsonProperty("alarmGroupNo")]
@@ -75,16 +82,6 @@ namespace SEOJIN_TMES.Client.Common.Models
 
         /// <summary>안 읽은 알림만.</summary>
         Unread
-    }
-
-    /// <summary>
-    /// 알림 읽음 처리 요청 바디. 목록의 <c>alarmSeqId</c>를 그대로 싣는다.
-    /// TODO: 읽음 처리 경로·바디 필드명은 아직 <b>가정값</b>이다 — 서버 스펙 확정 후 맞출 것.
-    /// </summary>
-    public class NotificationReadRequest
-    {
-        [JsonProperty("notificationIds")]
-        public string[] NotificationIds { get; set; }
     }
 
     /// <summary>

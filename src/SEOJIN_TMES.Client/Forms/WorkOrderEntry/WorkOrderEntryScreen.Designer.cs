@@ -85,9 +85,10 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.chkWorkStationEnable.Checked = true;
             this.chkWorkStationEnable.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkWorkStationEnable.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.chkWorkStationEnable.Location = new System.Drawing.Point(1413, 35);
+            this.chkWorkStationEnable.Font = new System.Drawing.Font("맑은 고딕", 9.5F);
+            this.chkWorkStationEnable.Location = new System.Drawing.Point(436, 54);
             this.chkWorkStationEnable.Name = "chkWorkStationEnable";
-            this.chkWorkStationEnable.Size = new System.Drawing.Size(91, 18);
+            this.chkWorkStationEnable.Size = new System.Drawing.Size(97, 21);
             this.chkWorkStationEnable.TabIndex = 11;
             this.chkWorkStationEnable.Text = "WorkStation";
             this.chkWorkStationEnable.UseVisualStyleBackColor = true;
@@ -99,60 +100,62 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.btnItemPick.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.btnItemPick.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(60)))), ((int)(((byte)(60)))), ((int)(((byte)(60)))));
             this.btnItemPick.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnItemPick.Location = new System.Drawing.Point(1374, 32);
+            this.btnItemPick.Location = new System.Drawing.Point(352, 52);
             this.btnItemPick.Margin = new System.Windows.Forms.Padding(1);
             this.btnItemPick.Name = "btnItemPick";
-            this.btnItemPick.Size = new System.Drawing.Size(23, 20);
+            this.btnItemPick.Size = new System.Drawing.Size(24, 24);
             this.btnItemPick.TabIndex = 10;
             this.btnItemPick.UseVisualStyleBackColor = false;
             this.btnItemPick.Click += new System.EventHandler(this.btnItemPick_Click);
             // 
             // txtItemName
             // 
-            this.txtItemName.Location = new System.Drawing.Point(1272, 33);
+            this.txtItemName.Location = new System.Drawing.Point(253, 52);
             this.txtItemName.Name = "txtItemName";
             this.txtItemName.Properties.Appearance.Font = new System.Drawing.Font("맑은 고딕", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.txtItemName.Properties.Appearance.Options.UseFont = true;
             this.txtItemName.Size = new System.Drawing.Size(98, 24);
             this.txtItemName.TabIndex = 9;
-            //
+            // 
             // lblItemCode
-            //
+            // 
             this.lblItemCode.Appearance.Font = new System.Drawing.Font("맑은 고딕", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lblItemCode.Appearance.Options.UseFont = true;
-            this.lblItemCode.Location = new System.Drawing.Point(1034, 36);
+            this.lblItemCode.Location = new System.Drawing.Point(15, 55);
             this.lblItemCode.Name = "lblItemCode";
             this.lblItemCode.Size = new System.Drawing.Size(114, 17);
             this.lblItemCode.TabIndex = 6;
             this.lblItemCode.Text = "· 품목코드 / 품목명";
-            //
+            // 
             // txtItemCode
-            //
-            this.txtItemCode.Location = new System.Drawing.Point(1168, 33);
+            // 
+            this.txtItemCode.Location = new System.Drawing.Point(149, 52);
             this.txtItemCode.Name = "txtItemCode";
             this.txtItemCode.Properties.Appearance.Font = new System.Drawing.Font("맑은 고딕", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.txtItemCode.Properties.Appearance.Options.UseFont = true;
             this.txtItemCode.Size = new System.Drawing.Size(98, 24);
             this.txtItemCode.TabIndex = 7;
-            //
+            // 
             // btnSearch
-            //
+            // 
+            this.btnSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnSearch.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnSearch.Font = new System.Drawing.Font("맑은 고딕", 9.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.btnSearch.Location = new System.Drawing.Point(16, 25);
+            this.btnSearch.Location = new System.Drawing.Point(1387, 20);
             this.btnSearch.Name = "btnSearch";
-            this.btnSearch.Size = new System.Drawing.Size(104, 36);
+            this.btnSearch.Size = new System.Drawing.Size(104, 48);
             this.btnSearch.TabIndex = 0;
             this.btnSearch.Text = "조회";
             this.btnSearch.Click += new System.EventHandler(this.btnSearch_Click);
             // 
             // btnWork
             // 
+            this.btnWork.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnWork.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnWork.Font = new System.Drawing.Font("맑은 고딕", 9.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
-            this.btnWork.Location = new System.Drawing.Point(126, 25);
+            this.btnWork.Location = new System.Drawing.Point(1277, 20);
             this.btnWork.Name = "btnWork";
-            this.btnWork.Size = new System.Drawing.Size(104, 36);
+            this.btnWork.Size = new System.Drawing.Size(104, 48);
             this.btnWork.TabIndex = 1;
             this.btnWork.Text = "작업";
             this.btnWork.Click += new System.EventHandler(this.btnWork_Click);
@@ -161,34 +164,34 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             // 
             this.lblWorkOrderNo.Appearance.Font = new System.Drawing.Font("맑은 고딕", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lblWorkOrderNo.Appearance.Options.UseFont = true;
-            this.lblWorkOrderNo.Location = new System.Drawing.Point(282, 36);
+            this.lblWorkOrderNo.Location = new System.Drawing.Point(15, 20);
             this.lblWorkOrderNo.Name = "lblWorkOrderNo";
             this.lblWorkOrderNo.Size = new System.Drawing.Size(100, 17);
             this.lblWorkOrderNo.TabIndex = 2;
             this.lblWorkOrderNo.Text = "· 작업지시번호(*)";
-            //
+            // 
             // txtWorkOrderNo
-            //
-            this.txtWorkOrderNo.Location = new System.Drawing.Point(400, 32);
+            // 
+            this.txtWorkOrderNo.Location = new System.Drawing.Point(133, 16);
             this.txtWorkOrderNo.Name = "txtWorkOrderNo";
             this.txtWorkOrderNo.Properties.Appearance.Font = new System.Drawing.Font("맑은 고딕", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.txtWorkOrderNo.Properties.Appearance.Options.UseFont = true;
             this.txtWorkOrderNo.Size = new System.Drawing.Size(200, 24);
             this.txtWorkOrderNo.TabIndex = 3;
-            //
+            // 
             // lblSerialNo
-            //
+            // 
             this.lblSerialNo.Appearance.Font = new System.Drawing.Font("맑은 고딕", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lblSerialNo.Appearance.Options.UseFont = true;
-            this.lblSerialNo.Location = new System.Drawing.Point(636, 36);
+            this.lblSerialNo.Location = new System.Drawing.Point(369, 20);
             this.lblSerialNo.Name = "lblSerialNo";
             this.lblSerialNo.Size = new System.Drawing.Size(144, 17);
             this.lblSerialNo.TabIndex = 4;
             this.lblSerialNo.Text = "· 생산품목 시리얼번호(*)";
-            //
+            // 
             // txtSerialNo
-            //
-            this.txtSerialNo.Location = new System.Drawing.Point(796, 32);
+            // 
+            this.txtSerialNo.Location = new System.Drawing.Point(529, 16);
             this.txtSerialNo.Name = "txtSerialNo";
             this.txtSerialNo.Properties.Appearance.Font = new System.Drawing.Font("맑은 고딕", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.txtSerialNo.Properties.Appearance.Options.UseFont = true;
@@ -237,16 +240,16 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.gridView.Name = "gridView";
             this.gridView.OptionsBehavior.Editable = false;
             this.gridView.RowHeight = 24;
-            //
+            // 
             // lblGridTitle
-            //
+            // 
             this.lblGridTitle.Appearance.Font = new System.Drawing.Font("맑은 고딕", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lblGridTitle.Appearance.Options.UseFont = true;
             this.lblGridTitle.Dock = System.Windows.Forms.DockStyle.Top;
             this.lblGridTitle.Location = new System.Drawing.Point(3, 3);
             this.lblGridTitle.Name = "lblGridTitle";
             this.lblGridTitle.Padding = new System.Windows.Forms.Padding(18, 12, 0, 10);
-            this.lblGridTitle.Size = new System.Drawing.Size(132, 41);
+            this.lblGridTitle.Size = new System.Drawing.Size(112, 41);
             this.lblGridTitle.TabIndex = 0;
             this.lblGridTitle.Text = "작업 지시 정보";
             // 

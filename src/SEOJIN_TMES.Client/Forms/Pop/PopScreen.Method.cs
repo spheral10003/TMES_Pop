@@ -1072,7 +1072,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             var itemCode = spec.InspectionItemCode ?? string.Empty;
 
             var result = new PopInspectionResult();
-            result.JgmtRslt = spec.ResultState ?? string.Empty;
+            result.jgmtRslt = spec.ResultState ?? string.Empty;
 
             // 정성 검사는 결과값이 없다 — null로 두면 Body에서 빠진다(PopInspectionResult 참고).
             result.inspRsltVl = spec.IsQuantitative ? spec.ResultValue ?? string.Empty : null;

@@ -598,7 +598,17 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             try
             {
                 AppLog.Step($"파일 일괄 업로드 시작 - {order.WorkOrderNo}, {files.Count}건 ({files.Sum(f => f.Length):N0} byte)");
-                List<FileUploadResponse> uploaded = await _fileApi.UploadManyAsync(files, KeyOf(order));
+                List<FileUploadResponse> uploaded;
+
+                // 큰 문서는 몇 분씩 걸리므로 보낸 양을 막대로 보여 준다. 되돌릴 수 없는 처리라 [취소]는 두지 않는다.
+                // Progress는 여기(UI 스레드)에서 만들어야 보고가 UI 스레드로 넘어온다.
+                using (var busy = BusyOverlay.Show(this))
+                {
+                    var progress = new Progress<TransferProgress>(p => busy?.SetProgress(p.Percent,
+                        $"{Language.Upload_ProgressFormat} {p.Percent}% ({FormatSize(p.BytesSent)} / {FormatSize(p.TotalBytes)})"));
+
+                    uploaded = await _fileApi.UploadManyAsync(files, KeyOf(order), progress);
+                }
                 if (IsDisposed || Disposing) return;
 
                 AppLog.Step($"파일 일괄 업로드 완료 - {order.WorkOrderNo}, {uploaded?.Count ?? files.Count}건");

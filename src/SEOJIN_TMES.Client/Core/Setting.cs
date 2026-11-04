@@ -50,7 +50,8 @@ namespace SEOJIN_TMES.Client.Core
             _appSet = AppSettingsLoader.Load();
 
             _apiOptions = new ApiClientOptions(_appSet.ApiBaseUrl, _appSet.ApiTimeoutSeconds,
-                _appSet.LogApiResponseBody, _appSet.LogApiResponseBodyMaxLength);
+                _appSet.LogApiResponseBody, _appSet.LogApiResponseBodyMaxLength,
+                _appSet.ApiUploadTimeoutSeconds, _appSet.ApiUploadMinKBytesPerSecond);
 
             _apiClients = new ApiClientFactory(_apiOptions);
 
