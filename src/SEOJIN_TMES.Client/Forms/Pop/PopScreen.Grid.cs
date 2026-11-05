@@ -6,6 +6,7 @@ using SEOJIN_TMES.Client.ApiClient;
 using SEOJIN_TMES.Client.Common.Languages;
 using SEOJIN_TMES.Client.Common.Logging;
 using SEOJIN_TMES.Client.Common.Models;
+using SEOJIN_TMES.Client.Core;
 using SEOJIN_TMES.Client.Equipment.Nutrunner;
 using SEOJIN_TMES.Client.Forms.Common;
 using SEOJIN_TMES.Client.Theme;
@@ -1107,8 +1108,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// 편집기가 열린 직후 가상 키보드를 띄운다. ShownEditor 안에서 바로 모달 창을 열면
-        /// 그리드가 편집기 활성화(포커스 · 마우스 처리)를 마치기 전에 끼어들게 되므로 BeginInvoke로 한 박자 미룬다.
+        /// 글자를 치는 편집기가 열리면 Windows 화상 키보드(OSK)를 띄운다.
+        /// OSK는 포커스를 가져가지 않으므로 열린 편집기에 바로 글자가 들어가고, 편집을 닫을 때
+        /// ValidatingEditor(숫자 검사 · 서버 저장)와 CellValueChanged(검사 결과 전송)가 직접 타이핑했을 때와 똑같이 돈다.
+        /// 자체 가상 키보드(<see cref="VirtualKeyboardForm"/>)는 코드로 남겨 두되 여기서 띄우지 않는다.
         /// </summary>
         private void GridView_ShownEditor(object sender, EventArgs e)
         {
@@ -1116,53 +1119,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (GetKeyboardMode(view) == null)
                 return;
 
-            BeginInvoke(new Action<GridView>(ShowVirtualKeyboard), view);
-        }
-
-        /// <summary>
-        /// 가상 키보드로 받은 값을 열려 있는 셀 편집기에 넣고 편집을 닫는다.
-        /// 셀에 바로 SetRowCellValue 하지 않는 이유 — 편집기를 닫는 경로여야 ValidatingEditor(숫자 검사 · 서버 저장)와
-        /// CellValueChanged(검사 결과 전송)가 직접 타이핑했을 때와 똑같이 돈다.
-        /// 값이 거절되면 편집기가 오류 표시와 함께 열린 채 남아, 작업자가 칸을 다시 눌러 고칠 수 있다.
-        /// 취소하면 편집기만 닫고 셀 값은 그대로 둔다.
-        /// </summary>
-        private void ShowVirtualKeyboard(GridView view)
-        {
-            if (IsDisposed || Disposing || view.ActiveEditor == null)
-                return;
-
-            var column = view.FocusedColumn;
-            var mode = GetKeyboardMode(view);
-            if (mode == null)
-                return;
-
-            try
-            {
-                var initial = Convert.ToString(view.EditingValue, CultureInfo.CurrentCulture);
-
-                using (var form = new VirtualKeyboardForm())
-                {
-                    form.Initialize(column.GetCaption(), initial, mode.Value);
-                    form.CenterOn(this);
-
-                    if (form.ShowDialog(this) != DialogResult.OK)
-                    {
-                        if (!IsDisposed && view.ActiveEditor != null)
-                            view.HideEditor();
-                        return;
-                    }
-
-                    if (IsDisposed || view.ActiveEditor == null)
-                        return;
-
-                    view.EditingValue = form.Value;
-                    view.CloseEditor();
-                }
-            }
-            catch (Exception ex)
-            {
-                HandleError("가상 키보드 입력", ex);
-            }
+            OnScreenKeyboard.Show();
         }
 
         // ─────────────────────────────────────────────────────────────────────────
