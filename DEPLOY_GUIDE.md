@@ -15,21 +15,21 @@ deploy/
 │  ├─ VIETNAM/   베트남
 │  ├─ USA/       미국
 │  └─ SEOJIN/    서진 Test 서버
-│     ├─ region.props           배포 서버 주소(DeployBaseUrl) · 제품 이름
-│     └─ App.config             이 지역 게시본의 SEOJIN_TMES_POP.exe.config
+│     ├─ region.props           배포 서버 주소(DeployBaseUrl) · 제품 이름 · 앱 ID(AssemblyName)
+│     └─ App.config             이 지역 게시본의 <앱 ID>.exe.config
 └─ out/<지역>/                   게시 결과(git 제외) — 이 폴더 내용을 배포 서버에 올린다
 ```
 
 ### 지역별 값
 
-| 지역 | 폴더 | 바로가기 이름 | 기본 언어 | 사업장 코드(ServerName) | 배포 서버 주소 · API 주소 |
-| --- | --- | --- | --- | --- | --- |
-| 구미 | `GUMI` | TMES POP (구미) | ko-KR | `GUM` | `http://172.16.150.11/mes_client/` (구미 Test 서버 TMES-TEST, IIS 가상 디렉터리 → `D:\TMES\mes_client`) · API `http://172.16.150.11:8080/` · 공유 `\\172.16.150.11\attach\` |
-| 화성 | `HWASEONG` | TMES POP (화성) | ko-KR | 입력 필요 | 입력 필요 |
-| 용인 | `YONGIN` | TMES POP (용인) | ko-KR | 입력 필요 | 입력 필요 |
-| 베트남 | `VIETNAM` | TMES POP (베트남) | vi-VN | 입력 필요 | 입력 필요 |
-| 미국 | `USA` | TMES POP (미국) | en-US | 입력 필요 | 입력 필요 |
-| 서진 Test 서버 | `SEOJIN` | TMES POP (서진 Test) | ko-KR | `GUM` | `http://10.200.1.235:8090/` (IIS 사이트 MESClient → `C:\TMES\MESClient`) · API `http://10.200.1.237:8080/` |
+| 지역 | 폴더 | 앱 ID | 바로가기 이름 | 기본 언어 | 사업장 코드(ServerName) | 배포 서버 주소 · API 주소 |
+| --- | --- | --- | --- | --- | --- | --- |
+| 구미 | `GUMI` | `SEOJIN_TMES_POP_GM` | TMES POP (구미) | ko-KR | `GUM` | `http://172.16.150.11/mes_client/` (구미 Test 서버 TMES-TEST, IIS 가상 디렉터리 → `D:\TMES\mes_client`) · API `http://172.16.150.11:8080/` · 공유 `\\172.16.150.11\attach\` |
+| 화성 | `HWASEONG` | `SEOJIN_TMES_POP_HS` | TMES POP (화성) | ko-KR | 입력 필요 | 입력 필요 |
+| 용인 | `YONGIN` | `SEOJIN_TMES_POP_YI` | TMES POP (용인) | ko-KR | 입력 필요 | 입력 필요 |
+| 베트남 | `VIETNAM` | `SEOJIN_TMES_POP_VN` | TMES POP (베트남) | vi-VN | 입력 필요 | 입력 필요 |
+| 미국 | `USA` | `SEOJIN_TMES_POP_US` | TMES POP (미국) | en-US | 입력 필요 | 입력 필요 |
+| 서진 Test 서버 | `SEOJIN` | `SEOJIN_TMES_POP_SJ` | TMES POP (서진 Test) | ko-KR | `GUM` | `http://10.200.1.235:8090/` (IIS 사이트 MESClient → `C:\TMES\MESClient`) · API `http://10.200.1.237:8080/` |
 
 "입력 필요" 값은 **비워 둔 상태**다. 게시 스크립트가 처음 게시할 때 물어보고 그 지역 파일에 저장한다(아래 3번).
 세 값 중 하나라도 비어 있으면 게시하지 않는다(빌드도 `DeployBaseUrl`이 비면 오류로 멈춘다).
@@ -38,7 +38,7 @@ deploy/
 **서버 주소 · 폴더**(합쳐서 `\\서버\폴더\`로 저장, 필수)와 **계정 · 비밀번호**(비우면 현재 윈도우 계정).
 계정 · 비밀번호는 공유 폴더 경로가 비어 있을 때나 `-Configure`일 때만 묻고, 비밀번호는 가려서 입력받는다.
 
-> **주의:** 계정 · 비밀번호를 넣으면 게시본 `SEOJIN_TMES_POP.exe.config.deploy`에 평문으로 들어가
+> **주의:** 계정 · 비밀번호를 넣으면 게시본 `<앱 ID>.exe.config.deploy`에 평문으로 들어가
 > 배포 웹 서버에서 **누구나 내려받을 수 있다.** 되도록 비워 두고 현장 PC 윈도우 계정에 공유 권한을 주는 편이 낫다.
 
 게시본 App.config는 지역 공통으로 `LogApiResponseBody=false`, `Equipments`(설비 목록)는 `[]`.
@@ -49,11 +49,11 @@ deploy/
 
 ## 2. 배포되는 파일 (솔루션 전체 확인 결과)
 
-ClickOnce 매니페스트가 참조를 따라가며 자동으로 고른다. 게시본 `Application Files\SEOJIN_TMES_POP_<버전>\`에 들어가는 것:
+ClickOnce 매니페스트가 참조를 따라가며 자동으로 고른다. 게시본 `Application Files\<앱 ID>_<버전>\`에 들어가는 것:
 
 | 구분 | 파일 |
 | --- | --- |
-| 실행 파일 · 설정 | `SEOJIN_TMES_POP.exe`, `SEOJIN_TMES_POP.exe.config`(지역 App.config), `SEOJIN_TMES_POP.exe.manifest`, `Images\texon.ico` |
+| 실행 파일 · 설정 | `<앱 ID>.exe`, `<앱 ID>.exe.config`(지역 App.config), `<앱 ID>.exe.manifest`, `Images\texon.ico` |
 | 솔루션 프로젝트 | `SEOJIN_TMES.Client.Common.dll`, `.ApiClient.dll`, `.Equipment.dll`, `.Modbus.dll`, `.Socket.dll`, `ImageBoxEx.dll` |
 | 다국어 리소스 | `ko\`, `en\`, `vi\` `SEOJIN_TMES.Client.Common.resources.dll` |
 | NuGet | `Newtonsoft.Json.dll` (13.0.3) |
@@ -103,7 +103,7 @@ Visual Studio(MSBuild.exe)가 설치된 PC의 PowerShell에서 저장소 루트 
 
 ### 버전 관리 규칙
 
-- 버전 형식 `주.부.빌드.리비전`. 자동 모드는 **배포 서버의 `SEOJIN_TMES_POP.application`에 적힌 버전**을 읽어 리비전을 +1 한다
+- 버전 형식 `주.부.빌드.리비전`. 자동 모드는 **배포 서버의 `<앱 ID>.application`에 적힌 버전**을 읽어 리비전을 +1 한다
   (서버에 닿지 않으면 `deploy\out\<지역>`의 이전 게시본 기준, 둘 다 없으면 `1.0.0.1`).
   → 여러 사람이 게시해도 "서버에 있는 것"이 기준이라 버전이 꼬이지 않는다.
 - 기본은 **필수 업데이트**: 게시 버전을 `minimumRequiredVersion`으로 넣어, 옛 버전 PC는 [건너뛰기] 없이 업데이트한다
@@ -124,7 +124,7 @@ ClickOnce는 낮은 버전으로는 업데이트하지 않는다.
 새 지역을 추가할 때:
 
 1. 비슷한 지역 폴더를 복사(예: `deploy/regions/YONGIN` → `deploy/regions/BUSAN`)
-2. `region.props`의 `ProductName`, 상단 주석의 지역명 수정 · 주소는 비워 둔다
+2. `region.props`의 `ProductName`, `AssemblyName`(다른 지역과 겹치지 않는 앱 ID), 상단 주석의 지역명 수정 · 주소는 비워 둔다
 3. `App.config`의 `DefaultCulture`, `ServerName` 등 지역 값 수정
 4. `Publish-ClickOnce.ps1` 상단 `[ValidateSet(...)]`에 폴더 이름 추가
 5. `.\deploy\Publish-ClickOnce.ps1 -Region BUSAN -Configure` 로 주소 입력
@@ -133,7 +133,7 @@ ClickOnce는 낮은 버전으로는 업데이트하지 않는다.
 
 ## 5. 배포 서버 준비
 
-`deploy\out\<지역>\` 안의 내용(`SEOJIN_TMES_POP.application`, `setup.exe`, `publish.htm`, `Application Files\`)을
+`deploy\out\<지역>\` 안의 내용(`<앱 ID>.application`, `setup.exe`, `publish.htm`, `Application Files\`)을
 `DeployBaseUrl` 경로(예: `https://tmes-gm-test.texon.co.kr/pop/`)에서 보이도록 올린다.
 `Application Files\`의 **옛 버전 폴더는 지우지 않는다** — 스크립트의 `-CopyTo`도 버전 폴더를 먼저, `.application`을 마지막에 올린다.
 
@@ -187,11 +187,20 @@ location /pop/ {
    - `Core/Setting.cs` `SaveCulture` — 로그인 화면에서 고른 언어(`DefaultCulture`)
    - `Core/Devices.cs` `Save` — 설비 목록(`Equipments`)
    → `UserPreferences`(%APPDATA%)처럼 사용자 폴더로 옮겨야 업데이트 후에도 유지된다.
-2. **게시된 App.config는 배포 서버에서 누구나 내려받을 수 있다**(`SEOJIN_TMES_POP.exe.config.deploy`).
+2. **게시된 App.config는 배포 서버에서 누구나 내려받을 수 있다**(`<앱 ID>.exe.config.deploy`).
    지역 App.config의 `DocumentShare`에 비밀번호를 넣지 말 것 — 도메인 계정 접근(UserName/Password 비움)을 쓰거나
    배포 서버를 사내망으로 제한한다. (개발용 `src/SEOJIN_TMES.Client/App.config`에는 지금 평문 비밀번호가 있다.)
 3. **매니페스트 서명 안 함**(`SignManifests=false`). 설치 때 "게시자를 알 수 없음" 경고가 뜬다.
    코드 서명 인증서가 있으면 `SignManifests=true` + `ManifestCertificateThumbprint`를 넣는다.
    한 번 서명 방식을 정하면 바꿀 때 기존 PC가 업데이트를 거부하니 처음에 정할 것.
-4. **같은 PC에 두 지역(또는 TEST/PROD)을 동시에 설치할 수 없다**(앱 ID가 같다). 한 PC는 한 지역 기준.
+4. **지역마다 앱 ID가 다르므로 한 PC에 여러 지역을 따로 설치할 수 있다**(바로가기 · 프로그램 추가/제거 항목도 지역별).
+   ClickOnce는 주소가 아니라 앱 ID(`.application` 이름 + 서명 키)로 같은 프로그램인지 판단한다 —
+   예전처럼 모든 지역이 `SEOJIN_TMES_POP`이면 다른 지역을 설치할 때 "이미 다른 위치에서 설치됨"으로 막히거나 덮어썼다.
+   - 동시 **실행**은 한 개만 된다(`Program.cs`의 Mutex 이름이 공통). 설비 접속이 겹치지 않게 일부러 그대로 둔다.
+   - `%APPDATA%\SEOJIN_TMES.Client\user-preferences.json`(아이디 저장)은 지역끼리 같이 쓴다.
+   - **옛 공통 이름(`SEOJIN_TMES_POP`)으로 설치된 PC는 새 게시본을 업데이트로 받지 못한다**(다른 프로그램이 됨).
+     [프로그램 추가/제거]에서 옛 `TMES POP (…)`를 지운 뒤 `publish.htm`에서 다시 설치한다.
+     지역 앱 ID로 처음 게시할 때 스크립트는 서버의 옛 `SEOJIN_TMES_POP.application` 버전에 이어서 번호를 매긴다.
+     배포 서버의 옛 `SEOJIN_TMES_POP.application`은 남겨 두면 재설치 안 한 PC가 옛 버전으로 계속 실행되므로,
+     현장 재설치가 끝나면 지운다.
 5. 화성 · 용인 · 베트남 · 미국의 **사업장 코드(ServerName)**는 아직 모른다 — 서버 쪽 corpCd를 확인해 입력할 것.

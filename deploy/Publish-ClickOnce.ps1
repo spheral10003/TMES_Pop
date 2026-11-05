@@ -48,13 +48,20 @@ $ErrorActionPreference = 'Stop'
 $repoRoot  = Split-Path -Parent $PSScriptRoot
 $regionDir = Join-Path $PSScriptRoot "regions\$Region"
 $project   = Join-Path $repoRoot 'src\SEOJIN_TMES.Client\SEOJIN_TMES.Client.csproj'
-$appName   = 'SEOJIN_TMES_POP'
 $outDir    = Join-Path $PSScriptRoot "out\$Region\"
+# 지역 앱 ID를 쓰기 전의 공통 이름. 새 이름으로 처음 게시할 때 서버의 옛 버전 번호를 이어받는 데만 쓴다.
+$legacyAppName = 'SEOJIN_TMES_POP'
 
 if (-not (Test-Path (Join-Path $regionDir 'region.props'))) {
     $known = (Get-ChildItem (Join-Path $PSScriptRoot 'regions') -Directory | ForEach-Object Name) -join ', '
     throw "지역 '$Region' 설정이 없다. 사용 가능한 지역: $known"
 }
+
+# 앱 ID(= exe · .application 이름)는 지역마다 다르다 — 같으면 한 PC에 여러 지역을 설치할 때 서로 덮어쓴다.
+# 빌드가 쓰는 값과 어긋나지 않도록 region.props 에서 그대로 읽는다.
+$appNameMatch = [regex]::Match([IO.File]::ReadAllText((Join-Path $regionDir 'region.props')), '<AssemblyName>([^<]+)</AssemblyName>')
+if (-not $appNameMatch.Success) { throw "deploy/regions/$Region/region.props 에 AssemblyName(지역 앱 ID)이 없다." }
+$appName = $appNameMatch.Groups[1].Value.Trim()
 
 # ── 지역 입력값(배포 서버 주소 · API 주소 · 사업장 코드) ─────────────
 # 지역 파일은 주소를 비운 채로 만들어 두고, 처음 게시할 때(또는 -Configure) 물어봐서 파일에 채워 넣는다.
@@ -177,25 +184,38 @@ function Get-DeployedVersion([xml]$manifest) {
     [version]$manifest.assembly.assemblyIdentity.version
 }
 
+function Get-ServerVersion([string]$name) {
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    $res = Invoke-WebRequest -Uri "$DeployBaseUrl$name.application" -UseBasicParsing -TimeoutSec 10
+    # IIS가 .application 을 application/x-ms-application 으로 주면 Content 가 문자열이 아니라 byte[] 로 온다
+    # (그대로 [xml] 로 바꾸면 실패해 로컬 이전 게시본 기준으로 대체됐다).
+    $text = if ($res.Content -is [byte[]]) { [Text.Encoding]::UTF8.GetString($res.Content) } else { [string]$res.Content }
+    Get-DeployedVersion ([xml]$text.TrimStart([char]0xFEFF))
+}
+
 if (-not $Version) {
     $current = $null
     try {
-        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-        $res = Invoke-WebRequest -Uri "$DeployBaseUrl$appName.application" -UseBasicParsing -TimeoutSec 10
-        # IIS가 .application 을 application/x-ms-application 으로 주면 Content 가 문자열이 아니라 byte[] 로 온다
-        # (그대로 [xml] 로 바꾸면 실패해 로컬 이전 게시본 기준으로 대체됐다).
-        $text = if ($res.Content -is [byte[]]) { [Text.Encoding]::UTF8.GetString($res.Content) } else { [string]$res.Content }
-        $current = Get-DeployedVersion ([xml]$text.TrimStart([char]0xFEFF))
+        $current = Get-ServerVersion $appName
         Write-Host "배포 서버 최신 버전: $current"
     }
     catch {
-        $local = Join-Path $outDir "$appName.application"
-        if (Test-Path $local) {
-            $current = Get-DeployedVersion ([xml](Get-Content $local -Raw))
-            Write-Warning "배포 서버에서 버전을 읽지 못해 이 PC의 이전 게시본($current) 기준으로 올린다. ($($_.Exception.Message))"
+        $serverError = $_.Exception.Message
+        # 지역 앱 ID로 처음 게시하는 경우 — 서버에 공통 이름 게시본만 있다. 그 번호를 이어 가야
+        # 설치 안내 페이지 · 사이드바 버전이 뒤로 돌아가 보이지 않는다.
+        try {
+            $current = Get-ServerVersion $legacyAppName
+            Write-Warning "배포 서버에 $appName 게시본이 없어 옛 공통 이름($legacyAppName) 게시본 버전($current)에 이어서 올린다."
         }
-        else {
-            Write-Warning "배포 서버 · 이전 게시본 모두 없음 - 첫 게시로 보고 1.0.0.1 로 시작한다."
+        catch {
+            $local = Join-Path $outDir "$appName.application"
+            if (Test-Path $local) {
+                $current = Get-DeployedVersion ([xml](Get-Content $local -Raw))
+                Write-Warning "배포 서버에서 버전을 읽지 못해 이 PC의 이전 게시본($current) 기준으로 올린다. ($serverError)"
+            }
+            else {
+                Write-Warning "배포 서버 · 이전 게시본 모두 없음 - 첫 게시로 보고 1.0.0.1 로 시작한다."
+            }
         }
     }
     $Version = if ($current) { "{0}.{1}.{2}.{3}" -f $current.Major, $current.Minor, $current.Build, ($current.Revision + 1) } else { '1.0.0.1' }
@@ -209,6 +229,7 @@ if (-not $msbuild) { throw 'Visual Studio MSBuild.exe 를 찾지 못했다(vswhe
 
 Write-Host ""
 Write-Host "지역        : $Region"
+Write-Host "앱 ID       : $appName"
 Write-Host "배포 주소   : $DeployBaseUrl"
 Write-Host "게시 버전   : $Version $(if ($OptionalUpdate) { '(선택 업데이트)' } else { '(필수 업데이트)' })"
 Write-Host "결과 폴더   : $outDir"

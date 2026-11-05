@@ -33,7 +33,7 @@
     ClickOnce 배포 설정.
     지역(구미 · 화성 · 용인 · 베트남 · 미국 · 서진 Test)별 게시는 deploy/Publish-ClickOnce.ps1 로 한다 — 사용법은 DEPLOY_GUIDE.md.
     아래는 지역과 무관한 공통값이고, -p:Region=<지역> 이 주어지면 deploy/regions/<지역>/region.props 가
-    배포 서버 주소 · 제품 이름 · App.config 를 덮어쓴다.
+    배포 서버 주소 · 제품 이름 · 앱 ID(AssemblyName) · App.config 를 덮어쓴다.
   -->
   <PropertyGroup>
     <PublishUrl>bin\publish\</PublishUrl>
@@ -86,6 +86,8 @@
   <Target Name="CheckRegion" BeforeTargets="PrepareForBuild" Condition="'$(Region)'!=''">
     <Error Condition="!Exists('$(RegionDir)region.props')" Text="지역 설정이 없다: $(RegionDir)region.props — deploy/regions 아래 폴더 이름을 확인할 것." />
     <Error Condition="'$(DeployBaseUrl)'==''" Text="$(Region) 지역의 배포 서버 주소(DeployBaseUrl)가 비어 있다 — deploy/Publish-ClickOnce.ps1 -Region $(Region) -Configure 로 입력할 것." />
+    <!-- 지역끼리 앱 ID가 같으면 한 PC에서 서로 덮어쓰므로, 새 지역을 추가하며 빠뜨리지 않도록 막는다. -->
+    <Error Condition="'$(AssemblyName)'=='SEOJIN_TMES_POP'" Text="$(Region) 지역의 앱 ID(AssemblyName)가 공통값 그대로다 — $(RegionDir)region.props 에 지역 고유 이름(예: SEOJIN_TMES_POP_GM)을 넣을 것." />
   </Target>
   <!--
     exe.config 중간 파일을 빌드마다 새로 만든다.

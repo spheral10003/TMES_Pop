@@ -17,6 +17,13 @@
     <!-- 시작 메뉴 · 바탕화면 바로가기 · 프로그램 추가/제거에 보이는 이름. -->
     <ProductName>TMES POP (미국)</ProductName>
 
+    <!--
+      ClickOnce 앱 ID(exe · .application 이름). 지역마다 달라야 한 PC에 여러 지역을 따로 설치할 수 있다 —
+      같으면 ClickOnce가 같은 프로그램으로 보고 다른 지역 설치를 막거나 덮어쓴다.
+      주의: 바꾸면 다른 프로그램이 되므로 이미 설치된 PC는 업데이트를 받지 못한다(제거 후 재설치).
+    -->
+    <AssemblyName>SEOJIN_TMES_POP_US</AssemblyName>
+
     <!-- 게시본의 exe.config 로 들어갈 파일. 개발용 src/SEOJIN_TMES.Client/App.config 대신 쓰인다. -->
     <AppConfig>$(MSBuildThisFileDirectory)App.config</AppConfig>
   </PropertyGroup>
