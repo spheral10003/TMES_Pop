@@ -974,7 +974,7 @@ namespace SEOJIN_TMES.Client.Forms
                 // 그림 높이를 행 높이와 같게 해야 세로 안내선이 위아래 항목과 끊김 없이 이어진다.
                 var rowHeight = AppTheme.MenuRowHeight(level);
                 element.ImageOptions.SvgImage = AppIcons.TreeLeaf(node.Accent, AppTheme.SidebarGuide, lastChild, rowHeight);
-                element.ImageOptions.SvgImageSize = new Size(24, rowHeight);
+                element.ImageOptions.SvgImageSize = new Size(AppIcons.TreeLeafWidth, rowHeight);
             }
             else
             {

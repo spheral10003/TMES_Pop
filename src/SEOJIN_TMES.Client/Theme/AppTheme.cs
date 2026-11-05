@@ -293,7 +293,8 @@ namespace SEOJIN_TMES.Client.Theme
 
         // ── 좌측 메뉴 계층 표현 값 ──
         /// <summary>깊이별 들여쓰기(px). 0=루트, 1=대분류, 2=화면.</summary>
-        private static readonly int[] MenuIndents = { 4, 18, 36 };
+        /// 사이드바 폭이 좁아 글자 앞 여백이 크면 화면 이름이 잘린다 — 계층이 구분될 만큼만 띄운다.
+        private static readonly int[] MenuIndents = { 2, 10, 20 };
 
         /// <summary>깊이별 행 높이(px). 아래로 갈수록 조금씩 낮아져 계층이 눈에 들어온다.</summary>
         /// 12pt 메뉴 글자(<see cref="ChromeFont"/>, 줄 높이 약 21px) 위아래에 여백이 남도록 잡은 값이다.

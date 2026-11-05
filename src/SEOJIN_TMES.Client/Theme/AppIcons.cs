@@ -114,6 +114,9 @@ namespace SEOJIN_TMES.Client.Theme
 
         private static readonly Dictionary<string, SvgImage> Cache = new Dictionary<string, SvgImage>();
 
+        /// <summary><see cref="TreeLeaf"/> 그림의 폭(px). 메뉴 항목의 SvgImageSize도 이 값을 쓴다.</summary>
+        public const int TreeLeafWidth = 18;
+
         /// <summary>
         /// 좌측 메뉴의 화면(리프) 항목 앞에 붙는 "트리 가지 + 색 점" 아이콘.
         /// 세로 안내선이 아이콘 높이(행 높이와 동일)를 가득 채우므로, 항목이 연달아 있으면 선이 이어져
@@ -132,12 +135,13 @@ namespace SEOJIN_TMES.Client.Theme
                     return cached;
 
                 var middle = height / 2;
-                var vertical = lastChild ? $"M7 0 V{middle}" : $"M7 0 V{height}";
+                // 폭 18px — 점 오른쪽에 빈 칸을 남기지 않아 글자가 점 바로 옆에서 시작한다.
+                var vertical = lastChild ? $"M4 0 V{middle}" : $"M4 0 V{height}";
                 var svg =
-                    $"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 {height}\" fill=\"none\">" +
+                    $"<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 {TreeLeafWidth} {height}\" fill=\"none\">" +
                     $"<path d=\"{vertical}\" stroke=\"{guideHex}\" stroke-width=\"1.2\"/>" +
-                    $"<path d=\"M7 {middle} H12.6\" stroke=\"{guideHex}\" stroke-width=\"1.2\"/>" +
-                    $"<circle cx=\"16.6\" cy=\"{middle}\" r=\"3.4\" fill=\"{dotHex}\"/>" +
+                    $"<path d=\"M4 {middle} H9.6\" stroke=\"{guideHex}\" stroke-width=\"1.2\"/>" +
+                    $"<circle cx=\"13.6\" cy=\"{middle}\" r=\"3.4\" fill=\"{dotHex}\"/>" +
                     "</svg>";
 
                 using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(svg)))
