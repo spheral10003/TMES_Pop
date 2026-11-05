@@ -305,6 +305,12 @@ namespace SEOJIN_TMES.Client.Common.Models
         /// <summary>검사 결과 비고 — 작업자가 화면에서 직접 입력한다.</summary>
         public string InspectionResultRemark { get; set; }
 
+        /// <summary>
+        /// 결과값 기준 문자(서버 stdLtl, 예: 저항 측정의 "OL"). 작업자가 넣은 결과값이 이 문자와 같으면
+        /// 화면이 판정을 OK로 채운다(공백 제거 · 대소문자 무시 — PopScreen.IsStdLtlMatched). 없으면 비교하지 않는다.
+        /// </summary>
+        public string InspectionStdLtl { get; set; }
+
         /// <summary>검사방법이 정량(QNT)인지 — 결과값 입력 · 전송 여부를 가른다.</summary>
         public bool IsQuantitative =>
             string.Equals(InspectionMethod, MethodQuantitative, StringComparison.OrdinalIgnoreCase);

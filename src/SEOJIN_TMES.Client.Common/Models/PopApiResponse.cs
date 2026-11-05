@@ -120,6 +120,7 @@ namespace SEOJIN_TMES.Client.Common.Models
         [JsonProperty("jgmtRslt")] public string JgmtRslt { get; set; }         // OK / NG
         [JsonProperty("inspRsltVl")] public string InspRsltVl { get; set; }
         [JsonProperty("inspRemark")] public string InspRemark { get; set; }
+        [JsonProperty("stdLtl")] public string StdLtl { get; set; }
     }
 
     // ===== 2. 역직렬화 + DTO 매핑 =====
@@ -218,6 +219,8 @@ namespace SEOJIN_TMES.Client.Common.Models
                     InspectionSpecName = i.InspItemNm,
                     InputPosition = i.IndctLoc,
                     InspectionRemark = i.InspRemark,
+                    // 결과값 기준 문자(예: 저항 측정의 "OL") — 결과값이 이 문자와 같으면 화면이 판정을 OK로 채운다.
+                    InspectionStdLtl = i.StdLtl,
                     // 서버 코드(QNT / QLT)를 그대로 둔다 — 정량/정성 문구는 그리드가 화면 언어로 바꿔 보여 준다.
                     InspectionMethod = i.InspDataType,
                     InspectionLower = i.Lsl,

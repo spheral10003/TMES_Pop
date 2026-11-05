@@ -40,6 +40,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// <summary>작업자가 직접 넣은 결과의 설비코드 — 서버가 입력 경로(설비/사람)를 구분하는 값이다.</summary>
         private const string ManualEquipmentCode = "MAN";
 
+        /// <summary>[검사 스팩] 판정 콤보의 펼침 버튼 폭 배율(기본 폭 대비).</summary>
+        private const int ResultStateButtonScale = 2;
+
         private List<PopInputMaterialDto> _materials = new List<PopInputMaterialDto>();
         private List<PopBomSpecDto> _bomSpecs = new List<PopBomSpecDto>();
         private List<PopInspectionSpecDto> _inspections = new List<PopInspectionSpecDto>();
@@ -212,14 +215,14 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         {
             gridInspection.DataSource = new List<PopInspectionSpecDto>();
             GridColumns.Apply(gridViewInspection, Language.Col_No,
-                GridColumns.Text("InspectionSpecName", Language.Col_InspectionSpecName, 220),
-                GridColumns.Text("InputPosition", Language.Col_InputPosition, 110),
+                GridColumns.Text("InspectionSpecName", Language.Col_InspectionSpecName, 300),
+                GridColumns.Text("InputPosition", Language.Col_InputPosition, 80),
                 GridColumns.Left("Description", Language.Col_Description, 300),
                 GridColumns.Text("InspectionMethod", Language.Col_InspectionMethod, 120),
-                GridColumns.Text("ResultState", Language.Col_ResultState, 130),
-                GridColumns.Text("InspectionLower", Language.Col_InspectionLower, 110),
-                GridColumns.Text("InspectionUpper", Language.Col_InspectionUpper, 110),
-                GridColumns.Text("InspectionTarget", Language.Col_InspectionTarget, 110),
+                GridColumns.Text("ResultState", Language.Col_ResultState, 80),
+                GridColumns.Text("InspectionLower", Language.Col_InspectionLower, 90),
+                GridColumns.Text("InspectionUpper", Language.Col_InspectionUpper, 90),
+                GridColumns.Text("InspectionTarget", Language.Col_InspectionTarget, 90),
                 GridColumns.Text("ResultValue", Language.Col_ResultValue, 130),
                 GridColumns.Text("InspectionResultRemark", Language.Col_InspectionRemark, 120));
 
@@ -234,6 +237,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 판정은 OK / NG 코드만 쓴다 — 고른 값이 그대로 서버로 나가므로 번역 문구를 넣지 않는다.
             _resultStateEditor.Items.Add(PopInspectionSpecDto.ResultOk);
             _resultStateEditor.Items.Add(PopInspectionSpecDto.ResultNg);
+            // 현장 터치 화면에서 펼침 버튼이 작아 잘 안 눌린다 — 기본 폭(스크롤바 폭과 같다)의 두 배로 키운다.
+            _resultStateEditor.Buttons[0].Width = SystemInformation.VerticalScrollBarWidth * ResultStateButtonScale;
             gridInspection.RepositoryItems.Add(_resultStateEditor);
 
             _resultValueEditor = new RepositoryItemTextEdit();
@@ -250,6 +255,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             SetEditableColumn(gridViewInspection, "InspectionResultRemark", _resultRemarkEditor);
 
             gridViewInspection.OptionsBehavior.Editable = true;
+            // 판정 칸은 누르기 전에도 펼침 버튼이 보여야 작업자가 고르는 칸인 줄 안다.
+            // 버튼이 있는 편집기는 판정 콤보뿐이라 다른 칸에는 영향이 없다.
+            gridViewInspection.OptionsView.ShowButtonMode = ShowButtonModeEnum.ShowAlways;
 
             gridViewInspection.RowCellStyle += GridViewInspection_RowCellStyle;
             SetGridLineColor(gridViewInspection);
@@ -994,9 +1002,19 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (fieldName == null || !_inspectionInputFields.Contains(fieldName))
                 return;
 
-            var spec = ((GridView)sender).GetRow(e.RowHandle) as PopInspectionSpecDto;
+            var view = (GridView)sender;
+            var spec = view.GetRow(e.RowHandle) as PopInspectionSpecDto;
             if (spec == null)
                 return;
+
+            // 결과값이 기준 문자(stdLtl, 예: 저항 측정의 "OL")와 같으면 판정을 OK로 채운다.
+            // 판정 칸에 직접 넣고 같은 전송에 실어 보낸다 — SetRowCellValue로 넣으면 이 이벤트가 한 번 더 올라와 두 번 전송된다.
+            if (fieldName == "ResultValue" && IsStdLtlMatched(spec))
+            {
+                spec.ResultState = PopInspectionSpecDto.ResultOk;
+                view.RefreshRow(e.RowHandle);
+                AppLog.Info($"[POP] 검사 결과값이 기준 문자와 같음 - 판정 OK ({spec.InspectionItemCode}, {spec.ResultValue})");
+            }
 
             // 정량 검사는 판정과 결과값을 함께 보내야 한다 — 둘 중 하나라도 비어 있으면 아직 보내지 않고,
             // 나머지가 들어오는 순간(이 이벤트가 다시 올라올 때) 함께 보낸다.
@@ -1016,6 +1034,21 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             {
                 HandleError("검사 결과 전송", ex);
             }
+        }
+
+        /// <summary>
+        /// 결과값이 서버가 준 기준 문자(stdLtl)와 같은지 — 양쪽 다 앞뒤 공백을 빼고 대문자로 바꿔 비교한다
+        /// (" ol"도 "OL"로 본다). 기준 문자가 없는 항목은 비교하지 않는다.
+        /// </summary>
+        private bool IsStdLtlMatched(PopInspectionSpecDto spec)
+        {
+            if (string.IsNullOrWhiteSpace(spec.InspectionStdLtl) || string.IsNullOrWhiteSpace(spec.ResultValue))
+                return false;
+
+            return string.Equals(
+                spec.ResultValue.Trim().ToUpperInvariant(),
+                spec.InspectionStdLtl.Trim().ToUpperInvariant(),
+                StringComparison.Ordinal);
         }
 
         // ─────────────────────────────────────────────────────────────────────────
@@ -1046,8 +1079,12 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// </summary>
         private bool IsNumericCell(GridView view, DevExpress.XtraGrid.Columns.GridColumn column)
         {
+            // 기준 문자(stdLtl, 예: "OL")가 있는 항목은 글자를 쳐야 하므로 문자 키보드를 띄운다.
             if (view == gridViewInspection && column.FieldName == "ResultValue")
-                return (view.GetFocusedRow() as PopInspectionSpecDto)?.IsQuantitative == true;
+            {
+                var spec = view.GetFocusedRow() as PopInspectionSpecDto;
+                return spec != null && spec.IsQuantitative && string.IsNullOrWhiteSpace(spec.InspectionStdLtl);
+            }
 
             var type = Nullable.GetUnderlyingType(column.ColumnType) ?? column.ColumnType;
             switch (Type.GetTypeCode(type))
