@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using DevExpress.XtraEditors;
+using SEOJIN_TMES.Client.Common.Logging;
 using SEOJIN_TMES.Client.Theme;
 
 namespace SEOJIN_TMES.Client.Forms.Common
@@ -65,6 +66,73 @@ namespace SEOJIN_TMES.Client.Forms.Common
 
             if (header != null)
                 EnableDrag(header, clickables);
+        }
+
+        /// <summary>
+        /// 팝업을 부모 창 가운데에 놓는다(부모가 없으면 주 모니터 작업 영역 가운데). 각 팝업의 <c>CenterOn</c>이 이것을 부른다.
+        ///
+        /// 예전에는 팝업마다 <c>ownerForm.Bounds</c> 기준으로 직접 계산했는데,
+        /// <b>부모 창이 최소화된 상태</b>면 Bounds가 (-32000, -32000, 160×28) 근처라 팝업이 화면 밖에 놓였다.
+        /// 모달이라 부모 창은 입력이 막힌 채로, 사용자가 창을 복원해도 팝업은 화면 밖에 남아 있어
+        /// "마우스 · 키보드가 아무것도 안 먹는" 상태가 됐다(설비 연결 실패 알림처럼 최소화 중에 뜨는 창이 주로 걸린다).
+        /// 그래서 최소화 상태면 복원될 위치(RestoreBounds)를 기준으로 삼고, 결과도 화면 작업 영역 안으로 끌어 넣는다.
+        /// </summary>
+        public static void CenterOn(Form dialog, IWin32Window owner)
+        {
+            var ownerForm = (owner as Control)?.FindForm();
+
+            Rectangle bounds;
+            if (ownerForm == null || ownerForm.IsDisposed)
+                bounds = Screen.PrimaryScreen.WorkingArea;
+            else if (ownerForm.WindowState == FormWindowState.Minimized)
+                bounds = ownerForm.RestoreBounds;
+            else
+                bounds = ownerForm.Bounds;
+
+            var location = new Point(
+                bounds.Left + ((bounds.Width - dialog.Width) / 2),
+                bounds.Top + ((bounds.Height - dialog.Height) / 2));
+
+            dialog.Location = ClampToWorkingArea(new Rectangle(location, dialog.Size)).Location;
+        }
+
+        /// <summary>
+        /// 창이 어느 모니터에도 걸치지 않으면(화면 밖) 가장 가까운 모니터의 작업 영역 안으로 옮긴다.
+        /// 창이 작업 영역보다 크면 왼쪽 위를 맞춘다 — 헤더(끌어서 옮기는 곳)와 닫기 버튼이 보이는 쪽을 남긴다.
+        /// </summary>
+        public static Rectangle ClampToWorkingArea(Rectangle rect)
+        {
+            var work = Screen.FromRectangle(rect).WorkingArea;
+
+            var x = Math.Max(work.Left, Math.Min(rect.Left, work.Right - rect.Width));
+            var y = Math.Max(work.Top, Math.Min(rect.Top, work.Bottom - rect.Height));
+
+            return new Rectangle(x, y, rect.Width, rect.Height);
+        }
+
+        /// <summary>
+        /// 부모 창이 다시 보이게 됐을 때(최소화 → 복원) 떠 있는 모달 팝업을 화면 안 · 맨 앞으로 되돌린다.
+        ///
+        /// 모달이 떠 있는 동안 부모 창은 입력이 막혀 있으므로, 팝업이 화면 밖에 있거나 부모 뒤로 가려지면
+        /// 작업자 입장에서는 "화면이 멈춘 것"과 구분이 안 된다. 어떤 경로로 그렇게 됐든 여기서 한 번 더 바로잡는다.
+        /// </summary>
+        public static void BringModalsIntoView()
+        {
+            foreach (Form form in Application.OpenForms)
+            {
+                if (form.IsDisposed || !form.Visible || !form.Modal)
+                    continue;
+
+                var clamped = ClampToWorkingArea(form.Bounds);
+                if (clamped.Location != form.Location)
+                {
+                    AppLog.Warn($"[DIALOG] 화면 밖에 있던 모달({form.GetType().Name}, {form.Location})을 화면 안으로 옮긴다");
+                    form.Location = clamped.Location;
+                }
+
+                form.BringToFront();
+                form.Activate();
+            }
         }
 
         /// <summary>

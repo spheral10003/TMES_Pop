@@ -587,12 +587,7 @@ namespace SEOJIN_TMES.Client.Forms.Notification
         /// <summary>부모 창(없으면 화면) 가운데에 띄운다.</summary>
         public void CenterOn(IWin32Window owner)
         {
-            var ownerForm = (owner as Control)?.FindForm();
-            var bounds = ownerForm != null ? ownerForm.Bounds : Screen.PrimaryScreen.WorkingArea;
-
-            Location = new Point(
-                bounds.Left + ((bounds.Width - Width) / 2),
-                bounds.Top + ((bounds.Height - Height) / 2));
+            DialogChrome.CenterOn(this, owner);   // 부모가 최소화돼 있어도 화면 안에 놓는다
         }
 
         /// <summary>읽음여부 콤보 항목 하나(표시 문구 ↔ 조회 조건 값).</summary>

@@ -3,6 +3,7 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using SEOJIN_TMES.Client.Common.Languages;
+using SEOJIN_TMES.Client.Forms.Common;
 using SEOJIN_TMES.Client.Theme;
 
 namespace SEOJIN_TMES.Client.Forms
@@ -81,10 +82,17 @@ namespace SEOJIN_TMES.Client.Forms
             if (WindowState == _lastWindowState)
                 return;
 
+            var wasMinimized = _lastWindowState == FormWindowState.Minimized;
             _lastWindowState = WindowState;
 
             if (WindowState != FormWindowState.Minimized)
                 ApplyWindowStatePresentation();
+
+            // 최소화에서 돌아올 때 모달 팝업이 떠 있으면 이 창은 입력이 막혀 있다.
+            // 그 팝업이 화면 밖이나 이 창 뒤에 있으면 작업자는 멈춘 화면으로 보므로 앞 · 화면 안으로 끌어온다.
+            // 복원 처리가 끝난 뒤에 해야 Z 순서가 다시 뒤집히지 않아 한 박자 미룬다.
+            if (wasMinimized && WindowState != FormWindowState.Minimized)
+                BeginInvoke(new MethodInvoker(DialogChrome.BringModalsIntoView));
         }
 
         /// <summary>해당 컨트롤을 누른 채 끌면 창이 따라 움직이고, 더블 클릭하면 최대화가 토글되도록 한다.</summary>

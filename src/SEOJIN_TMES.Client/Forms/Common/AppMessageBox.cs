@@ -43,6 +43,7 @@ namespace SEOJIN_TMES.Client.Forms.Common
             AppLog.Info($"[MSG/{kind}] {Flatten(title)}{Flatten(message)}");
 
             var safeOwner = LiveOwner(owner);
+            RestoreIfMinimized(safeOwner);
 
             // 조회·처리 중이면 화면에 대기 표시가 떠 있다. 그대로 두면
             // "조회 결과가 없습니다" 같은 안내 뒤에서 계속 돌아가 아직 처리 중인 것처럼 보인다.
@@ -107,24 +108,77 @@ namespace SEOJIN_TMES.Client.Forms.Common
         /// ObjectDisposedException을 던진다. 비동기 조회가 끝나기 전에 사용자가 팝업이나 탭을 닫으면
         /// 늦게 도착한 실패 응답이 딱 이 상황을 만든다.
         ///
-        /// 그런 소유자는 버리고 화면 가운데에 띄운다 — <b>메시지 자체를 삼키지는 않는다.</b>
+        /// 그런 소유자는 버리고 앱의 다른 살아 있는 창을 소유자로 삼는다 — <b>메시지 자체를 삼키지는 않는다.</b>
         /// 각 화면은 이 방어선에 기대지 말고 await 뒤에 IsDisposed를 확인해 안내 여부를 스스로 정할 것
         /// (없어진 화면의 오류를 뒤늦게 띄우는 게 늘 옳은 것은 아니다 — NotificationForm 참고).
+        ///
+        /// 소유자를 null로 두지 않는 이유: 소유자 없는 모달은 메인 창과 Z 순서가 묶이지 않고
+        /// 작업 표시줄에도 없다(ShowInTaskbar=false). 메인 창을 최소화했다 복원하면 메인 창이 그 위를 덮어
+        /// 안내 창이 보이지 않는데, 메인 창은 모달 때문에 입력이 막혀 있어 화면 전체가 멈춘 것처럼 된다.
+        /// 화면에서 떼어진(부모 없는) 컨트롤도 같은 이유로 소유자로 쓰지 않는다.
         /// </summary>
         private static IWin32Window LiveOwner(IWin32Window owner)
         {
             var control = owner as Control;
-            if (control == null)
+            if (owner != null && control == null)
                 return owner;
 
-            if (control.IsDisposed || control.Disposing)
+            if (control != null && (control.IsDisposed || control.Disposing))
             {
-                AppLog.Warn($"[MSG] 이미 닫힌 소유자({control.GetType().Name})를 무시하고 화면 가운데에 안내 창을 띄운다");
-                return null;
+                AppLog.Warn($"[MSG] 이미 닫힌 소유자({control.GetType().Name}) 대신 앱의 다른 창을 소유자로 안내 창을 띄운다");
+                control = null;
+            }
+            else if (control != null && control.FindForm() == null)
+            {
+                AppLog.Warn($"[MSG] 화면에서 떼어진 소유자({control.GetType().Name}) 대신 앱의 다른 창을 소유자로 안내 창을 띄운다");
+                control = null;
             }
 
-            return control;
+            return control ?? FallbackOwner();
         }
+
+        /// <summary>
+        /// 소유자로 쓸 수 있는 앱의 창 — 지금 활성 창, 없으면 가장 나중에 열린 보이는 창(대개 떠 있는 팝업, 그다음 MainForm).
+        /// 하나도 없으면(로그인 전 등) null — 그때는 화면 가운데에 단독으로 띄운다.
+        /// </summary>
+        private static IWin32Window FallbackOwner()
+        {
+            var active = Form.ActiveForm;
+            if (active != null && !active.IsDisposed && active.Visible)
+                return active;
+
+            for (int i = Application.OpenForms.Count - 1; i >= 0; i--)
+            {
+                var form = Application.OpenForms[i];
+                if (!form.IsDisposed && form.Visible && !(form is AppMessageForm))
+                    return form;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// 소유자 창이 최소화돼 있으면 되돌린다.
+        ///
+        /// 설비 연결 실패 알림이나 늦게 도착한 조회 실패처럼, 작업자가 창을 내려 둔 사이에도 안내가 뜰 수 있다.
+        /// 최소화된 창에 딸린 모달은 작업자 눈에 띄지 않는데 그동안 창은 입력이 막혀 있어,
+        /// 다시 올렸을 때 "아무것도 안 눌리는" 상태로 보였다. 모달은 답을 받아야 끝나므로 창을 올려 안내를 보여 준다.
+        /// SW_RESTORE는 최소화 전 상태(최대화/보통)로 되돌린다.
+        /// </summary>
+        private static void RestoreIfMinimized(IWin32Window owner)
+        {
+            var form = (owner as Control)?.FindForm();
+            if (form == null || form.IsDisposed || form.WindowState != FormWindowState.Minimized)
+                return;
+
+            AppLog.Info($"[MSG] 최소화된 소유자({form.GetType().Name})를 복원하고 안내 창을 띄운다");
+            ShowWindow(form.Handle, SW_RESTORE);
+        }
+
+        private const int SW_RESTORE = 9;
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool ShowWindow(System.IntPtr hWnd, int nCmdShow);
 
         private static string Flatten(string text) =>
             string.IsNullOrEmpty(text) ? string.Empty : text.Replace("\r\n", " ").Replace("\n", " ") + " ";
