@@ -171,6 +171,12 @@
   <data name="Login_CorpGumi" xml:space="preserve">
     <value>Texon Gumi</value>
   </data>
+  <data name="Login_CorpHwaseong" xml:space="preserve">
+    <value>Texon Hwaseong</value>
+  </data>
+  <data name="Login_CorpYongin" xml:space="preserve">
+    <value>Texon Yongin</value>
+  </data>
   <data name="Login_Exit" xml:space="preserve">
     <value>EXIT</value>
   </data>

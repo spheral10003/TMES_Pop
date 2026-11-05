@@ -171,6 +171,12 @@
   <data name="Login_CorpGumi" xml:space="preserve">
     <value>Texon 구미</value>
   </data>
+  <data name="Login_CorpHwaseong" xml:space="preserve">
+    <value>Texon 화성</value>
+  </data>
+  <data name="Login_CorpYongin" xml:space="preserve">
+    <value>Texon 용인</value>
+  </data>
   <data name="Login_Exit" xml:space="preserve">
     <value>종료</value>
   </data>

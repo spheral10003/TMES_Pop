@@ -311,14 +311,30 @@ namespace SEOJIN_TMES.Client.Forms
         }
 
         /// <summary>
-        /// 사업부 콤보 — 항목은 하나(Texon 구미)다. 보이는 글자만 다국어로 바꾸고,
-        /// 서버로 보내는 사업장 코드는 콤보 값이 아니라 App.config의 ServerName(GUM)을 그대로 쓴다(btnConnect_Click).
+        /// 사업부 콤보 — 항목은 하나다. App.config의 ServerName(GUM 구미 · HS 화성 · YI 용인)에 맞는
+        /// 이름("Texon 구미" 등)을 보여 주고, 보이는 글자만 다국어로 바꾼다.
+        /// 서버로 보내는 사업장 코드는 콤보 값이 아니라 ServerName을 그대로 쓴다(btnConnect_Click).
         /// </summary>
         private void SetCorpList()
         {
             cboCorp.Items.Clear();
-            cboCorp.Items.Add(Language.Login_CorpGumi);
+            cboCorp.Items.Add(GetCorpName(_setting.AppSet.ServerName));
             cboCorp.SelectedIndex = 0;
+        }
+
+        /// <summary>
+        /// 사업장 코드 → 표시 이름. 모르는 코드는 구미로 바꿔 보이지 않도록 코드를 그대로 보여 준다
+        /// (설정이 틀렸을 때 화면에서 바로 알아볼 수 있게).
+        /// </summary>
+        private static string GetCorpName(string serverName)
+        {
+            switch ((serverName ?? string.Empty).Trim().ToUpperInvariant())
+            {
+                case "GUM": return Language.Login_CorpGumi;
+                case "HS": return Language.Login_CorpHwaseong;
+                case "YI": return Language.Login_CorpYongin;
+                default: return serverName;
+            }
         }
 
         /// <summary>
@@ -427,7 +443,7 @@ namespace SEOJIN_TMES.Client.Forms
             }
 
             // 사업장 코드(corpCd) — 서버가 이 값으로 계정을 찾는다.
-            // 사업부 콤보는 표시("Texon 구미")만 하고, 코드는 App.config의 ServerName(GUM)을 쓴다.
+            // 사업부 콤보는 표시("Texon 구미" 등)만 하고, 코드는 App.config의 ServerName(GUM/HS/YI)을 쓴다.
             //var corpCd = cboServer.Text?.Trim();
             var corpCd = _setting.AppSet.ServerName;
             btnConnect.Enabled = false;
