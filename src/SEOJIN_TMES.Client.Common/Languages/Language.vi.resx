@@ -543,6 +543,18 @@
   <data name="Pop_StopProcess" xml:space="preserve">
     <value>Dừng</value>
   </data>
+  <data name="ProgressState_Ready" xml:space="preserve">
+    <value>Chờ</value>
+  </data>
+  <data name="ProgressState_Progress" xml:space="preserve">
+    <value>Đang thực hiện</value>
+  </data>
+  <data name="ProgressState_Stopped" xml:space="preserve">
+    <value>Đã dừng</value>
+  </data>
+  <data name="ProgressState_Finished" xml:space="preserve">
+    <value>Hoàn tất</value>
+  </data>
   <data name="Pop_StartProcess" xml:space="preserve">
     <value>Bắt đầu</value>
   </data>

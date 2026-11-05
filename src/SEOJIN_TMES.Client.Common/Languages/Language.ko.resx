@@ -543,6 +543,18 @@
   <data name="Pop_StopProcess" xml:space="preserve">
     <value>공정 중지</value>
   </data>
+  <data name="ProgressState_Ready" xml:space="preserve">
+    <value>대기</value>
+  </data>
+  <data name="ProgressState_Progress" xml:space="preserve">
+    <value>진행중</value>
+  </data>
+  <data name="ProgressState_Stopped" xml:space="preserve">
+    <value>중지</value>
+  </data>
+  <data name="ProgressState_Finished" xml:space="preserve">
+    <value>완료</value>
+  </data>
   <data name="Pop_StartProcess" xml:space="preserve">
     <value>공정 시작</value>
   </data>

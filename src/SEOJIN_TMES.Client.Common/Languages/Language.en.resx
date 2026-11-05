@@ -543,6 +543,18 @@
   <data name="Pop_StopProcess" xml:space="preserve">
     <value>Stop</value>
   </data>
+  <data name="ProgressState_Ready" xml:space="preserve">
+    <value>Waiting</value>
+  </data>
+  <data name="ProgressState_Progress" xml:space="preserve">
+    <value>In progress</value>
+  </data>
+  <data name="ProgressState_Stopped" xml:space="preserve">
+    <value>Stopped</value>
+  </data>
+  <data name="ProgressState_Finished" xml:space="preserve">
+    <value>Done</value>
+  </data>
   <data name="Pop_StartProcess" xml:space="preserve">
     <value>Start</value>
   </data>

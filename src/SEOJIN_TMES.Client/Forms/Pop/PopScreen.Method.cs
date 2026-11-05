@@ -239,11 +239,14 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// 서버가 준 진행 상태로 상태 띠의 색과 중지 버튼을 바꾼다.
         /// 상태 판정은 서버 몫이고, 여기서는 받은 값을 화면에 옮기기만 한다 —
         /// 모르는 값이 오면 기본색(보라)으로 두고 글자만 보여 준다.
+        /// 띠에는 화면 언어의 문구를 보이고, 상태 비교(<see cref="IsProgressState"/>)는 서버 코드 그대로 한다.
+        /// 완료된 공정은 중지 · 재시작할 일이 없으므로 중지 버튼을 끈다 — 다시 열려면 [리웍]으로 진행 중으로 되돌린다.
         /// </summary>
         private void SetProgressState(string progressState)
         {
             _progressState = progressState;
-            lblProgressState.Text = progressState;
+            lblProgressState.Text = Language.ProgressStateText(progressState);
+            btnStopProcess.Enabled = !IsProgressState(StateFinished);
 
             if (IsProgressState(StateReady))
             {

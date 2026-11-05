@@ -238,6 +238,30 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string Pop_PrevProcess => Get(nameof(Pop_PrevProcess));
         public static string Pop_NextProcess => Get(nameof(Pop_NextProcess));
         public static string Pop_StopProcess => Get(nameof(Pop_StopProcess));
+
+        // 공정 진행 상태 — 서버가 내려주는 workStatus 코드(Ready/Progress/Stopped/Finished)의 표시 문구
+        public static string ProgressState_Ready => Get(nameof(ProgressState_Ready));
+        public static string ProgressState_Progress => Get(nameof(ProgressState_Progress));
+        public static string ProgressState_Stopped => Get(nameof(ProgressState_Stopped));
+        public static string ProgressState_Finished => Get(nameof(ProgressState_Finished));
+
+        /// <summary>
+        /// 서버가 준 진행 상태 코드를 화면 언어의 문구로 바꾼다. 코드 값 자체는 바꾸지 않으므로 상태 비교는 원래 코드로 한다.
+        /// 문구가 없는 코드(서버에 새로 생긴 상태 등)는 받은 값을 그대로 돌려준다 — 빈칸으로 숨기면 원인을 찾기 어렵다.
+        /// </summary>
+        public static string ProgressStateText(string code)
+        {
+            // 화면의 상태 비교(PopScreen.IsProgressState)가 대소문자를 가리지 않으므로 여기서도 같게 맞춘다.
+            switch (code?.Trim().ToUpperInvariant())
+            {
+                case "READY": return ProgressState_Ready;
+                case "PROGRESS": return ProgressState_Progress;
+                case "STOPPED": return ProgressState_Stopped;
+                case "FINISHED": return ProgressState_Finished;
+                default: return code;
+            }
+        }
+
         public static string Pop_StartProcess => Get(nameof(Pop_StartProcess));
         public static string Pop_ProcessList => Get(nameof(Pop_ProcessList));
         public static string Pop_AdminAlarm => Get(nameof(Pop_AdminAlarm));

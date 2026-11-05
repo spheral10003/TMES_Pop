@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using DevExpress.XtraEditors;
+using DevExpress.XtraGrid.Views.Base;
 using SEOJIN_TMES.Client.Common.Models;
 using SEOJIN_TMES.Client.Forms.Common;
 using SEOJIN_TMES.Client.Common.Languages;
@@ -63,6 +64,20 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             // 행을 더블클릭하면 [이동]과 같게 동작한다.
             // 헤더 · 빈 영역 더블클릭에는 반응하지 않도록 RowDoubleClick을 쓴다(MeisGridView 참고).
             gridView.RowDoubleClick += gridView_RowDoubleClick;
+            gridView.CustomColumnDisplayText += gridView_CustomColumnDisplayText;
+        }
+
+        /// <summary>진행 상태(서버 코드 Ready/Progress/Stopped/Finished)를 화면 언어의 문구로 보여 준다. 값 자체는 바꾸지 않는다.</summary>
+        private void gridView_CustomColumnDisplayText(object sender, CustomColumnDisplayTextEventArgs e)
+        {
+            if (e.Column == null || e.Column.FieldName != nameof(RoutingProcessDto.ProgressState))
+                return;
+
+            var value = e.Value as string;
+            if (string.IsNullOrEmpty(value))
+                return;
+
+            e.DisplayText = Language.ProgressStateText(value);
         }
 
         private void ApplyTheme()
