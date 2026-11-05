@@ -190,13 +190,10 @@ namespace SEOJIN_TMES.Client.Theme
         public static Color GridNgRow => IsDarkMode ? Color.FromArgb(92, 44, 52) : Color.FromArgb(248, 215, 218); // #F8D7DA
 
         /// <summary>
-        /// 합격(OK) 행 바탕 — 상단 선택 탭과 같은 진한 청록(#2C5B78). 바탕이 진해 글자는 흰색(<see cref="GridOkRowText"/>).
+        /// 합격(OK) 행 바탕 — 옅은 초록(#D1E7DD). NG(#F8D7DA)와 같은 밝기의 옅은 색이라 글자는 기본 글자색 그대로 쓴다.
         /// NG와 마찬가지로 서버 결과를 <b>표시</b>만 하는 색이며, 선택 행은 선택 색이 우선한다 — <see cref="OkRowCell"/>로 칠할 것.
         /// </summary>
-        public static Color GridOkRow => Color.FromArgb(44, 91, 120);   // #2C5B78
-
-        /// <summary>합격(OK) 행 글자색.</summary>
-        public static Color GridOkRowText => Color.White;
+        public static Color GridOkRow => IsDarkMode ? Color.FromArgb(38, 74, 58) : Color.FromArgb(209, 231, 221); // #D1E7DD
 
         // ── 상단 탭 ── 선택 탭은 진한 청록(#2C5B78) + 흰 글자, 나머지는 옅은 회청(#F4F6FA) + 검정 글자 ──
         // 탭이 놓이는 스트립은 비선택 탭보다 한 톤 진하게 깔아야 비선택 탭의 윤곽이 바탕에 묻히지 않는다.
@@ -1135,7 +1132,7 @@ namespace SEOJIN_TMES.Client.Theme
         /// <summary>OK 행 칠하기 — <see cref="NgRowCell"/>과 같은 방식, 색만 <see cref="GridOkRow"/>.</summary>
         public static void OkRowCell(GridView view, RowCellStyleEventArgs e)
         {
-            ResultRowCell(view, e, GridOkRow, GridOkRowText);
+            ResultRowCell(view, e, GridOkRow, TextPrimary);
         }
 
         /// <summary>
