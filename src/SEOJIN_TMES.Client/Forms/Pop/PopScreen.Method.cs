@@ -432,7 +432,17 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 AppLog.Info($"[POP] 공정 이동 불가 - 현재 {current}, 이동 {offset}, 목록 {_processes.Count}건");
 
                 if (current >= 0 && offset > 0 && await EndCurrentProcess())
+                {
+                    // 옮기지 않고 이 공정에 머문다 — 완료 응답이 비어 상태가 아직 진행 중이면 서버 상태로 다시 읽는다.
+                    // 진행 중으로 남겨 두면 다음 이동에서 이미 끝난 공정에 완료를 또 보낸다(EndCurrentProcess 참고).
+                    if (IsProcessRunning)
+                    {
+                        await GetProcessInfo();
+                        if (IsDisposed || Disposing) return;
+                    }
+
                     AppMessageBox.Info(this, Language.Pop_LastProcess, Language.Pop_Title);
+                }
                 return;
             }
 
@@ -603,7 +613,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// 추정일 뿐이라 서버의 할 일(WORK_005)과 어긋날 수 있는데, 그 거절로 이동까지 막으면 작업자가 공정을 벗어날 수 없었다.
         /// 완료 여부는 서버 판단을 그대로 따르고(공정은 진행 중으로 남는다) 안내 칸에만 남긴다.
         ///
-        /// 완료 응답으로 지금 화면을 다시 그리지 않는다 — 곧바로 다른 공정을 읽으므로 그 갱신(응답이 비면 재조회까지)은 낭비다.
+        /// 완료 응답의 상태는 지금 화면에 옮겨 둔다(우측 카드만 — 탭 · 도면은 다시 읽지 않는다).
+        /// 마지막 공정에서 [다음 공정]을 누르면 완료만 보내고 그 공정에 머무는데, 상태를 옮기지 않으면 화면은 진행 중으로 남아
+        /// 다음 이동([이전 공정] · [공정 목록])에서 이미 끝난 공정 — 마지막 공정이면 작업지시까지 완료된 상태 — 에 완료를 또 보내
+        /// 서버 오류가 났다. 응답이 비어 오면 옮길 값이 없으므로 머무는 쪽(<see cref="MoveProcessBy"/>)이 다시 조회한다.
         /// </summary>
         /// <returns>이동을 계속해도 되면 true. 통신 실패 · 서버 장애로 완료 결과를 알 수 없거나 화면이 닫혔으면 false.</returns>
         private async Task<bool> EndCurrentProcess()
@@ -616,9 +629,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             }
 
             AppLog.Step($"[POP] 공정 변경으로 완료{(_reworking ? "(리웍)" : string.Empty)} - {_key.RoutingOperation}/{_key.PageOperation}");
+            PopProcessInfoDto changed;
             try
             {
-                await _apiClient.PopApiClient.ChangeProcessStateAsync(_key, PopProcessAction.end);
+                changed = await _apiClient.PopApiClient.ChangeProcessStateAsync(_key, PopProcessAction.end);
             }
             catch (ApiException ex) when (ex.StatusCode == HttpStatusCode.BadRequest)
             {
@@ -638,6 +652,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             }
 
             if (IsDisposed || Disposing) return false;
+
+            if (_info != null && !string.IsNullOrEmpty(changed?.ProgressState))
+                SetStateChange(changed);
 
             ShowMessage(Language.Pop_ProcessEnded);
             return true;
