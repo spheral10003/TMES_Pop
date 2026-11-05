@@ -136,11 +136,17 @@ namespace SEOJIN_TMES.Client.Common.Models
         /// </summary>
         public bool ItemCodeInputCompleted { get; set; }
 
-        /// <summary>작업자가 입력해야 할 것이 있는 자재인지(시리얼 확인 또는 품목번호 확인 대상).</summary>
-        public bool HasInputItem => SerialCheckRequired || ItemCodeCheckRequired;
+        /// <summary>
+        /// 참조 항목인지(서버 refYn=Y). 참조 자재는 작업자가 입력하지 않는다 —
+        /// 화면은 OK로 칠하고, 입력 팝업을 열지 않으며, 완료 판단에서도 끝난 것으로 본다.
+        /// </summary>
+        public bool IsReference { get; set; }
 
-        /// <summary>이 자재의 입력이 모두 끝났는지 — 시리얼(대상이면) · 품목번호(대상이면) 둘 다.</summary>
-        public bool IsInputCompleted => IsSerialInputCompleted && (!ItemCodeCheckRequired || ItemCodeInputCompleted);
+        /// <summary>작업자가 입력해야 할 것이 있는 자재인지(시리얼 확인 또는 품목번호 확인 대상, 참조 자재 제외).</summary>
+        public bool HasInputItem => !IsReference && (SerialCheckRequired || ItemCodeCheckRequired);
+
+        /// <summary>이 자재의 입력이 모두 끝났는지 — 시리얼(대상이면) · 품목번호(대상이면) 둘 다. 참조 자재는 늘 끝난 것으로 본다.</summary>
+        public bool IsInputCompleted => IsReference || (IsSerialInputCompleted && (!ItemCodeCheckRequired || ItemCodeInputCompleted));
 
         /// <summary>[투입자재] 그리드의 "시리얼번호 검사여부" 표시 문구.</summary>
         public string SerialCheckText => SerialCheckRequired ? "검사필요" : "검사불필요";
@@ -160,6 +166,7 @@ namespace SEOJIN_TMES.Client.Common.Models
         {
             get
             {
+                if (IsReference) return "-";
                 if (IsItemCodeInputOnly) return ItemCodeInputCompleted ? "완료" : "미완료";
                 if (!SerialCheckRequired) return "-";
                 return IsSerialInputCompleted ? "완료" : "미완료";
@@ -244,6 +251,12 @@ namespace SEOJIN_TMES.Client.Common.Models
         public bool IsManualInput { get; set; }
 
         public string EquipmentCode { get; set; }
+
+        /// <summary>
+        /// 참조 항목인지(서버 refYn=Y). 참조 줄은 체결 · 입력 대상이 아니다 —
+        /// 화면은 OK로 칠하고, 설비 결과를 채울 행에서 건너뛰며, 결과값 칸 편집도 막는다.
+        /// </summary>
+        public bool IsReference { get; set; }
     }
 
     public class PopBomSpecResultDto

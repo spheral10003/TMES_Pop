@@ -158,6 +158,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (stateColumn != null)
                 stateColumn.OptionsColumn.AllowFocus = true;
 
+            gridViewMaterial.RowCellStyle += GridViewMaterial_RowCellStyle;
             SetGridLineColor(gridViewMaterial);
         }
 
@@ -498,7 +499,22 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// 설비 결과를 채울 첫 행 — NG이거나 결과가 아직 없는 첫 행. 그런 행이 없으면 첫 행.
+        /// <paramref name="rowHandle"/> 바로 아래부터 찾은 첫 입력 대상 행(참조 줄 건너뜀). 없으면 InvalidRowHandle.
+        /// 설비 합격 뒤 "바로 아래 행"으로 넘어갈 때 참조 줄에 멈추지 않게 한다.
+        /// </summary>
+        private int FindNextBomSpecInputRow(int rowHandle)
+        {
+            for (int next = rowHandle + 1; next < gridViewBomSpec.RowCount; next++)
+            {
+                if (gridViewBomSpec.GetRow(next) is PopBomSpecDto spec && !spec.IsReference)
+                    return next;
+            }
+
+            return DevExpress.XtraGrid.GridControl.InvalidRowHandle;
+        }
+
+        /// <summary>
+        /// 설비 결과를 채울 첫 행 — NG이거나 결과가 아직 없는 첫 행(참조 줄은 합격으로 보므로 건너뛴다). 그런 행이 없으면 첫 행.
         /// 그리드에 보이는 순서(정렬 반영)대로 본다. 행이 하나도 없으면 InvalidRowHandle.
         /// </summary>
         private int FindBomSpecTargetRow()
@@ -575,9 +591,13 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// BOM 스팩 한 줄이 측정되고 NG가 아닌지 — 토크 · 각도가 모두 하한~상한 안이어야 한다
         /// (값이 비어 있으면 비교가 false라 통과하지 않는다).
         /// 그리드의 NG 표시 · 설비 결과의 다음 줄 이동 · 자동 진행이 모두 이 기준을 쓴다.
+        /// 참조 줄(서버 refYn=Y)은 체결 대상이 아니므로 값 없이도 통과로 본다.
         /// </summary>
         private bool IsBomSpecPassed(PopBomSpecDto spec)
         {
+            if (spec.IsReference)
+                return true;
+
             var torqueOk = spec.TorqueResult >= spec.TorqueLower && spec.TorqueResult <= spec.TorqueUpper;
             var angleOk = spec.AngleResult >= spec.AngleLower && spec.AngleResult <= spec.AngleUpper;
             return torqueOk && angleOk;
@@ -609,6 +629,16 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         // ─────────────────────────────────────────────────────────────────────────
         //  [투입자재] 그리드 이벤트
         // ─────────────────────────────────────────────────────────────────────────
+
+        /// <summary>참조 자재(서버 refYn=Y)는 입력 없이 끝난 줄이라 OK 색으로 칠한다(선택 행은 선택 색이 우선).</summary>
+        private void GridViewMaterial_RowCellStyle(object sender, RowCellStyleEventArgs e)
+        {
+            if (e.RowHandle < 0)
+                return;
+
+            if (gridViewMaterial.GetRow(e.RowHandle) is PopInputMaterialDto material && material.IsReference)
+                AppTheme.OkRowCell(gridViewMaterial, e);
+        }
 
         /// <summary>"시리얼번호 입력상태" 칸을 클릭하면 &lt;투입자재 정보 입력&gt; 팝업을 연다.</summary>
         private async void GridViewMaterial_RowCellClick(object sender, RowCellClickEventArgs e)
@@ -646,6 +676,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (e.RowHandle < 0)
                 return;
 
+            // 참조 줄은 체결 대상이 아니다 — 눌러도 설비 결과를 채울 행은 그대로 둔다.
+            if (gridViewBomSpec.GetRow(e.RowHandle) is PopBomSpecDto spec && spec.IsReference)
+                return;
+
             _bomSpecSelectedRow = e.RowHandle;
             AppLog.Info($"[POP] 선택한 Row - ( Row 값 {_bomSpecSelectedRow})");
         }
@@ -663,7 +697,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 return;
 
             var spec = gridViewBomSpec.GetRow(e.FocusedRowHandle) as PopBomSpecDto;
-            if (spec?.TorqueTarget == null)
+            if (spec?.TorqueTarget == null || spec.IsReference)
                 return;
 
             _bomSpecSelectedRow = e.FocusedRowHandle;
@@ -691,6 +725,13 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         {
             var fieldName = gridViewBomSpec.FocusedColumn?.FieldName;
             if (fieldName != TorqueResultField && fieldName != AngleResultField && fieldName != ResultInputField)
+            {
+                e.Cancel = true;
+                return;
+            }
+
+            // 참조 줄(서버 refYn=Y)은 입력 대상이 아니다 — 결과값 칸 · [입력] 버튼 모두 열지 않는다.
+            if (gridViewBomSpec.GetFocusedRow() is PopBomSpecDto spec && spec.IsReference)
             {
                 e.Cancel = true;
                 return;
@@ -836,7 +877,11 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 return;
 
             var spec = gridViewBomSpec.GetRow(e.RowHandle) as PopBomSpecDto;
-            if (spec == null || (spec.TorqueResult == null && spec.AngleResult == null))
+            if (spec == null)
+                return;
+
+            // 참조 줄은 측정값이 없어도 OK로 보여 준다(IsBomSpecPassed가 통과로 본다).
+            if (!spec.IsReference && spec.TorqueResult == null && spec.AngleResult == null)
                 return;
 
             if (IsBomSpecPassed(spec))
@@ -849,6 +894,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// [입력] 버튼 → 누른 줄과 <b>같은 자재코드(MaterialCode)</b>인 줄을 한 번에 채운다(일괄 입력).
         /// 각 줄의 토크 결과값은 하한~상한의 중간값, 각도 결과값은 목표 각도 — 수동 렌치로 조립할 때는 규격 한가운데를
         /// 목표로 조이므로 같은 자재의 체결 점마다 숫자를 다시 치는 과정을 줄인 것이다.
+        ///  - 참조 줄(서버 refYn=Y)은 입력 대상이 아니라 건너뛴다.
         ///  - 이미 값(토크 또는 각도)이 들어 있는 줄은 건너뛴다 — 설비 · 직접 입력으로 넣은 실측값을 덮어쓰지 않는다.
         ///  - 토크 하한/상한이 없는 줄도 중간값을 낼 수 없어 건너뛴다.
         ///  - 채운 값은 직접 입력과 같이 수동 입력(<see cref="ManualEquipmentCode"/>)으로 서버에 저장한다.
@@ -878,7 +924,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             foreach (var rowHandle in group)
             {
                 var spec = (PopBomSpecDto)gridViewBomSpec.GetRow(rowHandle);
-                if (spec.TorqueResult != null || spec.AngleResult != null)
+                if (spec.IsReference || spec.TorqueResult != null || spec.AngleResult != null)
                     continue;
 
                 if (spec.TorqueLower == null || spec.TorqueUpper == null)
@@ -945,14 +991,17 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             return rows;
         }
 
-        /// <summary>같은 자재 줄 중 마지막 줄의 바로 다음 줄. 마지막 줄이 그리드 끝이면 그 줄 그대로.</summary>
+        /// <summary>
+        /// 같은 자재 줄 중 마지막 줄 다음의 첫 입력 대상 줄(참조 줄은 건너뛴다). 그런 줄이 없으면 마지막 줄 그대로.
+        /// </summary>
         private int GetRowAfterMaterial(List<int> sameMaterialRows)
         {
             if (sameMaterialRows.Count == 0)
                 return gridViewBomSpec.FocusedRowHandle;
 
             var last = sameMaterialRows[sameMaterialRows.Count - 1];
-            return last + 1 < gridViewBomSpec.RowCount ? last + 1 : last;
+            var next = FindNextBomSpecInputRow(last);
+            return next >= 0 ? next : last;
         }
 
         // ─────────────────────────────────────────────────────────────────────────

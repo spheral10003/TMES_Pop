@@ -74,6 +74,9 @@ namespace SEOJIN_TMES.Client.Common.Models
 
         /// <summary>품목번호 입력이 끝났는지(서버 판정). 확인 대상이 아니거나 아직 입력 전이면 null로 온다.</summary>
         [JsonProperty("itemCdInputCompleted")] public bool? ItemCdInputCompleted { get; set; }
+
+        /// <summary>참조 항목 여부(Y/N). Y면 작업자가 입력하지 않는 줄이다 — 화면은 OK로 보여 주고 건너뛴다.</summary>
+        [JsonProperty("refYn")] public string RefYn { get; set; }
     }
 
     public class BomInspSpecGroupApi
@@ -106,6 +109,8 @@ namespace SEOJIN_TMES.Client.Common.Models
         [JsonProperty("angleRsltVl")] public decimal? AngleRsltVl { get; set; }
         [JsonProperty("eqpCd")] public string EquipmentCode { get; set; }
 
+        /// <summary>참조 항목 여부(Y/N). Y면 체결하지 않는 줄이다 — 화면은 OK로 보여 주고 건너뛴다.</summary>
+        [JsonProperty("refYn")] public string RefYn { get; set; }
     }
 
     public class InspChkItemApi
@@ -184,6 +189,7 @@ namespace SEOJIN_TMES.Client.Common.Models
                     SerialCheckRequired = m.SerialVrfcYn == "Y",
                     ItemCodeCheckRequired = m.ItemCdVrfcYn == "Y",
                     ItemCodeInputCompleted = m.ItemCdInputCompleted == true,
+                    IsReference = IsYes(m.RefYn),
                     SerialNumbers = string.IsNullOrWhiteSpace(m.InputtedSerials)
                         ? new List<string>()
                         : m.InputtedSerials.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
@@ -208,7 +214,8 @@ namespace SEOJIN_TMES.Client.Common.Models
                     AngleUnit = b.AngleUnit,
                     AngleResult = b.AngleRsltVl,
                     EquipmentCode = b.EquipmentCode,
-                    IsManualInput = !string.Equals(b.InptMth, "EQP", StringComparison.OrdinalIgnoreCase)
+                    IsManualInput = !string.Equals(b.InptMth, "EQP", StringComparison.OrdinalIgnoreCase),
+                    IsReference = IsYes(b.RefYn)
                 }).ToList(),
 
                 BomManualEnabled = bom.ManualEnabled == true,
@@ -252,6 +259,10 @@ namespace SEOJIN_TMES.Client.Common.Models
             };
         }
 
-
+        /// <summary>서버 Y/N 플래그 — 공백 · 소문자로 와도 Y로 본다.</summary>
+        private static bool IsYes(string flag)
+        {
+            return string.Equals(flag?.Trim(), "Y", StringComparison.OrdinalIgnoreCase);
+        }
     }
 }
