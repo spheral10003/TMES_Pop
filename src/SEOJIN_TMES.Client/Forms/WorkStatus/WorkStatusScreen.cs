@@ -176,15 +176,18 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
                     e.DisplayText = "-";
             };
 
-            gridViewProgress.RowStyle += GridViewProgress_RowStyle;
+            gridViewProgress.RowCellStyle += GridViewProgress_RowCellStyle;
         }
 
-        /// <summary>서버가 불합격으로 내려준 줄은 NG 색으로 칠한다(표시만 한다 — 판정은 서버).</summary>
-        private void GridViewProgress_RowStyle(object sender, DevExpress.XtraGrid.Views.Grid.RowStyleEventArgs e)
+        /// <summary>
+        /// 서버가 불합격으로 내려준 줄은 NG 색으로 칠한다(표시만 한다 — 판정은 서버).
+        /// 칸 정렬을 건드리지 않고, 선택 행은 선택 색이 우선한다(<see cref="AppTheme.NgRowCell"/> 참고).
+        /// </summary>
+        private void GridViewProgress_RowCellStyle(object sender, DevExpress.XtraGrid.Views.Grid.RowCellStyleEventArgs e)
         {
             var row = gridViewProgress.GetRow(e.RowHandle) as WorkProgressDto;
             if (row != null && string.Equals(row.SpecResultState, Language.Pop_ResultFail, StringComparison.OrdinalIgnoreCase))
-                AppTheme.NgRow(e);
+                AppTheme.NgRowCell(gridViewProgress, e);
         }
 
         /// <summary>조회 조건/필터 콤보를 채운다. 첫 항목은 항상 "전체"(조건 없음)다.</summary>

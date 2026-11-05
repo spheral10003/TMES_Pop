@@ -251,7 +251,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
             gridViewInspection.OptionsBehavior.Editable = true;
 
-            gridViewInspection.RowStyle += GridViewInspection_RowStyle;
+            gridViewInspection.RowCellStyle += GridViewInspection_RowCellStyle;
             SetGridLineColor(gridViewInspection);
         }
 
@@ -801,16 +801,27 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             AppLog.Info($"[POP] 토크 결과값 직접 입력 - {spec.BomSpecName}/{spec.InputPosition} = {spec.TorqueResult}");
         }
 
-        /// <summary>결과상태가 NG인 줄은 NG 색으로 칠한다(표시만 한다 — 판정은 서버).</summary>
-        private void GridViewInspection_RowStyle(object sender, RowStyleEventArgs e)
+        /// <summary>
+        /// 결과상태가 OK인 줄은 OK 색, NG인 줄은 NG 색으로 줄 전체를 칠한다(표시만 한다 — 판정은 서버).
+        /// 칸 정렬을 건드리지 않고, 선택 행은 선택 색이 우선한다(<see cref="AppTheme.NgRowCell"/> 참고).
+        /// </summary>
+        private void GridViewInspection_RowCellStyle(object sender, RowCellStyleEventArgs e)
         {
             var spec = gridViewInspection.GetRow(e.RowHandle) as PopInspectionSpecDto;
-            if (spec != null && spec.ResultState == PopInspectionSpecDto.ResultNg)
-                AppTheme.NgRow(e);
+            if (spec == null)
+                return;
+
+            if (spec.ResultState == PopInspectionSpecDto.ResultNg)
+                AppTheme.NgRowCell(gridViewInspection, e);
+            else if (spec.ResultState == PopInspectionSpecDto.ResultOk)
+                AppTheme.OkRowCell(gridViewInspection, e);
         }
 
-        /// <summary>측정값이 있는데 하한~상한을 벗어난 줄은 NG 색으로 칠한다(포커스 행 색보다 우선).</summary>
-        private void GridViewBomSpec_RowStyle(object sender, RowStyleEventArgs e)
+        /// <summary>
+        /// 측정값이 있는 줄만 칠한다 — 하한~상한 안이면 OK 색, 벗어나면 NG 색(줄 전체).
+        /// 칸 정렬을 건드리지 않고, 선택 행은 선택 색이 우선한다(<see cref="AppTheme.NgRowCell"/> 참고).
+        /// </summary>
+        private void GridViewBomSpec_RowCellStyle(object sender, RowCellStyleEventArgs e)
         {
             if (e.RowHandle < 0)
                 return;
@@ -819,10 +830,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (spec == null || (spec.TorqueResult == null && spec.AngleResult == null))
                 return;
 
-            if (!IsBomSpecPassed(spec))
-            {
-                AppTheme.NgRow(e);
-            }
+            if (IsBomSpecPassed(spec))
+                AppTheme.OkRowCell(gridViewBomSpec, e);
+            else
+                AppTheme.NgRowCell(gridViewBomSpec, e);
         }
 
         /// <summary>

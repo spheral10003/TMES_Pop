@@ -185,9 +185,18 @@ namespace SEOJIN_TMES.Client.Theme
 
         /// <summary>
         /// 불합격(NG) 행 바탕. 서버가 내려준 결과 상태를 <b>표시</b>만 하는 색이다(판정은 서버가 한다).
-        /// 선택 행보다 우선해야 선택해도 NG인 줄이 그대로 보인다 — <see cref="NgRow"/>로 칠할 것.
+        /// 선택(포커스) 행은 선택 색이 우선한다 — <see cref="NgRowCell"/>로 칠할 것.
         /// </summary>
         public static Color GridNgRow => IsDarkMode ? Color.FromArgb(92, 44, 52) : Color.FromArgb(248, 215, 218); // #F8D7DA
+
+        /// <summary>
+        /// 합격(OK) 행 바탕 — 상단 선택 탭과 같은 진한 청록(#2C5B78). 바탕이 진해 글자는 흰색(<see cref="GridOkRowText"/>).
+        /// NG와 마찬가지로 서버 결과를 <b>표시</b>만 하는 색이며, 선택 행은 선택 색이 우선한다 — <see cref="OkRowCell"/>로 칠할 것.
+        /// </summary>
+        public static Color GridOkRow => Color.FromArgb(44, 91, 120);   // #2C5B78
+
+        /// <summary>합격(OK) 행 글자색.</summary>
+        public static Color GridOkRowText => Color.White;
 
         // ── 상단 탭 ── 선택 탭은 진한 청록(#2C5B78) + 흰 글자, 나머지는 옅은 회청(#F4F6FA) + 검정 글자 ──
         // 탭이 놓이는 스트립은 비선택 탭보다 한 톤 진하게 깔아야 비선택 탭의 윤곽이 바탕에 묻히지 않는다.
@@ -1115,14 +1124,36 @@ namespace SEOJIN_TMES.Client.Theme
         }
 
         /// <summary>
-        /// NG 행 칠하기 — 그리드의 <c>RowStyle</c> 이벤트에서 NG인 줄에만 부른다.
-        /// 선택 행 색보다 우선하도록 <c>HighPriority</c>를 켠다(선택해도 NG인 줄임이 보여야 한다).
+        /// NG 행 칠하기 — 그리드의 <c>RowCellStyle</c> 이벤트에서 NG인 줄에만 부른다(줄 전체 칸이 같은 색이 된다).
+        /// 규칙은 <see cref="ResultRowCell"/> 참고.
         /// </summary>
-        public static void NgRow(RowStyleEventArgs e)
+        public static void NgRowCell(GridView view, RowCellStyleEventArgs e)
         {
-            e.Appearance.BackColor = GridNgRow;
+            ResultRowCell(view, e, GridNgRow, TextPrimary);
+        }
+
+        /// <summary>OK 행 칠하기 — <see cref="NgRowCell"/>과 같은 방식, 색만 <see cref="GridOkRow"/>.</summary>
+        public static void OkRowCell(GridView view, RowCellStyleEventArgs e)
+        {
+            ResultRowCell(view, e, GridOkRow, GridOkRowText);
+        }
+
+        /// <summary>
+        /// 결과(OK/NG) 행의 칸 색을 바꾼다.
+        ///  - <c>RowStyle</c>이 아니라 <c>RowCellStyle</c>에서 칸마다 <b>색만</b> 바꾼다. 예전에는 RowStyle + <c>HighPriority</c>로
+        ///    칠했는데, 그러면 행 모양이 컬럼 모양보다 우선해 컬럼의 가운데 정렬이 풀리고 왼쪽 정렬로 바뀌었다
+        ///    (값을 넣어 NG가 되는 순간 글자가 옆으로 튀었다). 칸 모양에는 이미 컬럼 정렬이 합쳐져 있어 그대로 남는다.
+        ///  - 선택(포커스) 행은 칠하지 않는다 — 선택 색이 보여야 지금 어느 줄을 고르고 있는지 알 수 있다.
+        /// </summary>
+        private static void ResultRowCell(GridView view, RowCellStyleEventArgs e, Color back, Color fore)
+        {
+            if (e.RowHandle == view.FocusedRowHandle || view.IsRowSelected(e.RowHandle))
+                return;
+
+            e.Appearance.BackColor = back;
             e.Appearance.Options.UseBackColor = true;
-            e.HighPriority = true;
+            e.Appearance.ForeColor = fore;
+            e.Appearance.Options.UseForeColor = true;
         }
 
         /// <summary>

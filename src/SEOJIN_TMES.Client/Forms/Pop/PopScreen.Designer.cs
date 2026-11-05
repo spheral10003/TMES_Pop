@@ -930,7 +930,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.gridViewBomSpec.GridControl = this.gridBomSpec;
             this.gridViewBomSpec.Name = "gridViewBomSpec";
             this.gridViewBomSpec.RowClick += new DevExpress.XtraGrid.Views.Grid.RowClickEventHandler(this.GridViewBomSpec_RowClick);
-            this.gridViewBomSpec.RowStyle += new DevExpress.XtraGrid.Views.Grid.RowStyleEventHandler(this.GridViewBomSpec_RowStyle);
+            this.gridViewBomSpec.RowCellStyle += new DevExpress.XtraGrid.Views.Grid.RowCellStyleEventHandler(this.GridViewBomSpec_RowCellStyle);
             this.gridViewBomSpec.ShowingEditor += new System.ComponentModel.CancelEventHandler(this.GridViewBomSpec_ShowingEditor);
             this.gridViewBomSpec.FocusedRowChanged += new DevExpress.XtraGrid.Views.Base.FocusedRowChangedEventHandler(this.GridViewBomSpec_FocusedRowChanged);
             this.gridViewBomSpec.CellValueChanged += new DevExpress.XtraGrid.Views.Base.CellValueChangedEventHandler(this.GridViewBomSpec_CellValueChanged);
