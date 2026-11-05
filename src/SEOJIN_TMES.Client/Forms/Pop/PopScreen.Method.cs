@@ -945,6 +945,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// <summary>
         /// 투입자재 입력(시리얼 · 품목코드)이 모두 끝났으면 [BOM 스팩] 탭으로 넘기고 체결할 행 · 목표 토크를 맞춘다.
         /// 투입자재가 없으면 탭을 옮기지 않는다(작업자가 보던 탭을 그대로 둔다).
+        /// 이 공정에 BOM 스팩이 한 줄도 없으면 빈 탭에 멈추지 않고 [검사 스팩] 탭으로 한 번 더 넘긴다
+        /// ([연결 장비] 탭까지는 자동으로 가지 않는다).
         /// </summary>
         /// <returns>탭을 옮겼으면 true.</returns>
         public bool ShowBomSpecTab()
@@ -952,7 +954,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (_materials.Count == 0 || !_materials.All(IsMaterialPopupDone))
                 return false;
 
-            tabSpec.SelectedTabPage = pageBom;
+            tabSpec.SelectedTabPage = _bomSpecs.Count == 0 ? pageInspec : pageBom;
             SelectBomSpecRow();
             return true;
         }
