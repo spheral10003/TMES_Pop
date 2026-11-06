@@ -422,6 +422,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
         private async Task MoveProcessBy(int offset)
         {
+            // 줄을 떠나지 않아 남은 검사 입력을 먼저 저장한다 — 마지막 공정에서 완료만 보내는 경우도 포함.
+            if (!await SavePendingInspections())
+                return;
+
             if (!await GetProcesses())
                 return;
 
@@ -490,6 +494,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             }
 
             if (selected == null)
+                return;
+
+            // 같은 공정을 다시 골라도 화면을 다시 읽으므로, 줄을 떠나지 않아 남은 검사 입력을 먼저 저장한다.
+            if (!await SavePendingInspections())
                 return;
 
             // 지금 공정을 다시 고른 것은 공정을 바꾼 것이 아니므로 완료하지 않는다.
@@ -1137,6 +1145,45 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// </summary>
         public async Task<bool> SetInspectionResult(PopInspectionSpecDto spec, string fieldName)
         {
+            if (!await SendInspectionResult(spec, fieldName))
+                return false;
+
+            if (IsDisposed || Disposing) return true;
+            await TryAutoProgress();
+            return true;
+        }
+
+        /// <summary>
+        /// 공정을 옮기기 전에, 입력했지만 줄을 떠나지 않아 아직 보내지 않은 [검사 스팩] 줄을 저장한다.
+        /// 공정을 옮기면 화면을 다시 읽어 그 입력이 사라지기 때문이다.
+        /// 결과상태가 없는 줄은 줄을 떠날 때와 같이 보내지 않는다. 자동 진행은 하지 않는다 — 작업자가 고른 이동을 이어 간다.
+        /// </summary>
+        /// <returns>이동을 계속해도 되면 true. 서버가 저장을 거절했거나 화면이 닫혔으면 false(입력을 잃지 않게 이동을 멈춘다).</returns>
+        private async Task<bool> SavePendingInspections()
+        {
+            // 편집 중인 칸의 값을 먼저 확정한다 — 확정돼야 CellValueChanged로 보낼 줄에 들어간다.
+            gridViewInspection.CloseEditor();
+            gridViewInspection.UpdateCurrentRow();
+
+            // 완료 · 중지 공정은 입력 자체가 막혀 있다. 보낼 수 없으니 이동을 막지 않는다.
+            if (!IsInputAllowed || _pendingInspections.Count == 0)
+                return true;
+
+            foreach (var spec in _pendingInspections.Where(IsInspectionEntered).ToList())
+            {
+                if (!await SendInspectionResult(spec, "process-move"))
+                    return false;
+
+                if (IsDisposed || Disposing) return false;
+                _pendingInspections.Remove(spec);
+            }
+
+            return true;
+        }
+
+        /// <summary>검사 스팩 한 줄을 서버에 보낸다(자동 진행 없음). 저장됐으면 true.</summary>
+        private async Task<bool> SendInspectionResult(PopInspectionSpecDto spec, string fieldName)
+        {
             if (!IsInputAllowed)
             {
                 AppLog.Info($"[POP] 공정 완료 · 중지 - 검사 결과 전송 생략 (상태 {_progressState})");
@@ -1171,8 +1218,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 EndResultSave();
             }
 
-            if (IsDisposed || Disposing) return true;
-            await TryAutoProgress();
             return true;
         }
 

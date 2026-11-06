@@ -80,6 +80,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// <summary>
         /// [검사 스팩]에서 고쳤지만 아직 서버에 보내지 않은 줄. 셀을 고칠 때마다 보내지 않고,
         /// 작업자가 그 줄에서 다른 줄로 포커스를 옮길 때 한 번에 보낸다(<see cref="GridViewInspection_FocusedRowChanged"/>).
+        /// 줄을 떠나지 않은 채 공정을 옮기면 이동 전에 남은 줄을 보낸다(<see cref="SavePendingInspections"/>).
         /// 다시 바인딩하면 DTO가 새로 만들어지므로 <see cref="SetGridData"/>에서 비운다.
         /// </summary>
         private readonly HashSet<PopInspectionSpecDto> _pendingInspections = new HashSet<PopInspectionSpecDto>();
