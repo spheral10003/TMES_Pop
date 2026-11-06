@@ -898,7 +898,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// 처음부터 "입력 완료"로 셈해져, 그런 자재만 있는 공정이 들어가자마자 자동 완료됐다.
         /// 품목번호 확인(itemCdVrfcYn=Y)도 서버는 할 일로 센다 — 빼고 세면 "입력할 것 없음"으로 보고 이동 때 완료를 보내
         /// WORK_005로 거절됐다(SUB20/0019).
-        /// 참조 항목(서버 refYn=Y)인 자재 · BOM 줄은 입력할 것이 아니므로 세지 않는다.
+        /// 참조 항목(서버 refLtl=AR·REF)인 자재 · BOM 줄은 입력할 것이 아니므로 세지 않는다.
         /// </summary>
         private bool HasInputItems()
         {
@@ -985,7 +985,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (material == null)
                 return;
 
-            // 참조 자재(서버 refYn=Y)는 입력을 받지 않는다 — 팝업도 안내 창도 띄우지 않는다.
+            // 참조 자재(서버 refLtl=AR·REF)는 입력을 받지 않는다 — 팝업도 안내 창도 띄우지 않는다.
             if (material.IsReference)
             {
                 AppLog.Info($"[POP] 참조 자재 - 입력 생략 ({material.MaterialCode})");
@@ -1086,7 +1086,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// 예전에는 시리얼 자재를 시리얼만 보고 판단해, 시리얼은 들어가 있고 품목코드 확인(itemCdVrfcYn=Y)이 남은 자재는
         /// 팝업이 자동으로 뜨지 않았다 — 그 자재는 완료 판단(IsInputCompleted)에서는 미완료라 공정이 넘어가지도 않고 멈췄다.
         /// 저장이 성공하면 SetMaterialInput이 품목코드 완료로 옮겨 두므로, 저장 뒤 같은 자재에 팝업이 되풀이되지 않는다.
-        /// 입력할 것이 없는 자재(둘 다 N)와 참조 자재(refYn=Y)는 처음부터 끝난 것으로 본다 — 자동 팝업도 띄우지 않는다.
+        /// 입력할 것이 없는 자재(둘 다 N)와 참조 자재(refLtl=AR·REF)는 처음부터 끝난 것으로 본다 — 자동 팝업도 띄우지 않는다.
         /// </summary>
         private static bool IsMaterialPopupDone(PopInputMaterialDto material)
         {
@@ -1389,7 +1389,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 return;
 
             var target = gridViewBomSpec.GetRow(_bomSpecSelectedRow) as PopBomSpecDto;
-            // 참조 줄(서버 refYn=Y)은 체결 대상이 아니다 — 모든 입력 줄이 끝나 첫 행(참조)에 머문 경우 등에 값을 덮어쓰지 않는다.
+            // 참조 줄(서버 refLtl=AR·REF)은 체결 대상이 아니다 — 모든 입력 줄이 끝나 첫 행(참조)에 머문 경우 등에 값을 덮어쓰지 않는다.
             if (target == null || target.IsReference)
             {
                 AppLog.Info($"[POP] {Language.Pop_TorqueNoPendingRow} (설비 {equipmentId}, 토크 {torqueValue}, 각도 {angleValue}" +
@@ -1416,7 +1416,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 합격이면 이 결과로 바로 다음 행에 넘어가 목표 토크까지 써 둔다. 다음 체결이 들어올 때 넘기면
             // 그 체결 값이 이미 합격한 행을 덮어써, 다음 행으로 가려면 한 번 더 조여야 했다.
             // 다음 행은 결과 유무와 상관없이 그리드 순서상 바로 아래 행이다 — 작업자가 위에서부터 차례로 조이므로.
-            // 단 참조 줄(서버 refYn=Y)은 체결하지 않으므로 건너뛴다.
+            // 단 참조 줄(서버 refLtl=AR·REF)은 체결하지 않으므로 건너뛴다.
             // NG면 같은 행을 다시 조이도록 그대로 둔다. 마지막 행이면 자리를 지킨다(자동 진행이 공정을 넘긴다).
             var nextRow = FindNextBomSpecInputRow(_bomSpecSelectedRow);
             if (IsBomSpecPassed(target) && nextRow >= 0)

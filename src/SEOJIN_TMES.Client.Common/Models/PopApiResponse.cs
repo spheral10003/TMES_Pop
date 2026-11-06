@@ -75,8 +75,8 @@ namespace SEOJIN_TMES.Client.Common.Models
         /// <summary>품목번호 입력이 끝났는지(서버 판정). 확인 대상이 아니거나 아직 입력 전이면 null로 온다.</summary>
         [JsonProperty("itemCdInputCompleted")] public bool? ItemCdInputCompleted { get; set; }
 
-        /// <summary>참조 항목 여부(Y/N). Y면 작업자가 입력하지 않는 줄이다 — 화면은 OK로 보여 주고 건너뛴다.</summary>
-        [JsonProperty("refYn")] public string RefYn { get; set; }
+        /// <summary>참조 구분(AR / REF). 둘 중 하나면 작업자가 입력하지 않는 줄이다 — 화면은 OK로 보여 주고 서버로 보내지 않는다.</summary>
+        [JsonProperty("refLtl")] public string RefLtl { get; set; }
     }
 
     public class BomInspSpecGroupApi
@@ -111,8 +111,8 @@ namespace SEOJIN_TMES.Client.Common.Models
         [JsonProperty("angleRsltVl")] public decimal? AngleRsltVl { get; set; }
         [JsonProperty("eqpCd")] public string EquipmentCode { get; set; }
 
-        /// <summary>참조 항목 여부(Y/N). Y면 체결하지 않는 줄이다 — 화면은 OK로 보여 주고 건너뛴다.</summary>
-        [JsonProperty("refYn")] public string RefYn { get; set; }
+        /// <summary>참조 구분(AR / REF). 둘 중 하나면 체결하지 않는 줄이다 — 화면은 OK로 보여 주고 서버로 보내지 않는다.</summary>
+        [JsonProperty("refLtl")] public string RefLtl { get; set; }
     }
 
     public class InspChkItemApi
@@ -189,11 +189,11 @@ namespace SEOJIN_TMES.Client.Common.Models
                     InputUnit = m.Unit,
                     InputPosition = m.IndctLoc,
                     MaterialGroup = m.InputItemGrp,
-                    // 대소문자 · 공백이 달라도 Y로 본다(refYn과 같은 기준) — "y"나 "Y "로 오면 확인 대상에서 빠져 팝업이 뜨지 않았다.
+                    // 대소문자 · 공백이 달라도 Y로 본다(다른 Y/N 플래그와 같은 기준) — "y"나 "Y "로 오면 확인 대상에서 빠져 팝업이 뜨지 않았다.
                     SerialCheckRequired = IsYes(m.SerialVrfcYn),
                     ItemCodeCheckRequired = IsYes(m.ItemCdVrfcYn),
                     ItemCodeInputCompleted = m.ItemCdInputCompleted == true,
-                    IsReference = IsYes(m.RefYn),
+                    IsReference = IsReferenceLtl(m.RefLtl),
                     SerialNumbers = string.IsNullOrWhiteSpace(m.InputtedSerials)
                         ? new List<string>()
                         : m.InputtedSerials.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
@@ -221,7 +221,7 @@ namespace SEOJIN_TMES.Client.Common.Models
                     AngleResult = b.AngleRsltVl,
                     EquipmentCode = b.EquipmentCode,
                     IsManualInput = !string.Equals(b.InptMth, "EQP", StringComparison.OrdinalIgnoreCase),
-                    IsReference = IsYes(b.RefYn)
+                    IsReference = IsReferenceLtl(b.RefLtl)
                 }).ToList(),
 
                 BomManualEnabled = bom.ManualEnabled == true,
@@ -269,6 +269,17 @@ namespace SEOJIN_TMES.Client.Common.Models
         private static bool IsYes(string flag)
         {
             return string.Equals(flag?.Trim(), "Y", StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// 참조 줄인지 — 서버 refLtl이 AR 또는 REF면 참조다(공백 · 소문자로 와도 같게 본다).
+        /// 그 밖의 값이나 빈 값은 일반 입력 줄이다.
+        /// </summary>
+        private static bool IsReferenceLtl(string refLtl)
+        {
+            var value = refLtl?.Trim();
+            return string.Equals(value, "AR", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(value, "REF", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

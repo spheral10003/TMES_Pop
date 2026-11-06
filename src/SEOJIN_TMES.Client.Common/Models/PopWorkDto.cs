@@ -150,7 +150,7 @@ namespace SEOJIN_TMES.Client.Common.Models
         public bool ItemCodeInputCompleted { get; set; }
 
         /// <summary>
-        /// 참조 항목인지(서버 refYn=Y). 참조 자재는 작업자가 입력하지 않는다 —
+        /// 참조 항목인지(서버 refLtl=AR·REF). 참조 자재는 작업자가 입력하지 않는다 —
         /// 화면은 OK로 칠하고, 입력 팝업을 열지 않으며, 완료 판단에서도 끝난 것으로 본다.
         /// </summary>
         public bool IsReference { get; set; }
@@ -272,7 +272,7 @@ namespace SEOJIN_TMES.Client.Common.Models
         public string EquipmentCode { get; set; }
 
         /// <summary>
-        /// 참조 항목인지(서버 refYn=Y). 참조 줄은 체결 · 입력 대상이 아니다 —
+        /// 참조 항목인지(서버 refLtl=AR·REF). 참조 줄은 체결 · 입력 대상이 아니다 —
         /// 화면은 OK로 칠하고, 설비 결과를 채울 행에서 건너뛰며, 결과값 칸 편집도 막는다.
         /// </summary>
         public bool IsReference { get; set; }
