@@ -814,7 +814,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
             var materialsDone = _materials.All(m => m.IsInputCompleted);
             var bomSpecsDone = _bomSpecs.All(IsBomSpecPassed);
-            var inspectionsDone = _inspections.All(IsInspectionEntered);
+            // 화면에 입력만 하고 줄을 떠나지 않아 아직 보내지 않은 검사 줄은 완료로 치지 않는다.
+            var inspectionsDone = _inspections.All(IsInspectionSaved);
 
             return materialsDone && bomSpecsDone && inspectionsDone;
         }
@@ -1132,13 +1133,14 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// 검사 스팩 한 줄의 결과를 서버에 보낸다 — 정량 검사는 판정 · 결과값 · 비고, 정성 검사는 판정 · 비고.
         /// 검사 항목 코드는 URL 경로로만 보내고 Body에는 담지 않는다.
         /// 공정이 완료 · 중지 상태면 보내지 않는다 — 편집 도중 상태가 바뀐 경우를 막는다.
+        /// 서버에 저장됐으면 true, 보내지 않았거나 서버가 거절하면 false(호출한 쪽이 다시 보낼 줄로 남긴다).
         /// </summary>
-        public async Task SetInspectionResult(PopInspectionSpecDto spec, string fieldName)
+        public async Task<bool> SetInspectionResult(PopInspectionSpecDto spec, string fieldName)
         {
             if (!IsInputAllowed)
             {
                 AppLog.Info($"[POP] 공정 완료 · 중지 - 검사 결과 전송 생략 (상태 {_progressState})");
-                return;
+                return false;
             }
 
             var itemCode = spec.InspectionItemCode ?? string.Empty;
@@ -1159,18 +1161,19 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             catch (ApiException ex)
             {
                 AppLog.Warn($"[POP] 검사 결과 전송 실패 - {itemCode}: {ex.Message}");
-                if (IsDisposed || Disposing) return;
+                if (IsDisposed || Disposing) return false;
 
                 AppMessageBox.Warn(this, ex.Message, Language.Pop_TabInspection);
-                return;
+                return false;
             }
             finally
             {
                 EndResultSave();
             }
 
-            if (IsDisposed || Disposing) return;
+            if (IsDisposed || Disposing) return true;
             await TryAutoProgress();
+            return true;
         }
 
         // ─────────────────────────────────────────────────────────────────────────

@@ -77,6 +77,13 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             "ResultState", "ResultValue", "InspectionResultRemark"
         };
 
+        /// <summary>
+        /// [검사 스팩]에서 고쳤지만 아직 서버에 보내지 않은 줄. 셀을 고칠 때마다 보내지 않고,
+        /// 작업자가 그 줄에서 다른 줄로 포커스를 옮길 때 한 번에 보낸다(<see cref="GridViewInspection_FocusedRowChanged"/>).
+        /// 다시 바인딩하면 DTO가 새로 만들어지므로 <see cref="SetGridData"/>에서 비운다.
+        /// </summary>
+        private readonly HashSet<PopInspectionSpecDto> _pendingInspections = new HashSet<PopInspectionSpecDto>();
+
         private bool IsBomSpecRedrawing => _bomSpecRedrawDepth > 0;
 
         private void BeginBomSpecRedraw()
@@ -262,6 +269,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             gridViewInspection.OptionsView.ShowButtonMode = ShowButtonModeEnum.ShowAlways;
 
             gridViewInspection.RowCellStyle += GridViewInspection_RowCellStyle;
+            gridViewInspection.FocusedRowChanged += GridViewInspection_FocusedRowChanged;
             SetGridLineColor(gridViewInspection);
         }
 
@@ -438,6 +446,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         {
             _materials = screen.Materials ?? new List<PopInputMaterialDto>();
             _inspections = screen.InspectionSpecs ?? new List<PopInspectionSpecDto>();
+            _pendingInspections.Clear();
             _equipments = screen.Equipments ?? new List<PopEquipmentDto>();
 
             gridMaterial.DataSource = _materials;
@@ -1029,13 +1038,17 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 return;
             }
 
+            var spec = view.GetFocusedRow() as PopInspectionSpecDto;
+            if (spec == null)
+                return;
+
             // 정성 검사는 결과값이 없다 — 결과상태(OK/NG)만 받는다.
-            if (fieldName == "ResultValue")
-            {
-                var spec = view.GetFocusedRow() as PopInspectionSpecDto;
-                if (spec != null && !spec.IsQuantitative)
-                    e.Cancel = true;
-            }
+            if (fieldName == "ResultValue" && !spec.IsQuantitative)
+                e.Cancel = true;
+
+            // 정량 검사의 판정이 결과값으로 정해졌으면 작업자가 바꿀 수 없다 — 결과값을 고쳐야 판정이 바뀐다.
+            if (fieldName == "ResultState" && GetAutoResultState(spec) != null)
+                e.Cancel = true;
         }
 
         /// <summary>검사방법 코드를 화면 언어로 표시한다 — QNT면 정량, 그 외는 정성.</summary>
@@ -1048,7 +1061,11 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             e.DisplayText = quantitative ? Language.Pop_InspectionQuantitative : Language.Pop_InspectionQualitative;
         }
 
-        private async void gridViewInspection_CellValueChanged(object sender, CellValueChangedEventArgs e)
+        /// <summary>
+        /// 셀 값이 바뀌면 그 줄을 "보낼 줄"로 표시만 한다 — 서버 전송은 줄을 떠날 때(<see cref="GridViewInspection_FocusedRowChanged"/>).
+        /// 정량 검사의 결과값이 바뀌면 하한 · 상한(또는 기준 문자)으로 판정을 다시 채운다.
+        /// </summary>
+        private void gridViewInspection_CellValueChanged(object sender, CellValueChangedEventArgs e)
         {
             var fieldName = e.Column?.FieldName;
             if (fieldName == null || !_inspectionInputFields.Contains(fieldName))
@@ -1059,33 +1076,108 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (spec == null)
                 return;
 
-            // 결과값이 기준 문자(stdLtl, 예: 저항 측정의 "OL")와 같으면 판정을 OK로 채운다.
-            // 판정 칸에 직접 넣고 같은 전송에 실어 보낸다 — SetRowCellValue로 넣으면 이 이벤트가 한 번 더 올라와 두 번 전송된다.
-            if (fieldName == "ResultValue" && IsStdLtlMatched(spec))
+            if (fieldName == "ResultValue" && spec.IsQuantitative)
+                ApplyAutoResultState(view, e.RowHandle, spec);
+
+            _pendingInspections.Add(spec);
+        }
+
+        /// <summary>
+        /// 정량 검사의 판정을 결과값으로 채운다(<see cref="GetAutoResultState"/>).
+        /// 판정 칸에 직접 넣는다 — SetRowCellValue로 넣으면 CellValueChanged가 한 번 더 올라온다.
+        /// 기준(하한 · 상한)이 있는 항목에서 결과값을 지우거나 숫자가 아니게 고치면 판정도 비운다 —
+        /// 앞서 결과값으로 정해진 판정이 그대로 남아 잠긴 채 서버로 나가지 않게 하기 위해서다.
+        /// </summary>
+        private void ApplyAutoResultState(GridView view, int rowHandle, PopInspectionSpecDto spec)
+        {
+            var auto = GetAutoResultState(spec);
+            if (auto != null)
             {
-                spec.ResultState = PopInspectionSpecDto.ResultOk;
-                view.RefreshRow(e.RowHandle);
-                AppLog.Info($"[POP] 검사 결과값이 기준 문자와 같음 - 판정 OK ({spec.InspectionItemCode}, {spec.ResultValue})");
+                spec.ResultState = auto;
+                AppLog.Info($"[POP] 검사 결과값으로 판정 - {auto} ({spec.InspectionItemCode}, {spec.ResultValue})");
+            }
+            else if (spec.InspectionLower.HasValue || spec.InspectionUpper.HasValue)
+            {
+                spec.ResultState = null;
             }
 
-            // 정량 검사는 판정과 결과값을 함께 보내야 한다 — 둘 중 하나라도 비어 있으면 아직 보내지 않고,
-            // 나머지가 들어오는 순간(이 이벤트가 다시 올라올 때) 함께 보낸다.
-            // 입력 순서는 정해져 있지 않다(결과값을 먼저 넣고 판정을 나중에 고를 수도 있다).
-            if (spec.IsQuantitative
-                && (string.IsNullOrWhiteSpace(spec.ResultState) || string.IsNullOrWhiteSpace(spec.ResultValue)))
+            view.RefreshRow(rowHandle);
+        }
+
+        /// <summary>
+        /// 결과값으로 정해지는 정량 검사의 판정. 정할 수 없으면 null — 그때는 작업자가 판정을 직접 고른다.
+        /// 1) 결과값이 기준 문자(stdLtl, 예: 저항 측정의 "OL")와 같으면 OK.
+        /// 2) 결과값이 숫자이고 하한 · 상한 중 하나라도 있으면, 있는 기준 안(경계 포함)이면 OK · 벗어나면 NG.
+        /// </summary>
+        private string GetAutoResultState(PopInspectionSpecDto spec)
+        {
+            if (!spec.IsQuantitative || string.IsNullOrWhiteSpace(spec.ResultValue))
+                return null;
+
+            if (IsStdLtlMatched(spec))
+                return PopInspectionSpecDto.ResultOk;
+
+            if (!spec.InspectionLower.HasValue && !spec.InspectionUpper.HasValue)
+                return null;
+
+            if (!TryParseResultValue(spec.ResultValue, out var value))
+                return null;
+
+            var lowerOk = !spec.InspectionLower.HasValue || value >= spec.InspectionLower.Value;
+            var upperOk = !spec.InspectionUpper.HasValue || value <= spec.InspectionUpper.Value;
+            return lowerOk && upperOk ? PopInspectionSpecDto.ResultOk : PopInspectionSpecDto.ResultNg;
+        }
+
+        /// <summary>
+        /// 결과값 문자열을 숫자로 읽는다. 가상 키패드는 소수점을 "."으로 넣으므로 고정 문화권으로 먼저 읽고,
+        /// 안 되면 화면 문화권(베트남어는 소수점이 ",")으로 다시 읽는다.
+        /// </summary>
+        private bool TryParseResultValue(string text, out decimal value)
+        {
+            var trimmed = text.Trim();
+            return decimal.TryParse(trimmed, NumberStyles.Number, CultureInfo.InvariantCulture, out value)
+                || decimal.TryParse(trimmed, NumberStyles.Number, CultureInfo.CurrentCulture, out value);
+        }
+
+        /// <summary>
+        /// 작업자가 줄을 옮기면 떠난 줄(이전 포커스 줄)에 고친 것이 있을 때 서버에 보낸다.
+        /// 새로 선택된 줄이 아니라 <b>떠난 줄</b>을 보낸다.
+        /// 다시 바인딩할 때 올라오는 이벤트는 <see cref="_pendingInspections"/>가 비어 있어 아무것도 보내지 않는다.
+        /// </summary>
+        private async void GridViewInspection_FocusedRowChanged(object sender, FocusedRowChangedEventArgs e)
+        {
+            if (e.PrevFocusedRowHandle == e.FocusedRowHandle || !gridViewInspection.IsDataRow(e.PrevFocusedRowHandle))
+                return;
+
+            var spec = gridViewInspection.GetRow(e.PrevFocusedRowHandle) as PopInspectionSpecDto;
+            if (spec == null || !_pendingInspections.Contains(spec))
+                return;
+
+            // 결과상태가 없으면 비고 · 결과값이 있어도 보내지 않는다. 정량 검사는 결과값까지 있어야 보낸다.
+            // 보낼 줄 표시는 남겨 둔다 — 나중에 판정을 채우고 다시 떠날 때 함께 보낸다.
+            if (!IsInspectionEntered(spec))
             {
-                AppLog.Info($"[POP] 정량 검사 판정/결과값 미입력 - 전송 보류 ({spec.InspectionItemCode}, {fieldName})");
+                AppLog.Info($"[POP] 검사 결과상태/결과값 미입력 - 전송 안 함 ({spec.InspectionItemCode})");
                 return;
             }
 
+            _pendingInspections.Remove(spec);
             try
             {
-                await Screen.SetInspectionResult(spec, fieldName);
+                if (!await Screen.SetInspectionResult(spec, "row"))
+                    _pendingInspections.Add(spec);
             }
             catch (Exception ex)
             {
+                _pendingInspections.Add(spec);
                 HandleError("검사 결과 전송", ex);
             }
+        }
+
+        /// <summary>검사 스팩 한 줄이 서버에 저장까지 끝났는지 — 입력됐어도 아직 보내지 않은 줄은 완료가 아니다.</summary>
+        private bool IsInspectionSaved(PopInspectionSpecDto spec)
+        {
+            return IsInspectionEntered(spec) && !_pendingInspections.Contains(spec);
         }
 
         /// <summary>
