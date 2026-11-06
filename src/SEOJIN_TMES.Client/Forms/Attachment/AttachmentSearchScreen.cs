@@ -75,11 +75,14 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             ControlEnabled();
         }
 
-        /// <summary>버튼 색 — 앱 공통 버튼 색(글꼴은 Designer 값 유지).</summary>
+        /// <summary>버튼 색 — 앱 공통 버튼 색(글꼴은 Designer 값 유지). 그리드 구분선은 다른 목록과 같은 색.</summary>
         private void ApplyTheme()
         {
             foreach (var button in new[] { btnSearch, btnUpload, btnDelete, btnDownload })
                 AppTheme.StandardButton(button, keepFont: true);
+
+            AppTheme.GridLines(gridViewOrders);
+            AppTheme.GridLines(gridViewFiles);
         }
 
         /// <summary>

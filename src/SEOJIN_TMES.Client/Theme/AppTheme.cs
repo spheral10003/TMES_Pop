@@ -177,8 +177,14 @@ namespace SEOJIN_TMES.Client.Theme
         /// <summary>그리드 헤더 배경(옅은 회색).</summary>
         public static Color GridHeaderBack => IsDarkMode ? Color.FromArgb(46, 45, 72) : Color.FromArgb(246, 247, 251);
 
-        /// <summary>그리드 구분선(행 사이 얇은 가로선).</summary>
-        public static Color GridLine => IsDarkMode ? Color.FromArgb(58, 56, 90) : Color.FromArgb(230, 233, 241);
+        /// <summary>
+        /// 그리드·트리의 가로/세로 구분선과 헤더 테두리.
+        ///
+        /// 옅은 회색(230,233,241)은 현장 조명·멀리서 보는 POP 화면에서 선이 사라져
+        /// 컬럼이 많은 표에서 어느 열의 값인지 놓치기 쉬웠다 — 그래서 진한 회색으로 둔다.
+        /// 다크 모드는 같은 진회색을 쓰면 어두운 바탕에 묻히므로, 반대로 바탕보다 밝은 톤으로 대비를 낸다.
+        /// </summary>
+        public static Color GridLine => IsDarkMode ? Color.FromArgb(104, 102, 146) : Color.FromArgb(60, 60, 60);
 
         /// <summary>그리드 선택(포커스) 행 바탕 — 화면별 포인트 컬러와 무관하게 모든 목록이 같은 하늘색을 쓴다.</summary>
         public static Color GridSelectedRow => IsDarkMode ? Color.FromArgb(38, 58, 92) : Color.FromArgb(230, 247, 255); // #E6F7FF
@@ -1116,6 +1122,16 @@ namespace SEOJIN_TMES.Client.Theme
             Paint(view.Appearance.HotTrackedRow, Blend(GridSelectedRow, Card, 0.5f), TextPrimary, BodyFont);
             Paint(view.Appearance.Empty, Card, TextPrimary, BodyFont);
 
+            GridLines(view);
+        }
+
+        /// <summary>
+        /// 가로/세로 구분선만 <see cref="GridLine"/>으로 칠한다.
+        /// <see cref="Grid"/>를 쓰지 않고 Designer 값으로 꾸민 그리드(첨부파일 조회 등)도 선 색은 다른 목록과 맞춘다 —
+        /// 지정하지 않으면 스킨 기본의 옅은 선이 그대로 나와 그 화면만 선이 흐리다.
+        /// </summary>
+        public static void GridLines(GridView view)
+        {
             view.Appearance.HorzLine.BackColor = GridLine;
             view.Appearance.HorzLine.Options.UseBackColor = true;
             view.Appearance.VertLine.BackColor = GridLine;
