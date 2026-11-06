@@ -178,13 +178,19 @@ namespace SEOJIN_TMES.Client.Theme
         public static Color GridHeaderBack => IsDarkMode ? Color.FromArgb(46, 45, 72) : Color.FromArgb(246, 247, 251);
 
         /// <summary>
-        /// 그리드·트리의 가로/세로 구분선과 헤더 테두리.
+        /// 그리드·트리 데이터 영역의 가로/세로 구분선(헤더 테두리는 <see cref="GridHeaderBorder"/>).
         ///
         /// 옅은 회색(230,233,241)은 현장 조명·멀리서 보는 POP 화면에서 선이 사라져
         /// 컬럼이 많은 표에서 어느 열의 값인지 놓치기 쉬웠다 — 그래서 진한 회색으로 둔다.
         /// 다크 모드는 같은 진회색을 쓰면 어두운 바탕에 묻히므로, 반대로 바탕보다 밝은 톤으로 대비를 낸다.
         /// </summary>
         public static Color GridLine => IsDarkMode ? Color.FromArgb(104, 102, 146) : Color.FromArgb(60, 60, 60);
+
+        /// <summary>
+        /// 그리드·트리 헤더 칸 테두리 — 데이터 구분선(<see cref="GridLine"/>)과 달리 옅은 회색 그대로 둔다.
+        /// 옅은 헤더 바탕에 진한 테두리를 두르면 헤더가 칸칸이 갇혀 보여, 진한 선은 데이터 영역에만 쓴다(사용자 요구).
+        /// </summary>
+        public static Color GridHeaderBorder => IsDarkMode ? Color.FromArgb(58, 56, 90) : Color.FromArgb(230, 233, 241);
 
         /// <summary>그리드 선택(포커스) 행 바탕 — 화면별 포인트 컬러와 무관하게 모든 목록이 같은 하늘색을 쓴다.</summary>
         public static Color GridSelectedRow => IsDarkMode ? Color.FromArgb(38, 58, 92) : Color.FromArgb(230, 247, 255); // #E6F7FF
@@ -1110,7 +1116,7 @@ namespace SEOJIN_TMES.Client.Theme
 
             Paint(view.Appearance.HeaderPanel, GridHeaderBack, TextPrimary, BodyBoldFont);
             view.Appearance.HeaderPanel.BackColor2 = GridHeaderBack;
-            view.Appearance.HeaderPanel.BorderColor = GridLine;
+            view.Appearance.HeaderPanel.BorderColor = GridHeaderBorder;
             view.Appearance.HeaderPanel.Options.UseBorderColor = true;
             view.Appearance.HeaderPanel.TextOptions.HAlignment = HorzAlignment.Center;
             view.Appearance.HeaderPanel.Options.UseTextOptions = true;
@@ -1216,7 +1222,7 @@ namespace SEOJIN_TMES.Client.Theme
             tree.ColumnPanelRowHeight = 32;
 
             Paint(tree.Appearance.HeaderPanel, GridHeaderBack, TextPrimary, BodyBoldFont);
-            tree.Appearance.HeaderPanel.BorderColor = GridLine;
+            tree.Appearance.HeaderPanel.BorderColor = GridHeaderBorder;
             tree.Appearance.HeaderPanel.Options.UseBorderColor = true;
             tree.Appearance.HeaderPanel.TextOptions.HAlignment = HorzAlignment.Center;
             tree.Appearance.HeaderPanel.Options.UseTextOptions = true;
