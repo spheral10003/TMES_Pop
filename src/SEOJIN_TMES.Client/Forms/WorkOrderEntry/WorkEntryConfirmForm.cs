@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using DevExpress.XtraEditors;
 using DevExpress.XtraGrid.Views.Base;
 using SEOJIN_TMES.Client.Common.Models;
+using SEOJIN_TMES.Client.Forms.Pop;
 using SEOJIN_TMES.Client.Forms.Common;
 using SEOJIN_TMES.Client.Common.Languages;
 using SEOJIN_TMES.Client.Theme;
@@ -14,6 +15,10 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
     /// <summary>
     /// &lt;작업 진입 확인&gt; 팝업 — 선택한 작업지시의 라우팅(공정) 목록을 보여주고,
     /// 사용자가 이동할 **페이지 공정**을 고르면 [이동]으로 확정한다.
+    ///
+    /// 페이지 공정을 전부 늘어놓지 않고 라우팅 공정이 바뀔 때마다 한 줄만 보여 준다.
+    /// 그 줄의 페이지는 진행 상태로 고른다(대기 → 작업 중 → 중지 → 마지막 페이지, <see cref="RoutingProcessGroups"/>) —
+    /// 작업자가 라우팅 공정을 고르면 이어서 할 페이지로 바로 들어가게 하려는 것.
     ///
     /// 결과는 <see cref="SelectedProcess"/>로 받는다(DialogResult.OK일 때만 값이 있다).
     /// 데이터 조회는 호출하는 화면(<see cref="WorkOrderEntryScreen"/>)이 미리 해서 넘겨준다 —
@@ -50,7 +55,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
 
             ApplyTheme();
 
-            grid.DataSource = processes ?? new List<RoutingProcessDto>();
+            grid.DataSource = RoutingProcessGroups.Representatives(processes);
             GridColumns.Apply(gridView, Language.Col_No,
                 GridColumns.Text("RoutingGroup", Language.Col_RoutingGroup, 150),
                 GridColumns.Text("RoutingName", Language.Col_RoutingOperation, 140),

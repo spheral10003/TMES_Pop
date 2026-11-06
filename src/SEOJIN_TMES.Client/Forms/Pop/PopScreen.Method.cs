@@ -459,8 +459,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// [공정 목록] — 공정(라우팅) 목록을 조회해 &lt;작업 진입 확인&gt; 팝업을 띄우고,
-        /// [이동]으로 고른 공정으로 화면을 다시 읽는다.
+        /// [공정 목록] — 공정(라우팅) 목록을 조회해 지금 라우팅 그룹의 페이지 공정만 &lt;공정 목록&gt; 팝업(ProcessListForm)에 띄우고,
+        /// [이동] · 더블클릭으로 고른 페이지 공정으로 화면을 다시 읽는다.
         /// 목록은 누를 때마다 서버에서 새로 받는다 — 팝업에 공정마다 진행 상태가 보이는데, 처음 받아 둔 목록을 그대로 쓰면
         /// 그동안 완료 · 중지 · 리웍한 공정이 예전 상태로 보였다(진입 화면 WorkOrderEntryScreen과 같은 API · 같은 방식).
         /// </summary>
@@ -475,15 +475,18 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (!await GetProcesses(refresh: true))
                 return;
 
+            // 지금 라우팅 그룹 안의 페이지만 보여 준다 — 다른 라우팅 그룹으로의 이동은 작업 진입 화면에서 한다.
+            var pages = RoutingProcessGroups.PagesInRoutingGroup(_processes, _key.SubRoutingRef);
+
             RoutingProcessDto selected;
-            using (var confirm = new WorkEntryConfirmForm())
+            using (var list = new ProcessListForm())
             {
-                confirm.Initialize(ResolveWorkOrder(), _processes);
-                confirm.CenterOn(this);
-                if (confirm.ShowDialog(this) != DialogResult.OK)
+                list.Initialize(ResolveWorkOrder(), pages, _key.SubRoutingRef);
+                list.CenterOn(this);
+                if (list.ShowDialog(this) != DialogResult.OK)
                     return;
 
-                selected = confirm.SelectedProcess;
+                selected = list.SelectedProcess;
             }
 
             if (selected == null)
