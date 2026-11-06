@@ -29,6 +29,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// <summary>[이동]으로 확정한 페이지 공정. 취소/닫기면 null.</summary>
         public RoutingProcessDto SelectedProcess { get; private set; }
 
+        /// <summary>진행 상태 앞의 상태 구슬 컬럼(이벤트를 걸어 두므로 폼과 수명을 같이한다).</summary>
+        private StateImageColumn _stateImage;
+
         public ProcessListForm()
         {
             InitializeComponent();
@@ -56,6 +59,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 GridColumns.Text("RoutingName", Language.Col_RoutingOperation, 160),
                 GridColumns.Text("PageName", Language.Col_PageOperation, 200),
                 GridColumns.Text("ProgressState", Language.Col_ProgressState, 140));
+            // 진행 상태 앞에 상태 구슬 그림 — 헤더는 진행 상태와 한 칸으로 합쳐 보인다.
+            _stateImage = new StateImageColumn(gridView, nameof(RoutingProcessDto.ProgressState));
+            _stateImage.Attach();
             GridColumns.FitToWidth(gridView);
 
             gridView.FocusedRowHandle = FindRowIndex(pages, currentSubRoutingRef);

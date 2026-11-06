@@ -387,6 +387,9 @@
   <data name="WorkEntry_Work" xml:space="preserve">
     <value>Bắt đầu làm việc</value>
   </data>
+  <data name="WorkEntry_WorkStation" xml:space="preserve">
+    <value>Trạm làm việc</value>
+  </data>
   <data name="WorkEntry_WorkOrderNo" xml:space="preserve">
     <value>Số lệnh sản xuất</value>
   </data>

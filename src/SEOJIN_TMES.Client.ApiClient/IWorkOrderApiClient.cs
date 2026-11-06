@@ -41,13 +41,23 @@ namespace SEOJIN_TMES.Client.ApiClient
 
         public async Task<List<WorkOrderEntryDto>> SearchWorkOrdersAsync(WorkOrderQuery search, bool workStationEnable,  CancellationToken cancellationToken = default)
         {
-            var query = BuildQuery(
-                ("corpCd", search.CorpCode), 
-                ("woNo", search.WorkOrderNo), 
+            var conditions = new List<(string Name, string Value)>
+            {
+                ("corpCd", search.CorpCode),
+                ("woNo", search.WorkOrderNo),
                 ("sn", search.SerialNo),
                 ("itemCd", search.ItemCode),
                 ("wkstnRef", workStationEnable ? search.WorkStationRef : "")
-                );
+            };
+
+            // 상태는 같은 이름을 반복해서 보낸다(statusList=Ready&statusList=Progress) — 서버가 목록으로 받는다.
+            if (search.StatusList != null)
+            {
+                foreach (var status in search.StatusList)
+                    conditions.Add(("statusList", status));
+            }
+
+            var query = BuildQuery(conditions.ToArray());
 
             var response = await GetAsync<ApiDataResponse<List<WorkOrderEntryDto>>>($"{ApiPrefix}md/work-orders/overview{query}", cancellationToken);
             return response?.Data ?? new List<WorkOrderEntryDto>();

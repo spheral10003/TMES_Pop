@@ -34,6 +34,14 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
         //private ClientContext _context;
         private Setting _appSet;
         //private WorkOrderQuery _query;
+
+        /// <summary>조회 조건 statusList에 보내는 작업지시 상태 코드(서버 값).</summary>
+        private const string StatusReady = "Ready";
+        private const string StatusProgress = "Progress";
+
+        /// <summary>상태 앞의 상태 구슬 컬럼(이벤트를 걸어 두므로 화면과 수명을 같이한다).</summary>
+        private StateImageColumn _statusImage;
+
         /// <summary>[이동] 선택 시 같은 탭에 띄울 화면을 MainForm에 요청한다.</summary>
         public event EventHandler<ScreenNavigationEventArgs> NavigateRequested;
 
@@ -54,7 +62,11 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             lblItemCode.Text = "· " + Language.ItemPicker_Keyword;
             btnSearch.Text = Language.WorkEntry_Search;
             btnWork.Text = Language.WorkEntry_Work;
-            
+            chkWorkStationEnable.Text = Language.WorkEntry_WorkStation;
+            chkReady.Text = Language.ProgressState_Ready;
+            chkProgress.Text = Language.ProgressState_Progress;
+            LayoutStatusChecks();
+
             ApplyTheme();
             ConfigureGrid();
 
@@ -65,6 +77,34 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             // 목록에서 더블클릭하면 [작업]과 같게 동작한다.
             // 헤더 · 빈 영역 더블클릭에는 반응하지 않도록 RowDoubleClick을 쓴다(MeisGridView 참고).
             gridView.RowDoubleClick += gridView_RowDoubleClick;
+            gridView.CustomColumnDisplayText += gridView_CustomColumnDisplayText;
+        }
+
+        /// <summary>
+        /// [워크스테이션] 옆으로 [대기] · [진행중]을 이어 붙인다. 체크박스 글자 폭이 언어마다 달라
+        /// 디자이너의 고정 위치로 두면 긴 문구(베트남어 등)가 다음 체크박스와 겹친다.
+        /// </summary>
+        private void LayoutStatusChecks()
+        {
+            const int gap = 12;
+            chkWorkStationEnable.Size = chkWorkStationEnable.PreferredSize;
+            chkReady.Size = chkReady.PreferredSize;
+            chkProgress.Size = chkProgress.PreferredSize;
+            chkReady.Left = chkWorkStationEnable.Right + gap;
+            chkProgress.Left = chkReady.Right + gap;
+        }
+
+        /// <summary>작업지시 상태(서버 코드 Ready/Progress/Completed 등)를 화면 언어의 문구로 보여 준다. 값 자체는 바꾸지 않는다.</summary>
+        private void gridView_CustomColumnDisplayText(object sender, DevExpress.XtraGrid.Views.Base.CustomColumnDisplayTextEventArgs e)
+        {
+            if (e.Column == null || e.Column.FieldName != nameof(WorkOrderEntryDto.StatusName))
+                return;
+
+            var value = e.Value as string;
+            if (string.IsNullOrEmpty(value))
+                return;
+
+            e.DisplayText = Language.ProgressStateText(value);
         }
 
         /// <summary>현재 테마 색을 화면에 입힌다(포인트 컬러: Indigo).</summary>
@@ -109,6 +149,32 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
                 GridColumns.Date("WorkEndDate", Language.Col_ActualEndDate, 120),
                 GridColumns.Text("StatusName", Language.Col_StatusName, 110),
                 GridColumns.Left("Remark", Language.Col_Remark, 200));
+
+            // 상태 앞에 상태 구슬 그림 — 헤더는 상태와 한 칸으로 합쳐 보인다.
+            _statusImage = new StateImageColumn(gridView, nameof(WorkOrderEntryDto.StatusName));
+            _statusImage.Attach();
+        }
+
+        /// <summary>
+        /// 조회 조건의 작업지시 상태 목록 — [대기] · [진행중] 체크로 고른다.
+        /// 완료(Completed)는 POP에서 다시 작업할 대상이 아니라 넣지 않는다.
+        /// 둘 다 끄면 조건이 비어 완료까지 전부 나오므로, 그때는 대기 · 진행중 둘 다로 조회한다.
+        /// </summary>
+        private List<string> BuildStatusList()
+        {
+            var statusList = new List<string>();
+            if (chkReady.Checked)
+                statusList.Add(StatusReady);
+            if (chkProgress.Checked)
+                statusList.Add(StatusProgress);
+
+            if (statusList.Count == 0)
+            {
+                statusList.Add(StatusReady);
+                statusList.Add(StatusProgress);
+            }
+
+            return statusList;
         }
 
         private void Condition_KeyDown(object sender, KeyEventArgs e)
@@ -157,7 +223,8 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
                     SerialNo = serialNo,
                     ItemCode = txtItemCode.Text?.Trim(),
                     ItemName = txtItemName.Text?.Trim(),
-                    WorkStationRef = _appSet.CurrentUser?.WorkstationInfo?.WorkstationRef
+                    WorkStationRef = _appSet.CurrentUser?.WorkstationInfo?.WorkstationRef,
+                    StatusList = BuildStatusList()
                 };
                 
                 result = await FetchWorkOrdersAsync(_query, chkWorkStationEnable.Checked);
@@ -166,6 +233,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
 
                 grid.DataSource = result;
                 gridView.BestFitColumns();
+                _statusImage.Attach();   // 맞춤 폭 계산이 빈 그림 컬럼을 줄여 놓으므로 폭 · 위치를 다시 잡는다
 
                 if (result.Count == 0)
                     AppMessageBox.Info(this, Language.WorkEntry_NoResult, Language.WorkEntry_Title);

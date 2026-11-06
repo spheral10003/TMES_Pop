@@ -387,6 +387,9 @@
   <data name="WorkEntry_Work" xml:space="preserve">
     <value>Start Work</value>
   </data>
+  <data name="WorkEntry_WorkStation" xml:space="preserve">
+    <value>Workstation</value>
+  </data>
   <data name="WorkEntry_WorkOrderNo" xml:space="preserve">
     <value>Work Order No</value>
   </data>

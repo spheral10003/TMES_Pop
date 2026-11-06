@@ -200,6 +200,8 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string WorkEntry_Title => Get(nameof(WorkEntry_Title));
         public static string WorkEntry_Search => Get(nameof(WorkEntry_Search));
         public static string WorkEntry_Work => Get(nameof(WorkEntry_Work));
+        /// <summary>작업 진입 화면 — 내 워크스테이션 작업지시만 조회하는 체크박스.</summary>
+        public static string WorkEntry_WorkStation => Get(nameof(WorkEntry_WorkStation));
         public static string WorkEntry_WorkOrderNo => Get(nameof(WorkEntry_WorkOrderNo));
         public static string WorkEntry_SerialNo => Get(nameof(WorkEntry_SerialNo));
         public static string WorkEntry_ListTitle => Get(nameof(WorkEntry_ListTitle));
@@ -260,6 +262,8 @@ namespace SEOJIN_TMES.Client.Common.Languages
                 case "PROGRESS": return ProgressState_Progress;
                 case "STOPPED": return ProgressState_Stopped;
                 case "FINISHED": return ProgressState_Finished;
+                // 작업지시 상태는 완료를 Completed로 내려준다(공정은 Finished) — 화면에는 같은 "완료".
+                case "COMPLETED": return ProgressState_Finished;
                 default: return code;
             }
         }

@@ -387,6 +387,9 @@
   <data name="WorkEntry_Work" xml:space="preserve">
     <value>작업</value>
   </data>
+  <data name="WorkEntry_WorkStation" xml:space="preserve">
+    <value>워크스테이션</value>
+  </data>
   <data name="WorkEntry_WorkOrderNo" xml:space="preserve">
     <value>작업지시번호</value>
   </data>

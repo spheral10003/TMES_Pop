@@ -37,5 +37,11 @@ namespace SEOJIN_TMES.Client.Common.Models
         /// <summary>워크스테이션 참조 코드.</summary>
         public string WorkStationRef { get; set; }
 
+        /// <summary>
+        /// 작업지시 상태 목록(Ready / Progress / Completed) — statusList=Ready&amp;statusList=Progress처럼 반복해서 보낸다.
+        /// 비어 있으면 상태로 거르지 않는다. POP 진입 화면은 완료를 빼고 보낸다(WorkOrderEntryScreen).
+        /// </summary>
+        public List<string> StatusList { get; set; }
+
     }
 }
