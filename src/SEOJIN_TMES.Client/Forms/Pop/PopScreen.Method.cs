@@ -914,7 +914,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// 시리얼 입력이 남은 자재마다 차례로 입력 팝업을 띄우고, 모두 끝났으면 [BOM 스팩] 탭으로 넘긴다.
+        /// 시리얼 입력이 남은 자재마다 차례로 입력 팝업을 띄우고, 끝나면 입력이 남은 다음 탭으로 넘긴다(<see cref="SelectInputTab"/>).
         /// 중간에 자동 진행으로 공정이 바뀌면(자재 목록이 새로 바뀌면) 남은 팝업은 띄우지 않는다.
         /// 공정에 들어올 때마다(진입 · 이동 · 자동 진행) 여기를 지나므로, BOM 대상 행 선택과 목표 토크도 여기서 한다.
         ///
@@ -923,6 +923,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// </summary>
         public async Task CheckMaterialSerials()
         {
+            // 앞 공정에서 보던 탭이 남지 않게, 팝업을 띄우기 전에 이 공정에서 볼 탭부터 고른다.
+            SelectInputTab();
+
             if (IsProcessRunning)
             {
                 var materials = _materials;
@@ -945,8 +948,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 AppLog.Info($"[POP] 공정 미진행 - 투입자재 입력 팝업 생략 ({_key?.RoutingOperation}/{_key?.PageOperation}, 상태 {_progressState})");
             }
 
-            if (!ShowBomSpecTab())
-                SelectBomSpecRow();
+            SelectInputTab();
+            SelectBomSpecRow();
         }
 
         /// <summary>
@@ -964,21 +967,32 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// 투입자재 입력(시리얼 · 품목코드)이 모두 끝났으면 [BOM 스팩] 탭으로 넘기고 체결할 행 · 목표 토크를 맞춘다.
-        /// 투입자재가 없으면 탭을 옮기지 않는다(작업자가 보던 탭을 그대로 둔다).
-        /// 이 공정에 BOM 스팩이 한 줄도 없으면 빈 탭에 멈추지 않고 [검사 스팩] 탭으로 한 번 더 넘긴다
-        /// ([연결 장비] 탭까지는 자동으로 가지 않는다).
+        /// 지금 공정에서 작업자가 볼 탭을 고른다 — 투입자재 → BOM 스팩 → 검사 스팩 순으로, 입력이 남은 첫 탭.
+        ///  - 투입자재 입력(시리얼 · 품목코드)이 남았으면 [투입자재]
+        ///  - 그다음 체결할 BOM 줄(참조 줄 제외)이 있으면 [BOM 스팩]
+        ///  - BOM이 없거나 참조 줄뿐이면 [검사 스팩]. 검사 항목도 없으면 [투입자재]에 둔다(빈 탭으로 옮기지 않는다).
+        /// [연결 장비] 탭으로는 자동으로 가지 않는다.
+        ///
+        /// 예전에는 투입자재가 없거나 덜 끝났을 때 탭을 건드리지 않아, 공정을 옮겨도 앞 공정에서 보던 탭이 그대로 남았다.
+        /// 공정에 들어올 때(CheckMaterialSerials)와 투입자재 입력을 마쳤을 때 부른다.
         /// </summary>
-        /// <returns>탭을 옮겼으면 true.</returns>
-        public bool ShowBomSpecTab()
+        /// <returns>투입자재 입력이 다 끝났으면(또는 받을 자재가 없으면) true.</returns>
+        public bool SelectInputTab()
         {
-            if (_materials.Count == 0 || !_materials.All(IsMaterialPopupDone))
-                return false;
+            var materialsDone = _materials.All(IsMaterialPopupDone);
 
-            // 참조 줄만 있는 BOM은 할 일이 없으므로 BOM 스팩이 없을 때와 같이 검사 탭으로 넘긴다.
-            tabSpec.SelectedTabPage = HasBomSpecInputRows() ? pageBom : pageInspec;
-            SelectBomSpecRow();
-            return true;
+            DevExpress.XtraTab.XtraTabPage page;
+            if (!materialsDone)
+                page = pageMaterial;
+            else if (HasBomSpecInputRows())
+                page = pageBom;
+            else if (_inspections.Count > 0)
+                page = pageInspec;
+            else
+                page = pageMaterial;
+
+            tabSpec.SelectedTabPage = page;
+            return materialsDone;
         }
 
         /// <summary>

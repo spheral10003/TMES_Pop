@@ -655,7 +655,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 if (IsDisposed || Disposing || !ReferenceEquals(bomSpecs, _bomSpecs))
                     return;
 
-                Screen.ShowBomSpecTab();
+                // 자재 입력이 다 끝나 다음 탭으로 넘어갔을 때만 체결할 BOM 행 · 목표 토크를 맞춘다.
+                if (Screen.SelectInputTab())
+                    Screen.SelectBomSpecRow();
             }
             catch (Exception ex)
             {
