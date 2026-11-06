@@ -426,6 +426,18 @@
   <data name="WorkEntryConfirm_SelectProcess" xml:space="preserve">
     <value>이동할 페이지 공정을 선택하세요.</value>
   </data>
+  <data name="WorkEntryConfirm_TabRouting" xml:space="preserve">
+    <value>라우팅 공정</value>
+  </data>
+  <data name="WorkEntryConfirm_TabAllPages" xml:space="preserve">
+    <value>전체 페이지 공정</value>
+  </data>
+  <data name="WorkEntryConfirm_MaterialSearch" xml:space="preserve">
+    <value>검색</value>
+  </data>
+  <data name="WorkEntryConfirm_NoMaterialMatch" xml:space="preserve">
+    <value>검색한 투입자재 코드를 사용하는 공정이 없습니다.</value>
+  </data>
   <data name="Col_No" xml:space="preserve">
     <value>NO</value>
   </data>

@@ -19,9 +19,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// 디자이너 지원 메서드. 람다식/삼항연산자/문자열보간/객체이니셜라이저/커스텀 static 호출 사용 금지.
         /// 색·폰트·아이콘·문구는 ProcessListForm.cs의 Initialize()에서 런타임에 넣는다.
         ///
-        /// 구성(다른 팝업과 동일): 상단 색 띠(아이콘+제목) + 옅은 본문 안의 카드(공정 목록 그리드) + 하단 [닫기][이동]
+        /// 구성(다른 팝업과 동일): 상단 색 띠(아이콘+제목) + 옅은 본문 안의 카드(제목 + 투입자재 검색 줄 + 공정 목록 그리드) + 하단 [닫기][이동]
         /// + 우하단 크기 조절 손잡이(pnlGrip).
         /// 도킹 순서 주의: bodyPanel(Fill) → footerPanel(Bottom) → headerPanel(Top).
+        /// listCard 안은 grid(Fill) → materialSearch(Top) → lblListTitle(Top).
         /// </summary>
         private void InitializeComponent()
         {
@@ -32,6 +33,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.listCard = new DevExpress.XtraEditors.PanelControl();
             this.grid = new DevExpress.XtraGrid.GridControl();
             this.gridView = new SEOJIN_TMES.Client.Forms.Common.MeisGridView();
+            this.materialSearch = new SEOJIN_TMES.Client.Forms.Pop.MaterialSearchBar();
             this.lblListTitle = new DevExpress.XtraEditors.LabelControl();
             this.footerPanel = new DevExpress.XtraEditors.PanelControl();
             this.pnlGrip = new System.Windows.Forms.Panel();
@@ -46,6 +48,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.listCard.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.grid)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView)).BeginInit();
+            this.materialSearch.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.footerPanel)).BeginInit();
             this.footerPanel.SuspendLayout();
             this.SuspendLayout();
@@ -88,6 +91,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // listCard
             // 
             this.listCard.Controls.Add(this.grid);
+            this.listCard.Controls.Add(this.materialSearch);
             this.listCard.Controls.Add(this.lblListTitle);
             this.listCard.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listCard.Location = new System.Drawing.Point(18, 14);
@@ -99,10 +103,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // grid
             // 
             this.grid.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.grid.Location = new System.Drawing.Point(3, 35);
+            this.grid.Location = new System.Drawing.Point(3, 79);
             this.grid.MainView = this.gridView;
             this.grid.Name = "grid";
-            this.grid.Size = new System.Drawing.Size(1158, 518);
+            this.grid.Size = new System.Drawing.Size(1158, 474);
             this.grid.TabIndex = 1;
             this.grid.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
             this.gridView});
@@ -113,6 +117,14 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.gridView.GridControl = this.grid;
             this.gridView.Name = "gridView";
             this.gridView.OptionsBehavior.Editable = false;
+            // 
+            // materialSearch
+            // 
+            this.materialSearch.Dock = System.Windows.Forms.DockStyle.Top;
+            this.materialSearch.Location = new System.Drawing.Point(3, 35);
+            this.materialSearch.Name = "materialSearch";
+            this.materialSearch.Size = new System.Drawing.Size(1158, 44);
+            this.materialSearch.TabIndex = 2;
             // 
             // lblListTitle
             // 
@@ -194,6 +206,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.listCard.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.grid)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView)).EndInit();
+            this.materialSearch.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.footerPanel)).EndInit();
             this.footerPanel.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -208,6 +221,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private DevExpress.XtraEditors.PanelControl bodyPanel;
         private DevExpress.XtraEditors.PanelControl listCard;
         private DevExpress.XtraEditors.LabelControl lblListTitle;
+        private SEOJIN_TMES.Client.Forms.Pop.MaterialSearchBar materialSearch;
         private DevExpress.XtraGrid.GridControl grid;
         private SEOJIN_TMES.Client.Forms.Common.MeisGridView gridView;
         private DevExpress.XtraEditors.PanelControl footerPanel;

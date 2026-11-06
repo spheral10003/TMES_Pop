@@ -16,9 +16,12 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
     /// &lt;작업 진입 확인&gt; 팝업 — 선택한 작업지시의 라우팅(공정) 목록을 보여주고,
     /// 사용자가 이동할 **페이지 공정**을 고르면 [이동]으로 확정한다.
     ///
-    /// 페이지 공정을 전부 늘어놓지 않고 라우팅 공정이 바뀔 때마다 한 줄만 보여 준다.
-    /// 그 줄의 페이지는 진행 상태로 고른다(대기 → 작업 중 → 중지 → 마지막 페이지, <see cref="RoutingProcessGroups"/>) —
-    /// 작업자가 라우팅 공정을 고르면 이어서 할 페이지로 바로 들어가게 하려는 것.
+    /// 탭 두 개로 보여 준다.
+    /// - [라우팅 공정] : 라우팅 공정이 바뀔 때마다 한 줄만 보여 준다.
+    ///   그 줄의 페이지는 진행 상태로 고른다(대기 → 작업 중 → 중지 → 마지막 페이지, <see cref="RoutingProcessGroups"/>) —
+    ///   작업자가 라우팅 공정을 고르면 이어서 할 페이지로 바로 들어가게 하려는 것.
+    /// - [전체 페이지 공정] : 예전 방식대로 페이지 공정을 전부 보여 준다.
+    ///   상단 투입자재 검색 줄(<see cref="MaterialSearchBar"/>)로 투입자재 코드를 쓰는 페이지만 추릴 수 있다.
     ///
     /// 결과는 <see cref="SelectedProcess"/>로 받는다(DialogResult.OK일 때만 값이 있다).
     /// 데이터 조회는 호출하는 화면(<see cref="WorkOrderEntryScreen"/>)이 미리 해서 넘겨준다 —
@@ -38,6 +41,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
 
         /// <summary>진행 상태 앞의 상태 구슬 컬럼(이벤트를 걸어 두므로 폼과 수명을 같이한다).</summary>
         private StateImageColumn _stateImage;
+        private StateImageColumn _stateImageAll;
 
         public WorkEntryConfirmForm()
         {
@@ -47,35 +51,65 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
         public void Initialize(WorkOrderEntryDto workOrder, List<RoutingProcessDto> processes)
         {
             _workOrder = workOrder;
+            var allPages = processes ?? new List<RoutingProcessDto>();
 
             Text = Language.WorkEntryConfirm_Title;
             lblTitle.Text = _workOrder != null
                 ? $"{Language.WorkEntryConfirm_Title} - {_workOrder.WorkOrderNo}"
                 : Language.WorkEntryConfirm_Title;
             lblListTitle.Text = Language.WorkEntryConfirm_ListTitle;
+            lblAllTitle.Text = Language.WorkEntryConfirm_ListTitle;
+            pageRouting.Text = Language.WorkEntryConfirm_TabRouting;
+            pageAllPages.Text = Language.WorkEntryConfirm_TabAllPages;
             btnMove.Text = Language.WorkEntryConfirm_Move;
             btnClose.Text = Language.Common_Close;
 
             ApplyTheme();
 
-            grid.DataSource = RoutingProcessGroups.Representatives(processes);
-            GridColumns.Apply(gridView, Language.Col_No,
+            // 탭 1 — 라우팅 공정마다 한 줄
+            grid.DataSource = RoutingProcessGroups.Representatives(allPages);
+            _stateImage = ConfigureProcessGrid(gridView);
+
+            // 탭 2 — 페이지 공정 전체(처음 열 때는 검색 없이 전부)
+            gridAll.DataSource = allPages;
+            _stateImageAll = ConfigureProcessGrid(gridViewAll);
+
+            materialSearch.Initialize(_workOrder, allPages);
+            materialSearch.SearchCompleted += materialSearch_SearchCompleted;
+        }
+
+        /// <summary>두 탭의 그리드 컬럼 · 상태 구슬 · 더블클릭을 같은 모양으로 맞춘다.</summary>
+        private StateImageColumn ConfigureProcessGrid(MeisGridView view)
+        {
+            GridColumns.Apply(view, Language.Col_No,
                 GridColumns.Text("RoutingGroup", Language.Col_RoutingGroup, 150),
                 GridColumns.Text("RoutingName", Language.Col_RoutingOperation, 140),
                 GridColumns.Text("PageName", Language.Col_PageOperation, 140),
                 GridColumns.Text("ProgressState", Language.Col_ProgressState, 120));
             // 진행 상태 앞에 상태 구슬 그림 — 헤더는 진행 상태와 한 칸으로 합쳐 보인다.
-            _stateImage = new StateImageColumn(gridView, nameof(RoutingProcessDto.ProgressState));
-            _stateImage.Attach();
-            GridColumns.FitToWidth(gridView);
+            var stateImage = new StateImageColumn(view, nameof(RoutingProcessDto.ProgressState));
+            stateImage.Attach();
+            GridColumns.FitToWidth(view);
 
-            if (gridView.RowCount > 0)
-                gridView.FocusedRowHandle = 0;
+            if (view.RowCount > 0)
+                view.FocusedRowHandle = 0;
 
             // 행을 더블클릭하면 [이동]과 같게 동작한다.
             // 헤더 · 빈 영역 더블클릭에는 반응하지 않도록 RowDoubleClick을 쓴다(MeisGridView 참고).
-            gridView.RowDoubleClick += gridView_RowDoubleClick;
-            gridView.CustomColumnDisplayText += gridView_CustomColumnDisplayText;
+            view.RowDoubleClick += gridView_RowDoubleClick;
+            view.CustomColumnDisplayText += gridView_CustomColumnDisplayText;
+            return stateImage;
+        }
+
+        /// <summary>투입자재 검색 결과로 [전체 페이지 공정] 목록을 갈아 끼운다(조건이 없으면 전체).</summary>
+        private void materialSearch_SearchCompleted(object sender, MaterialSearchResultEventArgs e)
+        {
+            gridAll.DataSource = e.Pages;
+            lblAllTitle.Text = string.IsNullOrEmpty(e.Condition)
+                ? Language.WorkEntryConfirm_ListTitle
+                : $"{Language.WorkEntryConfirm_ListTitle} - {e.Condition}";
+            if (gridViewAll.RowCount > 0)
+                gridViewAll.FocusedRowHandle = 0;
         }
 
         /// <summary>진행 상태(서버 코드 Ready/Progress/Stopped/Finished)를 화면 언어의 문구로 보여 준다. 값 자체는 바꾸지 않는다.</summary>
@@ -104,9 +138,17 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             pnlGrip.BackColor = AppTheme.Surface;
             AppTheme.StandardButton(btnMove);
             AppTheme.StandardButton(btnClose);
+
+            pageRouting.BackColor = AppTheme.Surface;
+            pageAllPages.BackColor = AppTheme.Surface;
+
             AppTheme.CardPanel(listCard);
             AppTheme.SectionTitle(lblListTitle, AppTheme.Indigo);
             AppTheme.Grid(grid, gridView, AppTheme.Indigo);
+
+            AppTheme.CardPanel(allCard);
+            AppTheme.SectionTitle(lblAllTitle, AppTheme.Indigo);
+            AppTheme.Grid(gridAll, gridViewAll, AppTheme.Indigo);
 
             headerIcon.SvgImage = AppIcons.Get(AppIcons.Layers, Color.White);
             headerIcon.SizeMode = SvgImageSizeMode.Stretch;
@@ -130,10 +172,11 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             Close();
         }
 
-        /// <summary>선택한 페이지 공정을 확정한다. 선택이 없으면 안내만 하고 창은 유지한다.</summary>
+        /// <summary>선택한 페이지 공정을 확정한다(보고 있는 탭의 그리드 기준). 선택이 없으면 안내만 하고 창은 유지한다.</summary>
         private void MoveToSelectedProcess()
         {
-            var process = gridView.GetFocusedRow() as RoutingProcessDto;
+            var view = tabProcess.SelectedTab == pageAllPages ? gridViewAll : gridView;
+            var process = view.GetFocusedRow() as RoutingProcessDto;
             if (process == null)
             {
                 AppMessageBox.Warn(this, Language.WorkEntryConfirm_SelectProcess, Language.WorkEntryConfirm_Title);

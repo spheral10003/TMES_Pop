@@ -18,6 +18,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
     /// &lt;작업 진입 확인&gt;(WorkEntryConfirmForm)은 라우팅 공정마다 한 줄로 줄여 보여 주므로,
     /// 페이지 단위로 골라 옮기는 일은 이 팝업이 맡는다.
     /// 목록 조회와 "어느 라우팅 그룹의 페이지인가"는 호출하는 POP 화면이 정해서 넘긴다.
+    /// 그리드 위 투입자재 검색 줄(<see cref="MaterialSearchBar"/>)로 투입자재 코드를 쓰는 페이지만 추릴 수 있다.
     ///
     /// VS 디자이너 호환을 위해 매개변수 없는 생성자만 두고, 실제 내용은 Initialize()로 넣는다.
     /// </summary>
@@ -37,7 +38,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             InitializeComponent();
         }
 
-        /// <param name="workOrder">제목에 작업지시번호를 붙이는 데만 쓴다. null이면 생략.</param>
+        /// <param name="workOrder">제목의 작업지시번호, 투입자재 검색의 조회 키(작업지시번호 · 시리얼)에 쓴다. null이면 제목에서 생략.</param>
         /// <param name="pages">같은 라우팅 그룹의 페이지 공정들(순번 순).</param>
         /// <param name="currentSubRoutingRef">지금 보고 있는 페이지 — 처음 포커스를 여기에 둔다.</param>
         public void Initialize(WorkOrderEntryDto workOrder, List<RoutingProcessDto> pages, string currentSubRoutingRef)
@@ -69,6 +70,25 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 헤더 · 빈 영역 더블클릭에는 반응하지 않도록 RowDoubleClick을 쓴다(MeisGridView 참고).
             gridView.RowDoubleClick += gridView_RowDoubleClick;
             gridView.CustomColumnDisplayText += gridView_CustomColumnDisplayText;
+
+            // 그리드 위 투입자재 검색 — 이 라우팅 그룹의 페이지 중에서만 찾는다.
+            _listTitle = lblListTitle.Text;
+            materialSearch.Initialize(workOrder, pages);
+            materialSearch.SearchCompleted += materialSearch_SearchCompleted;
+        }
+
+        /// <summary>검색 전 목록 제목(라우팅 그룹 포함) — 검색 조건을 붙였다 뗄 때의 기준.</summary>
+        private string _listTitle;
+
+        /// <summary>투입자재 검색 결과로 목록을 갈아 끼운다(조건이 없으면 전체).</summary>
+        private void materialSearch_SearchCompleted(object sender, MaterialSearchResultEventArgs e)
+        {
+            grid.DataSource = e.Pages;
+            lblListTitle.Text = string.IsNullOrEmpty(e.Condition)
+                ? _listTitle
+                : $"{_listTitle} - {e.Condition}";
+            if (gridView.RowCount > 0)
+                gridView.FocusedRowHandle = 0;
         }
 
         /// <summary>목록 제목 — 어느 라우팅 그룹의 공정인지 알 수 있게 라우팅 그룹을 붙인다.</summary>

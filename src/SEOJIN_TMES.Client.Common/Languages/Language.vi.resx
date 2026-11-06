@@ -426,6 +426,18 @@
   <data name="WorkEntryConfirm_SelectProcess" xml:space="preserve">
     <value>Hãy chọn công đoạn trang cần chuyển đến.</value>
   </data>
+  <data name="WorkEntryConfirm_TabRouting" xml:space="preserve">
+    <value>Công đoạn định tuyến</value>
+  </data>
+  <data name="WorkEntryConfirm_TabAllPages" xml:space="preserve">
+    <value>Tất cả công đoạn trang</value>
+  </data>
+  <data name="WorkEntryConfirm_MaterialSearch" xml:space="preserve">
+    <value>Tìm kiếm</value>
+  </data>
+  <data name="WorkEntryConfirm_NoMaterialMatch" xml:space="preserve">
+    <value>Không có công đoạn nào sử dụng mã vật tư đã tìm.</value>
+  </data>
   <data name="Col_No" xml:space="preserve">
     <value>STT</value>
   </data>

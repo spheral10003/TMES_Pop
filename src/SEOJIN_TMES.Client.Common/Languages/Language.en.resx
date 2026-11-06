@@ -426,6 +426,18 @@
   <data name="WorkEntryConfirm_SelectProcess" xml:space="preserve">
     <value>Select the page operation to move to.</value>
   </data>
+  <data name="WorkEntryConfirm_TabRouting" xml:space="preserve">
+    <value>Routing Operations</value>
+  </data>
+  <data name="WorkEntryConfirm_TabAllPages" xml:space="preserve">
+    <value>All Page Operations</value>
+  </data>
+  <data name="WorkEntryConfirm_MaterialSearch" xml:space="preserve">
+    <value>Search</value>
+  </data>
+  <data name="WorkEntryConfirm_NoMaterialMatch" xml:space="preserve">
+    <value>No operation uses the searched input material code.</value>
+  </data>
   <data name="Col_No" xml:space="preserve">
     <value>NO</value>
   </data>
