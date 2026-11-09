@@ -727,7 +727,11 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             try
             {
                 // 목표 토크는 서버 기준정보 값을 그대로 쓴다(클라이언트가 계산하지 않는다).
-                if (Screen.WriteTorqueToEquipment(spec.TorqueTarget.Value).Count == 0)
+                var activated = Screen.WriteTorqueToEquipment(spec.TorqueTarget.Value);
+
+                // 공정에 등록된 장비가 아예 없으면 수동 입력 공정이다 — 알릴 일이 아니다.
+                // 장비가 등록돼 있는데 쓸 수 있는 것이 없을 때(연결 실패 · 범위 밖)만 알린다.
+                if (activated.Count == 0 && _equipments.Count > 0)
                     AppMessageBox.Warn(this, "사용 할 수 있는 너트러너가 없습니다.", Language.Pop_Title);
             }
             catch (Exception ex)
