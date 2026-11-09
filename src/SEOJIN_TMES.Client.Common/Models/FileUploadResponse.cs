@@ -49,6 +49,10 @@ namespace SEOJIN_TMES.Client.Common.Models
         [JsonProperty("fileSize")]
         public long FileSize { get; set; }
 
+        /// <summary>공유 폴더 안의 첨부 파일 위치(DocumentShare.RootPath 기준 상대 경로). 이미지 첨부 미리보기에 쓴다.</summary>
+        [JsonProperty("attachFilePath")]
+        public string AttachFilePath { get; set; }
+
         /// <summary>첨부 식별자. 다운로드 · 삭제할 때 이 값을 쓴다. TODO: 필드명은 가정값.</summary>
         [JsonProperty("atchRef")]
         public string AttachRef { get; set; }

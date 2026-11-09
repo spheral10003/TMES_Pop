@@ -183,6 +183,11 @@ namespace SEOJIN_TMES.Client.Common.Models
         [JsonProperty("workStatus")]
         public string ProgressState { get; set; }
 
-        
+        /// <summary>
+        /// 페이지 공정의 작업 지시 이미지 위치(App.config의 DocumentShare.RootPath 기준 상대 경로).
+        /// POP [공정 목록] 팝업이 행 위에 마우스를 올렸을 때 이 그림을 미리보기로 띄운다.
+        /// </summary>
+        [JsonProperty("subRoutingProcImagePath")]
+        public string ProcImagePath { get; set; }
     }
 }

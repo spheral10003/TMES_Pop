@@ -26,6 +26,13 @@ namespace SEOJIN_TMES.Client.Common.Models
         [JsonProperty("fileExtn")]
         public string FileExtension { get; set; }
 
+        /// <summary>
+        /// 공유 폴더 안의 첨부 파일 위치(App.config의 DocumentShare.RootPath 기준 상대 경로).
+        /// 첨부파일 조회 화면은 이 경로를 RootPath 뒤에 붙여 이미지 첨부의 미리보기를 띄운다.
+        /// </summary>
+        [JsonProperty("attachFilePath")]
+        public string AttachFilePath { get; set; }
+
         /// <summary>그 작업지시의 첨부 건수. 첨부파일 조회 화면 목록의 "첨부파일" 열을 이 값으로 갱신한다.</summary>
         [JsonProperty("attachmentCount")]
         public string AttachmentCount { get; set; }

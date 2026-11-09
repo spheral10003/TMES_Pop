@@ -33,7 +33,8 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
     ///  3) 우측에서 체크한 파일을 [다운로드] · [삭제]하고, [업로드]로 올린다. 업로드 · 삭제 뒤에는 서버 목록을 다시 받는다.
     ///     체크 칸은 GridView의 CheckBoxRowSelect라 머리글 체크를 누르면 전체 체크 / 다시 누르면 전체 해제된다.
     ///
-    /// FileUploadForm과 같은 API(IFileApiClient)를 쓰되 미리보기는 없다.
+    /// FileUploadForm과 같은 API(IFileApiClient)를 쓴다. 파일 상세목록에서 이미지 첨부 위에 마우스를 올리면
+    /// 공유 폴더(DocumentShare.RootPath + attachFilePath)의 그림을 커서 옆에 미리보기로 띄운다(<see cref="GridImagePreview"/>).
     /// 그리드를 제외한 컨트롤은 .NET 기본 컨트롤이고, 색은 Designer에 직접 지정했다(테마 전환 대상 아님).
     /// </summary>
     public partial class AttachmentSearchScreen : UserControl
@@ -49,6 +50,9 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
 
         /// <summary>조회 · 업로드 · 삭제 · 다운로드 중에는 버튼을 막는다 — 중복 요청이 서버 상태를 꼬이게 한다.</summary>
         private bool _isBusy;
+
+        /// <summary>파일 상세목록의 이미지 첨부 마우스 오버 미리보기. 탭이 닫힐 때(Disposed) 함께 해제한다.</summary>
+        private GridImagePreview _preview;
 
         public AttachmentSearchScreen()
         {
@@ -72,7 +76,31 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             dtpFrom.Value = DateTime.Today.AddDays(-6);
             dtpTo.Value = DateTime.Today;
 
+            // 언어를 바꾸면 Init()이 다시 불리므로 이전 미리보기를 먼저 정리한다(이벤트가 두 번 걸리지 않게).
+            _preview?.Dispose();
+            _preview = new GridImagePreview(gridViewFiles, PreviewPathOf, _appSet.DocShare, _appSet.AppSet.DocumentShare.RootPath);
+            Disposed -= AttachmentSearchScreen_Disposed;
+            Disposed += AttachmentSearchScreen_Disposed;
+
             ControlEnabled();
+        }
+
+        /// <summary>
+        /// 미리보기할 그림 경로 — 올라간(업로드된) 첨부 중 이미지 파일만. 문서(PDF 등)는 미리보기하지 않는다.
+        /// 이미지 여부는 파일 유형(확장자, FileUploadResponse.IsImage)으로 판단한다.
+        /// </summary>
+        private string PreviewPathOf(object row)
+        {
+            var file = row as FileUploadResponse;
+            if (file == null || !file.IsImage)
+                return null;
+            return file.AttachFilePath;
+        }
+
+        private void AttachmentSearchScreen_Disposed(object sender, EventArgs e)
+        {
+            _preview?.Dispose();
+            _preview = null;
         }
 
         /// <summary>버튼 색 — 앱 공통 버튼 색(글꼴은 Designer 값 유지). 그리드 구분선은 다른 목록과 같은 색.</summary>
@@ -331,6 +359,7 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             file.FileName = item.FileName;
             file.FileExtension = item.FileExtension;
             file.FileSize = item.FileSize;
+            file.AttachFilePath = item.AttachFilePath;
             file.CreatedBy = item.CreatedBy;
             file.UpdatedBy = item.UpdatedBy;
             file.CreatedAt = item.CreatedAt;
