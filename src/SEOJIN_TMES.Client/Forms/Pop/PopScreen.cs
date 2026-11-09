@@ -344,6 +344,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 await Screen.GetProcessInfo();
                 if (IsDisposed || Disposing) return;
 
+                // 진입한 공정이 마지막 공정인지 — 완료하기 전에 작업자에게 확인하는 데 쓴다.
+                await Screen.GetIsLastProcess();
+                if (IsDisposed || Disposing) return;
+
                 WireEquipmentEvents();
 
                 // 진입도 공정 이동과 같다 — 시작 버튼이 없으므로 여기서 시작하지 않으면 첫 공정은 시작할 길이 없다.

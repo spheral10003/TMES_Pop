@@ -66,6 +66,12 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private bool _reworking;
 
         /// <summary>
+        /// 지금 페이지 공정이 마지막 공정인지(서버 is-last 응답). 공정에 들어올 때마다 다시 묻는다(<see cref="GetIsLastProcess"/>).
+        /// 마지막 공정을 완료하면 작업이 끝나므로 완료 전에 작업자에게 확인한다(<see cref="ConfirmLastProcessEnd"/>).
+        /// </summary>
+        private bool _isLastProcess;
+
+        /// <summary>
         /// 서버에 보내는 중인 실적 저장(시리얼 · 토크 · 검사) 개수.
         /// 화면 값은 저장 응답 전에 이미 채워져 있으므로, 응답을 기다리지 않고 완료를 보내면
         /// 서버에는 마지막 실적이 없는 채로 공정이 끝날 수 있다 — 0일 때만 완료를 보낸다.
@@ -198,6 +204,58 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
             // 도면은 공유 폴더를 거쳐 늦게 올 수 있으므로 공정 정보를 먼저 채운 뒤 읽는다.
             await LoadDrawing();
+        }
+
+        /// <summary>
+        /// 지금 공정이 마지막 공정인지 서버에 물어 둔다(진입 · 공정 이동 때).
+        /// 조회에 실패하면 마지막이 아닌 것으로 두고 완료 확인 없이 지금처럼 진행한다 —
+        /// 확인 창 하나 때문에 공정 진행 자체를 막지 않으려는 것이다(실패는 로그와 안내 칸에 남긴다).
+        /// </summary>
+        public async Task GetIsLastProcess()
+        {
+            _isLastProcess = false;
+            if (_key == null)
+                return;
+
+            bool isLast;
+            try
+            {
+                isLast = await _apiClient.PopApiClient.GetIsLastProcessAsync(_key);
+            }
+            catch (ApiException ex)
+            {
+                AppLog.Warn($"[POP] 마지막 공정 여부 조회 실패 - {_key.RoutingOperation}/{_key.PageOperation} : {ex.Message}");
+                if (IsDisposed || Disposing) return;
+
+                ShowMessage(ex.Message);
+                return;
+            }
+
+            if (IsDisposed || Disposing) return;
+
+            _isLastProcess = isLast;
+            AppLog.Info($"[POP] 마지막 공정 여부 - {_key.RoutingOperation}/{_key.PageOperation} : {isLast}");
+        }
+
+        /// <summary>
+        /// 마지막 공정을 완료하기 전에 작업자에게 묻는다. 마지막 공정이 아니면 묻지 않고 true.
+        /// 취소하면 공정은 진행 중으로 남기고(완료를 보내지 않는다) 공정 이동은 그대로 한다 — 이동 여부는 호출하는 쪽이 정한다.
+        /// </summary>
+        /// <returns>완료를 보내도 되면 true.</returns>
+        private bool ConfirmLastProcessEnd()
+        {
+            if (!_isLastProcess)
+                return true;
+
+            var ok = AppMessageBox.Show(this, Language.Pop_LastProcessEndConfirm, Language.Pop_Title,
+                                        AppMessageKind.Question, AppMessageButtons.OkCancel) == DialogResult.OK;
+            if (!ok)
+            {
+                AppLog.Info($"[POP] 마지막 공정 완료 취소 - 진행 중으로 유지 ({_key.RoutingOperation}/{_key.PageOperation})");
+                ShowMessage(Language.Pop_LastProcessKeptRunning);
+            }
+
+            return ok;
         }
 
         /// <summary>&lt;진행 중 공정 정보&gt;를 우측 카드에 채운다. 워크스테이션은 로그인 세션 값으로 보완한다.</summary>
@@ -435,7 +493,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             {
                 AppLog.Info($"[POP] 공정 이동 불가 - 현재 {current}, 이동 {offset}, 목록 {_processes.Count}건");
 
-                if (current >= 0 && offset > 0 && await EndCurrentProcess())
+                // 마지막 공정 완료 확인에서 취소했으면 이미 안내 칸에 남겼으므로 "목록의 마지막 공정" 안내는 띄우지 않는다.
+                if (current >= 0 && offset > 0 && await EndCurrentProcess() == ProcessEndResult.Proceed)
                 {
                     // 옮기지 않고 이 공정에 머문다 — 완료 응답이 비어 상태가 아직 진행 중이면 서버 상태로 다시 읽는다.
                     // 진행 중으로 남겨 두면 다음 이동에서 이미 끝난 공정에 완료를 또 보낸다(EndCurrentProcess 참고).
@@ -453,7 +512,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (!ConfirmIncompleteMove())
                 return;
 
-            if (!await EndCurrentProcess())
+            if (await EndCurrentProcess() == ProcessEndResult.Failed)
                 return;
 
             await MoveToProcess(_processes[target]);
@@ -505,7 +564,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (!isSameProcess && !ConfirmIncompleteMove())
                 return;
 
-            if (!isSameProcess && !await EndCurrentProcess())
+            if (!isSameProcess && await EndCurrentProcess() == ProcessEndResult.Failed)
                 return;
 
             await MoveToProcess(selected);
@@ -629,15 +688,25 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// 다음 이동([이전 공정] · [공정 목록])에서 이미 끝난 공정 — 마지막 공정이면 작업지시까지 완료된 상태 — 에 완료를 또 보내
         /// 서버 오류가 났다. 응답이 비어 오면 옮길 값이 없으므로 머무는 쪽(<see cref="MoveProcessBy"/>)이 다시 조회한다.
         /// </summary>
-        /// <returns>이동을 계속해도 되면 true. 통신 실패 · 서버 장애로 완료 결과를 알 수 없거나 화면이 닫혔으면 false.</returns>
-        private async Task<bool> EndCurrentProcess()
+        ///
+        /// 마지막 공정(<see cref="_isLastProcess"/>)이면 완료를 보내기 전에 묻는다(<see cref="ConfirmLastProcessEnd"/>).
+        /// 취소하면 완료하지 않고 진행 중 그대로 두며, 이동은 계속한다(<see cref="ProcessEndResult.Declined"/>).
+        /// </summary>
+        /// <returns>
+        /// 이동을 계속해도 되면 <see cref="ProcessEndResult.Proceed"/> · <see cref="ProcessEndResult.Declined"/>.
+        /// 통신 실패 · 서버 장애로 완료 결과를 알 수 없거나 화면이 닫혔으면 <see cref="ProcessEndResult.Failed"/>.
+        /// </returns>
+        private async Task<ProcessEndResult> EndCurrentProcess()
         {
             if (!IsProcessRunning || (HasInputItems() && !IsAllTabsCompleted()))
             {
                 if (_reworking)
                     AppLog.Info($"[POP] 리웍 공정 미완료(NG · 미입력 남음) - 완료하지 않고 이동 ({_key.RoutingOperation}/{_key.PageOperation})");
-                return true;
+                return ProcessEndResult.Proceed;
             }
+
+            if (!ConfirmLastProcessEnd())
+                return ProcessEndResult.Declined;
 
             AppLog.Step($"[POP] 공정 변경으로 완료{(_reworking ? "(리웍)" : string.Empty)} - {_key.RoutingOperation}/{_key.PageOperation}");
             PopProcessInfoDto changed;
@@ -648,30 +717,46 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             catch (ApiException ex) when (ex.StatusCode == HttpStatusCode.BadRequest)
             {
                 AppLog.Warn($"[POP] 공정 완료 거절 - 완료하지 않고 이동 ({_key.RoutingOperation}/{_key.PageOperation}) : {ex.Message}");
-                if (IsDisposed || Disposing) return false;
+                if (IsDisposed || Disposing) return ProcessEndResult.Failed;
 
                 ShowMessage(Language.Pop_ProcessMovedUnfinished);
-                return true;
+                return ProcessEndResult.Proceed;
             }
             catch (ApiException ex)
             {
                 AppLog.Warn($"[POP] 공정 상태 전이 실패 - {PopProcessAction.end} : {ex.Message}");
-                if (IsDisposed || Disposing) return false;
+                if (IsDisposed || Disposing) return ProcessEndResult.Failed;
 
                 AppMessageBox.Warn(this, ex.Message, Language.Pop_Title);
-                return false;
+                return ProcessEndResult.Failed;
             }
 
-            if (IsDisposed || Disposing) return false;
+            if (IsDisposed || Disposing) return ProcessEndResult.Failed;
 
             if (_info != null && !string.IsNullOrEmpty(changed?.ProgressState))
                 SetStateChange(changed);
 
             ShowMessage(Language.Pop_ProcessEnded);
-            return true;
+            return ProcessEndResult.Proceed;
         }
 
-        /// <summary>고른 공정으로 조회 키를 옮기고 화면 전체(공정 정보 + 탭 4개 + 도면)를 다시 읽는다.</summary>
+        /// <summary><see cref="EndCurrentProcess"/>의 결과 — 공정 이동을 계속할지와, 작업자가 마지막 공정 완료를 취소했는지.</summary>
+        private enum ProcessEndResult
+        {
+            /// <summary>완료했거나 완료할 대상이 아니다(서버 업무 거절 포함) — 이동을 계속한다.</summary>
+            Proceed,
+
+            /// <summary>마지막 공정 완료 확인에서 취소했다 — 진행 중 그대로 두고 이동은 계속한다.</summary>
+            Declined,
+
+            /// <summary>통신 실패 · 서버 장애 · 화면 닫힘 — 이동하지 않는다.</summary>
+            Failed
+        }
+
+        /// <summary>
+        /// 고른 공정으로 조회 키를 옮기고 화면 전체(공정 정보 + 탭 4개 + 도면)를 다시 읽는다.
+        /// 옮긴 공정이 마지막 공정인지도 이때 서버에 물어 둔다 — 완료 전 확인(<see cref="ConfirmLastProcessEnd"/>)에 쓴다.
+        /// </summary>
         private async Task MoveToProcess(RoutingProcessDto process)
         {
             _entry.Process = process;
@@ -680,6 +765,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
             AppLog.Step($"[POP] 공정 이동 - {_key.RoutingOperation}/{_key.PageOperation}");
             await GetProcessInfo();
+            if (IsDisposed || Disposing) return;
+
+            await GetIsLastProcess();
         }
 
         // ─────────────────────────────────────────────────────────────────────────
@@ -769,6 +857,16 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             {
                 while (!IsDisposed && !Disposing && IsProcessRunning && IsAllTabsCompleted())
                 {
+                    // 마지막 공정에서 완료를 취소하면 진행 중 그대로 두고 다음 공정으로만 옮긴다(목록 끝이면 머문다).
+                    if (!ConfirmLastProcessEnd())
+                    {
+                        if (!await MoveNextWithoutEnd())
+                            return;
+
+                        moved = true;
+                        continue;
+                    }
+
                     AppLog.Step($"[POP] 공정 자동 완료 - {_key.RoutingOperation}/{_key.PageOperation}");
                     if (!await SetProcessAction(PopProcessAction.end))
                         return;
@@ -844,6 +942,26 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 AppMessageBox.Info(this, Language.Pop_LastProcess, Language.Pop_Title);
                 return false;
             }
+
+            await MoveToProcess(_processes[current + 1]);
+            if (IsDisposed || Disposing) return false;
+
+            return await AutoStartProcess();
+        }
+
+        /// <summary>
+        /// 마지막 공정 완료를 취소한 뒤의 자동 진행 — 지금 공정은 진행 중 그대로 두고 다음 공정으로 옮겨 시작한다.
+        /// 공정 목록의 끝이면 옮길 곳이 없으므로 안내 없이 머문다(취소 사실은 이미 안내 칸에 남겼다).
+        /// </summary>
+        /// <returns>옮겨서 그 공정이 진행 중이면 true.</returns>
+        private async Task<bool> MoveNextWithoutEnd()
+        {
+            if (!await GetProcesses())
+                return false;
+
+            var current = GetProcessIndex();
+            if (current < 0 || current + 1 >= _processes.Count)
+                return false;
 
             await MoveToProcess(_processes[current + 1]);
             if (IsDisposed || Disposing) return false;

@@ -179,6 +179,8 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string Pop_ProcessEnded => Get(nameof(Pop_ProcessEnded));
         public static string Pop_ProcessMovedUnfinished => Get(nameof(Pop_ProcessMovedUnfinished));
         public static string Pop_ProcessIncompleteMoveConfirm => Get(nameof(Pop_ProcessIncompleteMoveConfirm));
+        public static string Pop_LastProcessEndConfirm => Get(nameof(Pop_LastProcessEndConfirm));
+        public static string Pop_LastProcessKeptRunning => Get(nameof(Pop_LastProcessKeptRunning));
         public static string Pop_InputNotAllowed => Get(nameof(Pop_InputNotAllowed));
 
         public static string Pop_WorkOrderList => Get(nameof(Pop_WorkOrderList));

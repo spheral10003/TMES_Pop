@@ -32,6 +32,13 @@ namespace SEOJIN_TMES.Client.ApiClient
         Task<List<PopEquipmentDto>> GetWorkstationEquipmentsAsync(PopProcessKey key, CancellationToken cancellationToken = default);
 
         Task<string> GetOmsPathAsync(PopProcessKey key, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// 지금 페이지 공정이 이 시리얼의 마지막 공정인지 — <c>GET pop/{sn}/{subRpRef}/is-last?corpCd=&amp;woNo=</c>.
+        /// 무엇을 "마지막"으로 볼지는 서버가 판단한다(클라이언트는 공정 목록 순서로 따지지 않는다).
+        /// </summary>
+        Task<bool> GetIsLastProcessAsync(PopProcessKey key, CancellationToken cancellationToken = default);
+
         /// <summary>&lt;투입자재 정보 입력&gt; 팝업 [저장] — 입력한 시리얼번호를 서버로 보낸다.</summary>
         //Task SaveMaterialSerialsAsync(PopMaterialSerialSaveRequest request, CancellationToken cancellationToken = default);
 
@@ -127,6 +134,14 @@ namespace SEOJIN_TMES.Client.ApiClient
         {
             var response = await GetPathAsync<string>($"{PopPrefix}{key.SubRoutingRef}/oms-image", cancellationToken);
             return response;
+        }
+
+        public async Task<bool> GetIsLastProcessAsync(PopProcessKey key, CancellationToken cancellationToken = default)
+        {
+            // 응답은 봉투 없이 본문 전체가 true / false 한 단어로 온다 — JSON 불리언으로 그대로 읽는다.
+            // 본문이 비어 오면 마지막이 아닌 것(false)으로 본다.
+            var url = $"{PopPrefix}{key.SerialNo}/{key.SubRoutingRef}/is-last{KeyQuery(key)}";
+            return await GetAsync<bool>(url, cancellationToken);
         }
 
         public Task SaveMaterialSerialsAsync(PopMaterialSerialSaveRequest request, PopProcessKey key, CancellationToken cancellationToken = default)

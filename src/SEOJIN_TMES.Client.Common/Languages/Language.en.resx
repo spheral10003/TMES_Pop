@@ -1059,6 +1059,12 @@ Reconnection continues automatically until it succeeds. You can also press [Reco
   <data name="Pop_ProcessIncompleteMoveConfirm" xml:space="preserve">
     <value>The current process is not completed yet. Do you want to move to another process anyway?</value>
   </data>
+  <data name="Pop_LastProcessEndConfirm" xml:space="preserve">
+    <value>This is the last process. Do you want to complete the process?</value>
+  </data>
+  <data name="Pop_LastProcessKeptRunning" xml:space="preserve">
+    <value>The last process was left in progress without being completed.</value>
+  </data>
   <data name="Pop_InputNotAllowed" xml:space="preserve">
     <value>Values cannot be entered while the process is finished or stopped. Restart a stopped process, or use [Rework] to put a finished process back in progress.</value>
   </data>
