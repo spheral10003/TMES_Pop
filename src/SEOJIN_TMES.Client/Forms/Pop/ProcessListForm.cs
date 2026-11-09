@@ -20,8 +20,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
     /// 페이지 단위로 골라 옮기는 일은 이 팝업이 맡는다.
     /// 목록 조회와 "어느 라우팅 그룹의 페이지인가"는 호출하는 POP 화면이 정해서 넘긴다.
     /// 그리드 위 투입자재 검색 줄(<see cref="MaterialSearchBar"/>)로 투입자재 코드를 쓰는 페이지만 추릴 수 있다.
-    /// 행 위에 마우스를 올리면 그 페이지의 작업 지시 이미지(DocumentShare.RootPath + subRoutingProcImagePath)를
-    /// 커서 옆에 미리보기로 띄운다(<see cref="GridImagePreview"/>).
+    /// 행 위에 마우스를 올리면 커서 옆에, 행을 클릭하면 그 행 옆에
+    /// 그 페이지의 작업 지시 이미지(DocumentShare.RootPath + subRoutingProcImagePath)를 미리보기로 띄운다(<see cref="GridImagePreview"/>).
     ///
     /// VS 디자이너 호환을 위해 매개변수 없는 생성자만 두고, 실제 내용은 Initialize()로 넣는다.
     /// </summary>
@@ -36,7 +36,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// <summary>진행 상태 앞의 상태 구슬 컬럼(이벤트를 걸어 두므로 폼과 수명을 같이한다).</summary>
         private StateImageColumn _stateImage;
 
-        /// <summary>행 마우스 오버 시 작업 지시 이미지 미리보기. 폼이 닫힐 때(Disposed) 함께 해제한다.</summary>
+        /// <summary>행 마우스 오버 · 클릭 시 작업 지시 이미지 미리보기. 폼이 닫힐 때(Disposed) 함께 해제한다.</summary>
         private GridImagePreview _preview;
 
         public ProcessListForm()
