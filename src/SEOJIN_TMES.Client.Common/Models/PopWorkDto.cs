@@ -450,6 +450,9 @@ namespace SEOJIN_TMES.Client.Common.Models
 
         /// <summary>알람 코드.</summary>
         public string alrmTypeCd { get; set; }
+
+        /// <summary>비고 — 작업자가 알람 등록 창에서 적은 자유 문구(선택 입력, 없으면 빈 문자열).</summary>
+        public string remark { get; set; } = string.Empty;
     }
 
     /// <summary>

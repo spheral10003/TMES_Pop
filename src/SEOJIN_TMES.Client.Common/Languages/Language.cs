@@ -432,6 +432,7 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string AdminAlarm_Send => Get(nameof(AdminAlarm_Send));
         public static string AdminAlarm_SelectAlarm => Get(nameof(AdminAlarm_SelectAlarm));
         public static string AdminAlarm_NoTypes => Get(nameof(AdminAlarm_NoTypes));
+        public static string AdminAlarm_Remark => Get(nameof(AdminAlarm_Remark));
         public static string AlarmType_EQP => Get(nameof(AlarmType_EQP));
         public static string AlarmType_QLT => Get(nameof(AlarmType_QLT));
         public static string AlarmType_MAT => Get(nameof(AlarmType_MAT));

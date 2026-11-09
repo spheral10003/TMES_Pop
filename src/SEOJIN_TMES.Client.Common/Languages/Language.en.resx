@@ -954,6 +954,9 @@ Reconnection continues automatically until it succeeds. You can also press [Reco
   <data name="AdminAlarm_NoTypes" xml:space="preserve">
     <value>No alarm codes found.</value>
   </data>
+  <data name="AdminAlarm_Remark" xml:space="preserve">
+    <value>Remark</value>
+  </data>
   <data name="AlarmType_EQP" xml:space="preserve">
     <value>Equipment</value>
   </data>

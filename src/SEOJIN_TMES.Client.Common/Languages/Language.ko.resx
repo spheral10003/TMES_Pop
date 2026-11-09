@@ -954,6 +954,9 @@
   <data name="AdminAlarm_NoTypes" xml:space="preserve">
     <value>조회된 알람 코드가 없습니다.</value>
   </data>
+  <data name="AdminAlarm_Remark" xml:space="preserve">
+    <value>비고</value>
+  </data>
   <data name="AlarmType_EQP" xml:space="preserve">
     <value>설비</value>
   </data>

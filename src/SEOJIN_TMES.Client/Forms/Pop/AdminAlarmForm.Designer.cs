@@ -20,13 +20,14 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// 색·폰트·문구는 AdminAlarmForm.cs의 Initialize()에서 런타임에 넣고, 타일(CardTile)도 조회 결과로 런타임에 만든다.
         ///
         /// 일반 .NET Form — Windows 제목 줄은 없애고(FormBorderStyle.None) pnlTitle + lblTitle이 제목 줄 역할을 한다.
-        /// 구성: 제목 띠(오른쪽 X 닫기) + [알람 유형 타일] + [알람 코드 타일] + 하단 [닫기][등록] + 우하단 크기 조절 손잡이(pnlGrip).
+        /// 구성: 제목 띠(오른쪽 X 닫기) + [알람 유형 타일] + [알람 코드 타일] + [비고 입력란] + 하단 [닫기][등록] + 우하단 크기 조절 손잡이(pnlGrip).
         /// 크기 가변: 유형 타일(flowTypes)은 AutoSize라 폭이 줄면 다음 줄로 넘어가며 높이가 늘고,
         ///            알람 코드 타일 크기는 flowCodes_SizeChanged에서 다시 계산한다. 최소 크기는 AdminAlarmForm.cs에서 정한다.
         /// lblClose는 lblTitle(Fill)보다 먼저 Add해 위에 그려지게 둔다(FileUploadForm과 같은 구성).
         /// 도킹 순서 주의: pnlBody(Fill) → pnlFooter(Bottom) → pnlTitle(Top).
-        ///                 pnlBody 안은 flowCodes(Fill) → lblCodeTitle → flowTypes → lblTypeTitle(모두 Top).
-        ///                 나중에 Add한 것이 위에 놓인다.
+        ///                 pnlBody 안은 flowCodes(Fill) → lblRemarkTitle(Bottom) → txtRemark(Bottom)
+        ///                 → lblCodeTitle → flowTypes → lblTypeTitle(Top).
+        ///                 나중에 Add한 것이 바깥쪽에 놓인다 — 비고 입력란이 맨 아래, 그 위에 비고 제목(StopIssueForm과 같은 구성).
         /// </summary>
         private void InitializeComponent()
         {
@@ -35,6 +36,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.lblTitle = new System.Windows.Forms.Label();
             this.pnlBody = new System.Windows.Forms.Panel();
             this.flowCodes = new System.Windows.Forms.FlowLayoutPanel();
+            this.lblRemarkTitle = new System.Windows.Forms.Label();
+            this.txtRemark = new System.Windows.Forms.RichTextBox();
             this.lblCodeTitle = new System.Windows.Forms.Label();
             this.flowTypes = new System.Windows.Forms.FlowLayoutPanel();
             this.lblTypeTitle = new System.Windows.Forms.Label();
@@ -86,6 +89,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // pnlBody
             // 
             this.pnlBody.Controls.Add(this.flowCodes);
+            this.pnlBody.Controls.Add(this.lblRemarkTitle);
+            this.pnlBody.Controls.Add(this.txtRemark);
             this.pnlBody.Controls.Add(this.lblCodeTitle);
             this.pnlBody.Controls.Add(this.flowTypes);
             this.pnlBody.Controls.Add(this.lblTypeTitle);
@@ -102,10 +107,31 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.flowCodes.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowCodes.Location = new System.Drawing.Point(16, 68);
             this.flowCodes.Name = "flowCodes";
-            this.flowCodes.Size = new System.Drawing.Size(1168, 512);
+            this.flowCodes.Size = new System.Drawing.Size(1168, 400);
             this.flowCodes.TabIndex = 3;
             this.flowCodes.SizeChanged += new System.EventHandler(this.flowCodes_SizeChanged);
-            // 
+            //
+            // lblRemarkTitle
+            //
+            this.lblRemarkTitle.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.lblRemarkTitle.Location = new System.Drawing.Point(16, 468);
+            this.lblRemarkTitle.Name = "lblRemarkTitle";
+            this.lblRemarkTitle.Size = new System.Drawing.Size(1168, 32);
+            this.lblRemarkTitle.TabIndex = 4;
+            this.lblRemarkTitle.Text = "비고";
+            this.lblRemarkTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            //
+            // txtRemark
+            //
+            this.txtRemark.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.txtRemark.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.txtRemark.Location = new System.Drawing.Point(16, 500);
+            this.txtRemark.MaxLength = 5000;
+            this.txtRemark.Name = "txtRemark";
+            this.txtRemark.Size = new System.Drawing.Size(1168, 80);
+            this.txtRemark.TabIndex = 5;
+            this.txtRemark.Text = "";
+            //
             // lblCodeTitle
             // 
             this.lblCodeTitle.Dock = System.Windows.Forms.DockStyle.Top;
@@ -218,6 +244,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private System.Windows.Forms.FlowLayoutPanel flowTypes;
         private System.Windows.Forms.Label lblCodeTitle;
         private System.Windows.Forms.FlowLayoutPanel flowCodes;
+        private System.Windows.Forms.Label lblRemarkTitle;
+        private System.Windows.Forms.RichTextBox txtRemark;
         private System.Windows.Forms.Panel pnlFooter;
         private System.Windows.Forms.Button btnSend;
         private System.Windows.Forms.Button btnClose;

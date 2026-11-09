@@ -20,7 +20,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
     /// 창이 뜨면 회사 코드 + 사용 여부(Y)로 자동 조회하고, 고르기는 전부 <b>카드 타일(<see cref="CardTile"/>)</b>로 한다.
     ///  1) [알람 유형] 타일 6장(대분류 — EQP/QLT/MAT/PRD/EHS/SYS) 중 하나를 누르면
     ///  2) 그 유형에 연결된 [알람 코드] 타일이 깔린다(위에 등급, 가운데 알람 코드, 아래 알람 명).
-    /// 유형과 알람 코드를 모두 골라야 [등록]이 켜지고, 누르면 alrmType · alrmTypeCd를 서버로 보낸다.
+    /// 유형과 알람 코드를 모두 골라야 [등록]이 켜지고, 누르면 alrmType · alrmTypeCd와 아래 [비고] 입력값(remark)을 서버로 보낸다.
     /// 실패하면 창을 닫지 않고 안내만 해서, 고른 그대로 다시 시도할 수 있게 한다.
     ///
     /// 일반 .NET Form이며 Windows 제목 줄 대신 pnlTitle(패널) + lblTitle(라벨)이 제목 줄 역할을 한다.
@@ -39,9 +39,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
         /// <summary>
         /// 창을 줄일 수 있는 한계. 이보다 작으면 알람 유형 카드가 세 줄로 넘어가 알람 코드 목록이 한 줄도 안 남는다.
-        /// (폭 820이면 유형 카드가 한 줄에 4장 → 두 줄, 높이 620이면 그 아래 알람 코드 카드가 한 줄 이상 보인다.)
+        /// (폭 820이면 유형 카드가 한 줄에 4장 → 두 줄, 높이 740이면 맨 아래 비고(제목 32 + 입력란 80)를 빼고도
+        ///  그 위 알람 코드 카드가 한 줄 이상 보인다.)
         /// </summary>
-        private readonly Size _minimumFormSize = new Size(820, 620);
+        private readonly Size _minimumFormSize = new Size(820, 740);
 
         private ApiClientFactory _apiClient;
         private PopProcessKey _key;
@@ -65,6 +66,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             lblTitle.Text = Language.AdminAlarm_Title;
             lblTypeTitle.Text = Language.AdminAlarm_Type;
             lblCodeTitle.Text = Language.AdminAlarm_ListTitle;
+            lblRemarkTitle.Text = Language.AdminAlarm_Remark;
             btnSend.Text = Language.AdminAlarm_Send;
             btnClose.Text = Language.Common_Close;
 
@@ -86,11 +88,15 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             pnlFooter.BackColor = AppTheme.Surface;
             pnlGrip.BackColor = AppTheme.Surface;
 
-            foreach (var label in new[] { lblTypeTitle, lblCodeTitle })
+            foreach (var label in new[] { lblTypeTitle, lblCodeTitle, lblRemarkTitle })
             {
                 label.ForeColor = AppTheme.TextPrimary;
                 label.Font = AppTheme.SectionFont;
             }
+
+            txtRemark.BackColor = AppTheme.Card;
+            txtRemark.ForeColor = AppTheme.TextPrimary;
+            txtRemark.Font = AppTheme.BodyFont;
         }
 
         /// <summary>알람 유형 · 등급 코드의 표시 문구. 모르는 코드는 서버가 준 코드를 그대로 보여 준다.</summary>
@@ -321,7 +327,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// 고른 알람(alrmType · alrmTypeCd)을 지금 공정에 등록한다. 성공하면 OK로 닫고(완료 안내는 호출한 화면이 띄운다),
+        /// 고른 알람(alrmType · alrmTypeCd)과 비고(remark)를 지금 공정에 등록한다. 비고는 선택 입력이라 비어 있으면 빈 문자열로 보낸다. 성공하면 OK로 닫고(완료 안내는 호출한 화면이 띄운다),
         /// 실패하면 안내만 하고 창은 유지한다.
         /// </summary>
         private async Task SetAlarm()
@@ -336,6 +342,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             var request = new AbnormalAlarmRequest();
             request.alrmType = alarm.AlarmType;
             request.alrmTypeCd = alarm.AlarmTypeCode;
+            request.remark = txtRemark.Text?.Trim() ?? string.Empty;
 
             btnSend.Enabled = false;
             try

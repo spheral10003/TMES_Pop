@@ -954,6 +954,9 @@ Hệ thống sẽ tự động thử kết nối lại cho đến khi thành cô
   <data name="AdminAlarm_NoTypes" xml:space="preserve">
     <value>Không tìm thấy mã cảnh báo.</value>
   </data>
+  <data name="AdminAlarm_Remark" xml:space="preserve">
+    <value>Ghi chú</value>
+  </data>
   <data name="AlarmType_EQP" xml:space="preserve">
     <value>Thiết bị</value>
   </data>
