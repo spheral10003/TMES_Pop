@@ -472,7 +472,7 @@ namespace SEOJIN_TMES.Client.Forms
                 _setting.SaveCulture(_loginCulture.Name);
                 Global.Instance.Settings.CurrentUser = _currentUser;
 
-                ServerLog.LoggedIn(userId, corpCd, null);
+                ServerLog.LoggedIn(userId, corpCd);
 
                 DialogResult = DialogResult.OK;
                 Close();

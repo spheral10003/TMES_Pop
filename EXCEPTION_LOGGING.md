@@ -14,17 +14,18 @@
 
 ### 서버로 보내는 6종 (`ClientLogType`)
 
-| 종류 | 호출 위치 | 언제 | 주요 필드 |
+| 종류(`evntNm`) | 호출 위치 | 언제 | `msg` · 그 밖의 필드 |
 | --- | --- | --- | --- |
-| `AppStart` | [Program.cs](src/SEOJIN_TMES.Client/Program.cs) | 프로그램 시작 직후 | AppVersion, MachineName |
-| `Login` | [LoginForm.cs](src/SEOJIN_TMES.Client/Forms/LoginForm.cs) | 로그인 성공(워크스테이션 선택까지 끝난 뒤) | UserId, CorpCd, Workstation |
-| `MenuClick` | [MainForm.cs](src/SEOJIN_TMES.Client/Forms/MainForm.cs) `Accordion_ElementClick` | 좌측 메뉴(화면 항목) 클릭 | MenuKey, MenuName, MenuAction(`Open`/`Focus`) |
-| `EquipmentConnect` | [Devices.cs](src/SEOJIN_TMES.Client/Core/Devices.cs) ← `NutrunnerDevice.ConnectAttempted` | 너트러너 접속 성공 / 실패(Request · Event 채널 각각) | EquipmentId(장비 코드), Channel, **Host(IP), Port**, Success, 실패 사유 |
-| `ModbusWrite` | [Devices.cs](src/SEOJIN_TMES.Client/Core/Devices.cs) ← `NutrunnerDevice.SettingWritten` | **설정 레지스터(토크 · 드라이버 잠금) 쓰기** 송신 1건 + 응답 1건 | ModbusRequest, Direction(`Send`/`Receive`), RegisterValues, Success |
-| `CriticalError` | `GlobalErrorHandler` · `Program` · 각 화면의 `catch (Exception)` | 처리되지 않은 예외 / 예기치 못한 예외 | Origin, ExceptionType, ExceptionDetail(스택) |
+| `AppStart` | [Program.cs](src/SEOJIN_TMES.Client/Program.cs) | 프로그램 시작 직후 | msg에 버전 · PC 이름 |
+| `Login` | [LoginForm.cs](src/SEOJIN_TMES.Client/Forms/LoginForm.cs) | 로그인 성공 | msg에 아이디 · PC 이름 |
+| `MenuClick` | [MainForm.cs](src/SEOJIN_TMES.Client/Forms/MainForm.cs) `Accordion_ElementClick` | 좌측 메뉴(화면 항목) 클릭 | msg에 메뉴명(키) · `Open`/`Focus` |
+| `EquipmentConnect` | [Devices.cs](src/SEOJIN_TMES.Client/Core/Devices.cs) ← `NutrunnerDevice.ConnectAttempted` | 너트러너 접속 성공 / 실패(Request · Event 채널 각각) | `eqpCd · eqpIp · eqpPort`, 실패면 `errYn=Y` · `errMsg`=실패 사유 |
+| `ModbusWrite` | [Devices.cs](src/SEOJIN_TMES.Client/Core/Devices.cs) ← `NutrunnerDevice.SettingWritten` | **설정 레지스터(토크 · 드라이버 잠금) 쓰기** 송신 1건 + 응답 1건 | `eqpCd · eqpIp · eqpPort`, msg에 요청 · 송신/응답 · 값, 오류 응답이면 `errYn=Y` |
+| `CriticalError` | `GlobalErrorHandler` · `Program` · 각 화면의 `catch (Exception)` | 처리되지 않은 예외 / 예기치 못한 예외 | `errYn=Y`, `errCd`=예외 타입 이름, `errMsg`=예외 전체(스택) |
 
-모든 항목에 공통으로 `OccurredAt · UserId · CorpCd · Workstation · MachineName · AppVersion · Message`가 실린다
-(로그인 전에 생긴 로그는 UserId가 비어 있다).
+모든 항목에 공통으로 `corpCd · userId · wkstnCd · deptCd · lineCd · evntOcrnDtm(yyyy-MM-dd HH:mm:ss) · errYn`이 실린다.
+로그인 전에 생긴 로그는 corpCd · userId가, 워크스테이션을 고르기 전(메인 화면 Shown)에 생긴 로그는 wkstnCd · deptCd · lineCd가 비어 있다.
+`errCd`는 클라이언트 오류 코드 체계가 아직 없어 예외 로그에만 예외 타입 이름(예: `NullReferenceException`)을 넣는다.
 
 ### 설비(너트러너) 쪽 구조
 
@@ -58,20 +59,17 @@ NutrunnerDevice ──ConnectAttempted / SettingWritten──▶ NutrunnerManage
 이후 ─ MenuClick / EquipmentConnect / ModbusWrite / CriticalError ── 생길 때마다 바로 전송
 ```
 
-- 전송은 백그라운드에서 한 줄로(동시에 여러 요청 없이) 최대 100건씩 묶어 보낸다.
-- 메인 화면이 뜨기 전 대기열 상한은 1000건 — 넘치면 오래된 것부터 버린다(파일에는 남아 있다).
-- 전송 실패는 **재시도하지 않는다** — `AppLog.Warn`으로 "전송 실패 N건"만 남긴다. 같은 내용이 이미 파일에 있다.
+- 전송은 백그라운드에서 한 줄로(동시에 여러 요청 없이) **한 건씩** 보낸다 — 서버 API가 한 요청에 1건만 받는다.
+- 대기열 상한은 1000건 — 넘치면 오래된 것부터 버린다(파일에는 남아 있다).
+- 전송 실패는 **재시도하지 않는다** — 그 건만 버리고 `AppLog.Warn`으로 "전송 실패 종류 시각"을 남긴 뒤 다음 건을 보낸다. 같은 내용이 이미 파일에 있다.
 - `ServerLog`의 어떤 메서드도 호출자에게 예외를 던지지 않는다(설비 통신 스레드에서도 불린다).
 
-## 3. 로그 전송 API — 아직 없음
+## 3. 로그 전송 API — `POST api/v1.0/pop/event-logs`
 
-[IClientLogApiClient.cs](src/SEOJIN_TMES.Client.ApiClient/IClientLogApiClient.cs)의 `ClientLogApiClient.SetClientLogs`가 통로다.
-**지금은 `ClientLogPath`가 빈 문자열이라 아무것도 보내지 않는다.** 서버 API가 생기면:
-
-1. `ClientLogPath`에 상대 경로를 적는다 (예: `"gm/client-logs"`) — 이것만으로 전송이 시작된다.
-2. 요청 바디는 `ClientLogDto` 배열(JSON)로 나간다. 서버 필드명이 다르면
-   [ClientLogDto.cs](src/SEOJIN_TMES.Client.Common/Models/ClientLogDto.cs)에 `[JsonProperty]`로 맞춘다.
-3. 서버가 배열이 아닌 봉투(`{ "logs": [...] }` 등)를 원하면 `SetClientLogs` 안에서만 감싼다.
+[IClientLogApiClient.cs](src/SEOJIN_TMES.Client.ApiClient/IClientLogApiClient.cs)의 `ClientLogApiClient.SetEventLog`가 통로다.
+요청 바디는 로그 **1건**(배열 아님)이며 필드는 [ClientLogDto.cs](src/SEOJIN_TMES.Client.Common/Models/ClientLogDto.cs)의
+`[JsonProperty]` 이름(`corpCd · evntNm · eqpCd · eqpIp · eqpPort · msg · errMsg · evntOcrnDtm · wkstnCd · deptCd · lineCd · userId · errYn · errCd`)이 서버 계약이다.
+값을 채우는 곳은 `ServerLog`뿐이다.
 
 ## 4. 예기치 못한 예외 — `UnexpectedException`
 

@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using SEOJIN_TMES.Client.Common.Models;
@@ -12,8 +11,9 @@ namespace SEOJIN_TMES.Client.Common.Logging
     public interface IClientLogSender
     {
         /// <summary>
-        /// 로그 묶음을 서버로 보낸다. 실패는 예외로 올린다(<see cref="ServerLog"/>가 받아서 로컬에만 남긴다).
+        /// 로그 1건을 서버로 보낸다(서버 API가 한 요청에 1건만 받는다).
+        /// 실패는 예외로 올린다(<see cref="ServerLog"/>가 받아서 로컬에만 남긴다).
         /// </summary>
-        Task SetClientLogs(IReadOnlyList<ClientLogDto> logs, CancellationToken cancellationToken = default);
+        Task SetEventLog(ClientLogDto log, CancellationToken cancellationToken = default);
     }
 }

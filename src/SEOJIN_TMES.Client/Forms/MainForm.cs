@@ -242,7 +242,7 @@ namespace SEOJIN_TMES.Client.Forms
             var user = _setting.CurrentUser;
             user.Workstation = station.WorkstationName;
             user.WorkstationInfo = station;
-            ServerLog.WorkstationSelected(station.WorkstationName);
+            ServerLog.WorkstationSelected(station.WorkstationCode, station.WorkstationName, station.DepartmentCode, station.LineCode);
 
             // 홈 탭의 "워크스테이션" 타일이 "-"에서 고른 이름으로 바뀐다.
             _homeScreen?.RefreshInfo();
