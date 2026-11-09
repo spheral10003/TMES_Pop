@@ -605,6 +605,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// (값이 비어 있으면 비교가 false라 통과하지 않는다).
         /// 그리드의 NG 표시 · 설비 결과의 다음 줄 이동 · 자동 진행이 모두 이 기준을 쓴다.
         /// 참조 줄(서버 refYn=Y)은 체결 대상이 아니므로 값 없이도 통과로 본다.
+        /// 각도 하한 · 상한이 둘 다 없는 줄은 각도 관리 대상이 아니라서 토크만 본다
+        /// (null 비교가 false라 예전에는 각도 값을 넣어도 영원히 NG로 남아 자동 진행이 막혔다).
         /// </summary>
         private bool IsBomSpecPassed(PopBomSpecDto spec)
         {
@@ -612,6 +614,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 return true;
 
             var torqueOk = spec.TorqueResult >= spec.TorqueLower && spec.TorqueResult <= spec.TorqueUpper;
+            if (spec.AngleLower == null && spec.AngleUpper == null)
+                return torqueOk;
+
             var angleOk = spec.AngleResult >= spec.AngleLower && spec.AngleResult <= spec.AngleUpper;
             return torqueOk && angleOk;
         }
