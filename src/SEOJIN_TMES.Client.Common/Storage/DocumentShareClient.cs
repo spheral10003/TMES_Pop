@@ -108,6 +108,13 @@ namespace SEOJIN_TMES.Client.Common.Storage
                 {
                     throw new DocumentShareException(ErrorCodes.FileShareFailed, $"{fullPath}\n{ex.Message}", ex);
                 }
+                catch (Exception ex) when (!(ex is OperationCanceledException))
+                {
+                    // 경로에 쓸 수 없는 문자(ArgumentException · NotSupportedException), 보안 정책(SecurityException) 등
+                    // 위에서 못 잡은 실패도 감싸서, 화면이 오류 코드 · 경로가 붙은 안내를 일관되게 띄우게 한다.
+                    // 취소는 감싸지 않는다 — 호출한 쪽이 취소로 구분해 조용히 넘어가야 한다.
+                    throw new DocumentShareException(ErrorCodes.FileShareFailed, $"{fullPath}\n{ex.Message}", ex);
+                }
             }, cancellationToken);
         }
 
