@@ -507,5 +507,6 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string Pop_ReworkStarted => Get(nameof(Pop_ReworkStarted));
         public static string Col_MaterialName => Get(nameof(Col_MaterialName));
         public static string Col_PurchasePlanMethod => Get(nameof(Col_PurchasePlanMethod));
+        public static string Col_ResultAction => Get(nameof(Col_ResultAction));
     }
 }

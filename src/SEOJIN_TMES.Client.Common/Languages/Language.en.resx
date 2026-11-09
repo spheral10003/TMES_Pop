@@ -1302,4 +1302,7 @@ Reconnection continues automatically until it succeeds. You can also press [Reco
   <data name="Col_PurchasePlanMethod" xml:space="preserve">
     <value>Purchase Plan Method</value>
   </data>
+  <data name="Col_ResultAction" xml:space="preserve">
+    <value>Result Action</value>
+  </data>
 </root>

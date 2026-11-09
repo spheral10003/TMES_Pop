@@ -1302,4 +1302,7 @@ Hệ thống sẽ tự động thử kết nối lại cho đến khi thành cô
   <data name="Col_PurchasePlanMethod" xml:space="preserve">
     <value>Phương thức kế hoạch mua</value>
   </data>
+  <data name="Col_ResultAction" xml:space="preserve">
+    <value>Thao tác kết quả</value>
+  </data>
 </root>

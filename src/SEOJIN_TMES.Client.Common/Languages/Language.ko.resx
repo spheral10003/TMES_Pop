@@ -1302,4 +1302,7 @@
   <data name="Col_PurchasePlanMethod" xml:space="preserve">
     <value>구매 계획 방식</value>
   </data>
+  <data name="Col_ResultAction" xml:space="preserve">
+    <value>결과동작</value>
+  </data>
 </root>

@@ -198,7 +198,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 GridColumns.Text("AngleTarget", Language.Col_AngleTarget, 120),
                 GridColumns.Text("AngleUnit", Language.Col_AngleUnit, 100),
                 GridColumns.Text(AngleResultField, Language.Col_AngleResult, 130),
-                GridColumns.Text("EquipmentCode", "결과동작", 130),
+                GridColumns.Text("EquipmentCode", Language.Col_ResultAction, 130),
                 GridColumns.Text(ResultInputField, Language.Pop_ResultInputColumn, 120));
 
             gridViewBomSpec.OptionsView.ColumnAutoWidth = true;
