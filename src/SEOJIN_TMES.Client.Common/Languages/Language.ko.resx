@@ -1296,4 +1296,10 @@
   <data name="Pop_ReworkStarted" xml:space="preserve">
     <value>리웍을 시작했습니다. 값을 고친 뒤 공정을 이동하세요 — 모두 OK면 이동할 때 완료됩니다.</value>
   </data>
+  <data name="Col_MaterialName" xml:space="preserve">
+    <value>자재 품명</value>
+  </data>
+  <data name="Col_PurchasePlanMethod" xml:space="preserve">
+    <value>구매 계획 방식</value>
+  </data>
 </root>

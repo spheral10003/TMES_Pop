@@ -1296,4 +1296,10 @@ Reconnection continues automatically until it succeeds. You can also press [Reco
   <data name="Pop_ReworkStarted" xml:space="preserve">
     <value>Rework started. Fix the values, then move to another process — it is completed on move if everything is OK.</value>
   </data>
+  <data name="Col_MaterialName" xml:space="preserve">
+    <value>Material Name</value>
+  </data>
+  <data name="Col_PurchasePlanMethod" xml:space="preserve">
+    <value>Purchase Plan Method</value>
+  </data>
 </root>

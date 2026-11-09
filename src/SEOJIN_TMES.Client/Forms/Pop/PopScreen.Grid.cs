@@ -152,6 +152,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             gridMaterial.DataSource = new List<PopInputMaterialDto>();
             GridColumns.Apply(gridViewMaterial, Language.Col_No,
                 GridColumns.Text("MaterialCode", Language.Col_MaterialCode, 200),
+                GridColumns.Text("MaterialName", Language.Col_MaterialName, 200),
                 GridColumns.Text("MaterialGroup", Language.Col_MaterialGroup, 100),
                 GridColumns.Number("InputQty", Language.Col_InputQty, 110),
                 GridColumns.Text("InputUnit", Language.Col_InputUnit, 100),
@@ -182,6 +183,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
             GridColumns.Apply(gridViewBomSpec, Language.Col_No,
                 GridColumns.Text("MaterialCode", Language.Col_MaterialCode, 180),
+                GridColumns.Text("MaterialName", Language.Col_MaterialName, 180),
+                GridColumns.Text("PurchasePlanMethod", Language.Col_PurchasePlanMethod, 130),
                 GridColumns.Text("InputPosition", Language.Col_InputPosition, 100),
                 GridColumns.Text("BomSpecName", Language.Col_BomSpecName, 140),
                 GridColumns.Text("SpecType", Language.Col_SpecType, 120),

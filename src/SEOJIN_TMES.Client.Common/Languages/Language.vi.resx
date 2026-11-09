@@ -1296,4 +1296,10 @@ Hệ thống sẽ tự động thử kết nối lại cho đến khi thành cô
   <data name="Pop_ReworkStarted" xml:space="preserve">
     <value>Đã bắt đầu gia công lại. Sửa giá trị rồi chuyển công đoạn — nếu tất cả OK, công đoạn sẽ hoàn thành khi chuyển.</value>
   </data>
+  <data name="Col_MaterialName" xml:space="preserve">
+    <value>Tên vật tư</value>
+  </data>
+  <data name="Col_PurchasePlanMethod" xml:space="preserve">
+    <value>Phương thức kế hoạch mua</value>
+  </data>
 </root>

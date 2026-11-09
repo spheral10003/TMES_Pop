@@ -62,6 +62,7 @@ namespace SEOJIN_TMES.Client.Common.Models
         [JsonProperty("bomRef")] public string BomRef { get; set; }
         [JsonProperty("inputItemCd")] public string InputItemCd { get; set; }
         [JsonProperty("inputItemNm")] public string InputItemNm { get; set; }
+        [JsonProperty("itemNm")] public string ItemNm { get; set; }            // 자재 품명 — 화면 표시용
         [JsonProperty("usageQty")] public decimal UsageQty { get; set; }
         [JsonProperty("unit")] public string Unit { get; set; }
         [JsonProperty("indctLoc")] public string IndctLoc { get; set; }        // 투입위치
@@ -94,6 +95,8 @@ namespace SEOJIN_TMES.Client.Common.Models
     {
         [JsonProperty("bomRef")] public string BomRef { get; set; }
         [JsonProperty("inputItemCd")] public string InputItemCd { get; set; }
+        [JsonProperty("itemNm")] public string ItemNm { get; set; }            // 자재 품명 — 화면 표시용
+        [JsonProperty("prchsPlanMth")] public string PrchsPlanMth { get; set; } // 구매 계획 방식 — null / MRP / ROP / 빈 문자열
         [JsonProperty("torqueLsl")] public decimal? TorqueLsl { get; set; }   // "8.0" 문자열도 자동 변환
         [JsonProperty("torqueTarget")] public decimal? TorqueTarget { get; set; }
         [JsonProperty("torqueUsl")] public decimal? TorqueUsl { get; set; }
@@ -181,6 +184,7 @@ namespace SEOJIN_TMES.Client.Common.Models
                 Materials = data.InputMaterialList.Select(m => new PopInputMaterialDto
                 {
                     MaterialCode = m.InputItemCd,
+                    MaterialName = m.ItemNm,
                     ItemCode = m.InputItemCd,
                     InputQty = (int)m.UsageQty,
                     InputUnit = m.Unit,
@@ -199,6 +203,8 @@ namespace SEOJIN_TMES.Client.Common.Models
                 BomSpecs = bomList.Select(b => new PopBomSpecDto
                 {
                     MaterialCode = b.InputItemCd,
+                    MaterialName = b.ItemNm,
+                    PurchasePlanMethod = b.PrchsPlanMth,
                     Seq = b.Seq,
                     InputPosition = b.IndctLoc,
                     BomSpecName = $"토크작업{b.Seq:00}",
