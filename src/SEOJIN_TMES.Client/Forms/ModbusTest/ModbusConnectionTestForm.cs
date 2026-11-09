@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using DevExpress.XtraEditors;
 using DevExpress.XtraGrid.Columns;
 using SEOJIN_TMES.Client.Common.Configuration;
+using SEOJIN_TMES.Client.Common.Errors;
 using SEOJIN_TMES.Client.Common.Languages;
 using SEOJIN_TMES.Client.Common.Logging;
 using SEOJIN_TMES.Client.Core;
@@ -208,7 +209,7 @@ namespace SEOJIN_TMES.Client.Forms.ModbusTest
                 AppLog.Error("[접속 테스트] 실행 중 예외", ex);
                 if (IsDisposed || Disposing) return;
                 SetRunning(false);
-                AppMessageBox.Error(this, ex.Message, Language.ModbusTest_Title);
+                AppMessageBox.Error(this, ErrorText.ForDisplay(ex), Language.ModbusTest_Title);
             }
         }
 

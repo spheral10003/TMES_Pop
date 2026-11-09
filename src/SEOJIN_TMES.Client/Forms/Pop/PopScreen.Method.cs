@@ -1,4 +1,5 @@
 using SEOJIN_TMES.Client.ApiClient;
+using SEOJIN_TMES.Client.Common.Errors;
 using SEOJIN_TMES.Client.Common.Imaging;
 using SEOJIN_TMES.Client.Common.Languages;
 using SEOJIN_TMES.Client.Common.Logging;
@@ -99,15 +100,16 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (isApiError)
                 AppLog.Warn($"[POP] {actionName} 실패 - {ex.Message}");
             else
-                ServerLog.Unexpected($"POP {actionName}", ex);   // API 오류가 아닌 것은 예기치 못한 오류 — 서버로도 보낸다
+                ex = ServerLog.Unexpected($"POP {actionName}", ex);   // API 오류가 아닌 것은 예기치 못한 오류 — 서버로도 보낸다
 
             if (IsDisposed || Disposing)
                 return;
 
+            // API 오류는 Message가 이미 안내 + 오류 코드, 그 밖은 SYS_001 문구 + 원인 + 코드(서버로 보낸 것과 같은 코드).
             if (isApiError)
                 AppMessageBox.Warn(this, ex.Message, Language.Pop_Title);
             else
-                AppMessageBox.Error(this, ex.Message, Language.Pop_Title);
+                AppMessageBox.Error(this, ErrorText.ForDisplay(ex), Language.Pop_Title);
         }
 
         private bool IsProgressState(string state) =>

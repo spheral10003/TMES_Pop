@@ -4,6 +4,7 @@ using DevExpress.XtraTreeList;
 using DevExpress.XtraTreeList.Columns;
 using SEOJIN_TMES.Client.ApiClient;
 using SEOJIN_TMES.Client.Common.Configuration;
+using SEOJIN_TMES.Client.Common.Errors;
 using SEOJIN_TMES.Client.Common.Languages;
 using SEOJIN_TMES.Client.Common.Logging;
 using SEOJIN_TMES.Client.Common.Models;
@@ -259,7 +260,9 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
                 {
                     // 파일이 열려 있거나 쓰기 권한이 없는 경우 등 — 화면은 계속 쓸 수 있어야 한다.
                     AppLog.Info($"[작업통합] 엑셀 내보내기 실패 - {ex.Message}");
-                    AppMessageBox.Warn(this, $"{Language.WorkIntegrated_ExportFailed}\n{ex.Message}", Language.WorkIntegrated_ExcelExport);
+                    AppMessageBox.Warn(this,
+                        ErrorText.WithCode($"{Language.WorkIntegrated_ExportFailed}\n{ex.Message}", ErrorText.CodeOf(ex, ErrorCodes.FileAccessFailed)),
+                        Language.WorkIntegrated_ExcelExport);
                 }
             }
         }

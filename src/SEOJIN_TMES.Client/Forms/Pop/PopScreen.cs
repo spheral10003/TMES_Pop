@@ -1,5 +1,6 @@
 using DevExpress.XtraEditors;
 using SEOJIN_TMES.Client.ApiClient;
+using SEOJIN_TMES.Client.Common.Errors;
 using SEOJIN_TMES.Client.Common.Imaging;
 using SEOJIN_TMES.Client.Common.Languages;
 using SEOJIN_TMES.Client.Common.Logging;
@@ -705,7 +706,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (!_connectFailedShown.Add(equipmentCode))
                 return;
 
-            AppMessageBox.Warn(this, string.Format(Language.Pop_EquipmentConnectFailed, equipmentCode), Language.Pop_Title);
+            AppMessageBox.Warn(this,
+                ErrorText.WithCode(string.Format(Language.Pop_EquipmentConnectFailed, equipmentCode), ErrorCodes.EquipmentConnectFailed),
+                Language.Pop_Title);
         }
 
         /// <summary>체결 결과 한 건 — 원본을 로그로 남기고 토크 · 각도(Angle3)를 BOM 스팩에 채운다.</summary>

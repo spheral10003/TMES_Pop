@@ -1314,4 +1314,49 @@ Reconnection continues automatically until it succeeds. You can also press [Reco
   <data name="Col_ResultAction" xml:space="preserve">
     <value>Result Action</value>
   </data>
+  <data name="Error_CodeFormat" xml:space="preserve">
+    <value>Error code: {0}</value>
+  </data>
+  <data name="Error_CauseFormat" xml:space="preserve">
+    <value>Cause: {0}</value>
+  </data>
+  <data name="Error_API_001" xml:space="preserve">
+    <value>Cannot connect to the server. Please check the server address and network.</value>
+  </data>
+  <data name="Error_API_002" xml:space="preserve">
+    <value>The server did not respond in time. Please try again later.</value>
+  </data>
+  <data name="Error_API_003" xml:space="preserve">
+    <value>An error occurred while communicating with the server.</value>
+  </data>
+  <data name="Error_API_004" xml:space="preserve">
+    <value>The server response format is invalid. Please contact the administrator.</value>
+  </data>
+  <data name="Error_API_005" xml:space="preserve">
+    <value>The server could not process the request. (HTTP {0})</value>
+  </data>
+  <data name="Error_API_006" xml:space="preserve">
+    <value>The login response has no authentication token. Please contact the administrator.</value>
+  </data>
+  <data name="Error_EQP_001" xml:space="preserve">
+    <value>Failed to connect to the equipment.</value>
+  </data>
+  <data name="Error_EQP_002" xml:space="preserve">
+    <value>The equipment returned an error for the setting write.</value>
+  </data>
+  <data name="Error_EQP_003" xml:space="preserve">
+    <value>Could not start reconnecting the equipment.</value>
+  </data>
+  <data name="Error_FILE_001" xml:space="preserve">
+    <value>Could not read the file from the drawing shared folder.</value>
+  </data>
+  <data name="Error_FILE_002" xml:space="preserve">
+    <value>Could not read or write the file. Check whether it is open or you lack permission.</value>
+  </data>
+  <data name="Error_SYS_001" xml:space="preserve">
+    <value>Something went wrong. Only this action was cancelled - you can keep working.</value>
+  </data>
+  <data name="Error_SYS_002" xml:space="preserve">
+    <value>An unhandled error occurred. Only this action was cancelled - you can keep working.</value>
+  </data>
 </root>

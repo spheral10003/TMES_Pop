@@ -65,7 +65,7 @@ namespace SEOJIN_TMES.Client.ApiClient
                 return response;
 
             AppLog.Warn($"{what} 응답에 accessToken이 없다 - 서버 응답 형식을 확인할 것(봉투 구조 변경 여부)");
-            throw new ApiException(HttpStatusCode.Unauthorized, null, $"{what} 응답에 토큰이 없습니다.");
+            throw ApiException.FromMissingToken();
         }
 
         public async Task<string> GetSaltAsync(CancellationToken cancellationToken = default)

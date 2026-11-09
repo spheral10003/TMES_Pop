@@ -4,6 +4,7 @@ using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
 using SEOJIN_TMES.Client.ApiClient;
 using SEOJIN_TMES.Client.Common.Configuration;
+using SEOJIN_TMES.Client.Common.Errors;
 using SEOJIN_TMES.Client.Common.Languages;
 using SEOJIN_TMES.Client.Common.Logging;
 using SEOJIN_TMES.Client.Common.Models;
@@ -486,17 +487,17 @@ namespace SEOJIN_TMES.Client.Forms
             {
                 // 서버 미기동/네트워크 단절/타임아웃 — 상세 사유는 로그로 남기고, 라벨에는 한 줄 안내만 띄운다.
                 AppLog.Error($"로그인 중 통신 오류 - UserId={userId}", ex);
-                lblMessage.Text = Language.Login_ConnectionErrorMessage;
+                lblMessage.Text = $"{Language.Login_ConnectionErrorMessage} ({FormatCode(ex.Code)})";
             }
             catch (ApiException ex)
             {
-                AppLog.Error($"로그인 실패 - UserId={userId}, StatusCode={(int)ex.StatusCode}");
-                lblMessage.Text = $"{Language.Login_FailedMessage} ({(int)ex.StatusCode})";
+                AppLog.Error($"로그인 실패 - UserId={userId}, StatusCode={(int)ex.StatusCode}, Code={ex.Code}");
+                lblMessage.Text = $"{Language.Login_FailedMessage} (HTTP {(int)ex.StatusCode}, {FormatCode(ex.Code)})";
             }
             catch (Exception ex)
             {
-                ServerLog.Unexpected("로그인", ex);
-                lblMessage.Text = $"{Language.Login_ConnectionErrorMessage}: {ex.Message}";
+                var wrapped = ServerLog.Unexpected("로그인", ex);
+                lblMessage.Text = $"{Language.Login_ConnectionErrorMessage}: {ex.Message} ({FormatCode(ErrorText.CodeOf(wrapped))})";
             }
             finally
             {
@@ -504,6 +505,9 @@ namespace SEOJIN_TMES.Client.Forms
                     btnConnect.Enabled = true;
             }
         }
+
+        /// <summary>안내 라벨 끝에 붙이는 "오류 코드: XXX" — 라벨은 한 줄이라 ErrorText.WithCode(빈 줄 + 코드 줄) 대신 괄호로 잇는다.</summary>
+        private static string FormatCode(string code) => string.Format(Language.Error_CodeFormat, code);
 
         private void btnClose_Click(object sender, EventArgs e) => Close();
 

@@ -1,7 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using SEOJIN_TMES.Client.ApiClient;
+using SEOJIN_TMES.Client.Common.Errors;
 using SEOJIN_TMES.Client.Common.Logging;
 using SEOJIN_TMES.Client.Common.Languages;
 using SEOJIN_TMES.Client.Forms.Common;
@@ -48,25 +48,17 @@ namespace SEOJIN_TMES.Client.Composition
             }
 
             // 화면이 감싸지 못한 예외는 시스템 차원의 치명적 오류로 보고 서버로도 보낸다(로컬 파일에도 남는다).
-            ServerLog.Critical(origin, exception);
+            var wrapped = ServerLog.Critical(origin, exception);
 
             try
             {
-                AppMessageBox.Error(Form.ActiveForm, BuildMessage(exception), Language.Message_TitleError);
+                // API 예외는 이미 안내 문구 + 오류 코드를 담고 있으므로 그대로, 그 외에는 SYS_002 문구 + 원인 + 코드.
+                AppMessageBox.Error(Form.ActiveForm, ErrorText.ForDisplay(wrapped), Language.Message_TitleError);
             }
             catch (Exception reportFailure)
             {
                 AppLog.Error("[전역] 오류 안내 창 표시 실패", reportFailure);
             }
         }
-
-        /// <summary>
-        /// API 예외는 이미 사용자에게 보여줄 문구를 담고 있으므로 그대로 쓰고,
-        /// 그 외에는 공통 안내 문구 뒤에 원인 한 줄을 붙인다.
-        /// </summary>
-        private static string BuildMessage(Exception exception) =>
-            exception is ApiException
-                ? exception.Message
-                : $"{Language.Common_UnexpectedError}{Environment.NewLine}{Environment.NewLine}{exception.Message}";
     }
 }

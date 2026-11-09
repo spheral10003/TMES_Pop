@@ -19,13 +19,47 @@
 | `AppStart` | [Program.cs](src/SEOJIN_TMES.Client/Program.cs) | 프로그램 시작 직후 | msg에 버전 · PC 이름 |
 | `Login` | [LoginForm.cs](src/SEOJIN_TMES.Client/Forms/LoginForm.cs) | 로그인 성공 | msg에 아이디 · PC 이름 |
 | `MenuClick` | [MainForm.cs](src/SEOJIN_TMES.Client/Forms/MainForm.cs) `Accordion_ElementClick` | 좌측 메뉴(화면 항목) 클릭 | msg에 메뉴명(키) · `Open`/`Focus` |
-| `EquipmentConnect` | [Devices.cs](src/SEOJIN_TMES.Client/Core/Devices.cs) ← `NutrunnerDevice.ConnectAttempted` | 너트러너 접속 성공 / 실패(Request · Event 채널 각각) | `eqpCd · eqpIp · eqpPort`, 실패면 `errYn=Y` · `errMsg`=실패 사유 |
-| `ModbusWrite` | [Devices.cs](src/SEOJIN_TMES.Client/Core/Devices.cs) ← `NutrunnerDevice.SettingWritten` | **설정 레지스터(토크 · 드라이버 잠금) 쓰기** 송신 1건 + 응답 1건 | `eqpCd · eqpIp · eqpPort`, msg에 요청 · 송신/응답 · 값, 오류 응답이면 `errYn=Y` |
-| `CriticalError` | `GlobalErrorHandler` · `Program` · 각 화면의 `catch (Exception)` | 처리되지 않은 예외 / 예기치 못한 예외 | `errYn=Y`, `errCd`=예외 타입 이름, `errMsg`=예외 전체(스택) |
+| `EquipmentConnect` | [Devices.cs](src/SEOJIN_TMES.Client/Core/Devices.cs) ← `NutrunnerDevice.ConnectAttempted` | 너트러너 접속 성공 / 실패(Request · Event 채널 각각) | `eqpCd · eqpIp · eqpPort`, 실패면 `errYn=Y` · `errCd=EQP_001` · `errMsg`=코드 문구 + 실패 사유 |
+| `ModbusWrite` | [Devices.cs](src/SEOJIN_TMES.Client/Core/Devices.cs) ← `NutrunnerDevice.SettingWritten` | **설정 레지스터(토크 · 드라이버 잠금) 쓰기** 송신 1건 + 응답 1건 | `eqpCd · eqpIp · eqpPort`, msg에 요청 · 송신/응답 · 값, 오류 응답이면 `errYn=Y` · `errCd=EQP_002` |
+| `CriticalError` | `GlobalErrorHandler` · `Program` · 각 화면의 `catch (Exception)` | 처리되지 않은 예외 / 예기치 못한 예외 | `errYn=Y`, `errCd`=`SYS_001`/`SYS_002`(감싼 예외가 ApiException이면 그 코드), `errMsg`=코드 문구 + 예외 전체(타입 · 스택) |
 
 모든 항목에 공통으로 `corpCd · userId · wkstnCd · deptCd · lineCd · evntOcrnDtm(yyyy-MM-dd HH:mm:ss) · errYn`이 실린다.
 로그인 전에 생긴 로그는 corpCd · userId가, 워크스테이션을 고르기 전(메인 화면 Shown)에 생긴 로그는 wkstnCd · deptCd · lineCd가 비어 있다.
-`errCd`는 클라이언트 오류 코드 체계가 아직 없어 예외 로그에만 예외 타입 이름(예: `NullReferenceException`)을 넣는다.
+서버로 보내는 `msg` · `errMsg`는 화면 언어와 상관없이 **항상 한국어**다(아래 "오류 코드" 참고).
+
+### 오류 코드
+
+[ErrorCodes.cs](src/SEOJIN_TMES.Client.Common/Errors/ErrorCodes.cs) — 형식은 서버 업무 코드(`WORK_005`)와 같은 `분류_번호`.
+코드별 문구는 Languages의 `Error_{코드}` 키(ko/en/vi)에 있고, [ErrorText.cs](src/SEOJIN_TMES.Client.Common/Errors/ErrorText.cs)가 꺼낸다.
+
+| 코드 | 뜻 | 어디서 |
+| --- | --- | --- |
+| `API_001` | 서버에 연결할 수 없음 | `ApiException.FromTransportFailure` (HttpRequestException) |
+| `API_002` | 서버 응답 시간 초과 | `ApiException.FromTransportFailure` (취소 = 타임아웃) |
+| `API_003` | 그 밖의 통신 오류 | `ApiException.FromTransportFailure` |
+| `API_004` | 서버 응답 형식 오류 | `ApiException.FromInvalidResponse` |
+| `API_005` | 서버 오류 응답(업무 코드 없음, HTTP 상태코드 표시) | `ApiException.FromErrorResponse` |
+| `API_006` | 로그인 응답에 토큰 없음 | `ApiException.FromMissingToken` |
+| `EQP_001` | 설비 접속 실패 | `ServerLog.EquipmentConnected` · POP 접속 실패 창 |
+| `EQP_002` | 설정 레지스터 쓰기 오류 응답 | `ServerLog.ModbusWritten` |
+| `EQP_003` | 설비 재연결 시작 실패 | POP 장비 그리드 [재연결] |
+| `FILE_001` | 도면 공유 폴더 파일 읽기 실패 | `DocumentShareException` |
+| `FILE_002` | 로컬 파일 읽기 · 쓰기 실패 | `IOException` · `UnauthorizedAccessException` (엑셀 저장 등) |
+| `SYS_001` | 화면이 잡은 예기치 못한 예외 | `ServerLog.Unexpected` |
+| `SYS_002` | 어디서도 잡지 못한 예외 | `ServerLog.Critical` (전역 처리기) |
+
+서버가 오류 본문에 업무 코드(`WORK_005` 등)를 주면 화면 · 로그에는 그 코드가 쓰인다(`ApiException.Code`).
+서버 업무 코드에는 클라이언트 문구가 없어 서버가 준 사유(`message`)를 그대로 보여 준다.
+
+**화면** — 현재 언어의 코드 문구 아래에 빈 줄 + `오류 코드: XXX_000` 줄.
+- `ApiException.Message`는 읽는 시점의 화면 언어로 만들어지고 코드 줄까지 들어 있다 → 화면은 `ex.Message`를 그대로 띄운다.
+- 그 밖의 예외는 `ErrorText.ForDisplay(ex)`(코드 문구 + 원인 + 코드 줄), 고정 안내 문구에는 `ErrorText.WithCode(문구, 코드)`.
+
+**서버** — `errCd`=코드, `errMsg`=`ErrorText.Korean(코드)` 첫 줄 + 상세. ApiException은 `MessageFor(ko-KR)`로 한국어 문구를 꺼낸다.
+.NET이 만든 예외 메시지(스택 앞 줄)는 PC의 Windows 언어를 따르므로 여기서는 바꾸지 않는다.
+
+**코드를 추가할 때** — `ErrorCodes` 상수 + 세 resx의 `Error_{코드}` 키(같은 순서) + `Language.cs` 속성 + 이 표.
+이미 나간 코드의 의미는 바꾸지 말 것(서버에 쌓인 로그와 현장 문의가 코드로 연결된다).
 
 ### 설비(너트러너) 쪽 구조
 

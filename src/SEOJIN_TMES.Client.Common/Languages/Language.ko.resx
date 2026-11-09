@@ -1314,4 +1314,49 @@
   <data name="Col_ResultAction" xml:space="preserve">
     <value>결과동작</value>
   </data>
+  <data name="Error_CodeFormat" xml:space="preserve">
+    <value>오류 코드: {0}</value>
+  </data>
+  <data name="Error_CauseFormat" xml:space="preserve">
+    <value>원인: {0}</value>
+  </data>
+  <data name="Error_API_001" xml:space="preserve">
+    <value>서버에 연결할 수 없습니다. 서버 주소와 네트워크 상태를 확인해 주세요.</value>
+  </data>
+  <data name="Error_API_002" xml:space="preserve">
+    <value>서버 응답 시간이 초과되었습니다. 잠시 후 다시 시도해 주세요.</value>
+  </data>
+  <data name="Error_API_003" xml:space="preserve">
+    <value>서버 통신 중 오류가 발생했습니다.</value>
+  </data>
+  <data name="Error_API_004" xml:space="preserve">
+    <value>서버 응답 형식이 올바르지 않습니다. 관리자에게 문의해 주세요.</value>
+  </data>
+  <data name="Error_API_005" xml:space="preserve">
+    <value>서버가 요청을 처리하지 못했습니다. (HTTP {0})</value>
+  </data>
+  <data name="Error_API_006" xml:space="preserve">
+    <value>로그인 응답에 인증 토큰이 없습니다. 관리자에게 문의해 주세요.</value>
+  </data>
+  <data name="Error_EQP_001" xml:space="preserve">
+    <value>장비에 연결하지 못했습니다.</value>
+  </data>
+  <data name="Error_EQP_002" xml:space="preserve">
+    <value>장비가 설정값 쓰기에 오류로 응답했습니다.</value>
+  </data>
+  <data name="Error_EQP_003" xml:space="preserve">
+    <value>장비 재연결을 시작하지 못했습니다.</value>
+  </data>
+  <data name="Error_FILE_001" xml:space="preserve">
+    <value>도면 공유 폴더의 파일을 읽지 못했습니다.</value>
+  </data>
+  <data name="Error_FILE_002" xml:space="preserve">
+    <value>파일을 읽거나 쓰지 못했습니다. 파일이 열려 있거나 권한이 없는지 확인해 주세요.</value>
+  </data>
+  <data name="Error_SYS_001" xml:space="preserve">
+    <value>처리 중 오류가 발생했습니다. 이 작업만 중단되며 계속 사용할 수 있습니다.</value>
+  </data>
+  <data name="Error_SYS_002" xml:space="preserve">
+    <value>처리되지 않은 오류가 발생했습니다. 이 작업만 중단되며 계속 사용할 수 있습니다.</value>
+  </data>
 </root>

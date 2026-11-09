@@ -38,7 +38,9 @@ namespace SEOJIN_TMES.Client.Common.Models
         [JsonProperty("msg")]
         public string Message { get; set; }
 
-        /// <summary>오류 내용 — 예외면 예외 전체 문자열(스택 포함), 설비 접속 실패면 실패 사유.</summary>
+        /// <summary>
+        /// 오류 내용(항상 한국어) — 첫 줄은 오류 코드 문구, 그 아래 상세(예외면 예외 전체 · 스택, 설비 접속 실패면 실패 사유).
+        /// </summary>
         [JsonProperty("errMsg")]
         public string ErrorMessage { get; set; }
 
@@ -69,7 +71,7 @@ namespace SEOJIN_TMES.Client.Common.Models
         [JsonProperty("errYn")]
         public string ErrorYn { get; set; }
 
-        /// <summary>오류 코드. 지금은 예외의 타입 이름(예: <c>NullReferenceException</c>)만 채운다 — 클라이언트 오류 코드 체계는 아직 없다.</summary>
+        /// <summary>오류 코드 — <c>ErrorCodes</c>의 클라이언트 코드(예: <c>SYS_001</c>, <c>EQP_001</c>) 또는 서버 업무 코드(예: <c>WORK_005</c>).</summary>
         [JsonProperty("errCd")]
         public string ErrorCode { get; set; }
     }

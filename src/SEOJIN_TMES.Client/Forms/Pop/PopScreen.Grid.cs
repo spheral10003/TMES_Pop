@@ -3,6 +3,7 @@ using DevExpress.XtraEditors.Repository;
 using DevExpress.XtraGrid.Views.Base;
 using DevExpress.XtraGrid.Views.Grid;
 using SEOJIN_TMES.Client.ApiClient;
+using SEOJIN_TMES.Client.Common.Errors;
 using SEOJIN_TMES.Client.Common.Languages;
 using SEOJIN_TMES.Client.Common.Logging;
 using SEOJIN_TMES.Client.Common.Models;
@@ -1350,7 +1351,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             {
                 if (!_equip.Manager.TryGet(equipment.EquipmentCode, out INutrunner nutrunner) || nutrunner == null)
                 {
-                    AppMessageBox.Warn(this, Language.Pop_ReconnectFailed, Language.Pop_Title);
+                    AppMessageBox.Warn(this, ErrorText.WithCode(Language.Pop_ReconnectFailed, ErrorCodes.EquipmentReconnectFailed), Language.Pop_Title);
                     return;
                 }
 

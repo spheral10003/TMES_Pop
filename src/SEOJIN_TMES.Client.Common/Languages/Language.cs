@@ -511,5 +511,22 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string Col_MaterialName => Get(nameof(Col_MaterialName));
         public static string Col_PurchasePlanMethod => Get(nameof(Col_PurchasePlanMethod));
         public static string Col_ResultAction => Get(nameof(Col_ResultAction));
+
+        // ── 오류 코드 문구 — 코드별 문구는 ErrorText가 "Error_" + 코드로 꺼낸다(서버 전송용 한국어도 같은 키) ──
+        public static string Error_CodeFormat => Get(nameof(Error_CodeFormat));
+        public static string Error_CauseFormat => Get(nameof(Error_CauseFormat));
+        public static string Error_API_001 => Get(nameof(Error_API_001));
+        public static string Error_API_002 => Get(nameof(Error_API_002));
+        public static string Error_API_003 => Get(nameof(Error_API_003));
+        public static string Error_API_004 => Get(nameof(Error_API_004));
+        public static string Error_API_005 => Get(nameof(Error_API_005));
+        public static string Error_API_006 => Get(nameof(Error_API_006));
+        public static string Error_EQP_001 => Get(nameof(Error_EQP_001));
+        public static string Error_EQP_002 => Get(nameof(Error_EQP_002));
+        public static string Error_EQP_003 => Get(nameof(Error_EQP_003));
+        public static string Error_FILE_001 => Get(nameof(Error_FILE_001));
+        public static string Error_FILE_002 => Get(nameof(Error_FILE_002));
+        public static string Error_SYS_001 => Get(nameof(Error_SYS_001));
+        public static string Error_SYS_002 => Get(nameof(Error_SYS_002));
     }
 }

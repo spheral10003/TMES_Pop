@@ -1314,4 +1314,49 @@ Hệ thống sẽ tự động thử kết nối lại cho đến khi thành cô
   <data name="Col_ResultAction" xml:space="preserve">
     <value>Thao tác kết quả</value>
   </data>
+  <data name="Error_CodeFormat" xml:space="preserve">
+    <value>Mã lỗi: {0}</value>
+  </data>
+  <data name="Error_CauseFormat" xml:space="preserve">
+    <value>Nguyên nhân: {0}</value>
+  </data>
+  <data name="Error_API_001" xml:space="preserve">
+    <value>Không thể kết nối đến máy chủ. Vui lòng kiểm tra địa chỉ máy chủ và mạng.</value>
+  </data>
+  <data name="Error_API_002" xml:space="preserve">
+    <value>Máy chủ phản hồi quá thời gian. Vui lòng thử lại sau.</value>
+  </data>
+  <data name="Error_API_003" xml:space="preserve">
+    <value>Đã xảy ra lỗi khi giao tiếp với máy chủ.</value>
+  </data>
+  <data name="Error_API_004" xml:space="preserve">
+    <value>Định dạng phản hồi của máy chủ không hợp lệ. Vui lòng liên hệ quản trị viên.</value>
+  </data>
+  <data name="Error_API_005" xml:space="preserve">
+    <value>Máy chủ không thể xử lý yêu cầu. (HTTP {0})</value>
+  </data>
+  <data name="Error_API_006" xml:space="preserve">
+    <value>Phản hồi đăng nhập không có mã xác thực. Vui lòng liên hệ quản trị viên.</value>
+  </data>
+  <data name="Error_EQP_001" xml:space="preserve">
+    <value>Không thể kết nối với thiết bị.</value>
+  </data>
+  <data name="Error_EQP_002" xml:space="preserve">
+    <value>Thiết bị trả về lỗi khi ghi giá trị cài đặt.</value>
+  </data>
+  <data name="Error_EQP_003" xml:space="preserve">
+    <value>Không thể bắt đầu kết nối lại thiết bị.</value>
+  </data>
+  <data name="Error_FILE_001" xml:space="preserve">
+    <value>Không thể đọc tệp từ thư mục chia sẻ bản vẽ.</value>
+  </data>
+  <data name="Error_FILE_002" xml:space="preserve">
+    <value>Không thể đọc hoặc ghi tệp. Hãy kiểm tra tệp có đang mở hoặc thiếu quyền không.</value>
+  </data>
+  <data name="Error_SYS_001" xml:space="preserve">
+    <value>Đã xảy ra lỗi. Chỉ tác vụ này bị hủy - bạn có thể tiếp tục làm việc.</value>
+  </data>
+  <data name="Error_SYS_002" xml:space="preserve">
+    <value>Đã xảy ra lỗi chưa được xử lý. Chỉ tác vụ này bị hủy - bạn có thể tiếp tục làm việc.</value>
+  </data>
 </root>

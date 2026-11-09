@@ -1,4 +1,5 @@
 using System;
+using SEOJIN_TMES.Client.Common.Errors;
 
 namespace SEOJIN_TMES.Client.Common.Logging
 {
@@ -15,14 +16,22 @@ namespace SEOJIN_TMES.Client.Common.Logging
         /// <summary>예외가 잡힌 자리(예: <c>로그인</c>, <c>UI 스레드</c>).</summary>
         public string Origin { get; }
 
-        public UnexpectedException(string origin, Exception innerException)
+        /// <summary>
+        /// 오류 코드 — 화면이 잡은 예외는 <see cref="ErrorCodes.Unexpected"/>(SYS_001),
+        /// 전역 처리기까지 올라온 예외는 <see cref="ErrorCodes.Unhandled"/>(SYS_002).
+        /// </summary>
+        public string Code { get; }
+
+        /// <remarks>Message는 로그(로컬 파일 · 서버) 전용이라 한국어로 고정한다 — 화면에는 ErrorText.ForDisplay로 띄운다.</remarks>
+        public UnexpectedException(string origin, Exception innerException, string code = ErrorCodes.Unexpected)
             : base($"[{origin}] 예기치 못한 오류 - {innerException?.Message}", innerException)
         {
             Origin = origin;
+            Code = code;
         }
 
-        /// <summary>이미 감싼 예외면 그대로 돌려준다(두 겹으로 싸지 않는다).</summary>
-        public static UnexpectedException Wrap(string origin, Exception exception) =>
-            exception as UnexpectedException ?? new UnexpectedException(origin, exception);
+        /// <summary>이미 감싼 예외면 그대로 돌려준다(두 겹으로 싸지 않는다 — 처음 감쌀 때의 코드를 유지한다).</summary>
+        public static UnexpectedException Wrap(string origin, Exception exception, string code = ErrorCodes.Unexpected) =>
+            exception as UnexpectedException ?? new UnexpectedException(origin, exception, code);
     }
 }
