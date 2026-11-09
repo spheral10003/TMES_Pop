@@ -44,11 +44,44 @@ namespace SEOJIN_TMES.Client.Common.Errors
 
         // ── FILE: 파일 ──
 
-        /// <summary>도면 공유 폴더(SMB) 파일 접근 실패.</summary>
+        /// <summary>도면 공유 폴더(SMB) 파일 읽기 실패(입출력 오류 — 아래로 분류되지 않은 경우).</summary>
         public const string FileShareFailed = "FILE_001";
 
         /// <summary>로컬 파일 읽기 · 쓰기 실패(첨부 업로드 · 엑셀 저장 등).</summary>
         public const string FileAccessFailed = "FILE_002";
+
+        /// <summary>표시할 도면 파일 경로가 비어 있음.</summary>
+        public const string DrawingPathEmpty = "FILE_003";
+
+        /// <summary>도면 공유 폴더(App.config DocumentShare.RootPath) 미설정.</summary>
+        public const string DrawingShareNotConfigured = "FILE_004";
+
+        /// <summary>도면 파일 없음.</summary>
+        public const string DrawingNotFound = "FILE_005";
+
+        /// <summary>도면 파일 크기 상한 초과. 문구 인자: 파일 크기(MB), 상한(MB).</summary>
+        public const string DrawingTooLarge = "FILE_006";
+
+        /// <summary>도면 파일 접근 권한 없음.</summary>
+        public const string DrawingAccessDenied = "FILE_007";
+
+        /// <summary>공유 폴더 연결 — 접근 거부(Windows 오류 5).</summary>
+        public const string ShareAccessDenied = "FILE_008";
+
+        /// <summary>공유 폴더 연결 — 공유를 찾을 수 없음(Windows 오류 53).</summary>
+        public const string ShareNotFound = "FILE_009";
+
+        /// <summary>공유 폴더 연결 — 공유 이름 오류(Windows 오류 67).</summary>
+        public const string ShareBadName = "FILE_010";
+
+        /// <summary>공유 폴더 연결 — 계정 또는 비밀번호 오류(Windows 오류 86 · 1326).</summary>
+        public const string ShareBadCredential = "FILE_011";
+
+        /// <summary>공유 폴더 연결 — 같은 서버에 다른 계정으로 이미 연결됨(Windows 오류 1219).</summary>
+        public const string ShareCredentialConflict = "FILE_012";
+
+        /// <summary>공유 폴더 연결 — 그 밖의 실패. 문구 인자: Windows 오류 번호.</summary>
+        public const string ShareConnectFailed = "FILE_013";
 
         // ── SYS: 예기치 못한 오류 ──
 

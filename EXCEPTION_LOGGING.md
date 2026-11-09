@@ -43,8 +43,22 @@
 | `EQP_001` | 설비 접속 실패 | `ServerLog.EquipmentConnected` · POP 접속 실패 창 |
 | `EQP_002` | 설정 레지스터 쓰기 오류 응답 | `ServerLog.ModbusWritten` |
 | `EQP_003` | 설비 재연결 시작 실패 | POP 장비 그리드 [재연결] |
-| `FILE_001` | 도면 공유 폴더 파일 읽기 실패 | `DocumentShareException` |
+| `FILE_001` | 도면 공유 폴더 파일 읽기 실패(입출력 오류) | `DocumentShareClient.ReadAllBytesAsync` |
 | `FILE_002` | 로컬 파일 읽기 · 쓰기 실패 | `IOException` · `UnauthorizedAccessException` (엑셀 저장 등) |
+| `FILE_003` | 도면 파일 경로 비어 있음 | `DocumentShareClient.Resolve` |
+| `FILE_004` | 도면 공유 폴더(RootPath) 미설정 | `DocumentShareClient.Resolve` |
+| `FILE_005` | 도면 파일 없음 | `DocumentShareClient.ReadAllBytesAsync` |
+| `FILE_006` | 도면 파일 크기 상한(64MB) 초과 | `DocumentShareClient.ReadAllBytesAsync` |
+| `FILE_007` | 도면 파일 접근 권한 없음 | `DocumentShareClient.ReadAllBytesAsync` |
+| `FILE_008` | 공유 폴더 접근 거부(Windows 5) | `SmbConnection.Ensure` |
+| `FILE_009` | 공유 폴더를 찾을 수 없음(Windows 53) | `SmbConnection.Ensure` |
+| `FILE_010` | 공유 이름 오류(Windows 67) | `SmbConnection.Ensure` |
+| `FILE_011` | 공유 계정 또는 비밀번호 오류(Windows 86 · 1326) | `SmbConnection.Ensure` |
+| `FILE_012` | 같은 서버에 다른 계정으로 이미 연결(Windows 1219) | `SmbConnection.Ensure` |
+| `FILE_013` | 그 밖의 공유 연결 실패(Windows 오류 번호 표시) | `SmbConnection.Ensure` |
+
+`DocumentShareException`도 ApiException처럼 Message를 읽는 시점의 화면 언어로 만들고 코드 줄을 붙인다(파일 · 공유 경로는 번역 없이 그 아래에).
+POP 도면 영역은 "도면을 불러오지 못했습니다" 아래에 이 사유와 코드를 함께 보여 준다.
 | `SYS_001` | 화면이 잡은 예기치 못한 예외 | `ServerLog.Unexpected` |
 | `SYS_002` | 어디서도 잡지 못한 예외 | `ServerLog.Critical` (전역 처리기) |
 

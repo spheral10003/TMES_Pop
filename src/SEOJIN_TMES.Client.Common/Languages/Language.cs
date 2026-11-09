@@ -528,5 +528,16 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string Error_FILE_002 => Get(nameof(Error_FILE_002));
         public static string Error_SYS_001 => Get(nameof(Error_SYS_001));
         public static string Error_SYS_002 => Get(nameof(Error_SYS_002));
+        public static string Error_FILE_003 => Get(nameof(Error_FILE_003));
+        public static string Error_FILE_004 => Get(nameof(Error_FILE_004));
+        public static string Error_FILE_005 => Get(nameof(Error_FILE_005));
+        public static string Error_FILE_006 => Get(nameof(Error_FILE_006));
+        public static string Error_FILE_007 => Get(nameof(Error_FILE_007));
+        public static string Error_FILE_008 => Get(nameof(Error_FILE_008));
+        public static string Error_FILE_009 => Get(nameof(Error_FILE_009));
+        public static string Error_FILE_010 => Get(nameof(Error_FILE_010));
+        public static string Error_FILE_011 => Get(nameof(Error_FILE_011));
+        public static string Error_FILE_012 => Get(nameof(Error_FILE_012));
+        public static string Error_FILE_013 => Get(nameof(Error_FILE_013));
     }
 }

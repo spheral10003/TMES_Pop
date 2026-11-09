@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using SEOJIN_TMES.Client.Common.Configuration;
+using SEOJIN_TMES.Client.Common.Errors;
 using SEOJIN_TMES.Client.Common.Logging;
 
 namespace SEOJIN_TMES.Client.Common.Storage
@@ -45,7 +46,7 @@ namespace SEOJIN_TMES.Client.Common.Storage
         public string Resolve(string path)
         {
             if (string.IsNullOrWhiteSpace(path))
-                throw new DocumentShareException("표시할 도면 파일 경로가 비어 있습니다.");
+                throw new DocumentShareException(ErrorCodes.DrawingPathEmpty);
 
             var normalized = path.Trim().Replace('/', '\\');
 
@@ -53,7 +54,7 @@ namespace SEOJIN_TMES.Client.Common.Storage
                 return normalized;
 
             if (!_settings.IsConfigured)
-                throw new DocumentShareException("도면 공유 폴더(App.config의 DocumentShare.RootPath)가 설정되지 않았습니다.");
+                throw new DocumentShareException(ErrorCodes.DrawingShareNotConfigured);
 
             return Path.Combine(_settings.RootPath.TrimEnd('\\'), normalized.TrimStart('\\'));
         }
@@ -78,10 +79,11 @@ namespace SEOJIN_TMES.Client.Common.Storage
 
                     var info = new FileInfo(fullPath);
                     if (!info.Exists)
-                        throw new DocumentShareException($"도면 파일을 찾을 수 없습니다.\n{fullPath}");
+                        throw new DocumentShareException(ErrorCodes.DrawingNotFound, fullPath);
 
                     if (info.Length > MaxFileBytes)
-                        throw new DocumentShareException($"도면 파일이 너무 큽니다({info.Length / (1024 * 1024)}MB). 최대 {MaxFileBytes / (1024 * 1024)}MB까지 표시합니다.");
+                        throw new DocumentShareException(ErrorCodes.DrawingTooLarge, fullPath, 0,
+                            info.Length / (1024 * 1024), MaxFileBytes / (1024 * 1024));
 
                     AppLog.Info($"[SMB] 도면 읽기 시작 - {fullPath} ({info.Length:N0} bytes)");
 
@@ -100,11 +102,11 @@ namespace SEOJIN_TMES.Client.Common.Storage
                 }
                 catch (UnauthorizedAccessException ex)
                 {
-                    throw new DocumentShareException($"도면 파일에 접근할 권한이 없습니다.\n{fullPath}", ex);
+                    throw new DocumentShareException(ErrorCodes.DrawingAccessDenied, fullPath, ex);
                 }
                 catch (IOException ex)
                 {
-                    throw new DocumentShareException($"도면 파일을 읽지 못했습니다.\n{fullPath}\n{ex.Message}", ex);
+                    throw new DocumentShareException(ErrorCodes.FileShareFailed, $"{fullPath}\n{ex.Message}", ex);
                 }
             }, cancellationToken);
         }

@@ -1359,4 +1359,37 @@ Hệ thống sẽ tự động thử kết nối lại cho đến khi thành cô
   <data name="Error_SYS_002" xml:space="preserve">
     <value>Đã xảy ra lỗi chưa được xử lý. Chỉ tác vụ này bị hủy - bạn có thể tiếp tục làm việc.</value>
   </data>
+  <data name="Error_FILE_003" xml:space="preserve">
+    <value>Đường dẫn tệp bản vẽ đang trống.</value>
+  </data>
+  <data name="Error_FILE_004" xml:space="preserve">
+    <value>Chưa cấu hình thư mục chia sẻ bản vẽ (DocumentShare.RootPath trong App.config).</value>
+  </data>
+  <data name="Error_FILE_005" xml:space="preserve">
+    <value>Không tìm thấy tệp bản vẽ.</value>
+  </data>
+  <data name="Error_FILE_006" xml:space="preserve">
+    <value>Tệp bản vẽ quá lớn ({0}MB). Chỉ hiển thị tối đa {1}MB.</value>
+  </data>
+  <data name="Error_FILE_007" xml:space="preserve">
+    <value>Không có quyền truy cập tệp bản vẽ.</value>
+  </data>
+  <data name="Error_FILE_008" xml:space="preserve">
+    <value>Truy cập thư mục chia sẻ bị từ chối. Hãy kiểm tra quyền của tài khoản.</value>
+  </data>
+  <data name="Error_FILE_009" xml:space="preserve">
+    <value>Không tìm thấy thư mục chia sẻ. Hãy kiểm tra tên/địa chỉ máy chủ.</value>
+  </data>
+  <data name="Error_FILE_010" xml:space="preserve">
+    <value>Tên thư mục chia sẻ không hợp lệ.</value>
+  </data>
+  <data name="Error_FILE_011" xml:space="preserve">
+    <value>Tài khoản hoặc mật khẩu thư mục chia sẻ không đúng.</value>
+  </data>
+  <data name="Error_FILE_012" xml:space="preserve">
+    <value>Đã kết nối tới cùng máy chủ bằng một tài khoản khác.</value>
+  </data>
+  <data name="Error_FILE_013" xml:space="preserve">
+    <value>Không thể kết nối tới thư mục chia sẻ. (Lỗi Windows {0})</value>
+  </data>
 </root>

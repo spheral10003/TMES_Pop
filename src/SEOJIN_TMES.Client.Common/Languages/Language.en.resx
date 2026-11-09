@@ -1359,4 +1359,37 @@ Reconnection continues automatically until it succeeds. You can also press [Reco
   <data name="Error_SYS_002" xml:space="preserve">
     <value>An unhandled error occurred. Only this action was cancelled - you can keep working.</value>
   </data>
+  <data name="Error_FILE_003" xml:space="preserve">
+    <value>The drawing file path is empty.</value>
+  </data>
+  <data name="Error_FILE_004" xml:space="preserve">
+    <value>The drawing shared folder (DocumentShare.RootPath in App.config) is not configured.</value>
+  </data>
+  <data name="Error_FILE_005" xml:space="preserve">
+    <value>The drawing file was not found.</value>
+  </data>
+  <data name="Error_FILE_006" xml:space="preserve">
+    <value>The drawing file is too large ({0}MB). Up to {1}MB can be displayed.</value>
+  </data>
+  <data name="Error_FILE_007" xml:space="preserve">
+    <value>You do not have permission to access the drawing file.</value>
+  </data>
+  <data name="Error_FILE_008" xml:space="preserve">
+    <value>Access to the shared folder was denied. Check the account permissions.</value>
+  </data>
+  <data name="Error_FILE_009" xml:space="preserve">
+    <value>The shared folder was not found. Check the server name/address.</value>
+  </data>
+  <data name="Error_FILE_010" xml:space="preserve">
+    <value>The share name is invalid.</value>
+  </data>
+  <data name="Error_FILE_011" xml:space="preserve">
+    <value>The shared folder account or password is incorrect.</value>
+  </data>
+  <data name="Error_FILE_012" xml:space="preserve">
+    <value>Already connected to the same server with a different account.</value>
+  </data>
+  <data name="Error_FILE_013" xml:space="preserve">
+    <value>Could not connect to the shared folder. (Windows error {0})</value>
+  </data>
 </root>

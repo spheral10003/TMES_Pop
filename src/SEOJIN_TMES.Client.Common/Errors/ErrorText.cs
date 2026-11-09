@@ -3,7 +3,6 @@ using System.Globalization;
 using System.IO;
 using SEOJIN_TMES.Client.Common.Languages;
 using SEOJIN_TMES.Client.Common.Logging;
-using SEOJIN_TMES.Client.Common.Storage;
 
 namespace SEOJIN_TMES.Client.Common.Errors
 {
@@ -61,8 +60,6 @@ namespace SEOJIN_TMES.Client.Common.Errors
                 case UnexpectedException unexpected:
                     // 감싼 원래 예외가 코드를 들고 있으면(ApiException) 그 코드가 더 구체적이다.
                     return unexpected.InnerException is ICodedException inner ? inner.Code : unexpected.Code;
-                case DocumentShareException _:
-                    return ErrorCodes.FileShareFailed;
                 case IOException _:
                 case UnauthorizedAccessException _:
                     return ErrorCodes.FileAccessFailed;

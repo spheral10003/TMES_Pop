@@ -3,7 +3,7 @@ using System.Globalization;
 namespace SEOJIN_TMES.Client.Common.Errors
 {
     /// <summary>
-    /// 오류 코드와 <b>화면에 그대로 띄울 수 있는 안내 문구</b>를 함께 들고 있는 예외(지금은 ApiException).
+    /// 오류 코드와 <b>화면에 그대로 띄울 수 있는 안내 문구</b>를 함께 들고 있는 예외(ApiException · DocumentShareException).
     /// <see cref="System.Exception.Message"/>가 현재 화면 언어의 안내 + "오류 코드" 줄이므로
     /// 화면은 <c>ex.Message</c>를 그대로 띄우면 된다.
     /// (Common은 ApiClient를 모르므로 ApiException도 이 계약으로만 본다.)

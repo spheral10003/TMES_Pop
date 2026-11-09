@@ -1589,7 +1589,11 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             {
                 AppLog.Warn($"[POP] 도면 읽기 실패 - {path} : {ex.Message}");
                 if (IsDisposed || Disposing) return;
-                ShowViewerMessage(Language.Pop_DrawingLoadFailed);
+
+                // 공유 폴더 실패는 사유(파일 없음 · 권한 · 계정 등)와 코드가 Message에 들어 있어 그대로 덧붙인다.
+                ShowViewerMessage(ex is ICodedException
+                    ? $"{Language.Pop_DrawingLoadFailed}{Environment.NewLine}{Environment.NewLine}{ex.Message}"
+                    : ErrorText.WithCode(Language.Pop_DrawingLoadFailed, ErrorText.CodeOf(ex, ErrorCodes.FileShareFailed)));
             }
         }
 

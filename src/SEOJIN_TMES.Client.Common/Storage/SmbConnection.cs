@@ -1,5 +1,7 @@
 using System;
+using System.Globalization;
 using System.Runtime.InteropServices;
+using SEOJIN_TMES.Client.Common.Errors;
 using SEOJIN_TMES.Client.Common.Logging;
 
 namespace SEOJIN_TMES.Client.Common.Storage
@@ -71,7 +73,7 @@ namespace SEOJIN_TMES.Client.Common.Storage
                 }
 
                 if (result != NoError && result != ErrorAlreadyAssigned)
-                    throw new DocumentShareException(DescribeConnectError(result, _shareRoot), result);
+                    throw new DocumentShareException(ConnectErrorCode(result), _shareRoot, result, result);
 
                 _connected = true;
                 AppLog.Info($"[SMB] {_shareRoot} 연결 완료 (계정 {_userName})");
@@ -113,18 +115,21 @@ namespace SEOJIN_TMES.Client.Common.Storage
             return @"\\" + parts[0] + @"\" + parts[1];
         }
 
-        /// <summary>자주 나오는 오류 코드는 원인을 바로 알 수 있게 우리말로 풀어 준다.</summary>
-        private static string DescribeConnectError(int code, string shareRoot)
+        /// <summary>
+        /// 자주 나오는 Windows 오류는 원인을 바로 알 수 있게 오류 코드를 따로 둔다(문구는 Languages의 Error_FILE_xxx).
+        /// 그 밖의 번호는 FILE_013 하나로 묶고 문구에 Windows 오류 번호를 넣는다.
+        /// </summary>
+        private static string ConnectErrorCode(int win32Error)
         {
-            switch (code)
+            switch (win32Error)
             {
-                case 5:    return $"공유 폴더 접근이 거부되었습니다({shareRoot}). 계정 권한을 확인하세요.";
-                case 53:   return $"공유 폴더를 찾을 수 없습니다({shareRoot}). 서버 이름/주소를 확인하세요.";
-                case 67:   return $"공유 이름이 올바르지 않습니다({shareRoot}).";
-                case 86:   return $"공유 폴더 비밀번호가 올바르지 않습니다({shareRoot}).";
-                case 1326: return $"공유 폴더 계정 또는 비밀번호가 올바르지 않습니다({shareRoot}).";
-                case 1219: return $"같은 서버에 다른 계정으로 이미 연결되어 있습니다({shareRoot}).";
-                default:   return $"공유 폴더에 연결하지 못했습니다({shareRoot}). 오류 코드 {code}.";
+                case 5:    return ErrorCodes.ShareAccessDenied;
+                case 53:   return ErrorCodes.ShareNotFound;
+                case 67:   return ErrorCodes.ShareBadName;
+                case 86:
+                case 1326: return ErrorCodes.ShareBadCredential;
+                case 1219: return ErrorCodes.ShareCredentialConflict;
+                default:   return ErrorCodes.ShareConnectFailed;
             }
         }
 
@@ -166,23 +171,47 @@ namespace SEOJIN_TMES.Client.Common.Storage
     }
 
     /// <summary>
-    /// 공유 폴더 접근 실패. 화면은 이 예외의 <see cref="Exception.Message"/>를 그대로 보여 주면 되도록
-    /// 사람이 읽을 수 있는 문구를 담는다(ApiException과 같은 방식).
+    /// 공유 폴더 접근 실패. 화면은 이 예외의 <see cref="Message"/>를 그대로 보여 주면 된다(ApiException과 같은 방식) —
+    /// 오류 코드(FILE_xxx)로 문구를 정하고, Message를 <b>읽을 때</b> 그 시점의 화면 언어로 만든다
+    /// (파일 읽기는 백그라운드 스레드에서 실패하므로 만들 때 문구를 굳히면 언어가 어긋날 수 있다).
+    /// 끝에는 "오류 코드" 줄이 붙는다. 서버 로그용 한국어 문구는 <see cref="MessageFor"/>로 꺼낸다.
     /// </summary>
-    public class DocumentShareException : Exception
+    public class DocumentShareException : Exception, ICodedException
     {
         /// <summary>윈도우 오류 코드(있으면). 코드가 없는 경우 0.</summary>
         public int ErrorCode { get; }
 
-        public DocumentShareException(string message, int errorCode = 0)
-            : base(message)
+        /// <summary>오류 코드(FILE_xxx).</summary>
+        public string Code { get; }
+
+        /// <summary>문구 아래에 덧붙이는 상세(파일 · 공유 경로, 입출력 오류 원인). 경로라 번역하지 않는다.</summary>
+        private readonly string _detail;
+
+        /// <summary>코드 문구에 넣을 인자(FILE_006 크기, FILE_013 Windows 오류 번호).</summary>
+        private readonly object[] _codeArgs;
+
+        public DocumentShareException(string code, string detail = null, int win32Error = 0, params object[] codeArgs)
+            : this(code, detail, null, win32Error, codeArgs)
         {
-            ErrorCode = errorCode;
         }
 
-        public DocumentShareException(string message, Exception innerException)
-            : base(message, innerException)
+        public DocumentShareException(string code, string detail, Exception innerException, int win32Error = 0, params object[] codeArgs)
+            : base(ErrorText.Korean(code, codeArgs), innerException)
         {
+            Code = code;
+            ErrorCode = win32Error;
+            _detail = detail;
+            _codeArgs = codeArgs;
+        }
+
+        /// <summary>현재 화면 언어의 안내 문구 + 상세 + 오류 코드 줄.</summary>
+        public override string Message => ErrorText.WithCode(MessageFor(CultureInfo.CurrentUICulture), Code);
+
+        /// <summary>지정한 언어의 안내 문구 + 상세(코드 줄 제외).</summary>
+        public string MessageFor(CultureInfo culture)
+        {
+            var message = ErrorText.Format(Code, culture, _codeArgs);
+            return string.IsNullOrWhiteSpace(_detail) ? message : message + Environment.NewLine + _detail;
         }
     }
 }
