@@ -106,7 +106,7 @@ namespace SEOJIN_TMES.Client.Common.Models
         /// <summary>투입자재 코드 (예: M-00001-01010).</summary>
         public string MaterialCode { get; set; }
 
-        /// <summary>자재 품명(서버 itemNm) — 화면 표시용.</summary>
+        /// <summary>자재 품명(서버 inputItemNm) — 화면 표시용.</summary>
         public string MaterialName { get; set; }
 
         /// <summary>품목코드 — 시리얼번호 입력 팝업에 함께 보여준다 (예: PN-010101010-11).</summary>
@@ -205,7 +205,7 @@ namespace SEOJIN_TMES.Client.Common.Models
         /// <summary>투입자재 코드.</summary>
         public string MaterialCode { get; set; }
 
-        /// <summary>자재 품명(서버 itemNm) — 화면 표시용.</summary>
+        /// <summary>자재 품명(서버 inputItemNm) — 화면 표시용.</summary>
         public string MaterialName { get; set; }
 
         /// <summary>구매 계획 방식(서버 prchsPlanMth: null / MRP / ROP / 빈 문자열) — 서버 값을 그대로 보여 준다.</summary>
