@@ -980,6 +980,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         ///  - 투입자재 입력(시리얼 · 품목코드)이 남았으면 [투입자재]
         ///  - 그다음 체결할 BOM 줄(참조 줄 제외)이 있으면 [BOM 스팩]
         ///  - BOM이 없거나 참조 줄뿐이면 [검사 스팩]. 검사 항목도 없으면 [투입자재]에 둔다(빈 탭으로 옮기지 않는다).
+        ///    단 투입자재가 입력 불필요(시리얼 · 품목코드 확인 N, 참조)뿐이고 BOM 줄이 있으면 [BOM 스팩]으로 간다.
         /// [연결 장비] 탭으로는 자동으로 가지 않는다.
         ///
         /// 예전에는 투입자재가 없거나 덜 끝났을 때 탭을 건드리지 않아, 공정을 옮겨도 앞 공정에서 보던 탭이 그대로 남았다.
@@ -997,6 +998,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 page = pageBom;
             else if (_inspections.Count > 0)
                 page = pageInspec;
+            else if (!_materials.Any(m => m.HasInputItem) && _bomSpecs.Count > 0)
+                page = pageBom;   // 투입자재가 입력 불필요뿐이면 볼 것이 없는 [투입자재] 대신 BOM(참조 줄뿐이어도)을 보여 준다.
             else
                 page = pageMaterial;
 
