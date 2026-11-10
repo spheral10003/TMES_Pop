@@ -446,13 +446,51 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         //  바인딩
         // ─────────────────────────────────────────────────────────────────────────
 
+        /// <summary>
+        /// 기준정보에 IP · 포트가 없는(또는 포트가 1~65534 숫자가 아닌) 설비는 "설비 없음"으로 보고 목록에서 뺀다.
+        /// 예전에는 0.0.0.0 · 5000으로 등록해 연결할 수 없는 대상에 재연결을 끝없이 되풀이했고,
+        /// 그리드에는 "연결 실패"로 남아 작업자가 설비 고장으로 오해했다.
+        /// 여기서 빼 두면 그리드 · 장비 등록(<see cref="WireEquipmentEvents"/>) · "너트러너 없음" 경고 판정이 모두 같은 목록을 본다.
+        /// </summary>
+        private List<PopEquipmentDto> SelectConnectableEquipments(List<PopEquipmentDto> equipments)
+        {
+            var result = new List<PopEquipmentDto>();
+            if (equipments == null)
+                return result;
+
+            foreach (var equipment in equipments)
+            {
+                if (equipment == null)
+                    continue;
+
+                if (string.IsNullOrWhiteSpace(equipment.EquipmentIp) || !TryGetEquipmentPort(equipment, out _))
+                {
+                    AppLog.Warn($"[POP] 설비 IP · 포트 없음 - 목록에서 제외: {equipment.EquipmentCode} " +
+                                $"(IP '{equipment.EquipmentIp}', 포트 '{equipment.EquipmentPort}')");
+                    continue;
+                }
+
+                result.Add(equipment);
+            }
+
+            return result;
+        }
+
+        /// <summary>기준정보의 설비 포트(문자열)를 Modbus 포트로 읽는다. 비었거나 1~65534 밖이면 false.</summary>
+        private bool TryGetEquipmentPort(PopEquipmentDto equipment, out int port)
+        {
+            // 이벤트 포트는 port + 1을 쓰므로 65535는 받을 수 없다.
+            return int.TryParse(equipment.EquipmentPort?.Trim(), NumberStyles.Integer, CultureInfo.InvariantCulture, out port)
+                   && port > 0 && port < 65535;
+        }
+
         /// <summary>서버가 한 번에 내려준 탭 4개 데이터를 그리드에 붙인다.</summary>
         public void SetGridData(PopScreenData screen)
         {
             _materials = screen.Materials ?? new List<PopInputMaterialDto>();
             _inspections = screen.InspectionSpecs ?? new List<PopInspectionSpecDto>();
             _pendingInspections.Clear();
-            _equipments = screen.Equipments ?? new List<PopEquipmentDto>();
+            _equipments = SelectConnectableEquipments(screen.Equipments);
 
             gridMaterial.DataSource = _materials;
             gridInspection.DataSource = _inspections;

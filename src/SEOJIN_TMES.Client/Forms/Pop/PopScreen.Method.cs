@@ -32,9 +32,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private const string StateStopped = "Stopped";
         private const string StateFinished = "Finished";
 
-        /// <summary>기준정보에 설비 포트가 없거나 숫자가 아닐 때 쓰는 Modbus 포트(이벤트 포트는 +1).</summary>
-        private const int DefaultEquipmentPort = 5000;
-
         // 아래 폭 · 높이는 디자이너(배율 1.0) 기준이다 — 넣을 때 _scaler.Scale()로 지금 배율에 맞춘다.
 
         /// <summary>접었을 때 남기는 우측 패널 폭 = 세로 손잡이 띠의 폭.</summary>

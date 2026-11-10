@@ -254,18 +254,15 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             int index = 0;
             foreach (var eq in _equipments)
             {
-                // IP · 포트가 비어 있거나 숫자가 아니면 기본값으로 등록해 두고 로그를 남긴다 —
-                // 설비 한 대의 기준정보 오류로 화면 전체가 열리지 않으면 안 된다.
-                if (!int.TryParse(eq.EquipmentPort, out var port))
-                {
-                    AppLog.Warn($"[POP] 설비 포트 형식 오류 - {eq.EquipmentCode}: '{eq.EquipmentPort}' → {DefaultEquipmentPort} 사용");
-                    port = DefaultEquipmentPort;
-                }
+                // IP · 포트가 없는 설비는 SetGridData에서 이미 뺐다(SelectConnectableEquipments).
+                // 여기서 다시 걸리는 것은 방어용이다 — 연결할 수 없는 대상을 등록하지 않는다.
+                if (string.IsNullOrWhiteSpace(eq.EquipmentIp) || !TryGetEquipmentPort(eq, out var port))
+                    continue;
 
                 var info = new NutrunnerInfo();
                 info.Id = eq.Id = index++;
                 info.Code = eq.EquipmentCode;
-                info.Ip = string.IsNullOrEmpty(eq.EquipmentIp) ? "0.0.0.0" : eq.EquipmentIp;
+                info.Ip = eq.EquipmentIp.Trim();
                 info.Port = port;
                 info.EventPort = port + 1;
                 info.Name = eq.EquipmentName;
