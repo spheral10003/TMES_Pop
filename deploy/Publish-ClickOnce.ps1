@@ -274,13 +274,12 @@ Get-ChildItem $outDir | Where-Object { $keep -notcontains $_.Name } | Remove-Ite
 $installPage = @"
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><title>TMES POP 설치 ($Region)</title>
-<style>body{font-family:'Malgun Gothic',sans-serif;margin:40px;color:#222}a.btn{display:inline-block;padding:12px 24px;background:#1f5fbf;color:#fff;text-decoration:none;border-radius:6px}code{background:#f2f2f2;padding:2px 6px}</style>
+<style>body{font-family:'Malgun Gothic',sans-serif;margin:40px;color:#222}a.btn{display:inline-block;padding:12px 24px;background:#1f5fbf;color:#fff;text-decoration:none;border-radius:6px}</style>
 </head><body>
 <h2>TMES POP 설치 — $Region</h2>
 <p>현재 버전: <b>$Version</b></p>
 <p><a class="btn" href="$setupName">설치 ($setupName)</a></p>
 <p>이미 설치된 PC는 프로그램을 실행하면 자동으로 새 버전을 받는다.</p>
-<p>설치 파일이 막힌 환경에서는 Edge 에서 <a href="$appName.application"><code>$appName.application</code></a> 을 직접 연다.</p>
 </body></html>
 "@
 [IO.File]::WriteAllText((Join-Path $outDir 'publish.htm'), $installPage, (New-Object Text.UTF8Encoding $true))
