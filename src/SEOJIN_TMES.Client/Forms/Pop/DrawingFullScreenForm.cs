@@ -66,13 +66,28 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             picView.Focus();
         }
 
-        /// <summary>그림이 포커스를 가져가도 Esc로 닫히도록 폼 단계에서 먼저 잡는다.</summary>
+        /// <summary>
+        /// 그림이 포커스를 가져가도 Esc로 닫히도록 폼 단계에서 먼저 잡는다.
+        /// Ctrl + '+' / '-'는 PopScreen과 같은 확대 · 축소 단축키다(기본 자판 Shift+= · 숫자 키패드 포함).
+        /// </summary>
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            if (keyData == Keys.Escape)
+            switch (keyData)
             {
-                Close();
-                return true;
+                case Keys.Escape:
+                    Close();
+                    return true;
+
+                case Keys.Control | Keys.Oemplus:
+                case Keys.Control | Keys.Shift | Keys.Oemplus:
+                case Keys.Control | Keys.Add:
+                    btnZoomIn.PerformClick();
+                    return true;
+
+                case Keys.Control | Keys.OemMinus:
+                case Keys.Control | Keys.Subtract:
+                    btnZoomOut.PerformClick();
+                    return true;
             }
             return base.ProcessCmdKey(ref msg, keyData);
         }

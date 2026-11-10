@@ -451,6 +451,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// PageUp = [이전 공정], PageDown = [다음 공정]. 그리드 · 입력칸에 포커스가 있어도 화면 안이면 먼저 가로챈다
         /// (그리드의 페이지 스크롤보다 공정 이동이 우선이다). 버튼과 같은 처리를 타도록 PerformClick으로 부른다 —
         /// 버튼이 꺼져 있으면(공정 목록 조회 중) 키도 먹지 않는다.
+        /// Ctrl + '+' = 도면 [Zoom In], Ctrl + '-' = [Zoom Out]. 기본 자판의 +는 Shift를 같이 눌러야 나오고
+        /// 숫자 키패드 +/-도 쓰이므로 세 경우를 모두 받는다.
         /// </summary>
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
@@ -462,6 +464,17 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
                 case Keys.PageDown:
                     btnNextProcess.PerformClick();
+                    return true;
+
+                case Keys.Control | Keys.Oemplus:
+                case Keys.Control | Keys.Shift | Keys.Oemplus:
+                case Keys.Control | Keys.Add:
+                    btnZoomIn.PerformClick();
+                    return true;
+
+                case Keys.Control | Keys.OemMinus:
+                case Keys.Control | Keys.Subtract:
+                    btnZoomOut.PerformClick();
                     return true;
             }
 
