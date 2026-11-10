@@ -140,7 +140,9 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
                     {
                         CorpCode = _appSet.CurrentUser?.Server,
                         ItemCode = txtItemCode.Text?.Trim(),
-                        ItemName = txtItemName.Text?.Trim()
+                        ItemName = txtItemName.Text?.Trim(),
+                        // <생산품목 선택> 팝업이므로 품목 계정 "10"인 품목만 서버에 요청한다.
+                        ItemAcnt = "10"
                     };
 
                     var result = await FetchItemsAsync(query);

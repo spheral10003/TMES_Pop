@@ -60,7 +60,7 @@ namespace SEOJIN_TMES.Client.ApiClient
         public async Task<List<ItemResponse>> SearchItemsAsync(ItemQuery keyword, CancellationToken cancellationToken = default)
         {
             var url = $"{ ApiPrefix }md/items";
-            var query = BuildQuery(("corpCd", keyword.CorpCode), ("itemCd", keyword.ItemCode), ("itemNm", keyword.ItemName));
+            var query = BuildQuery(("corpCd", keyword.CorpCode), ("itemCd", keyword.ItemCode), ("itemNm", keyword.ItemName), ("itemAcnt", keyword.ItemAcnt));
             var response = await GetAsync<ApiDataResponse<List<ItemResponse>>>($"{url}{query}", cancellationToken);
             return response?.Data ?? new List<ItemResponse>();
         }
