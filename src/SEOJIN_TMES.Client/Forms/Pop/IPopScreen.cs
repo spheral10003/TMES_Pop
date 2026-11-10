@@ -47,6 +47,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         Task InputMaterialSerial(int rowHandle);
         Task CheckMaterialSerials();
         bool SelectInputTab();
+        void ShowInspectionTabIfBomDone();
         Task<bool> SetBomSpecResult(PopBomSpecDto spec, decimal? torque, decimal? angle, string equipmentCode);
         Task<bool> SetInspectionResult(PopInspectionSpecDto spec, string fieldName);
 

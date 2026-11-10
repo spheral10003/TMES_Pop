@@ -1125,6 +1125,27 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
+        /// [BOM 스팩]에서 체결할 줄(참조 줄 제외)이 모두 합격이 되면 [검사 스팩] 탭으로 넘긴다.
+        /// BOM 결과를 저장한 직후(설비 체결 · 직접 입력 · 수동 렌치 일괄 입력) 부른다.
+        /// 공정을 옮길 때만 탭을 고르면(<see cref="SelectInputTab"/>), BOM을 다 끝내고도 작업자가 탭을 직접 눌러야 검사로 갈 수 있었다.
+        ///  - 지금 [BOM 스팩] 탭을 보고 있을 때만 넘긴다 — 다른 탭을 보던 작업자의 화면을 빼앗지 않는다.
+        ///  - 검사할 항목이 없으면(검사 항목 0건 · 모두 저장됨) 탭을 바꾸지 않는다 — 뒤이은 <see cref="TryAutoProgress"/>가
+        ///    예전처럼 공정을 완료하고 다음 공정으로 넘긴다.
+        /// 합격 판정 기준은 그리드 표시 · 자동 진행과 같은 <see cref="IsBomSpecPassed"/>.
+        /// </summary>
+        public void ShowInspectionTabIfBomDone()
+        {
+            if (tabSpec.SelectedTabPage != pageBom || _inspections.All(IsInspectionSaved))
+                return;
+
+            if (!HasBomSpecInputRows() || !_bomSpecs.All(IsBomSpecPassed))
+                return;
+
+            AppLog.Info($"[POP] BOM 스팩 완료 - 검사 스팩 탭으로 이동 ({_key?.RoutingOperation}/{_key?.PageOperation})");
+            tabSpec.SelectedTabPage = pageInspec;
+        }
+
+        /// <summary>
         /// 시리얼 확인 자재의 시리얼번호를 서버에 보낸다. 품목코드 확인 자재면 팝업에서 입력한 품목코드를 함께 싣고,
         /// 아니면 전처럼 투입자재 코드를 그대로 싣는다.
         /// </summary>
@@ -1400,6 +1421,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 WriteBomSpecTorque();
             }
 
+            ShowInspectionTabIfBomDone();
             await TryAutoProgress();
         }
 

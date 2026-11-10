@@ -893,6 +893,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                             $"(토크 {torque}, 각도 {angle})");
 
                 // 첫 await에서 그리드가 입력값을 행에 반영했으므로, 여기서는 고친 값까지 포함해 완료를 판단한다.
+                Screen.ShowInspectionTabIfBomDone();
                 await Screen.TryAutoProgress();
             }
             catch (Exception ex)
@@ -1074,6 +1075,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 if (IsDisposed || Disposing) return;
 
                 FocusBomSpecRow(GetRowAfterMaterial(GetSameMaterialRows(focused.MaterialCode)));
+                Screen.ShowInspectionTabIfBomDone();
                 await Screen.TryAutoProgress();
             }
             catch (Exception ex)
