@@ -652,12 +652,28 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (spec.IsReference)
                 return true;
 
-            var torqueOk = spec.TorqueResult >= spec.TorqueLower && spec.TorqueResult <= spec.TorqueUpper;
-            if (spec.AngleLower == null && spec.AngleUpper == null)
-                return torqueOk;
+            if (!IsAngleManaged(spec))
+                return IsTorquePassed(spec);
 
-            var angleOk = spec.AngleResult >= spec.AngleLower && spec.AngleResult <= spec.AngleUpper;
-            return torqueOk && angleOk;
+            return IsTorquePassed(spec) && IsAnglePassed(spec);
+        }
+
+        /// <summary>토크 결과값이 하한~상한 안인지(값이 비어 있으면 false).</summary>
+        private bool IsTorquePassed(PopBomSpecDto spec)
+        {
+            return spec.TorqueResult >= spec.TorqueLower && spec.TorqueResult <= spec.TorqueUpper;
+        }
+
+        /// <summary>각도 결과값이 하한~상한 안인지(값이 비어 있으면 false).</summary>
+        private bool IsAnglePassed(PopBomSpecDto spec)
+        {
+            return spec.AngleResult >= spec.AngleLower && spec.AngleResult <= spec.AngleUpper;
+        }
+
+        /// <summary>각도 하한 · 상한 중 하나라도 있으면 각도도 판정 대상이다.</summary>
+        private bool IsAngleManaged(PopBomSpecDto spec)
+        {
+            return spec.AngleLower != null || spec.AngleUpper != null;
         }
 
         /// <summary>검사 스팩 한 줄이 입력됐는지 — 결과상태는 필수이고, 정량 검사는 결과값까지 있어야 한다.</summary>
@@ -915,13 +931,24 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// 결과상태가 OK인 줄은 OK 색, NG인 줄은 NG 색으로 줄 전체를 칠한다(표시만 한다 — 판정은 서버).
+        /// 결과상태가 OK면 OK 색, NG면 NG 색을 <b>결과 칸에만</b> 칠한다(표시만 한다 — 판정은 서버).
+        ///  - 정량: 결과값 · 결과상태 두 칸 — 결과값이 판정 근거라 함께 보여 준다.
+        ///  - 정성: 결과상태 칸만 — 결과값 칸은 쓰지 않는다.
+        /// 줄 전체를 칠하면 어느 칸이 판정 대상인지 구분이 안 돼서 결과 칸으로 좁혔다.
         /// 칸 정렬을 건드리지 않고, 선택 행은 선택 색이 우선한다(<see cref="AppTheme.NgRowCell"/> 참고).
         /// </summary>
         private void GridViewInspection_RowCellStyle(object sender, RowCellStyleEventArgs e)
         {
+            if (e.RowHandle < 0 || e.Column == null)
+                return;
+
             var spec = gridViewInspection.GetRow(e.RowHandle) as PopInspectionSpecDto;
             if (spec == null)
+                return;
+
+            var fieldName = e.Column.FieldName;
+            var isResultCell = fieldName == "ResultState" || (spec.IsQuantitative && fieldName == "ResultValue");
+            if (!isResultCell)
                 return;
 
             if (spec.ResultState == PopInspectionSpecDto.ResultNg)
@@ -931,26 +958,41 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// 측정값이 있는 줄만 칠한다 — 하한~상한 안이면 OK 색, 벗어나면 NG 색(줄 전체).
+        /// 측정값이 들어온 <b>결과값 칸만</b> 칠한다 — 토크 결과값은 토크 판정으로, 각도 결과값은 각도 판정으로
+        /// (하한~상한 안이면 OK 색, 벗어나면 NG 색). 줄 전체를 칠하면 토크 · 각도 중 어느 쪽이 NG인지 보이지 않는다.
+        ///  - 각도 하한 · 상한이 둘 다 없는 줄은 각도 판정 대상이 아니라 각도 칸을 칠하지 않는다(<see cref="IsBomSpecPassed"/>와 같은 기준).
+        ///  - 참조 줄(서버 refYn=Y)은 측정값 없이 끝난 줄이라 예전처럼 줄 전체를 OK 색으로 둔다.
         /// 칸 정렬을 건드리지 않고, 선택 행은 선택 색이 우선한다(<see cref="AppTheme.NgRowCell"/> 참고).
         /// </summary>
         private void GridViewBomSpec_RowCellStyle(object sender, RowCellStyleEventArgs e)
         {
-            if (e.RowHandle < 0)
+            if (e.RowHandle < 0 || e.Column == null)
                 return;
 
             var spec = gridViewBomSpec.GetRow(e.RowHandle) as PopBomSpecDto;
             if (spec == null)
                 return;
 
-            // 참조 줄은 측정값이 없어도 OK로 보여 준다(IsBomSpecPassed가 통과로 본다).
-            if (!spec.IsReference && spec.TorqueResult == null && spec.AngleResult == null)
-                return;
-
-            if (IsBomSpecPassed(spec))
+            if (spec.IsReference)
+            {
                 AppTheme.OkRowCell(gridViewBomSpec, e);
+                return;
+            }
+
+            var fieldName = e.Column.FieldName;
+            if (fieldName == TorqueResultField && spec.TorqueResult != null)
+                ResultCell(gridViewBomSpec, e, IsTorquePassed(spec));
+            else if (fieldName == AngleResultField && spec.AngleResult != null && IsAngleManaged(spec))
+                ResultCell(gridViewBomSpec, e, IsAnglePassed(spec));
+        }
+
+        /// <summary>판정 결과에 따라 칸 하나를 OK / NG 색으로 칠한다.</summary>
+        private void ResultCell(GridView view, RowCellStyleEventArgs e, bool passed)
+        {
+            if (passed)
+                AppTheme.OkRowCell(view, e);
             else
-                AppTheme.NgRowCell(gridViewBomSpec, e);
+                AppTheme.NgRowCell(view, e);
         }
 
         /// <summary>

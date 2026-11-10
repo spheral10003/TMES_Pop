@@ -1145,7 +1145,8 @@ namespace SEOJIN_TMES.Client.Theme
         }
 
         /// <summary>
-        /// NG 행 칠하기 — 그리드의 <c>RowCellStyle</c> 이벤트에서 NG인 줄에만 부른다(줄 전체 칸이 같은 색이 된다).
+        /// NG 행 칠하기 — 그리드의 <c>RowCellStyle</c> 이벤트에서 NG인 줄에만 부른다(부른 칸만 칠해진다 —
+        /// 모든 칸에서 부르면 줄 전체, 결과 컬럼에서만 부르면 그 칸만).
         /// 규칙은 <see cref="ResultRowCell"/> 참고.
         /// </summary>
         public static void NgRowCell(GridView view, RowCellStyleEventArgs e)
