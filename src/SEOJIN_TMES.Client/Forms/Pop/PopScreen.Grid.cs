@@ -551,19 +551,14 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// 합격한 <paramref name="rowHandle"/> 다음에 체결할 행 — 아직 합격하지 않은 행(NG · 결과 없음)을 찾는다.
-        /// 아래쪽부터 차례로 보고, 끝까지 없으면 위로 돌아가 남은 NG · 빈 행을 찾는다(참조 줄은 합격으로 보므로 건너뛴다).
-        /// 남은 행이 없으면 InvalidRowHandle — 호출한 쪽이 자리를 지킨다.
-        /// 예전에는 결과와 상관없이 바로 아래 행으로 갔다. 그래서 NG 행을 다시 조여 합격시키면 이미 합격한 아래 행으로 넘어가,
-        /// 그 체결 값이 합격 행을 덮어쓰거나 작업자가 남은 NG · 빈 행을 직접 찾아 눌러야 했다.
+        /// <paramref name="rowHandle"/> 바로 아래부터 찾은 첫 입력 대상 행(참조 줄 건너뜀). 없으면 InvalidRowHandle.
+        /// 설비 합격 뒤 "바로 아래 행"으로 넘어갈 때 참조 줄에 멈추지 않게 한다.
         /// </summary>
-        private int FindNextPendingBomSpecRow(int rowHandle)
+        private int FindNextBomSpecInputRow(int rowHandle)
         {
-            var count = gridViewBomSpec.RowCount;
-            for (int offset = 1; offset < count; offset++)
+            for (int next = rowHandle + 1; next < gridViewBomSpec.RowCount; next++)
             {
-                var next = (Math.Max(rowHandle, 0) + offset) % count;
-                if (gridViewBomSpec.GetRow(next) is PopBomSpecDto spec && !IsBomSpecPassed(spec))
+                if (gridViewBomSpec.GetRow(next) is PopBomSpecDto spec && !spec.IsReference)
                     return next;
             }
 
@@ -1009,7 +1004,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         ///  - 이미 값(토크 또는 각도)이 들어 있는 줄은 건너뛴다 — 설비 · 직접 입력으로 넣은 실측값을 덮어쓰지 않는다.
         ///  - 토크 하한/상한이 없는 줄도 중간값을 낼 수 없어 건너뛴다.
         ///  - 채운 값은 직접 입력과 같이 수동 입력(<see cref="ManualEquipmentCode"/>)으로 서버에 저장한다.
-        ///  - 끝나면 그 자재의 마지막 줄 다음의 <b>NG · 빈 줄</b>로 포커스를 옮긴다(아래부터, 없으면 위로 돌아가 찾고 — 남은 줄이 없으면 그대로).
+        ///  - 끝나면 그 자재의 마지막 줄 <b>바로 다음 줄</b>로 포커스를 옮긴다(다음 자재로 넘어가는 순서 — 마지막이면 그대로).
         /// 수동 렌치가 꺼져 있으면 동작하지 않는다(컬럼도 숨겨진다 — <see cref="SetResultInputColumnVisible"/>).
         /// 여기서 내는 값은 <b>입력 편의를 위한 기본값</b>일 뿐이고(합·불 판정은 서버 몫),
         /// 다르게 넣어야 하면 "토크 결과값" 칸을 눌러 직접 고쳐 쓰면 된다.
@@ -1104,8 +1099,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// 같은 자재 줄 중 마지막 줄 다음에 체결할 줄 — 아직 합격하지 않은 줄(NG · 빈 줄)을 아래부터, 없으면 위로 돌아가 찾는다
-        /// (<see cref="FindNextPendingBomSpecRow"/>, 참조 줄은 건너뛴다). 그런 줄이 없으면 마지막 줄 그대로.
+        /// 같은 자재 줄 중 마지막 줄 다음의 첫 입력 대상 줄(참조 줄은 건너뛴다). 그런 줄이 없으면 마지막 줄 그대로.
         /// </summary>
         private int GetRowAfterMaterial(List<int> sameMaterialRows)
         {
@@ -1113,7 +1107,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 return gridViewBomSpec.FocusedRowHandle;
 
             var last = sameMaterialRows[sameMaterialRows.Count - 1];
-            var next = FindNextPendingBomSpecRow(last);
+            var next = FindNextBomSpecInputRow(last);
             return next >= 0 ? next : last;
         }
 

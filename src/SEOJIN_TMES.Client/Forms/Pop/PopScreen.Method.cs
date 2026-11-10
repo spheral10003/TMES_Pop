@@ -1413,12 +1413,12 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (!ReferenceEquals(bomSpecs, _bomSpecs))
                 return;
 
-            // 합격이면 이 결과로 바로 다음 체결 행에 넘어가 목표 토크까지 써 둔다. 다음 체결이 들어올 때 넘기면
+            // 합격이면 이 결과로 바로 다음 행에 넘어가 목표 토크까지 써 둔다. 다음 체결이 들어올 때 넘기면
             // 그 체결 값이 이미 합격한 행을 덮어써, 다음 행으로 가려면 한 번 더 조여야 했다.
-            // 다음 행은 아직 합격하지 않은 행(NG · 결과 없음)이다 — 아래쪽부터 보고 없으면 위로 돌아간다(FindNextPendingBomSpecRow).
-            // NG 행을 재작업해 합격시킨 뒤 이미 합격한 아래 행으로 가지 않게 하기 위해서다. 참조 줄(서버 refYn=Y)은 건너뛴다.
-            // NG면 같은 행을 다시 조이도록 그대로 둔다. 남은 행이 없으면 자리를 지킨다(검사 탭 이동 · 자동 진행이 이어진다).
-            var nextRow = FindNextPendingBomSpecRow(_bomSpecSelectedRow);
+            // 다음 행은 결과 유무와 상관없이 그리드 순서상 바로 아래 행이다 — 작업자가 위에서부터 차례로 조이므로.
+            // 단 참조 줄(서버 refYn=Y)은 체결하지 않으므로 건너뛴다.
+            // NG면 같은 행을 다시 조이도록 그대로 둔다. 마지막 행이면 자리를 지킨다(자동 진행이 공정을 넘긴다).
+            var nextRow = FindNextBomSpecInputRow(_bomSpecSelectedRow);
             if (IsBomSpecPassed(target) && nextRow >= 0)
             {
                 FocusBomSpecRow(nextRow);
