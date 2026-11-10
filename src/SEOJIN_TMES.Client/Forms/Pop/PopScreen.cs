@@ -397,6 +397,14 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 if (!await Screen.SetProcessAction(action))
                     return;
 
+                // 재시작 직후엔 공정 진입 때 건너뛴 일을 잇는다 — 중지 공정은 자동 재시작하지 않아
+                // 진입 시 시리얼 입력 팝업이 뜨지 않았으므로, 여기서 남은 시리얼 입력 → 완료 검사를 한다.
+                if (action == PopProcessAction.resume)
+                {
+                    await Screen.CheckMaterialSerials();
+                    if (IsDisposed || Disposing) return;
+                }
+
                 // 시작 · 재시작 직후에도 완료 여부를 본다 — 탭 3개가 모두 비어 있는 공정은 바로 넘어간다.
                 if (action == PopProcessAction.start || action == PopProcessAction.resume)
                     await Screen.TryAutoProgress();

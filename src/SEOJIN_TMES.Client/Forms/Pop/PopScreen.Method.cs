@@ -777,7 +777,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         //   - 입력할 항목이 없는 공정(HasInputItems)은 자동으로 끝내지 않는다. 시작 상태로 두고, 작업자가
         //     [이전 공정] · [다음 공정] · [공정 목록]으로 공정을 바꿀 때 완료를 보낸다(EndCurrentProcess).
         //   - [공정 시작] 버튼은 없다. 화면 진입 · [이전 공정] · [다음 공정] · [공정 목록]으로 공정에 들어와도
-        //     자동으로 시작하고, 중지돼 있던 공정이면 재시작한다(StartEnteredProcess).
+        //     대기 공정이면 자동으로 시작한다(StartEnteredProcess). 중지돼 있던 공정은 자동으로 재시작하지 않고
+        //     중지 상태로 두며, 작업자가 [공정 재시작]을 눌러야 진행 중으로 바뀐다.
         // ─────────────────────────────────────────────────────────────────────────
 
         /// <summary>
@@ -797,7 +798,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// 지금 공정을 자동으로 시작한다 — 대기(Ready)면 시작, 중지(Stopped)면 재시작.
+        /// 지금 공정을 자동으로 시작한다 — 대기(Ready)일 때만 시작한다.
+        /// 중지(Stopped)된 공정은 자동으로 재시작하지 않는다(사용자 요구) — 작업자가 사유를 남기고 일부러 멈춘 공정이므로,
+        /// 작업자가 [공정 재시작](중지 버튼이 바뀐 것)을 눌러 서버에 resume을 보내야만 진행 중으로 바뀐다.
         /// 이미 진행 중이거나 완료된 공정에는 요청하지 않는다(전이 가능 여부의 최종 판단은 서버가 한다).
         /// 자동 처리라 확인 창은 띄우지 않고, 결과는 우측 안내 칸에 남긴다.
         /// </summary>
@@ -807,24 +810,24 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (_key == null)
                 return false;
 
-            PopProcessAction action;
-            if (IsProgressState(StateReady))
-                action = PopProcessAction.start;
-            else if (IsProgressState(StateStopped))
-                action = PopProcessAction.resume;
-            else
+            if (IsProgressState(StateStopped))
+            {
+                ShowMessage(Language.Pop_StoppedRestartRequired);
+                return false;
+            }
+
+            if (!IsProgressState(StateReady))
                 return IsProcessRunning;
 
             // 실패 사유는 SetProcessAction이 창으로 알린다 — 안내 칸에는 실패 사실만 남긴다.
-            if (!await SetProcessAction(action))
+            if (!await SetProcessAction(PopProcessAction.start))
             {
                 ShowMessage(Language.Pop_AutoStartFailed);
                 return false;
             }
 
-            var restarted = action == PopProcessAction.resume;
-            AppLog.Step($"[POP] 공정 자동 {(restarted ? "재시작" : "시작")} - {_key.RoutingOperation}/{_key.PageOperation} → {_progressState}");
-            ShowMessage(restarted ? Language.Pop_AutoRestarted : Language.Pop_AutoStarted);
+            AppLog.Step($"[POP] 공정 자동 시작 - {_key.RoutingOperation}/{_key.PageOperation} → {_progressState}");
+            ShowMessage(Language.Pop_AutoStarted);
             return IsProcessRunning;
         }
 
@@ -926,7 +929,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// 공정 목록의 다음 공정으로 옮기고 자동으로 시작(중지 상태면 재시작)한다.
+        /// 공정 목록의 다음 공정으로 옮기고 자동으로 시작한다(중지 상태면 재시작하지 않고 멈춘다).
         /// 마지막 공정이었으면 알리고 false. 옮긴 공정이 이미 진행 · 완료 상태면
         /// 시작 요청은 보내지 않고 서버 상태를 그대로 따른다.
         /// </summary>

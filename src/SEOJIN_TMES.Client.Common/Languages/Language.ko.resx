@@ -1044,8 +1044,8 @@
   <data name="Pop_AutoStarted" xml:space="preserve">
     <value>공정을 자동으로 시작했습니다.</value>
   </data>
-  <data name="Pop_AutoRestarted" xml:space="preserve">
-    <value>중지된 공정을 자동으로 다시 시작했습니다.</value>
+  <data name="Pop_StoppedRestartRequired" xml:space="preserve">
+    <value>중지된 공정입니다. [공정 재시작]을 눌러야 진행됩니다.</value>
   </data>
   <data name="Pop_AutoStartFailed" xml:space="preserve">
     <value>공정을 자동으로 시작하지 못했습니다.</value>

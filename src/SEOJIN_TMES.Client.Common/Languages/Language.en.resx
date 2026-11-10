@@ -1044,8 +1044,8 @@ Reconnection continues automatically until it succeeds. You can also press [Reco
   <data name="Pop_AutoStarted" xml:space="preserve">
     <value>The process was started automatically.</value>
   </data>
-  <data name="Pop_AutoRestarted" xml:space="preserve">
-    <value>The stopped process was restarted automatically.</value>
+  <data name="Pop_StoppedRestartRequired" xml:space="preserve">
+    <value>This process is stopped. Press [Restart] to continue.</value>
   </data>
   <data name="Pop_AutoStartFailed" xml:space="preserve">
     <value>The process could not be started automatically.</value>

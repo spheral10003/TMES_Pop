@@ -1044,8 +1044,8 @@ Hệ thống sẽ tự động thử kết nối lại cho đến khi thành cô
   <data name="Pop_AutoStarted" xml:space="preserve">
     <value>Công đoạn đã được tự động bắt đầu.</value>
   </data>
-  <data name="Pop_AutoRestarted" xml:space="preserve">
-    <value>Công đoạn đang dừng đã được tự động bắt đầu lại.</value>
+  <data name="Pop_StoppedRestartRequired" xml:space="preserve">
+    <value>Công đoạn đang dừng. Nhấn [Khởi động lại] để tiếp tục.</value>
   </data>
   <data name="Pop_AutoStartFailed" xml:space="preserve">
     <value>Không thể tự động bắt đầu công đoạn.</value>

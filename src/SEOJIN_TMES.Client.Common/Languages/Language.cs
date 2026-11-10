@@ -173,7 +173,7 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string Pop_EndProcess => Get(nameof(Pop_EndProcess));
         public static string Pop_RestartProcess => Get(nameof(Pop_RestartProcess));
         public static string Pop_AutoStarted => Get(nameof(Pop_AutoStarted));
-        public static string Pop_AutoRestarted => Get(nameof(Pop_AutoRestarted));
+        public static string Pop_StoppedRestartRequired => Get(nameof(Pop_StoppedRestartRequired));
         public static string Pop_AutoStartFailed => Get(nameof(Pop_AutoStartFailed));
         public static string Pop_AutoEnded => Get(nameof(Pop_AutoEnded));
         public static string Pop_ProcessEnded => Get(nameof(Pop_ProcessEnded));
