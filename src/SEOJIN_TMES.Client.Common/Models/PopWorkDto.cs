@@ -23,6 +23,16 @@ namespace SEOJIN_TMES.Client.Common.Models
     }
 
     /// <summary>
+    /// 마지막 공정 여부 응답(<c>GET pop/{sn}/{subRpRef}/is-last</c>)의 <c>data</c> — <c>{"data":{"lastProc":true|false}}</c>.
+    /// 본문 전체가 true/false 한 단어라고 보고 bool로 읽었다가 늘 해석에 실패해, 마지막 공정에서도 완료 확인 창이 뜨지 않았다.
+    /// </summary>
+    public class PopIsLastProcessDto
+    {
+        [JsonProperty("lastProc")]
+        public bool IsLastProcess { get; set; }
+    }
+
+    /// <summary>
     /// POP 본 화면 우측 &lt;진행 중 공정 정보&gt; 한 건.
     /// 시간/상태 값은 전부 서버가 계산해서 내려주며, 클라이언트는 표시만 한다.
     /// TODO: 실제 서버 응답 필드명이 확정되면 속성명을 맞추거나 JsonProperty로 매핑할 것.

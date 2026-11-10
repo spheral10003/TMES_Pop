@@ -34,7 +34,8 @@ namespace SEOJIN_TMES.Client.ApiClient
         Task<string> GetOmsPathAsync(PopProcessKey key, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// 지금 페이지 공정이 이 시리얼의 마지막 공정인지 — <c>GET pop/{sn}/{subRpRef}/is-last?corpCd=&amp;woNo=</c>.
+        /// 지금 페이지 공정이 이 시리얼의 마지막 공정인지 — <c>GET pop/{sn}/{subRpRef}/is-last?corpCd=&amp;woNo=</c>
+        /// (응답 <c>{"data":{"lastProc":bool}}</c>).
         /// 무엇을 "마지막"으로 볼지는 서버가 판단한다(클라이언트는 공정 목록 순서로 따지지 않는다).
         /// </summary>
         Task<bool> GetIsLastProcessAsync(PopProcessKey key, CancellationToken cancellationToken = default);
@@ -138,10 +139,12 @@ namespace SEOJIN_TMES.Client.ApiClient
 
         public async Task<bool> GetIsLastProcessAsync(PopProcessKey key, CancellationToken cancellationToken = default)
         {
-            // 응답은 봉투 없이 본문 전체가 true / false 한 단어로 온다 — JSON 불리언으로 그대로 읽는다.
-            // 본문이 비어 오면 마지막이 아닌 것(false)으로 본다.
+            // 응답은 {"data":{"lastProc":true|false}, "status":200, ...} 봉투로 온다(테스트 서버 로그로 확인).
+            // 본문 전체를 bool로 읽으면 해석 실패 → 화면이 늘 "마지막 아님"으로 처리했다.
+            // 본문 · data가 비어 오면 마지막이 아닌 것(false)으로 본다.
             var url = $"{PopPrefix}{key.SerialNo}/{key.SubRoutingRef}/is-last{KeyQuery(key)}";
-            return await GetAsync<bool>(url, cancellationToken);
+            var response = await GetAsync<ApiDataResponse<PopIsLastProcessDto>>(url, cancellationToken);
+            return response?.Data?.IsLastProcess ?? false;
         }
 
         public Task SaveMaterialSerialsAsync(PopMaterialSerialSaveRequest request, PopProcessKey key, CancellationToken cancellationToken = default)
