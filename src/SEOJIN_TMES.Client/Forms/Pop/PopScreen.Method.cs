@@ -1082,17 +1082,18 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// 입력 팝업으로 받을 것이 끝난 자재인지 — 품목코드만 받는 자재는 품목코드, 그 밖에는 시리얼 기준.
-        /// 시리얼 자재의 품목코드 완료는 시리얼 저장에 함께 실리므로 여기서 따로 보지 않는다
-        /// (서버 값이 늦게 오는 경우 시리얼을 다 넣은 자재에 팝업이 되풀이되지 않게).
+        /// 입력 팝업으로 받을 것이 끝난 자재인지 — 시리얼(serialVrfcYn=Y일 때) · 품목코드(itemCdVrfcYn=Y일 때) 둘 다 끝나야 끝난 것.
+        /// 예전에는 시리얼 자재를 시리얼만 보고 판단해, 시리얼은 들어가 있고 품목코드 확인(itemCdVrfcYn=Y)이 남은 자재는
+        /// 팝업이 자동으로 뜨지 않았다 — 그 자재는 완료 판단(IsInputCompleted)에서는 미완료라 공정이 넘어가지도 않고 멈췄다.
+        /// 저장이 성공하면 SetMaterialInput이 품목코드 완료로 옮겨 두므로, 저장 뒤 같은 자재에 팝업이 되풀이되지 않는다.
+        /// 입력할 것이 없는 자재(둘 다 N)와 참조 자재(refYn=Y)는 처음부터 끝난 것으로 본다 — 자동 팝업도 띄우지 않는다.
         /// </summary>
         private static bool IsMaterialPopupDone(PopInputMaterialDto material)
         {
-            // 참조 자재(서버 refYn=Y)는 입력하지 않는 줄이라 처음부터 끝난 것으로 본다 — 자동 팝업도 띄우지 않는다.
-            if (material.IsReference)
+            if (!material.HasInputItem)
                 return true;
 
-            return material.IsItemCodeInputOnly ? material.ItemCodeInputCompleted : material.IsSerialInputCompleted;
+            return material.IsInputCompleted;
         }
 
         /// <summary>

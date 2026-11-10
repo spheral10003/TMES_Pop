@@ -189,8 +189,9 @@ namespace SEOJIN_TMES.Client.Common.Models
                     InputUnit = m.Unit,
                     InputPosition = m.IndctLoc,
                     MaterialGroup = m.InputItemGrp,
-                    SerialCheckRequired = m.SerialVrfcYn == "Y",
-                    ItemCodeCheckRequired = m.ItemCdVrfcYn == "Y",
+                    // 대소문자 · 공백이 달라도 Y로 본다(refYn과 같은 기준) — "y"나 "Y "로 오면 확인 대상에서 빠져 팝업이 뜨지 않았다.
+                    SerialCheckRequired = IsYes(m.SerialVrfcYn),
+                    ItemCodeCheckRequired = IsYes(m.ItemCdVrfcYn),
                     ItemCodeInputCompleted = m.ItemCdInputCompleted == true,
                     IsReference = IsYes(m.RefYn),
                     SerialNumbers = string.IsNullOrWhiteSpace(m.InputtedSerials)
