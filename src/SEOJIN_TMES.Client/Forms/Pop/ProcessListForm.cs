@@ -20,6 +20,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
     /// 페이지 단위로 골라 옮기는 일은 이 팝업이 맡는다.
     /// 목록 조회와 "어느 라우팅 그룹의 페이지인가"는 호출하는 POP 화면이 정해서 넘긴다.
     /// 그리드 위 투입자재 검색 줄(<see cref="MaterialSearchBar"/>)로 투입자재 코드를 쓰는 페이지만 추릴 수 있다.
+    /// 같은 줄 우측에는 지금 목록의 공정 수(전체 · 완료 · 진행중 · 대기)를 보여 준다.
     /// 행 위에 마우스를 올리면 커서 옆에, 행을 클릭하면 그 행 옆에
     /// 그 페이지의 작업 지시 이미지(DocumentShare.RootPath + subRoutingProcImagePath)를 미리보기로 띄운다(<see cref="GridImagePreview"/>).
     ///
@@ -72,6 +73,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             GridColumns.FitToWidth(gridView);
 
             gridView.FocusedRowHandle = FindRowIndex(pages, currentSubRoutingRef);
+            ShowProcessStats(pages);
 
             // 헤더 · 빈 영역 더블클릭에는 반응하지 않도록 RowDoubleClick을 쓴다(MeisGridView 참고).
             gridView.RowDoubleClick += gridView_RowDoubleClick;
@@ -107,11 +109,42 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private void materialSearch_SearchCompleted(object sender, MaterialSearchResultEventArgs e)
         {
             grid.DataSource = e.Pages;
+            ShowProcessStats(e.Pages);
             lblListTitle.Text = string.IsNullOrEmpty(e.Condition)
                 ? _listTitle
                 : $"{_listTitle} - {e.Condition}";
             if (gridView.RowCount > 0)
                 gridView.FocusedRowHandle = 0;
+        }
+
+        /// <summary>
+        /// 그리드 바로 위 우측에 지금 목록의 페이지 공정 수를 보여 준다 — 전체 · 완료 · 진행중 · 대기.
+        /// 서버가 내려준 진행 상태를 그대로 세기만 하고 판정은 하지 않는다(집계 API가 따로 없다).
+        /// 투입자재 검색으로 목록이 바뀌면 그 목록 기준으로 다시 센다 — 그리드에 보이는 줄과 숫자가 맞도록.
+        /// 중지(Stopped)는 따로 보이지 않으므로 전체에만 들어간다.
+        /// </summary>
+        private void ShowProcessStats(List<RoutingProcessDto> pages)
+        {
+            pages = pages ?? new List<RoutingProcessDto>();
+
+            lblProcessStats.Text = string.Format("{0} {1}    {2} {3}    {4} {5}    {6} {7}",
+                Language.Common_All, pages.Count,
+                Language.ProgressState_Finished, CountInState(pages, "FINISHED"),
+                Language.ProgressState_Progress, CountInState(pages, "PROGRESS"),
+                Language.ProgressState_Ready, CountInState(pages, "READY"));
+        }
+
+        /// <summary>진행 상태가 state인 페이지 수. 대소문자 · 공백 차이는 같은 상태로 본다(Language.ProgressStateText와 같은 기준).</summary>
+        private int CountInState(List<RoutingProcessDto> pages, string state)
+        {
+            int count = 0;
+            foreach (var page in pages)
+            {
+                if (string.Equals(page.ProgressState?.Trim(), state, StringComparison.OrdinalIgnoreCase))
+                    count++;
+            }
+
+            return count;
         }
 
         /// <summary>목록 제목 — 어느 라우팅 그룹의 공정인지 알 수 있게 라우팅 그룹을 붙인다.</summary>
@@ -163,6 +196,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             AppTheme.StandardButton(btnClose);
             AppTheme.CardPanel(listCard);
             AppTheme.SectionTitle(lblListTitle, AppTheme.Indigo);
+            // 검색 줄은 카드 안에 테두리 없이 얹으므로 카드와 같은 바탕색이어야 이어져 보인다.
+            searchRow.Appearance.BackColor = AppTheme.Card;
+            searchRow.Appearance.Options.UseBackColor = true;
+            AppTheme.BodyText(lblProcessStats, true);
             AppTheme.Grid(grid, gridView, AppTheme.Indigo);
 
             headerIcon.SvgImage = AppIcons.Get(AppIcons.Layers, Color.White);

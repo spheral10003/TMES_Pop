@@ -22,7 +22,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// 구성(다른 팝업과 동일): 상단 색 띠(아이콘+제목) + 옅은 본문 안의 카드(제목 + 투입자재 검색 줄 + 공정 목록 그리드) + 하단 [닫기][이동]
         /// + 우하단 크기 조절 손잡이(pnlGrip).
         /// 도킹 순서 주의: bodyPanel(Fill) → footerPanel(Bottom) → headerPanel(Top).
-        /// listCard 안은 grid(Fill) → materialSearch(Top) → lblListTitle(Top).
+        /// listCard 안은 grid(Fill) → searchRow(Top) → lblListTitle(Top).
+        /// searchRow(그리드 바로 위 한 줄) 안은 materialSearch(Fill, 왼쪽 투입자재 검색) → lblProcessStats(Right, 상태별 공정 수).
         /// </summary>
         private void InitializeComponent()
         {
@@ -33,7 +34,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.listCard = new DevExpress.XtraEditors.PanelControl();
             this.grid = new DevExpress.XtraGrid.GridControl();
             this.gridView = new SEOJIN_TMES.Client.Forms.Common.MeisGridView();
+            this.searchRow = new DevExpress.XtraEditors.PanelControl();
             this.materialSearch = new SEOJIN_TMES.Client.Forms.Pop.MaterialSearchBar();
+            this.lblProcessStats = new DevExpress.XtraEditors.LabelControl();
             this.lblListTitle = new DevExpress.XtraEditors.LabelControl();
             this.footerPanel = new DevExpress.XtraEditors.PanelControl();
             this.pnlGrip = new System.Windows.Forms.Panel();
@@ -48,6 +51,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.listCard.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.grid)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.searchRow)).BeginInit();
+            this.searchRow.SuspendLayout();
             this.materialSearch.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.footerPanel)).BeginInit();
             this.footerPanel.SuspendLayout();
@@ -91,7 +96,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // listCard
             // 
             this.listCard.Controls.Add(this.grid);
-            this.listCard.Controls.Add(this.materialSearch);
+            this.listCard.Controls.Add(this.searchRow);
             this.listCard.Controls.Add(this.lblListTitle);
             this.listCard.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listCard.Location = new System.Drawing.Point(18, 14);
@@ -117,14 +122,38 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.gridView.GridControl = this.grid;
             this.gridView.Name = "gridView";
             this.gridView.OptionsBehavior.Editable = false;
-            // 
+            //
+            // searchRow
+            //
+            this.searchRow.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder;
+            this.searchRow.Controls.Add(this.materialSearch);
+            this.searchRow.Controls.Add(this.lblProcessStats);
+            this.searchRow.Dock = System.Windows.Forms.DockStyle.Top;
+            this.searchRow.Location = new System.Drawing.Point(3, 35);
+            this.searchRow.Name = "searchRow";
+            this.searchRow.Size = new System.Drawing.Size(1158, 44);
+            this.searchRow.TabIndex = 2;
+            //
             // materialSearch
-            // 
-            this.materialSearch.Dock = System.Windows.Forms.DockStyle.Top;
-            this.materialSearch.Location = new System.Drawing.Point(3, 35);
+            //
+            this.materialSearch.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.materialSearch.Location = new System.Drawing.Point(0, 0);
             this.materialSearch.Name = "materialSearch";
-            this.materialSearch.Size = new System.Drawing.Size(1158, 44);
-            this.materialSearch.TabIndex = 2;
+            this.materialSearch.Size = new System.Drawing.Size(638, 44);
+            this.materialSearch.TabIndex = 0;
+            //
+            // lblProcessStats
+            //
+            this.lblProcessStats.Appearance.Options.UseTextOptions = true;
+            this.lblProcessStats.Appearance.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Far;
+            this.lblProcessStats.Appearance.TextOptions.VAlignment = DevExpress.Utils.VertAlignment.Center;
+            this.lblProcessStats.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.None;
+            this.lblProcessStats.Dock = System.Windows.Forms.DockStyle.Right;
+            this.lblProcessStats.Location = new System.Drawing.Point(638, 0);
+            this.lblProcessStats.Name = "lblProcessStats";
+            this.lblProcessStats.Padding = new System.Windows.Forms.Padding(0, 0, 16, 0);
+            this.lblProcessStats.Size = new System.Drawing.Size(520, 44);
+            this.lblProcessStats.TabIndex = 1;
             // 
             // lblListTitle
             // 
@@ -206,6 +235,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.listCard.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.grid)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.searchRow)).EndInit();
+            this.searchRow.ResumeLayout(false);
             this.materialSearch.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.footerPanel)).EndInit();
             this.footerPanel.ResumeLayout(false);
@@ -221,7 +252,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private DevExpress.XtraEditors.PanelControl bodyPanel;
         private DevExpress.XtraEditors.PanelControl listCard;
         private DevExpress.XtraEditors.LabelControl lblListTitle;
+        private DevExpress.XtraEditors.PanelControl searchRow;
         private SEOJIN_TMES.Client.Forms.Pop.MaterialSearchBar materialSearch;
+        private DevExpress.XtraEditors.LabelControl lblProcessStats;
         private DevExpress.XtraGrid.GridControl grid;
         private SEOJIN_TMES.Client.Forms.Common.MeisGridView gridView;
         private DevExpress.XtraEditors.PanelControl footerPanel;
