@@ -35,6 +35,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.chkWorkStationEnable = new System.Windows.Forms.CheckBox();
             this.chkReady = new System.Windows.Forms.CheckBox();
             this.chkProgress = new System.Windows.Forms.CheckBox();
+            this.chkCompleted = new System.Windows.Forms.CheckBox();
             this.btnItemPick = new System.Windows.Forms.Button();
             this.txtItemName = new DevExpress.XtraEditors.TextEdit();
             this.lblItemCode = new DevExpress.XtraEditors.LabelControl();
@@ -67,6 +68,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.topCard.Controls.Add(this.chkWorkStationEnable);
             this.topCard.Controls.Add(this.chkReady);
             this.topCard.Controls.Add(this.chkProgress);
+            this.topCard.Controls.Add(this.chkCompleted);
             this.topCard.Controls.Add(this.btnItemPick);
             this.topCard.Controls.Add(this.txtItemName);
             this.topCard.Controls.Add(this.lblItemCode);
@@ -124,6 +126,18 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.chkProgress.TabIndex = 13;
             this.chkProgress.Text = "진행중";
             this.chkProgress.UseVisualStyleBackColor = true;
+            //
+            // chkCompleted
+            //
+            this.chkCompleted.AutoSize = true;
+            this.chkCompleted.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.chkCompleted.Font = new System.Drawing.Font("맑은 고딕", 9.5F);
+            this.chkCompleted.Location = new System.Drawing.Point(700, 54);
+            this.chkCompleted.Name = "chkCompleted";
+            this.chkCompleted.Size = new System.Drawing.Size(70, 21);
+            this.chkCompleted.TabIndex = 14;
+            this.chkCompleted.Text = "완료";
+            this.chkCompleted.UseVisualStyleBackColor = true;
             // 
             // btnItemPick
             // 
@@ -329,5 +343,6 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
         private System.Windows.Forms.CheckBox chkWorkStationEnable;
         private System.Windows.Forms.CheckBox chkReady;
         private System.Windows.Forms.CheckBox chkProgress;
+        private System.Windows.Forms.CheckBox chkCompleted;
     }
 }

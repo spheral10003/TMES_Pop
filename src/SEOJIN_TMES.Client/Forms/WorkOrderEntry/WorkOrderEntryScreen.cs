@@ -38,6 +38,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
         /// <summary>조회 조건 statusList에 보내는 작업지시 상태 코드(서버 값).</summary>
         private const string StatusReady = "Ready";
         private const string StatusProgress = "Progress";
+        private const string StatusCompleted = "Completed";
 
         /// <summary>상태 앞의 상태 구슬 컬럼(이벤트를 걸어 두므로 화면과 수명을 같이한다).</summary>
         private StateImageColumn _statusImage;
@@ -65,6 +66,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             chkWorkStationEnable.Text = Language.WorkEntry_WorkStation;
             chkReady.Text = Language.ProgressState_Ready;
             chkProgress.Text = Language.ProgressState_Progress;
+            chkCompleted.Text = Language.ProgressState_Finished;
             LayoutStatusChecks();
 
             ApplyTheme();
@@ -81,7 +83,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
         }
 
         /// <summary>
-        /// [워크스테이션] 옆으로 [대기] · [진행중]을 이어 붙인다. 체크박스 글자 폭이 언어마다 달라
+        /// [워크스테이션] 옆으로 [대기] · [진행중] · [완료]를 이어 붙인다. 체크박스 글자 폭이 언어마다 달라
         /// 디자이너의 고정 위치로 두면 긴 문구(베트남어 등)가 다음 체크박스와 겹친다.
         /// </summary>
         private void LayoutStatusChecks()
@@ -90,8 +92,10 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             chkWorkStationEnable.Size = chkWorkStationEnable.PreferredSize;
             chkReady.Size = chkReady.PreferredSize;
             chkProgress.Size = chkProgress.PreferredSize;
+            chkCompleted.Size = chkCompleted.PreferredSize;
             chkReady.Left = chkWorkStationEnable.Right + gap;
             chkProgress.Left = chkReady.Right + gap;
+            chkCompleted.Left = chkProgress.Right + gap;
         }
 
         /// <summary>작업지시 상태(서버 코드 Ready/Progress/Completed 등)를 화면 언어의 문구로 보여 준다. 값 자체는 바꾸지 않는다.</summary>
@@ -156,9 +160,10 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
         }
 
         /// <summary>
-        /// 조회 조건의 작업지시 상태 목록 — [대기] · [진행중] 체크로 고른다.
-        /// 완료(Completed)는 POP에서 다시 작업할 대상이 아니라 넣지 않는다.
-        /// 둘 다 끄면 조건이 비어 완료까지 전부 나오므로, 그때는 대기 · 진행중 둘 다로 조회한다.
+        /// 조회 조건의 작업지시 상태 목록 — [대기] · [진행중] · [완료] 체크로 고른다.
+        /// 체크한 상태만 그대로 statusList로 보낸다(statusList=Ready&amp;statusList=Progress&amp;statusList=Completed).
+        /// 아무것도 체크하지 않았을 때 대신 채워 넣지 않는다 — 빈 조건을 어떻게 볼지는 서버가 정한다.
+        /// [완료]는 지난 작업을 찾아볼 때만 쓰므로 기본은 꺼 둔다(Designer).
         /// </summary>
         private List<string> BuildStatusList()
         {
@@ -167,12 +172,8 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
                 statusList.Add(StatusReady);
             if (chkProgress.Checked)
                 statusList.Add(StatusProgress);
-
-            if (statusList.Count == 0)
-            {
-                statusList.Add(StatusReady);
-                statusList.Add(StatusProgress);
-            }
+            if (chkCompleted.Checked)
+                statusList.Add(StatusCompleted);
 
             return statusList;
         }
