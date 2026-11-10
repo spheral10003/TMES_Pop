@@ -227,9 +227,18 @@ $vswhere = "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.e
 $msbuild = & $vswhere -latest -prerelease -products * -requires Microsoft.Component.MSBuild -find 'MSBuild\**\Bin\MSBuild.exe' | Select-Object -First 1
 if (-not $msbuild) { throw 'Visual Studio MSBuild.exe 를 찾지 못했다(vswhere).' }
 
+# ── 설치 파일 이름 ─────────────────────────────────────────────
+# MSBuild 는 부트스트래퍼 이름을 setup.exe 로 고정해 만든다(바꾸는 속성이 없다).
+# 현장에서 여러 사업장 · 테스트/운용 설치 파일이 섞여도 구분되도록 TMES_<사업장>[_TEST].exe 로 한 부 더 만든다.
+# TEST 여부는 앱이 아이콘 · 상단 바 색을 고를 때 쓰는 값(지역 App.config 의 IsTestServer)을 그대로 따른다 — 키가 없으면 false.
+$testMatch    = [regex]::Match([IO.File]::ReadAllText($configPath), '<add key="IsTestServer" value="([^"]*)"')
+$isTestServer = $testMatch.Success -and $testMatch.Groups[1].Value.Trim() -eq 'true'
+$setupName    = "TMES_$Region$(if ($isTestServer) { '_TEST' }).exe"
+
 Write-Host ""
 Write-Host "지역        : $Region"
 Write-Host "앱 ID       : $appName"
+Write-Host "설치 파일   : $setupName"
 Write-Host "배포 주소   : $DeployBaseUrl"
 Write-Host "게시 버전   : $Version $(if ($OptionalUpdate) { '(선택 업데이트)' } else { '(필수 업데이트)' })"
 Write-Host "결과 폴더   : $outDir"
@@ -252,7 +261,13 @@ if ($LASTEXITCODE -ne 0) { throw "MSBuild 게시 실패(exit $LASTEXITCODE)" }
 # SDK 형식 프로젝트의 ClickOnce 게시는 빌드 산출물(dll · xml · pdb)까지 결과 폴더 루트에 복사한다.
 # 현장 PC가 실제로 받는 것은 .application + setup.exe + Application Files\<버전> 뿐이므로 나머지는 지운다
 # (pdb · DevExpress xml 문서를 배포 서버에 올릴 이유가 없다).
-$keep = @("$appName.application", 'setup.exe', 'Application Files', 'publish.htm')
+# setup.exe 는 지우지 않는다 — 이미 배포한 서버의 안내 · 설치 가이드가 setup.exe 주소를 쓰고 있다.
+# 이름을 바꿔도 설치 정보(.application 주소 등)가 파일 안에 들어 있어 그대로 동작한다.
+$setupPath = Join-Path $outDir 'setup.exe'
+if (-not (Test-Path $setupPath)) { throw "게시 결과에 setup.exe 가 없다: $setupPath" }
+Copy-Item $setupPath (Join-Path $outDir $setupName) -Force
+
+$keep = @("$appName.application", 'setup.exe', $setupName, 'Application Files', 'publish.htm')
 Get-ChildItem $outDir | Where-Object { $keep -notcontains $_.Name } | Remove-Item -Recurse -Force -Confirm:$false
 
 # 설치 안내 페이지 — 현장 PC 브라우저에서 이 주소를 열어 설치한다.
@@ -263,9 +278,9 @@ $installPage = @"
 </head><body>
 <h2>TMES POP 설치 — $Region</h2>
 <p>현재 버전: <b>$Version</b></p>
-<p><a class="btn" href="setup.exe">설치 (setup.exe)</a></p>
+<p><a class="btn" href="$setupName">설치 ($setupName)</a></p>
 <p>이미 설치된 PC는 프로그램을 실행하면 자동으로 새 버전을 받는다.</p>
-<p>setup.exe 가 막힌 환경에서는 Edge 에서 <a href="$appName.application"><code>$appName.application</code></a> 을 직접 연다.</p>
+<p>설치 파일이 막힌 환경에서는 Edge 에서 <a href="$appName.application"><code>$appName.application</code></a> 을 직접 연다.</p>
 </body></html>
 "@
 [IO.File]::WriteAllText((Join-Path $outDir 'publish.htm'), $installPage, (New-Object Text.UTF8Encoding $true))

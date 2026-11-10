@@ -133,8 +133,12 @@ ClickOnce는 낮은 버전으로는 업데이트하지 않는다.
 
 ## 5. 배포 서버 준비
 
-`deploy\out\<지역>\` 안의 내용(`<앱 ID>.application`, `setup.exe`, `publish.htm`, `Application Files\`)을
+`deploy\out\<지역>\` 안의 내용(`<앱 ID>.application`, `setup.exe`, `TMES_<지역>[_TEST].exe`, `publish.htm`, `Application Files\`)을
 `DeployBaseUrl` 경로(예: `https://tmes-gm-test.texon.co.kr/pop/`)에서 보이도록 올린다.
+
+`TMES_<지역>[_TEST].exe`는 `setup.exe`와 같은 파일을 이름만 바꿔 한 부 더 둔 것이다(예: 구미 테스트 = `TMES_GUMI_TEST.exe`).
+지역 `App.config`의 `IsTestServer`가 `true`일 때만 `_TEST`가 붙는다. `publish.htm` 설치 버튼은 이 파일로 연결된다.
+`setup.exe`는 이미 배포한 안내 · 설치 가이드가 그 주소를 쓰고 있어 그대로 남겨 둔다.
 `Application Files\`의 **옛 버전 폴더는 지우지 않는다** — 스크립트의 `-CopyTo`도 버전 폴더를 먼저, `.application`을 마지막에 올린다.
 
 웹 서버에 MIME 타입 등록이 필요하다:
@@ -174,7 +178,7 @@ location /pop/ {
 
 ## 6. 현장 PC
 
-- **최초 설치:** 브라우저로 `https://<도메인>/pop/publish.htm` → [설치(setup.exe)].
+- **최초 설치:** 브라우저로 `https://<도메인>/pop/publish.htm` → [설치(TMES_<지역>[_TEST].exe)].
   바탕화면 · 시작 메뉴에 `TMES POP (구미)` 같은 바로가기가 생긴다.
 - **업데이트:** 바로가기로 실행하면 창이 뜨기 전에 서버 버전을 확인하고 새 버전이 있으면 받은 뒤 실행한다.
   POP는 하루 종일 켜 두므로, 게시 후에는 프로그램을 한 번 껐다 켜야 반영된다.
