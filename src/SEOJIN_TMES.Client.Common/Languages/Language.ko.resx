@@ -441,6 +441,9 @@
   <data name="Col_No" xml:space="preserve">
     <value>NO</value>
   </data>
+  <data name="Col_Preview" xml:space="preserve">
+    <value>미리보기</value>
+  </data>
   <data name="Col_WorkOrderNo" xml:space="preserve">
     <value>작업지시번호</value>
   </data>

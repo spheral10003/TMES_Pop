@@ -221,6 +221,7 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string WorkEntryConfirm_MaterialSearch => Get(nameof(WorkEntryConfirm_MaterialSearch));
         public static string WorkEntryConfirm_NoMaterialMatch => Get(nameof(WorkEntryConfirm_NoMaterialMatch));
         public static string Col_No => Get(nameof(Col_No));
+        public static string Col_Preview => Get(nameof(Col_Preview));
         public static string Col_Description => Get(nameof(Col_Description));
         public static string Col_WorkOrderNo => Get(nameof(Col_WorkOrderNo));
         public static string Col_ItemCode => Get(nameof(Col_ItemCode));

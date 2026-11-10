@@ -209,6 +209,9 @@
     코드(Theme/AppImages.cs)는 아래 LogicalName으로 찾으므로, 파일 이름을 바꿔도 LogicalName은 그대로 둘 것.
   -->
   <ItemGroup>
+    <EmbeddedResource Include="Images\photo.png">
+      <LogicalName>SEOJIN_TMES.Client.Images.photo.png</LogicalName>
+    </EmbeddedResource>
     <EmbeddedResource Include="Images\login_icon.png">
       <LogicalName>SEOJIN_TMES.Client.Images.login_icon.png</LogicalName>
     </EmbeddedResource>

@@ -441,6 +441,9 @@
   <data name="Col_No" xml:space="preserve">
     <value>NO</value>
   </data>
+  <data name="Col_Preview" xml:space="preserve">
+    <value>Preview</value>
+  </data>
   <data name="Col_WorkOrderNo" xml:space="preserve">
     <value>Work Order No</value>
   </data>

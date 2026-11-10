@@ -4,21 +4,32 @@ using System.Drawing;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DevExpress.Data;
+using DevExpress.Utils;
+using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Base;
 using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraGrid.Views.Grid.ViewInfo;
 using SEOJIN_TMES.Client.Common.Imaging;
+using SEOJIN_TMES.Client.Common.Languages;
 using SEOJIN_TMES.Client.Common.Logging;
 using SEOJIN_TMES.Client.Common.Storage;
+using SEOJIN_TMES.Client.Theme;
 
 namespace SEOJIN_TMES.Client.Forms.Common
 {
     /// <summary>
-    /// 그리드 행이 가리키는 공유 폴더의 그림을 미리보기 창(<see cref="ImagePreviewPopup"/>)에 띄운다. 두 가지 방식이 있다.
-    ///  - 마우스 오버: 행 위에 잠깐(<see cref="HoverDelayMs"/>) 머물면 커서 옆에 띄우고, 벗어나면 내린다.
-    ///  - 행 클릭: 클릭한 행 옆에 띄우고 <b>고정</b>한다. 고정된 동안은 마우스 오버 미리보기를 멈춘다 —
+    /// 그리드 행이 가리키는 공유 폴더의 그림을 미리보기 창(<see cref="ImagePreviewPopup"/>)에 띄운다.
+    ///
+    /// 그리드 맨 뒤에 [미리보기] 컬럼을 붙이고, 그림이 있는 행의 그 칸에만 사진 아이콘(Images/photo.png)을 그린다.
+    /// 미리보기는 <b>이 컬럼의 칸에서만</b> 동작한다 — 행 아무 데서나 띄우면 목록을 훑거나 행을 고르기만 해도
+    /// 창이 떠서 목록을 가린다. 두 가지 방식이 있다.
+    ///  - 마우스 오버: 미리보기 칸 위에 잠깐(<see cref="HoverDelayMs"/>) 머물면 커서 옆에 띄우고, 칸을 벗어나면 내린다.
+    ///  - 클릭: 미리보기 칸을 클릭하면 그 행 옆에 띄우고 <b>고정</b>한다. 고정된 동안은 마우스 오버 미리보기를 멈춘다 —
     ///    마우스를 움직일 때마다 고정한 그림이 다른 그림으로 바뀌면 클릭한 의미가 없다.
-    ///    그림 없는 행 · 빈 영역 클릭, Esc, 스크롤, 목록 갱신, 그리드가 포커스를 잃거나 창이 비활성화되면 고정을 푼다.
+    ///    미리보기 칸이 아닌 곳 · 그림 없는 행 클릭, Esc, 스크롤, 목록 갱신, 그리드가 포커스를 잃거나 창이 비활성화되면 고정을 푼다.
+    ///
+    /// <see cref="GridColumns.Apply"/>는 목록에 없는 컬럼을 숨기므로 이 객체는 반드시 그 <b>뒤에</b> 만든다.
     ///
     /// 어느 행이 어떤 그림인지는 화면이 정한다 — 생성자로 받은 <c>pathOf</c>가 행 객체에서 서버 경로(상대 경로)를 꺼내고,
     /// 그림이 아니거나 경로가 없으면 null/빈 값을 돌려주면 된다. 경로는 App.config의 DocumentShare.RootPath 뒤에 붙인다.
@@ -37,6 +48,15 @@ namespace SEOJIN_TMES.Client.Forms.Common
         /// <summary>캐시에 들고 있을 그림 수. 넘으면 비우고 다시 쌓는다 — 원본 크기 그림이라 무한히 들고 있으면 메모리가 커진다.</summary>
         private const int MaxCachedImages = 30;
 
+        /// <summary>[미리보기] 컬럼의 필드 이름 — 값 없이 아이콘만 그리는 비바인딩 컬럼이다.</summary>
+        private const string PreviewFieldName = "__Preview";
+
+        /// <summary>[미리보기] 컬럼 폭. 헤더 문구(미리보기 · Preview · Xem trước)가 잘리지 않을 만큼.</summary>
+        private const int PreviewColumnWidth = 80;
+
+        /// <summary>칸에 그리는 사진 아이콘 크기(px). 기본 행 높이 안에 들어가는 크기.</summary>
+        private const int PhotoIconSize = 18;
+
         private readonly GridView _view;
         private readonly Func<object, string> _pathOf;
         private readonly DocumentShareClient _docShare;
@@ -47,6 +67,12 @@ namespace SEOJIN_TMES.Client.Forms.Common
         private readonly Timer _hoverTimer = new Timer();
 
         private ImagePreviewPopup _popup;
+
+        /// <summary>그림이 있는 행에 사진 아이콘을 그리고, 미리보기가 반응하는 유일한 칸.</summary>
+        private GridColumn _previewColumn;
+
+        /// <summary>칸에 그릴 사진 아이콘. AppImages가 캐시해 앱 전체에서 같이 쓰므로 여기서 Dispose하지 않는다.</summary>
+        private Image _photoIcon;
 
         /// <summary>지금 마우스가 올라가 있는 행의 그림 전체 경로. 미리보기 대상이 아니면 null.</summary>
         private string _hoverPath;
@@ -79,8 +105,12 @@ namespace SEOJIN_TMES.Client.Forms.Common
             if (!_enabled)
                 return;
 
+            AttachPreviewColumn();
+
             _hoverTimer.Interval = HoverDelayMs;
             _hoverTimer.Tick += HoverTimer_Tick;
+
+            _view.CustomDrawCell += View_CustomDrawCell;
 
             _view.MouseMove += View_MouseMove;
             _view.MouseLeave += View_MouseLeave;
@@ -101,6 +131,58 @@ namespace SEOJIN_TMES.Client.Forms.Common
 
         private bool IsPinned => _pinnedPath != null;
 
+        // ────────────────────────────── 미리보기 컬럼 ──────────────────────────────
+
+        /// <summary>
+        /// 그리드 맨 뒤에 [미리보기] 컬럼을 넣는다. 화면이 다시 초기화되며(언어 변경 등) 이 객체를 새로 만들면
+        /// 이미 넣어 둔 컬럼을 그대로 다시 쓴다 — 컬럼이 두 개가 되지 않도록.
+        /// </summary>
+        private void AttachPreviewColumn()
+        {
+            _previewColumn = _view.Columns.ColumnByFieldName(PreviewFieldName);
+            if (_previewColumn == null)
+            {
+                _previewColumn = _view.Columns.AddField(PreviewFieldName);
+                _previewColumn.UnboundType = UnboundColumnType.Object;   // 값은 없고 아이콘만 그린다
+                _previewColumn.OptionsColumn.AllowEdit = false;
+                _previewColumn.OptionsColumn.AllowSort = DefaultBoolean.False;
+                _previewColumn.OptionsColumn.AllowSize = false;
+                _previewColumn.OptionsColumn.FixedWidth = true;
+                _previewColumn.OptionsFilter.AllowFilter = false;
+            }
+
+            _previewColumn.Caption = Language.Col_Preview;
+            _previewColumn.Width = PreviewColumnWidth;
+            _previewColumn.Visible = true;
+            _previewColumn.VisibleIndex = _view.VisibleColumns.Count;   // 맨 뒤
+
+            _photoIcon = AppImages.Icon(AppImages.IconPhoto, PhotoIconSize, Color.Empty);   // 원래 색 그대로
+        }
+
+        /// <summary>그림이 있는 행의 미리보기 칸에만 사진 아이콘을 그린다. 그림이 없는 행은 빈칸 — 눌러도 아무것도 뜨지 않는다.</summary>
+        private void View_CustomDrawCell(object sender, RowCellCustomDrawEventArgs e)
+        {
+            if (e.Column != _previewColumn)
+                return;
+
+            e.DefaultDraw();   // 선택 · 줄무늬 배경은 기본대로
+
+            if (_photoIcon != null && PathOfRow(e.RowHandle) != null)
+            {
+                int x = e.Bounds.X + (e.Bounds.Width - PhotoIconSize) / 2;
+                int y = e.Bounds.Y + (e.Bounds.Height - PhotoIconSize) / 2;
+                e.Cache.DrawImage(_photoIcon, new Rectangle(x, y, PhotoIconSize, PhotoIconSize));
+            }
+
+            e.Handled = true;
+        }
+
+        /// <summary>마우스가 미리보기 칸 위인가.</summary>
+        private bool IsPreviewCell(GridHitInfo hit)
+        {
+            return hit.InRowCell && hit.Column == _previewColumn;
+        }
+
         // ────────────────────────────── 마우스 오버 ──────────────────────────────
 
         private void View_MouseMove(object sender, MouseEventArgs e)
@@ -109,8 +191,9 @@ namespace SEOJIN_TMES.Client.Forms.Common
             if (IsPinned)
                 return;
 
+            // 미리보기 칸 위에서만 띄운다 — 같은 행이라도 다른 칸이면 내린다.
             GridHitInfo hit = _view.CalcHitInfo(e.Location);
-            string path = hit.InRow ? PathOfRow(hit.RowHandle) : null;
+            string path = IsPreviewCell(hit) ? PathOfRow(hit.RowHandle) : null;
 
             if (path == null)
             {
@@ -118,7 +201,7 @@ namespace SEOJIN_TMES.Client.Forms.Common
                 return;
             }
 
-            // 같은 행(같은 그림) 안에서 움직이면 창만 따라 옮긴다.
+            // 같은 칸(같은 그림) 안에서 움직이면 창만 따라 옮긴다.
             if (string.Equals(path, _hoverPath, StringComparison.OrdinalIgnoreCase))
             {
                 if (_popup != null && _popup.Visible)
@@ -150,20 +233,23 @@ namespace SEOJIN_TMES.Client.Forms.Common
 
         /// <summary>
         /// 누르는 순간 마우스 오버 미리보기는 거둔다(곧이어 RowClick이 고정 미리보기를 띄운다).
-        /// 행이 아닌 곳(헤더 · 빈 영역)을 누르면 고정도 푼다 — 행을 누른 경우는 RowClick이 판단한다.
+        /// 미리보기 칸이 아닌 곳(다른 칸 · 헤더 · 빈 영역)을 누르면 고정도 푼다 — 미리보기 칸은 RowClick이 판단한다.
         /// </summary>
         private void View_MouseDown(object sender, MouseEventArgs e)
         {
             CancelHover();
 
-            if (!_view.CalcHitInfo(e.Location).InRow)
+            if (!IsPreviewCell(_view.CalcHitInfo(e.Location)))
                 Unpin();
         }
 
-        /// <summary>행을 클릭하면 그 행의 그림을 행 옆에 고정해 띄운다. 그림이 없는 행이면 고정을 푼다.</summary>
+        /// <summary>
+        /// 미리보기 칸을 클릭하면 그 행의 그림을 행 옆에 고정해 띄운다. 그림이 없는 행이면 고정을 푼다.
+        /// 다른 칸 클릭은 행 선택만 하고 미리보기는 띄우지 않는다(고정 해제는 MouseDown이 이미 했다).
+        /// </summary>
         private async void View_RowClick(object sender, RowClickEventArgs e)
         {
-            if (e.Button != MouseButtons.Left)
+            if (e.Button != MouseButtons.Left || !IsPreviewCell(_view.CalcHitInfo(e.Location)))
                 return;
 
             string path = PathOfRow(e.RowHandle);
@@ -434,6 +520,7 @@ namespace SEOJIN_TMES.Client.Forms.Common
 
             if (_enabled)
             {
+                _view.CustomDrawCell -= View_CustomDrawCell;
                 _view.MouseMove -= View_MouseMove;
                 _view.MouseLeave -= View_MouseLeave;
                 _view.MouseWheel -= View_MouseWheel;

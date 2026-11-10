@@ -33,8 +33,8 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
     ///  3) 우측에서 체크한 파일을 [다운로드] · [삭제]하고, [업로드]로 올린다. 업로드 · 삭제 뒤에는 서버 목록을 다시 받는다.
     ///     체크 칸은 GridView의 CheckBoxRowSelect라 머리글 체크를 누르면 전체 체크 / 다시 누르면 전체 해제된다.
     ///
-    /// FileUploadForm과 같은 API(IFileApiClient)를 쓴다. 파일 상세목록에서 이미지 첨부 위에 마우스를 올리면 커서 옆에,
-    /// 행을 클릭하면 그 행 옆에 공유 폴더(DocumentShare.RootPath + attachFilePath)의 그림을 미리보기로 띄운다(<see cref="GridImagePreview"/>).
+    /// FileUploadForm과 같은 API(IFileApiClient)를 쓴다. 파일 상세목록 맨 뒤 [미리보기] 칸(이미지 첨부만 사진 아이콘)에
+    /// 마우스를 올리면 커서 옆에, 그 칸을 클릭하면 그 행 옆에 공유 폴더(DocumentShare.RootPath + attachFilePath)의 그림을 미리보기로 띄운다(<see cref="GridImagePreview"/>).
     /// 그리드를 제외한 컨트롤은 .NET 기본 컨트롤이고, 색은 Designer에 직접 지정했다(테마 전환 대상 아님).
     /// </summary>
     public partial class AttachmentSearchScreen : UserControl

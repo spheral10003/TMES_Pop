@@ -47,6 +47,9 @@ namespace SEOJIN_TMES.Client.Theme
         /// <summary>홈 — 상단 바 브레드크럼 맨 앞과 홈 탭에서 "홈"이라는 글자 대신 쓴다.</summary>
         public const string IconHome = "SEOJIN_TMES.Client.Images.house-solid.png";
 
+        /// <summary>그리드 [미리보기] 칸의 사진 아이콘(64×64 컬러). 칠하지 않고 원래 색 그대로 쓴다(Forms.Common.GridImagePreview).</summary>
+        public const string IconPhoto = "SEOJIN_TMES.Client.Images.photo.png";
+
         /// <summary>국기 아이콘(24×24). 뒤에 두 글자 언어 코드가 붙는다 — flag_ko / flag_en / flag_vi.</summary>
         private const string FlagResourcePrefix = "SEOJIN_TMES.Client.Images.flag_";
 
