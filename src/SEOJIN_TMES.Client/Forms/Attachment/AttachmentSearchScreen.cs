@@ -340,9 +340,9 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
 
                 ClearFiles();
                 AppLog.Error($"첨부 조회 실패 - {order.WorkOrderNo}", ex);
-                AppMessageBox.Error(this, ex.IsTransportFailure
+                AppMessageBox.Error(this, ex.WithLead(ex.IsTransportFailure
                     ? Language.Upload_ConnectionError
-                    : $"{Language.Upload_Failed} ({(int)ex.StatusCode})", Language.Attach_Title);
+                    : Language.Upload_Failed), Language.Attach_Title);
             }
             finally
             {
@@ -570,9 +570,9 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
                 if (IsDisposed || Disposing) return;
 
                 AppLog.Error($"첨부 삭제 실패 - {order.WorkOrderNo}", ex);
-                AppMessageBox.Error(this, ex.IsTransportFailure
+                AppMessageBox.Error(this, ex.WithLead(ex.IsTransportFailure
                     ? Language.Upload_ConnectionError
-                    : $"{Language.Upload_DeleteFailed} ({(int)ex.StatusCode})", Language.Attach_Title);
+                    : Language.Upload_DeleteFailed), Language.Attach_Title);
                 return;
             }
             finally
@@ -651,9 +651,9 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
 
                 // 한 요청이라 실패하면 아무것도 안 올라간 것으로 본다.
                 AppLog.Error($"파일 일괄 업로드 실패 - {order.WorkOrderNo}, {files.Count}건", ex);
-                AppMessageBox.Error(this, ex.IsTransportFailure
+                AppMessageBox.Error(this, ex.WithLead(ex.IsTransportFailure
                     ? Language.Upload_ConnectionError
-                    : $"{Language.Upload_Failed} ({(int)ex.StatusCode})", Language.Attach_Title);
+                    : Language.Upload_Failed), Language.Attach_Title);
                 return;
             }
             finally

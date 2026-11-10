@@ -129,14 +129,16 @@ namespace SEOJIN_TMES.Client.Common.Logging
                 ? $"설비 접속 성공 - {equipmentId}/{channel} {host}:{port}{local}"
                 : $"설비 접속 실패 - {equipmentId}/{channel} {host}:{port} :: {reason}";
 
-            if (success)
-                AppLog.Step($"[서버로그] {summary}");
-            else
-                AppLog.Warn($"[서버로그] {summary}");
-
             var log = NewEquipment(ClientLogType.EquipmentConnect, summary, equipmentId, host, port);
-            if (!success)
+            if (success)
+            {
+                AppLog.Step($"[서버로그] {summary}");
+            }
+            else
+            {
                 MarkError(log, ErrorCodes.EquipmentConnectFailed, reason);
+                AppLog.Warn($"[서버로그] {log.Message}");
+            }
             Enqueue(log);
         }
 
@@ -155,12 +157,12 @@ namespace SEOJIN_TMES.Client.Common.Logging
                 ? $"레지스터 쓰기 {direction} - {equipmentId} {request} = {values}"
                 : $"레지스터 쓰기 {direction}(오류 응답) - {equipmentId} {request} = {values}";
 
-            AppLog.Info($"[서버로그] {summary}");
-
             // 요청 · 방향 · 값은 서버 필드가 없어 메시지(summary)에 이미 담겨 있다.
             var log = NewEquipment(ClientLogType.ModbusWrite, summary, equipmentId, host, port);
             if (!success)
                 MarkError(log, ErrorCodes.EquipmentWriteRejected, summary);
+
+            AppLog.Info($"[서버로그] {log.Message}");
             Enqueue(log);
         }
 
@@ -171,8 +173,9 @@ namespace SEOJIN_TMES.Client.Common.Logging
         public static UnexpectedException Critical(string origin, Exception exception)
         {
             var wrapped = UnexpectedException.Wrap(origin, exception, ErrorCodes.Unhandled);
-            AppLog.Error($"[서버로그] 치명적 오류 ({origin})", wrapped);
-            Enqueue(NewError(origin, wrapped));
+            var log = NewError(origin, wrapped);
+            AppLog.Error($"[서버로그] 치명적 오류 ({origin}) {ErrorText.Summary(log.ErrorCode, ErrorText.DescriptionOf(wrapped, ErrorText.ServerCulture))}", wrapped);
+            Enqueue(log);
             return wrapped;
         }
 
@@ -184,8 +187,9 @@ namespace SEOJIN_TMES.Client.Common.Logging
         public static UnexpectedException Unexpected(string origin, Exception exception)
         {
             var wrapped = UnexpectedException.Wrap(origin, exception);
-            AppLog.Error($"[서버로그] 예기치 못한 오류 ({origin})", wrapped);
-            Enqueue(NewError(origin, wrapped));
+            var log = NewError(origin, wrapped);
+            AppLog.Error($"[서버로그] 예기치 못한 오류 ({origin}) {ErrorText.Summary(log.ErrorCode, ErrorText.DescriptionOf(wrapped, ErrorText.ServerCulture))}", wrapped);
+            Enqueue(log);
             return wrapped;
         }
 
@@ -220,32 +224,41 @@ namespace SEOJIN_TMES.Client.Common.Logging
         }
 
         /// <summary>
-        /// 예외 로그. 메시지는 "[자리] 예기치 못한 오류 - 원인 메시지",
-        /// 오류 내용은 코드 문구(한국어) + 원래 예외 전체(타입 · 스택 포함).
-        /// 원래 예외가 코드를 들고 있으면(ApiException) 그 코드를, 아니면 래퍼의 SYS 코드를 쓴다.
+        /// 예외 로그. 메시지는 "[자리] 예기치 못한 오류 - 원인 - [코드] 설명",
+        /// 오류 내용은 "[코드] 설명" + 원래 예외 전체(타입 · 스택 포함) — 모두 한국어.
+        /// 원래 예외가 코드를 들고 있으면(ApiException) 그 코드와 설명(서버 업무 코드면 서버 사유)을, 아니면 래퍼의 SYS 코드를 쓴다.
         /// </summary>
         private static ClientLogDto NewError(string origin, UnexpectedException wrapped)
         {
             var root = wrapped.InnerException ?? wrapped;
             var code = ErrorText.CodeOf(wrapped);
+            var description = ErrorText.DescriptionOf(wrapped, ErrorText.ServerCulture);
 
-            var log = New(ClientLogType.CriticalError, wrapped.Message);
-            MarkError(log, code, DescribeInKorean(root));
+            // 래퍼의 Message는 원래 예외의 Message를 그대로 이어 붙여 ApiException이면 화면 언어가 섞인다 — 원인은 한국어로 다시 적는다.
+            var cause = root is ICodedException coded ? coded.MessageFor(ErrorText.ServerCulture) : root.Message;
+            var log = New(ClientLogType.CriticalError, $"[{origin}] 예기치 못한 오류 - {OneLine(cause)}");
+            MarkError(log, code, DescribeInKorean(root), description);
             return log;
         }
 
         /// <summary>
-        /// 오류 표시. 서버로는 화면 언어와 상관없이 한국어로 보낸다 —
-        /// 오류 내용 앞에 코드 문구(한국어)를 두고, 그 아래에 상세(사유 · 예외)를 잇는다.
+        /// 오류 표시. 서버로는 화면 언어와 상관없이 한국어로 보낸다.
+        ///  - 메시지(<c>msg</c>) 끝에 "[코드] 설명"을 붙인다 — 서버 화면에서 메시지 칸만 보고도 무슨 오류인지 알 수 있게.
+        ///  - 오류 내용(<c>errMsg</c>)은 "[코드] 설명" 아래에 상세(사유 · 예외)를 잇는다.
+        /// <paramref name="description"/>을 주지 않으면 코드 문구(한국어)가 설명이다.
         /// </summary>
-        private static void MarkError(ClientLogDto log, string code, string detail)
+        private static void MarkError(ClientLogDto log, string code, string detail, string description = null)
         {
             log.ErrorYn = "Y";
             log.ErrorCode = code;
 
-            var title = ErrorText.Korean(code);
+            var title = ErrorText.Summary(code, description);
+            log.Message = string.IsNullOrWhiteSpace(log.Message) ? title : $"{log.Message} - {title}";
             log.ErrorMessage = string.IsNullOrWhiteSpace(detail) ? title : title + Environment.NewLine + detail;
         }
+
+        private static string OneLine(string text) =>
+            text?.Replace("\r\n", " ").Replace('\n', ' ').Replace('\r', ' ').Trim();
 
         /// <summary>
         /// 예외 상세(타입 · 메시지 · 스택). 코드를 들고 있는 예외는 Message가 화면 언어이므로

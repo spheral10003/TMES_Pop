@@ -233,11 +233,16 @@ namespace SEOJIN_TMES.Client.ApiClient
             }
             catch (Exception ex)
             {
-                // 타임아웃은 LoggingHandler가 이미 Warn으로 남겼다 — 그 밖의 예외만 여기서 스택까지 남긴다.
-                if (!(ex is OperationCanceledException))
-                    AppLog.Error($"API 호출 예외(핸들러 밖) {method} {AbsoluteUrl(relativeUrl)}", ex);
+                var apiException = ApiException.FromTransportFailure(method, AbsoluteUrl(relativeUrl), ex);
 
-                throw ApiException.FromTransportFailure(method, AbsoluteUrl(relativeUrl), ex);
+                // 타임아웃은 LoggingHandler가 이미 Warn으로 남겼다(그 자리에서는 취소와 구분이 안 돼 코드 없이) —
+                // 여기서 코드와 설명을 붙여 한 줄 더 남기고, 그 밖의 예외는 스택까지 남긴다.
+                if (ex is OperationCanceledException)
+                    AppLog.Warn($"API 호출 실패 - {apiException.ToLogText()}");
+                else
+                    AppLog.Error($"API 호출 예외(핸들러 밖) - {apiException.ToLogText()}", ex);
+
+                throw apiException;
             }
         }
 
@@ -255,8 +260,9 @@ namespace SEOJIN_TMES.Client.ApiClient
             catch (Exception ex)
             {
                 var request = response.RequestMessage;
-                AppLog.Error($"API 응답 해석 실패 ({typeof(T).Name}) {request?.Method} {request?.RequestUri}", ex);
-                throw ApiException.FromInvalidResponse(response.StatusCode, body, request?.Method?.Method, request?.RequestUri?.ToString(), ex);
+                var apiException = ApiException.FromInvalidResponse(response.StatusCode, body, request?.Method?.Method, request?.RequestUri?.ToString(), ex);
+                AppLog.Error($"API 응답 해석 실패 ({typeof(T).Name}) - {apiException.ToLogText()}", ex);
+                throw apiException;
             }
         }
 
@@ -310,7 +316,7 @@ namespace SEOJIN_TMES.Client.ApiClient
         {
             var body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
-                throw ApiException.FromErrorResponse(response.StatusCode, response.ReasonPhrase, body);
+                throw ErrorResponse(response, body);
 
             return body;
         }
@@ -321,7 +327,21 @@ namespace SEOJIN_TMES.Client.ApiClient
                 return;
 
             var body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-            throw ApiException.FromErrorResponse(response.StatusCode, response.ReasonPhrase, body);
+            throw ErrorResponse(response, body);
+        }
+
+        /// <summary>
+        /// 실패 상태코드 응답을 예외로 바꾸고 <b>서버가 준 사유를 코드와 함께</b> 로그에 남긴다.
+        /// LoggingHandler는 상태코드만 남기고 본문은 LogApiResponseBody가 켜져 있을 때만 남기므로,
+        /// 이 줄이 없으면 운영(본문 로그 끔)에서 서버가 무엇 때문에 거절했는지 로그로 알 수 없다.
+        /// 화면들은 각자 ApiException을 잡아 자기 말로 로그를 남기지만, 이 한 곳은 모든 호출에 같은 형식으로 남는다.
+        /// </summary>
+        private static ApiException ErrorResponse(HttpResponseMessage response, string body)
+        {
+            var exception = ApiException.FromErrorResponse(response.StatusCode, response.ReasonPhrase, body);
+            var request = response.RequestMessage;
+            AppLog.Warn($"API 오류 응답 {request?.Method} {request?.RequestUri} - {exception.ToLogText()}");
+            return exception;
         }
     }
 }

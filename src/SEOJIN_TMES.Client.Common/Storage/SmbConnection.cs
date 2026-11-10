@@ -205,7 +205,11 @@ namespace SEOJIN_TMES.Client.Common.Storage
         }
 
         /// <summary>현재 화면 언어의 안내 문구 + 상세 + 오류 코드 줄.</summary>
-        public override string Message => ErrorText.WithCode(MessageFor(CultureInfo.CurrentUICulture), Code);
+        public override string Message =>
+            ErrorText.WithCode(MessageFor(CultureInfo.CurrentUICulture), Code, DescriptionFor(CultureInfo.CurrentUICulture));
+
+        /// <summary>코드 문구(인자 포함) — 코드 줄 · 서버 로그에 코드와 함께 적는 설명.</summary>
+        public string DescriptionFor(CultureInfo culture) => ErrorText.Format(Code, culture, _codeArgs);
 
         /// <summary>지정한 언어의 안내 문구 + 상세(코드 줄 제외).</summary>
         public string MessageFor(CultureInfo culture)

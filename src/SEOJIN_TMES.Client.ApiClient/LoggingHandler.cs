@@ -64,8 +64,9 @@ namespace SEOJIN_TMES.Client.ApiClient
             catch (Exception ex)
             {
                 stopwatch.Stop();
-                AppLog.Error($"API 호출 예외 ({stopwatch.ElapsedMilliseconds}ms) {request.Method} {request.RequestUri}", ex);
-                throw ApiException.FromTransportFailure(request.Method?.Method, request.RequestUri?.ToString(), ex);
+                var apiException = ApiException.FromTransportFailure(request.Method?.Method, request.RequestUri?.ToString(), ex);
+                AppLog.Error($"API 호출 예외 ({stopwatch.ElapsedMilliseconds}ms) - {apiException.ToLogText()}", ex);
+                throw apiException;
             }
         }
 

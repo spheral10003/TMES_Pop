@@ -19,5 +19,11 @@ namespace SEOJIN_TMES.Client.Common.Errors
         /// 지정한 언어의 안내 문구(코드 줄 제외). 서버 로그는 화면 언어와 상관없이 한국어로 보내므로 이 메서드로 꺼낸다.
         /// </summary>
         string MessageFor(CultureInfo culture);
+
+        /// <summary>
+        /// 코드의 설명 한 줄 — 화면의 "오류 코드" 줄과 서버 로그(<c>msg</c> · <c>errMsg</c>)에 코드와 함께 붙인다.
+        /// 클라이언트 코드는 <c>Error_{코드}</c> 문구, 서버 업무 코드(클라이언트에 문구가 없는 코드)는 서버가 내려준 사유.
+        /// </summary>
+        string DescriptionFor(CultureInfo culture);
     }
 }

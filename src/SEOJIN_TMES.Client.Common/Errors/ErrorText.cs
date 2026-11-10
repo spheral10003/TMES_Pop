@@ -11,8 +11,9 @@ namespace SEOJIN_TMES.Client.Common.Errors
     ///  - <see cref="Display"/> : 현재 화면 언어(ko/en/vi) — 사용자에게 보여 줄 때
     ///  - <see cref="Korean"/>  : 항상 한국어 — 서버로 보내는 로그(<c>errMsg</c>)에 쓸 때
     ///
-    /// 화면에는 문구 아래에 "오류 코드: XXX_000" 줄을 붙인다(<see cref="WithCode"/>) —
-    /// 현장에서 언어가 달라도 코드 하나로 같은 오류인지 알 수 있게 하기 위해서다.
+    /// 화면에는 문구 아래에 "오류 코드: XXX_000 - 설명" 줄을 붙인다(<see cref="WithCode"/>) —
+    /// 현장에서 언어가 달라도 코드 하나로 같은 오류인지 알 수 있게 하고, 코드만 보고는 뜻을 모르는 일이 없게 하기 위해서다.
+    /// 로그(로컬 파일 · 서버)는 "[XXX_000] 설명"(한국어, <see cref="Summary"/>)으로 적는다.
     /// </summary>
     public static class ErrorText
     {
@@ -38,13 +39,81 @@ namespace SEOJIN_TMES.Client.Common.Errors
             return args == null || args.Length == 0 ? template : string.Format(culture, template, args);
         }
 
-        /// <summary>화면용 — 안내 문구 아래에 빈 줄을 두고 "오류 코드: XXX" 줄을 붙인다.</summary>
-        public static string WithCode(string message, string code)
+        /// <summary>
+        /// 코드의 설명(지정한 언어). 문구가 없는 코드(서버 업무 코드 등)는 null — 설명 없이 코드만 찍힌다.
+        /// </summary>
+        public static string Description(string code, CultureInfo culture, params object[] args)
+        {
+            if (string.IsNullOrEmpty(code))
+                return null;
+
+            var text = Format(code, culture, args);
+            return text == code ? null : text;
+        }
+
+        /// <summary>
+        /// 화면용 — 안내 문구 아래에 빈 줄을 두고 "오류 코드: XXX - 설명" 줄을 붙인다.
+        /// <paramref name="description"/>을 주지 않으면 코드 문구(화면 언어)를 설명으로 쓴다.
+        /// </summary>
+        public static string WithCode(string message, string code, string description = null)
         {
             if (string.IsNullOrEmpty(code))
                 return message;
 
-            return $"{message}{Environment.NewLine}{Environment.NewLine}{string.Format(Language.Error_CodeFormat, code)}";
+            return $"{message}{Environment.NewLine}{Environment.NewLine}{CodeLine(code, description, message)}";
+        }
+
+        /// <summary>
+        /// "오류 코드: XXX - 설명" 한 줄(현재 화면 언어). 한 줄짜리 라벨처럼 <see cref="WithCode"/>를 쓸 수 없는 곳에서 쓴다.
+        /// 설명이 이미 <paramref name="shownMessage"/>(코드 줄 위에 보여 준 문구)에 들어 있으면 두 번 적지 않는다 —
+        /// 안내 문구가 곧 코드 문구인 경우(통신 실패 등) 같은 문장이 연달아 찍히면 읽기만 번거롭다.
+        /// </summary>
+        public static string CodeLine(string code, string description = null, string shownMessage = null)
+        {
+            var line = string.Format(Language.Error_CodeFormat, code);
+            var text = OneLine(description ?? Description(code, CultureInfo.CurrentUICulture));
+
+            if (string.IsNullOrEmpty(text) || (!string.IsNullOrEmpty(shownMessage) && shownMessage.Contains(text)))
+                return line;
+
+            return $"{line} - {text}";
+        }
+
+        /// <summary>
+        /// 로그용 "[XXX] 설명"(한국어). 로컬 파일 · 서버 로그(<c>msg</c> · <c>errMsg</c>) 모두 이 형식으로 코드와 설명을 함께 적는다.
+        /// 설명을 주지 않으면 코드 문구(한국어), 문구가 없는 코드면 "[XXX]"만.
+        /// </summary>
+        public static string Summary(string code, string description = null)
+        {
+            if (string.IsNullOrEmpty(code))
+                return OneLine(description) ?? string.Empty;
+
+            var text = OneLine(description ?? Description(code, ServerCulture));
+            return string.IsNullOrEmpty(text) ? $"[{code}]" : $"[{code}] {text}";
+        }
+
+        /// <summary>
+        /// 예외 코드의 설명(지정한 언어). 코드를 들고 있는 예외는 그 예외가 정한 설명(서버 업무 코드면 서버 사유)을,
+        /// 아니면 코드 문구를 쓴다.
+        /// </summary>
+        public static string DescriptionOf(Exception exception, CultureInfo culture, string fallbackCode = ErrorCodes.Unexpected)
+        {
+            // UnexpectedException은 로그용 래퍼다 — 감싼 예외가 코드를 들고 있으면(CodeOf와 같은 규칙) 그 설명을 쓴다.
+            var coded = exception as ICodedException
+                ?? (exception is UnexpectedException ? exception.InnerException as ICodedException : null);
+            if (coded != null)
+                return coded.DescriptionFor(culture);
+
+            return Description(CodeOf(exception, fallbackCode), culture);
+        }
+
+        /// <summary>여러 줄 문구를 로그 · 코드 줄에 넣을 수 있게 한 줄로 편다.</summary>
+        private static string OneLine(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return null;
+
+            return text.Replace("\r\n", " ").Replace('\n', ' ').Replace('\r', ' ').Trim();
         }
 
         /// <summary>

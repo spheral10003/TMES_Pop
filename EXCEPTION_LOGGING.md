@@ -19,9 +19,9 @@
 | `AppStart` | [Program.cs](src/SEOJIN_TMES.Client/Program.cs) | 프로그램 시작 직후 | msg에 버전 · PC 이름 |
 | `Login` | [LoginForm.cs](src/SEOJIN_TMES.Client/Forms/LoginForm.cs) | 로그인 성공 | msg에 아이디 · PC 이름 |
 | `MenuClick` | [MainForm.cs](src/SEOJIN_TMES.Client/Forms/MainForm.cs) `Accordion_ElementClick` | 좌측 메뉴(화면 항목) 클릭 | msg에 메뉴명(키) · `Open`/`Focus` |
-| `EquipmentConnect` | [Devices.cs](src/SEOJIN_TMES.Client/Core/Devices.cs) ← `NutrunnerDevice.ConnectAttempted` | 너트러너 접속 성공 / 실패(Request · Event 채널 각각) | `eqpCd · eqpIp · eqpPort`, 실패면 `errYn=Y` · `errCd=EQP_001` · `errMsg`=코드 문구 + 실패 사유 |
+| `EquipmentConnect` | [Devices.cs](src/SEOJIN_TMES.Client/Core/Devices.cs) ← `NutrunnerDevice.ConnectAttempted` | 너트러너 접속 성공 / 실패(Request · Event 채널 각각) | `eqpCd · eqpIp · eqpPort`, 실패면 `errYn=Y` · `errCd=EQP_001` · `errMsg`=`[EQP_001] 설명` + 실패 사유, msg 끝에 `[EQP_001] 설명` |
 | `ModbusWrite` | [Devices.cs](src/SEOJIN_TMES.Client/Core/Devices.cs) ← `NutrunnerDevice.SettingWritten` | **설정 레지스터(토크 · 드라이버 잠금) 쓰기** 송신 1건 + 응답 1건 | `eqpCd · eqpIp · eqpPort`, msg에 요청 · 송신/응답 · 값, 오류 응답이면 `errYn=Y` · `errCd=EQP_002` |
-| `CriticalError` | `GlobalErrorHandler` · `Program` · 각 화면의 `catch (Exception)` | 처리되지 않은 예외 / 예기치 못한 예외 | `errYn=Y`, `errCd`=`SYS_001`/`SYS_002`(감싼 예외가 ApiException이면 그 코드), `errMsg`=코드 문구 + 예외 전체(타입 · 스택) |
+| `CriticalError` | `GlobalErrorHandler` · `Program` · 각 화면의 `catch (Exception)` | 처리되지 않은 예외 / 예기치 못한 예외 | `errYn=Y`, `errCd`=`SYS_001`/`SYS_002`(감싼 예외가 ApiException이면 그 코드), `errMsg`=`[코드] 설명` + 예외 전체(타입 · 스택), msg 끝에 `[코드] 설명` |
 
 모든 항목에 공통으로 `corpCd · userId · wkstnCd · deptCd · lineCd · evntOcrnDtm(yyyy-MM-dd HH:mm:ss) · errYn`이 실린다.
 로그인 전에 생긴 로그는 corpCd · userId가, 워크스테이션을 고르기 전(메인 화면 Shown)에 생긴 로그는 wkstnCd · deptCd · lineCd가 비어 있다.
@@ -63,13 +63,29 @@ POP 도면 영역은 "도면을 불러오지 못했습니다" 아래에 이 사�
 | `SYS_002` | 어디서도 잡지 못한 예외 | `ServerLog.Critical` (전역 처리기) |
 
 서버가 오류 본문에 업무 코드(`WORK_005` 등)를 주면 화면 · 로그에는 그 코드가 쓰인다(`ApiException.Code`).
-서버 업무 코드에는 클라이언트 문구가 없어 서버가 준 사유(`message`)를 그대로 보여 준다.
+서버 업무 코드에는 클라이언트 문구가 없어 서버가 준 사유(`message`)가 곧 그 코드의 설명이다(`ICodedException.DescriptionFor`).
 
-**화면** — 현재 언어의 코드 문구 아래에 빈 줄 + `오류 코드: XXX_000` 줄.
+**코드는 항상 설명과 함께 찍는다.**
+
+| 어디 | 형식 | 만드는 곳 |
+| --- | --- | --- |
+| 화면 | 안내 문구 아래 빈 줄 + `오류 코드: XXX_000 - 설명` (현재 언어) | `ErrorText.WithCode` · `CodeLine` |
+| 로컬 로그 · 서버 로그 | `[XXX_000] 설명` (한국어) | `ErrorText.Summary` |
+
+- 설명이 바로 위 안내 문구에 이미 그대로 있으면(통신 실패처럼 안내 = 코드 문구인 경우) 코드 줄에는 코드만 남긴다 — 같은 문장을 두 번 찍지 않으려고.
 - `ApiException.Message`는 읽는 시점의 화면 언어로 만들어지고 코드 줄까지 들어 있다 → 화면은 `ex.Message`를 그대로 띄운다.
+  자기 안내 문구를 앞에 둘 화면은 `ex.WithLead(문구)` — 서버 사유와 코드 줄이 그 아래에 붙는다(문구만 띄우면 서버 사유가 사라진다).
 - 그 밖의 예외는 `ErrorText.ForDisplay(ex)`(코드 문구 + 원인 + 코드 줄), 고정 안내 문구에는 `ErrorText.WithCode(문구, 코드)`.
 
-**서버** — `errCd`=코드, `errMsg`=`ErrorText.Korean(코드)` 첫 줄 + 상세. ApiException은 `MessageFor(ko-KR)`로 한국어 문구를 꺼낸다.
+**API 오류 — 서버가 준 내용을 같이 보여 주고 남긴다.**
+- 화면: 서버 오류 본문의 사유(`message`, 없으면 `msg` · `detail`)가 안내 첫 줄, 코드 줄 설명에 `서버가 요청을 처리하지 못했습니다. (HTTP 400)`.
+  사유가 없으면(HTML 오류 페이지 등) 코드 문구로 안내하고 상태 문구(Bad Request)는 로그에만 남긴다.
+- 로컬 로그: 실패 응답을 받은 자리(`ApiClientBase.ErrorResponse`)에서 모든 호출에 한 줄 —
+  `API 오류 응답 POST https://... - [WORK_005] 서버 사유 | HTTP 400 Bad Request | 클라이언트 분류 [API_005] ... | 서버 사유: ...`
+  (`ApiException.ToLogText`). 응답 본문 로그(`LogApiResponseBody`)를 꺼도 서버 사유는 남는다. 통신 실패 · 응답 해석 실패도 같은 형식.
+
+**서버로 보내는 로그** — `errCd`=코드, `msg` 끝에 ` - [코드] 설명`, `errMsg`=`[코드] 설명` 첫 줄 + 상세.
+ApiException은 `MessageFor(ko-KR)` · `DescriptionFor(ko-KR)`로 한국어 문구(서버 사유 포함)를 꺼낸다.
 .NET이 만든 예외 메시지(스택 앞 줄)는 PC의 Windows 언어를 따르므로 여기서는 바꾸지 않는다.
 
 **코드를 추가할 때** — `ErrorCodes` 상수 + 세 resx의 `Error_{코드}` 키(같은 순서) + `Language.cs` 속성 + 이 표.

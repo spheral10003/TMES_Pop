@@ -18,8 +18,9 @@ namespace SEOJIN_TMES.Client.ApiClient
     ///
     /// 안내 문구는 오류 코드(<see cref="ErrorCodes"/>)로 정하고, <see cref="Message"/>를 <b>읽을 때</b> 그 시점의 화면 언어로 만든다
     /// (예외는 백그라운드 스레드에서 생기므로 만들 때 문구를 굳히면 언어가 어긋날 수 있다).
-    /// Message 끝에는 "오류 코드" 줄이 붙어 있어 화면은 <c>ex.Message</c>를 그대로 띄우면 된다.
-    /// 서버 로그용 한국어 문구는 <see cref="MessageFor"/>로 꺼낸다.
+    /// Message 끝에는 "오류 코드: XXX - 설명" 줄이 붙어 있어 화면은 <c>ex.Message</c>를 그대로 띄우면 된다.
+    /// 서버가 오류 본문에 사유를 담아 주면 그 사유가 안내의 첫 줄이다 — 작업자에게는 "왜 거절됐는지"가 가장 쓸모 있다.
+    /// 서버 로그 · 로컬 로그용 한국어 문구는 <see cref="MessageFor"/> · <see cref="ToLogText"/>로 꺼낸다.
     /// </summary>
     public class ApiException : Exception, ICodedException
     {
@@ -43,8 +44,14 @@ namespace SEOJIN_TMES.Client.ApiClient
         /// <summary>코드 문구에 넣을 인자(API_005의 HTTP 상태코드).</summary>
         private readonly object[] _codeArgs;
 
-        /// <summary>서버가 오류 본문에 담아 준 사유. 서버가 준 문장이라 번역하지 않고 그대로 보여 준다.</summary>
-        private readonly string _serverMessage;
+        /// <summary>
+        /// 서버가 오류 본문에 담아 준 사유(<c>message</c> 등). 서버가 준 문장이라 번역하지 않고 그대로 보여 준다.
+        /// 본문에 사유가 없으면 null(상태 문구 "Bad Request"는 여기 넣지 않는다 — 안내로는 쓸모가 없어 로그에만 남긴다).
+        /// </summary>
+        public string ServerMessage { get; }
+
+        /// <summary>HTTP 상태 문구(Bad Request 등). 로그용.</summary>
+        private readonly string _reasonPhrase;
 
         /// <summary>호출 대상("POST https://..."). 개발자용 단서.</summary>
         private readonly string _request;
@@ -66,15 +73,16 @@ namespace SEOJIN_TMES.Client.ApiClient
         }
 
         private ApiException(HttpStatusCode statusCode, string responseBody, string clientCode, object[] codeArgs,
-            string errorCode, string serverMessage, string request, string cause, Exception innerException)
+            string errorCode, string serverMessage, string reasonPhrase, string request, string cause, Exception innerException)
             : base(ErrorText.Korean(clientCode, codeArgs), innerException)
         {
             StatusCode = statusCode;
             ResponseBody = responseBody;
             ErrorCode = errorCode;
+            ServerMessage = serverMessage;
             _clientCode = clientCode;
             _codeArgs = codeArgs;
-            _serverMessage = serverMessage;
+            _reasonPhrase = reasonPhrase;
             _request = request;
             _cause = cause;
         }
@@ -82,18 +90,45 @@ namespace SEOJIN_TMES.Client.ApiClient
         /// <summary>서버 응답 자체를 받지 못한 실패(연결 실패/타임아웃 등)인지 여부.</summary>
         public bool IsTransportFailure => (int)StatusCode == 0;
 
-        /// <summary>현재 화면 언어의 안내 문구 + 오류 코드 줄.</summary>
-        public override string Message => ErrorText.WithCode(MessageFor(CultureInfo.CurrentUICulture), Code);
+        /// <summary>현재 화면 언어의 안내 문구 + "오류 코드: XXX - 설명" 줄.</summary>
+        public override string Message => WithLead(null);
 
         /// <summary>
-        /// 지정한 언어의 안내 문구(코드 줄 제외) — "무엇이 잘못됐는지(사용자용) + 서버 사유 + 호출 대상 + 실제 원인(개발자용)" 순서.
+        /// 화면이 자기 안내 문구(예: "업로드 실패")를 맨 앞에 두고 싶을 때 — 그 아래에 서버 사유 · 상세 · 코드 줄을 잇는다.
+        /// 화면 문구만 띄우면 서버가 내려준 사유가 사라지므로, 자체 문구를 쓰는 화면도 이 메서드를 거친다.
+        /// </summary>
+        public string WithLead(string lead)
+        {
+            var culture = CultureInfo.CurrentUICulture;
+            var body = MessageFor(culture);
+            if (!string.IsNullOrWhiteSpace(lead))
+                body = lead + Environment.NewLine + body;
+
+            return ErrorText.WithCode(body, Code, DescriptionFor(culture));
+        }
+
+        /// <summary>
+        /// 코드 설명 — 서버 업무 코드(WORK_005 등)는 클라이언트에 문구가 없으므로 서버 사유가 곧 설명이다.
+        /// 클라이언트 코드(API_xxx)는 코드 문구(HTTP 상태코드 포함).
+        /// </summary>
+        public string DescriptionFor(CultureInfo culture)
+        {
+            if (!string.IsNullOrEmpty(ErrorCode) && !string.IsNullOrWhiteSpace(ServerMessage))
+                return ServerMessage;
+
+            return _rawMessage ?? ErrorText.Format(_clientCode, culture, _codeArgs);
+        }
+
+        /// <summary>
+        /// 지정한 언어의 안내 문구(코드 줄 제외) — "무엇이 잘못됐는지 + 호출 대상 + 실제 원인(개발자용)" 순서.
+        /// 서버가 사유를 주었으면 그 사유가 첫 줄이고, 우리 코드 문구("서버가 요청을 처리하지 못했습니다. (HTTP 400)")는
+        /// 코드 줄의 설명으로 내려간다 — 같은 내용을 두 번 적지 않으려고.
         /// </summary>
         public string MessageFor(CultureInfo culture)
         {
-            var message = _rawMessage ?? ErrorText.Format(_clientCode, culture, _codeArgs);
-
-            if (!string.IsNullOrWhiteSpace(_serverMessage))
-                message += Environment.NewLine + _serverMessage;
+            var message = string.IsNullOrWhiteSpace(ServerMessage)
+                ? _rawMessage ?? ErrorText.Format(_clientCode, culture, _codeArgs)
+                : ServerMessage;
 
             if (!string.IsNullOrEmpty(_request))
                 message += $"{Environment.NewLine}({_request})";
@@ -105,9 +140,33 @@ namespace SEOJIN_TMES.Client.ApiClient
         }
 
         /// <summary>
-        /// 실패 상태코드 응답을 예외로 바꾼다. 서버 오류 본문(<c>{"message":..., "code":...}</c>)의 사유를 안내 문구에 붙인다 —
+        /// 로그(로컬 파일)용 한 줄 — 항상 한국어. "[코드] 설명 | HTTP 상태 | 서버 사유 | 호출 대상 | 원인".
+        /// 화면 언어와 상관없이 같은 형식이라 로그를 코드로 찾아볼 수 있고, 서버가 준 사유도 그대로 남는다.
+        /// </summary>
+        public string ToLogText()
+        {
+            var culture = ErrorText.ServerCulture;
+            var text = ErrorText.Summary(Code, DescriptionFor(culture));
+
+            if (!IsTransportFailure)
+                text += $" | HTTP {(int)StatusCode} {_reasonPhrase}".TrimEnd();
+            if (!string.IsNullOrEmpty(ErrorCode))
+                text += " | 클라이언트 분류 " + ErrorText.Summary(_clientCode, ErrorText.Format(_clientCode, culture, _codeArgs));
+            if (!string.IsNullOrWhiteSpace(ServerMessage))
+                text += " | 서버 사유: " + OneLine(ServerMessage);
+            if (!string.IsNullOrEmpty(_request))
+                text += " | " + _request;
+            if (!string.IsNullOrWhiteSpace(_cause))
+                text += " | 원인: " + OneLine(_cause);
+
+            return text;
+        }
+
+        /// <summary>
+        /// 실패 상태코드 응답을 예외로 바꾼다. 서버 오류 본문(<c>{"message":..., "code":...}</c>)의 사유를 안내 첫 줄로 쓴다 —
         /// 상태코드만 보여 주면("API 호출 실패: 400") 작업자도 개발자도 무엇이 거절됐는지 알 수 없었다.
-        /// 본문이 JSON이 아니면(HTML 오류 페이지 등) 상태코드만으로 안내한다.
+        /// 본문이 JSON이 아니거나 사유가 없으면(HTML 오류 페이지 등) 코드 문구("서버가 요청을 처리하지 못했습니다. (HTTP 400)")로 안내하고,
+        /// 상태 문구(Bad Request 등)는 로그(<see cref="ToLogText"/>)에만 남긴다.
         /// </summary>
         public static ApiException FromErrorResponse(HttpStatusCode statusCode, string reasonPhrase, string responseBody)
         {
@@ -118,8 +177,9 @@ namespace SEOJIN_TMES.Client.ApiClient
             {
                 if (!string.IsNullOrWhiteSpace(responseBody) && JToken.Parse(responseBody) is JObject body)
                 {
-                    errorCode = (string)body["code"];
-                    serverMessage = (string)body["message"];
+                    errorCode = FirstText(body, "code");
+                    // 서버 공통 봉투는 message. 다른 형태(msg · detail)로 오는 응답도 사유를 놓치지 않게 차례로 본다.
+                    serverMessage = FirstText(body, "message", "msg", "detail");
                 }
             }
             catch (JsonException)
@@ -127,15 +187,8 @@ namespace SEOJIN_TMES.Client.ApiClient
                 // 오류 본문이 JSON이 아니어도 실패 사실은 그대로 알려야 한다.
             }
 
-            if (string.IsNullOrWhiteSpace(errorCode))
-                errorCode = null;
-
-            // 서버가 사유를 주지 않으면 상태 문구(Bad Request 등)라도 남긴다.
-            if (string.IsNullOrWhiteSpace(serverMessage))
-                serverMessage = reasonPhrase;
-
             return new ApiException(statusCode, responseBody, ErrorCodes.ApiErrorResponse, new object[] { (int)statusCode },
-                errorCode, serverMessage, null, null, null);
+                errorCode, serverMessage, reasonPhrase, null, null, null);
         }
 
         /// <summary>
@@ -162,7 +215,7 @@ namespace SEOJIN_TMES.Client.ApiClient
                 cause = RootCause(exception).Message;
             }
 
-            return new ApiException((HttpStatusCode)0, null, code, null, null, null, Describe(method, requestUri), cause, exception);
+            return new ApiException((HttpStatusCode)0, null, code, null, null, null, null, Describe(method, requestUri), cause, exception);
         }
 
         /// <summary>
@@ -171,7 +224,7 @@ namespace SEOJIN_TMES.Client.ApiClient
         /// </summary>
         public static ApiException FromInvalidResponse(HttpStatusCode statusCode, string responseBody, string method, string requestUri, Exception exception)
         {
-            return new ApiException(statusCode, responseBody, ErrorCodes.ApiInvalidResponse, null, null, null,
+            return new ApiException(statusCode, responseBody, ErrorCodes.ApiInvalidResponse, null, null, null, null,
                 Describe(method, requestUri), RootCause(exception).Message, exception);
         }
 
@@ -180,8 +233,23 @@ namespace SEOJIN_TMES.Client.ApiClient
         /// </summary>
         public static ApiException FromMissingToken()
         {
-            return new ApiException(HttpStatusCode.Unauthorized, null, ErrorCodes.ApiNoToken, null, null, null, null, null, null);
+            return new ApiException(HttpStatusCode.Unauthorized, null, ErrorCodes.ApiNoToken, null, null, null, null, null, null, null);
         }
+
+        /// <summary>본문에서 처음으로 값이 있는 문자열 필드. 필드가 객체 · 배열이면(형식이 다른 서버) 건너뛴다.</summary>
+        private static string FirstText(JObject body, params string[] names)
+        {
+            foreach (var name in names)
+            {
+                if (body[name] is JValue value && value.Type == JTokenType.String && !string.IsNullOrWhiteSpace((string)value))
+                    return ((string)value).Trim();
+            }
+
+            return null;
+        }
+
+        private static string OneLine(string text) =>
+            text?.Replace("\r\n", " ").Replace('\n', ' ').Replace('\r', ' ').Trim();
 
         private static string Describe(string method, string requestUri) =>
             string.IsNullOrEmpty(requestUri) ? null : $"{method} {requestUri}";

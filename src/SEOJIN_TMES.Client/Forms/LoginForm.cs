@@ -487,17 +487,22 @@ namespace SEOJIN_TMES.Client.Forms
             {
                 // 서버 미기동/네트워크 단절/타임아웃 — 상세 사유는 로그로 남기고, 라벨에는 한 줄 안내만 띄운다.
                 AppLog.Error($"로그인 중 통신 오류 - UserId={userId}", ex);
-                lblMessage.Text = $"{Language.Login_ConnectionErrorMessage} ({FormatCode(ex.Code)})";
+                lblMessage.Text = $"{Language.Login_ConnectionErrorMessage} ({FormatCode(ex)})";
             }
             catch (ApiException ex)
             {
-                AppLog.Error($"로그인 실패 - UserId={userId}, StatusCode={(int)ex.StatusCode}, Code={ex.Code}");
-                lblMessage.Text = $"{Language.Login_FailedMessage} (HTTP {(int)ex.StatusCode}, {FormatCode(ex.Code)})";
+                AppLog.Error($"로그인 실패 - UserId={userId}, {ex.ToLogText()}");
+
+                // 서버가 사유를 주었으면(계정 잠김 등) 그 사유가 작업자에게 가장 쓸모 있다 — 한 줄 라벨이라 줄바꿈은 편다.
+                var reason = string.IsNullOrWhiteSpace(ex.ServerMessage)
+                    ? $"HTTP {(int)ex.StatusCode}"
+                    : ex.ServerMessage.Replace(Environment.NewLine, " ").Replace('\n', ' ');
+                lblMessage.Text = $"{Language.Login_FailedMessage} - {reason} ({FormatCode(ex)})";
             }
             catch (Exception ex)
             {
                 var wrapped = ServerLog.Unexpected("로그인", ex);
-                lblMessage.Text = $"{Language.Login_ConnectionErrorMessage}: {ex.Message} ({FormatCode(ErrorText.CodeOf(wrapped))})";
+                lblMessage.Text = $"{Language.Login_ConnectionErrorMessage}: {ex.Message} ({ErrorText.CodeLine(ErrorText.CodeOf(wrapped), ErrorText.DescriptionOf(wrapped, CultureInfo.CurrentUICulture))})";
             }
             finally
             {
@@ -506,8 +511,12 @@ namespace SEOJIN_TMES.Client.Forms
             }
         }
 
-        /// <summary>안내 라벨 끝에 붙이는 "오류 코드: XXX" — 라벨은 한 줄이라 ErrorText.WithCode(빈 줄 + 코드 줄) 대신 괄호로 잇는다.</summary>
-        private static string FormatCode(string code) => string.Format(Language.Error_CodeFormat, code);
+        /// <summary>
+        /// 안내 라벨 끝에 붙이는 "오류 코드: XXX - 설명" — 라벨은 한 줄이라 ErrorText.WithCode(빈 줄 + 코드 줄) 대신 괄호로 잇는다.
+        /// 서버 업무 코드면 설명이 서버 사유라, 라벨 앞쪽에 이미 적은 사유와 겹치면 코드만 남긴다.
+        /// </summary>
+        private string FormatCode(ApiException ex) =>
+            ErrorText.CodeLine(ex.Code, ex.DescriptionFor(CultureInfo.CurrentUICulture), ex.ServerMessage);
 
         private void btnClose_Click(object sender, EventArgs e) => Close();
 
