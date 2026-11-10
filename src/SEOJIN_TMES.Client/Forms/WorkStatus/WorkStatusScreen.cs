@@ -49,6 +49,10 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
         /// </summary>
         private string _loadedWorkOrderNo;
 
+        /// <summary>작업지시 상태 · 진행 상태 앞의 상태 구슬 컬럼(이벤트를 걸어 두므로 화면과 수명을 같이한다).</summary>
+        private StateImageColumn _orderStatusImage;
+        private StateImageColumn _progressStateImage;
+
         public WorkStatusScreen()
         {
             InitializeComponent();
@@ -157,6 +161,11 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
                 GridColumns.Text("StatusName", Language.Col_StatusName, 110),
                 GridColumns.Left("Remark", Language.Col_Remark, 200));
 
+            // 상태 앞에 상태 구슬 그림 — 헤더는 상태와 한 칸으로 합쳐 보인다(GridColumns.Apply 뒤에 붙여야 한다).
+            _orderStatusImage = new StateImageColumn(gridViewOrders, nameof(WorkOrderEntryDto.StatusName));
+            _orderStatusImage.Attach();
+            gridViewOrders.CustomColumnDisplayText += GridViewOrders_CustomColumnDisplayText;
+
             gridProgress.DataSource = new List<WorkProgressDto>();
             GridColumns.Apply(gridViewProgress, Language.Col_No,
                 GridColumns.Text("RoutingGroup", Language.Col_RoutingGroup, 150),
@@ -167,16 +176,45 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
                 GridColumns.Text("ProgressState", Language.Col_ProgressState, 130),
                 GridColumns.Text("SpecResultState", Language.Col_SpecResultState, 140));
 
+            _progressStateImage = new StateImageColumn(gridViewProgress, nameof(WorkProgressDto.ProgressState));
+            _progressStateImage.Attach();
+
             gridViewProgress.OptionsView.ColumnAutoWidth = true;
-
-            // 결과가 아직 없는 줄은 빈칸 대신 "-"로 보여 준다(POP 화면과 같은 표기).
-            gridViewProgress.CustomColumnDisplayText += (s, e) =>
-            {
-                if (e.Column.FieldName == "SpecResultState" && string.IsNullOrEmpty(e.Value as string))
-                    e.DisplayText = "-";
-            };
-
+            gridViewProgress.CustomColumnDisplayText += GridViewProgress_CustomColumnDisplayText;
             gridViewProgress.RowCellStyle += GridViewProgress_RowCellStyle;
+        }
+
+        /// <summary>작업지시 상태(서버 코드 Ready/Progress/Completed 등)를 화면 언어의 문구로 보여 준다. 값 자체는 바꾸지 않는다.</summary>
+        private void GridViewOrders_CustomColumnDisplayText(object sender, DevExpress.XtraGrid.Views.Base.CustomColumnDisplayTextEventArgs e)
+        {
+            if (e.Column == null || e.Column.FieldName != nameof(WorkOrderEntryDto.StatusName))
+                return;
+
+            var value = e.Value as string;
+            if (!string.IsNullOrEmpty(value))
+                e.DisplayText = Language.ProgressStateText(value);
+        }
+
+        /// <summary>
+        /// 진행 상태는 서버 코드(Ready/Progress/Finished 등)를 화면 언어의 문구로 바꿔 보여 주고(값은 그대로 — 필터가 코드로 비교한다),
+        /// 스팩 결과가 아직 없는 줄은 빈칸 대신 "-"로 보여 준다(POP 화면과 같은 표기).
+        /// </summary>
+        private void GridViewProgress_CustomColumnDisplayText(object sender, DevExpress.XtraGrid.Views.Base.CustomColumnDisplayTextEventArgs e)
+        {
+            if (e.Column == null)
+                return;
+
+            var value = e.Value as string;
+            if (e.Column.FieldName == nameof(WorkProgressDto.SpecResultState))
+            {
+                if (string.IsNullOrEmpty(value))
+                    e.DisplayText = "-";
+            }
+            else if (e.Column.FieldName == nameof(WorkProgressDto.ProgressState))
+            {
+                if (!string.IsNullOrEmpty(value))
+                    e.DisplayText = Language.ProgressStateText(value);
+            }
         }
 
         /// <summary>

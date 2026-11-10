@@ -11,7 +11,7 @@ using SEOJIN_TMES.Client.Theme;
 namespace SEOJIN_TMES.Client.Forms.Common
 {
     /// <summary>
-    /// 상태 컬럼 바로 앞에 상태 구슬 그림 컬럼을 붙인다 — 대기(파랑) · 작업 중(초록) · 완료(노랑) · 중지(빨강).
+    /// 상태 컬럼 바로 앞에 상태 구슬 그림 컬럼을 붙인다 — 대기(파랑) · 작업 중(노랑) · 완료(초록) · 중지(빨강).
     /// 그림 컬럼과 상태 컬럼의 헤더는 하나로 합쳐 상태 컬럼 문구만 보이게 그린다(두 칸이 한 항목이라는 것이 보이도록).
     ///
     /// 그림은 상태 컬럼 값(서버 코드)으로만 고른다 — 판정은 하지 않고 서버가 준 상태를 색으로 바꿔 보여 줄 뿐이다.
@@ -27,7 +27,7 @@ namespace SEOJIN_TMES.Client.Forms.Common
         private readonly string _stateFieldName;
         private GridColumn _imageColumn;
 
-        /// <summary>셀 크기로 줄여 둔 구슬 그림 — 대기(파랑) · 작업 중(초록) · 완료(노랑) · 중지(빨강).</summary>
+        /// <summary>셀 크기로 줄여 둔 구슬 그림 — 대기(파랑) · 작업 중(노랑) · 완료(초록) · 중지(빨강).</summary>
         private Image _ready;
         private Image _progress;
         private Image _finished;
@@ -82,8 +82,8 @@ namespace SEOJIN_TMES.Client.Forms.Common
                 return;
 
             _ready = LoadSphere(Properties.Resources.sphere_blue);
-            _progress = LoadSphere(Properties.Resources.sphere_green);
-            _finished = LoadSphere(Properties.Resources.sphere_yellow);
+            _progress = LoadSphere(Properties.Resources.sphere_yellow);
+            _finished = LoadSphere(Properties.Resources.sphere_green);
             _stopped = LoadSphere(Properties.Resources.sphere_red);
 
             if (_view.GridControl != null)
