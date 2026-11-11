@@ -858,6 +858,18 @@
   <data name="Pop_MaterialInputUnchanged" xml:space="preserve">
     <value>저장된 값과 같아 다시 전송하지 않았습니다.</value>
   </data>
+  <data name="Pop_CheckSerial" xml:space="preserve">
+    <value>시리얼 검사</value>
+  </data>
+  <data name="Pop_CheckItemCode" xml:space="preserve">
+    <value>품목코드 검사</value>
+  </data>
+  <data name="Pop_CheckSerialItemCode" xml:space="preserve">
+    <value>시리얼/품목코드 검사</value>
+  </data>
+  <data name="Pop_CheckNotRequired" xml:space="preserve">
+    <value>검사 불필요</value>
+  </data>
   <data name="PopTorque_Title" xml:space="preserve">
     <value>토크 결과값 입력</value>
   </data>

@@ -1,4 +1,5 @@
 using Newtonsoft.Json;
+using SEOJIN_TMES.Client.Common.Languages;
 using System;
 using System.Collections.Generic;
 
@@ -161,8 +162,21 @@ namespace SEOJIN_TMES.Client.Common.Models
         /// <summary>이 자재의 입력이 모두 끝났는지 — 시리얼(대상이면) · 품목번호(대상이면) 둘 다. 참조 자재는 늘 끝난 것으로 본다.</summary>
         public bool IsInputCompleted => IsReference || (IsSerialInputCompleted && (!ItemCodeCheckRequired || ItemCodeInputCompleted));
 
-        /// <summary>[투입자재] 그리드의 "시리얼번호 검사여부" 표시 문구.</summary>
-        public string SerialCheckText => SerialCheckRequired ? "검사필요" : "검사불필요";
+        /// <summary>
+        /// [투입자재] 그리드의 "검사여부" 표시 문구 — 시리얼 · 품목코드 중 무엇을 확인하는지 보여 준다(화면 언어).
+        /// 예전에는 시리얼 확인 여부만 보고 "검사필요/검사불필요"를 띄워, 품목코드만 확인하는 자재도 "검사불필요"로 보였다.
+        /// 그리드가 칸을 그릴 때마다 읽으므로 언어를 바꾸면 바로 바뀐다.
+        /// </summary>
+        public string SerialCheckText
+        {
+            get
+            {
+                if (SerialCheckRequired && ItemCodeCheckRequired) return Language.Pop_CheckSerialItemCode;
+                if (SerialCheckRequired) return Language.Pop_CheckSerial;
+                if (ItemCodeCheckRequired) return Language.Pop_CheckItemCode;
+                return Language.Pop_CheckNotRequired;
+            }
+        }
 
         /// <summary>
         /// 품목코드만 받는 자재인지(시리얼 확인 N · 품목코드 확인 Y). 입력 팝업이 시리얼 대신 품목코드 한 줄을 받는다.

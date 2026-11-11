@@ -858,6 +858,18 @@ Hệ thống sẽ tự động thử kết nối lại cho đến khi thành cô
   <data name="Pop_MaterialInputUnchanged" xml:space="preserve">
     <value>Giá trị nhập giống với giá trị đã lưu nên không gửi lại.</value>
   </data>
+  <data name="Pop_CheckSerial" xml:space="preserve">
+    <value>Kiểm tra sê-ri</value>
+  </data>
+  <data name="Pop_CheckItemCode" xml:space="preserve">
+    <value>Kiểm tra mã sản phẩm</value>
+  </data>
+  <data name="Pop_CheckSerialItemCode" xml:space="preserve">
+    <value>Kiểm tra sê-ri/mã sản phẩm</value>
+  </data>
+  <data name="Pop_CheckNotRequired" xml:space="preserve">
+    <value>Không cần kiểm tra</value>
+  </data>
   <data name="PopTorque_Title" xml:space="preserve">
     <value>Nhập kết quả lực siết</value>
   </data>
