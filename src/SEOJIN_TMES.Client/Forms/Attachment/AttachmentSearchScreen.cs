@@ -54,9 +54,21 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
         /// <summary>파일 상세목록의 이미지 첨부 미리보기(마우스 오버 · 행 클릭). 탭이 닫힐 때(Disposed) 함께 해제한다.</summary>
         private GridImagePreview _preview;
 
+        /// <summary>
+        /// 서버가 내려준 버튼 권한(/AttachmentSearch). 받기 전에는 모두 없음이라 조회 · 업로드 · 삭제 · 다운로드 버튼이 숨어 있다.
+        /// 버튼 배치(<see cref="ArrangeByTextWidth"/>)는 Visible 대신 이 값을 본다 — 탭이 화면에 붙기 전에는 Visible이 늘 false로 읽힌다.
+        /// </summary>
+        private ProgramPermissionDto _permission = ProgramPermissionDto.None();
+
+        /// <summary>첨부 버튼 묶음의 오른쪽 여백(부모 오른쪽 끝 → [업로드] 오른쪽 끝). 숨긴 버튼을 빼고 다시 붙일 기준이다.</summary>
+        private readonly int _fileButtonsRightMargin;
+
         public AttachmentSearchScreen()
         {
             InitializeComponent();
+
+            // 디자이너 값일 때 잡는다 — 탭에 붙어 늘어나도 Top | Right 고정이라 오른쪽 여백은 그대로다.
+            _fileButtonsRightMargin = btnUpload.Parent.ClientSize.Width - btnUpload.Right;
         }
 
         public void Init()
@@ -83,6 +95,33 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             Disposed += AttachmentSearchScreen_Disposed;
 
             ControlEnabled();
+            SetPermission();
+        }
+
+        /// <summary>
+        /// 버튼 권한을 받아 버튼을 보이거나 숨기고, 보이는 첨부 버튼만 오른쪽 끝부터 다시 붙인다.
+        /// 조회=srchAuthYn, 업로드=strgAuthYn, 삭제=delAuthYn, 다운로드=prnotAuthYn(파일을 밖으로 내보내는 출력으로 본다).
+        /// </summary>
+        private async void SetPermission()
+        {
+            _permission = ProgramPermissionDto.None();
+            ShowPermittedButtons();
+
+            var permission = await MenuPermission.Get(MenuPermission.AttachmentSearch);
+            if (IsDisposed || Disposing)
+                return;
+
+            _permission = permission;
+            ShowPermittedButtons();
+        }
+
+        private void ShowPermittedButtons()
+        {
+            MenuPermission.SetVisible(_permission.CanSearch, btnSearch);
+            MenuPermission.SetVisible(_permission.CanSave, btnUpload);
+            MenuPermission.SetVisible(_permission.CanDelete, btnDelete);
+            MenuPermission.SetVisible(_permission.CanPrint, btnDownload);
+            ArrangeByTextWidth();
         }
 
         /// <summary>
@@ -166,9 +205,16 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
 
             // 버튼은 문구가 넘치지 않게 넓히고, 파일 상세목록 제목 줄의 오른쪽 끝부터 [업로드] → [삭제] → [다운로드] 순으로 채운다.
             // Designer에서 Top | Right로 고정해 두었으므로 여기서 한 번 맞추면 창 크기가 바뀌어도 오른쪽 끝에 붙어 있다.
-            int right = btnUpload.Right;
-            foreach (var button in new[] { btnUpload, btnDelete, btnDownload })
+            // 권한이 없어 숨긴 버튼은 건너뛴다 — 자리를 비워 두면 버튼 사이가 벌어져 보인다.
+            int right = btnUpload.Parent.ClientSize.Width - _fileButtonsRightMargin;
+            var permitted = new[] { _permission.CanSave, _permission.CanDelete, _permission.CanPrint };
+            var buttons = new[] { btnUpload, btnDelete, btnDownload };
+            for (int i = 0; i < buttons.Length; i++)
             {
+                if (!permitted[i])
+                    continue;
+
+                var button = buttons[i];
                 button.Width = Math.Max(76, TextRenderer.MeasureText(button.Text, button.Font).Width + 20);
                 button.Left = right - button.Width;
                 right = button.Left - 6;
@@ -204,7 +250,8 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
         /// <summary>바코드 스캐너처럼 Enter로 끝나는 입력을 그대로 조회로 연결한다.</summary>
         private async void Condition_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode != Keys.Enter || _isBusy)
+            // 조회 권한이 없으면 [조회]를 숨겼으므로 Enter로도 조회하지 않는다.
+            if (e.KeyCode != Keys.Enter || _isBusy || !_permission.CanSearch)
                 return;
 
             e.SuppressKeyPress = true;

@@ -244,6 +244,25 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
+        /// 버튼 권한(/POP)을 받아 하단 버튼을 보이거나 숨긴다. 받기 전에는 모두 숨긴다.
+        /// 공정 이동 · 목록(이전 공정 · 다음 공정 · 공정 목록)은 조회(srchAuthYn),
+        /// 서버 상태를 바꾸는 공정 중지 · 알림 등록 · 리웍은 저장(strgAuthYn)으로 본다.
+        /// 숨긴 버튼 자리는 비워 둔다 — 현장 작업자가 버튼 위치로 기억하므로 남은 버튼을 옮기지 않는다.
+        /// 단축키(PageUp/PageDown)는 PerformClick이라 숨긴 버튼에는 동작하지 않는다.
+        /// </summary>
+        private async void SetPermission()
+        {
+            MenuPermission.SetVisible(false, btnPrevProcess, btnNextProcess, btnProcessList, btnStopProcess, btnAdminAlarm, btnRework);
+
+            var permission = await MenuPermission.Get(MenuPermission.Pop);
+            if (IsDisposed || Disposing)
+                return;
+
+            MenuPermission.SetVisible(permission.CanSearch, btnPrevProcess, btnNextProcess, btnProcessList);
+            MenuPermission.SetVisible(permission.CanSave, btnStopProcess, btnAdminAlarm, btnRework);
+        }
+
+        /// <summary>
         /// 설비 목록(서버 기준정보)을 장비 관리자에 등록하고 이벤트를 구독한 뒤 연결을 시작한다.
         /// 설비 Id는 목록 순번으로 다시 매긴다 — 장비 관리자 안에서만 쓰는 식별자다.
         /// 등록 · 시작은 <see cref="Devices.Attach"/>가 한다 — 이전 POP가 아직 열려 있어도 이 화면이 장비를 넘겨받는다.
@@ -318,6 +337,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 ApplyLanguage();
                 ApplyTheme();
                 InitActionTiles();
+                SetPermission();
                 Screen.InitGrids();
 
                 // 도면을 넓게 보는 것이 먼저라 우측 공정 정보는 접힌 채로 시작한다(손잡이로 펼친다).

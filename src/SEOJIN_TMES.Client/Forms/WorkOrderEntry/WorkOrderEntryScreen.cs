@@ -80,6 +80,29 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             // 헤더 · 빈 영역 더블클릭에는 반응하지 않도록 RowDoubleClick을 쓴다(MeisGridView 참고).
             gridView.RowDoubleClick += gridView_RowDoubleClick;
             gridView.CustomColumnDisplayText += gridView_CustomColumnDisplayText;
+
+            SetPermission();
+        }
+
+        /// <summary>서버가 내려준 버튼 권한(/POP). 받기 전에는 모두 없음이라 [조회] · [작업]이 숨어 있다.</summary>
+        private ProgramPermissionDto _permission = ProgramPermissionDto.None();
+
+        /// <summary>
+        /// 버튼 권한을 받아 [조회](srchAuthYn) · [작업](strgAuthYn)을 보이거나 숨긴다.
+        /// [작업]은 POP로 들어가 공정을 시작(서버에 실적 기록)하므로 저장 권한으로 본다.
+        /// </summary>
+        private async void SetPermission()
+        {
+            _permission = ProgramPermissionDto.None();
+            MenuPermission.SetVisible(false, btnSearch, btnWork);
+
+            var permission = await MenuPermission.Get(MenuPermission.Pop);
+            if (IsDisposed || Disposing)
+                return;
+
+            _permission = permission;
+            MenuPermission.SetVisible(_permission.CanSearch, btnSearch);
+            MenuPermission.SetVisible(_permission.CanSave, btnWork);
         }
 
         /// <summary>
@@ -180,7 +203,8 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
 
         private void Condition_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode != Keys.Enter)
+            // 조회 권한이 없으면 [조회]를 숨겼으므로 Enter로도 조회하지 않는다.
+            if (e.KeyCode != Keys.Enter || !_permission.CanSearch)
                 return;
 
             e.Handled = true;
@@ -192,6 +216,10 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
 
         private async void gridView_RowDoubleClick(object sender, EventArgs e)
         {
+            // 더블클릭은 [작업]과 같으므로 [작업]을 숨겼으면(저장 권한 없음) 반응하지 않는다.
+            if (!_permission.CanSave)
+                return;
+
             try
             {
                 await StartWorkAsync();

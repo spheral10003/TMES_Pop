@@ -62,6 +62,26 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
 
             // 바코드 스캐너처럼 Enter로 끝나는 입력을 그대로 조회로 연결한다.
             txtSerialNo.KeyDown += SerialNo_KeyDown;
+
+            SetPermission();
+        }
+
+        /// <summary>서버가 내려준 버튼 권한(/WorkIntegratedStatus). 받기 전에는 모두 없음이라 [조회] · [엑셀 내보내기]가 숨어 있다.</summary>
+        private ProgramPermissionDto _permission = ProgramPermissionDto.None();
+
+        /// <summary>버튼 권한을 받아 [조회](srchAuthYn) · [엑셀 내보내기](prnotAuthYn)를 보이거나 숨긴다.</summary>
+        private async void SetPermission()
+        {
+            _permission = ProgramPermissionDto.None();
+            MenuPermission.SetVisible(false, btnSearch, btnExcelExport);
+
+            var permission = await MenuPermission.Get(MenuPermission.WorkIntegratedStatus);
+            if (IsDisposed || Disposing)
+                return;
+
+            _permission = permission;
+            MenuPermission.SetVisible(_permission.CanSearch, btnSearch);
+            MenuPermission.SetVisible(_permission.CanPrint, btnExcelExport);
         }
 
         /// <summary>현재 테마 색을 화면에 입힌다(포인트 컬러: Violet).</summary>
@@ -166,7 +186,8 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
 
         private void SerialNo_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode != Keys.Enter)
+            // 조회 권한이 없으면 [조회]를 숨겼으므로 Enter로도 조회하지 않는다.
+            if (e.KeyCode != Keys.Enter || !_permission.CanSearch)
                 return;
 
             e.Handled = true;
