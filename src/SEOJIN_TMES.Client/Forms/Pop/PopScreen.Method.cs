@@ -1207,7 +1207,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
         /// <summary>
         /// 시리얼 확인 자재의 시리얼번호를 서버에 보낸다. 품목코드 확인 자재면 팝업에서 입력한 품목코드를 함께 싣고,
-        /// 아니면 전처럼 투입자재 코드를 그대로 싣는다.
+        /// 아니면 품목코드는 null로 보낸다.
         /// </summary>
         /// <returns>서버에 저장됐으면 true. 실패(사유는 창으로 알린다) · 화면 닫힘이면 false.</returns>
         private async Task<bool> SetMaterialSerials(PopInputMaterialDto material, string itemCode)
@@ -1235,8 +1235,20 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 return false;
             }
 
+            // 품목코드 확인 대상이면 팝업에서 입력한 값이 있어야 한다 — 비어 있으면 서버의 품목코드 할 일이 남는다.
+            if (material.ItemCodeCheckRequired && string.IsNullOrWhiteSpace(itemCode))
+            {
+                AppLog.Info($"[POP] 품목코드 공란 - 저장 안 함 ({material.MaterialCode})");
+                if (IsDisposed || Disposing) return false;
+
+                AppMessageBox.Warn(this, Language.PopSerial_ItemCodeIncomplete, Language.PopSerial_Title);
+                return false;
+            }
+
+            // 품목코드 확인 대상이 아니면(itemCdVrfcYn≠Y) 품목코드는 null로 보낸다.
+            // 예전에는 투입자재 코드를 대신 채워 보내, 확인하지 않은 품목코드가 입력된 것처럼 서버에 남았다.
             var request = new PopMaterialSerialSaveRequest();
-            request.inputtedItemCd = string.IsNullOrWhiteSpace(itemCode) ? material.MaterialCode : itemCode.Trim();
+            request.inputtedItemCd = material.ItemCodeCheckRequired ? itemCode.Trim() : null;
             request.inputtedSerialList = serials.Select(s => s.Trim()).ToList();
 
             return await SetMaterialInput(material, request);
@@ -1277,7 +1289,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
             // API 로그에는 요청 바디가 남지 않는다 — 서버가 거절했을 때 무엇을 보냈는지 알 수 있게 여기서 남긴다.
             var sentSerials = request.inputtedSerialList ?? new List<string>();
-            AppLog.Info($"[POP] 투입자재 입력 전송 - {material.MaterialCode} : 품목코드 {request.inputtedItemCd}, 시리얼 {sentSerials.Count}건 [{string.Join(", ", sentSerials)}]");
+            AppLog.Info($"[POP] 투입자재 입력 전송 - {material.MaterialCode} : 품목코드 {request.inputtedItemCd ?? "null"}, 시리얼 {sentSerials.Count}건 [{string.Join(", ", sentSerials)}]");
 
             BeginResultSave();
             try
@@ -1311,8 +1323,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
             if (IsDisposed || Disposing) return false;
 
-            // 시리얼 저장 · 품목코드 저장 모두 품목코드(inputtedItemCd)를 보낸다 — 서버가 받았으므로 다시 조회하지 않고 완료로 옮겨 둔다.
-            material.ItemCodeInputCompleted = true;
+            // 품목코드 확인 대상이면 품목코드(inputtedItemCd)를 함께 보냈다 — 서버가 받았으므로 다시 조회하지 않고 완료로 옮겨 둔다.
+            if (material.ItemCodeCheckRequired)
+                material.ItemCodeInputCompleted = true;
 
             AppMessageBox.Success(this, GetMaterialSavedMessage(material), Language.PopSerial_Title);
             return true;

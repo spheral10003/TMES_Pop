@@ -118,7 +118,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         {
             var required = _material.ItemCodeCheckRequired;
 
-            txtItemCode.Text = string.Empty;
+            // 확인 대상이 아니면 값 자체를 비워(null) 둔다 — 저장 때도 InputtedItemCode는 null로 넘긴다.
+            txtItemCode.EditValue = null;
             txtItemCode.Properties.ReadOnly = !required;
             txtItemCode.Enabled = required;
             txtItemCode.TabStop = required;
