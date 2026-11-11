@@ -112,10 +112,11 @@ namespace SEOJIN_TMES.Client.ApiClient
         /// <summary>
         /// <c>"키" : "값"</c> 에서 키가 비밀 항목인 경우를 잡는다(대소문자 무시).
         /// 키 이름은 서버 스펙(accessToken/refreshToken/password/salt)과 흔한 변형을 함께 넣었다.
-        /// 비밀번호류는 앞에 무엇이 붙어도 가린다 — 설정(sm/configurations)의 초기 비밀번호(initPwd 등)가 본문 로그에 찍히지 않게.
+        /// 비밀번호류는 앞에 무엇이 붙어도 가린다 — 설정(sm/configurations)의 초기 비밀번호(initPswd, 평문)가 본문 로그에 찍히지 않게.
+        /// pswd를 빼면 그 값이 그대로 로그 파일에 남는다(2026-11-11 실제로 남았다).
         /// </summary>
         private static readonly Regex SecretValuePattern = new Regex(
-            "(\"(?:access_?token|refresh_?token|\\w*password|\\w*passwd|\\w*pwd|init_?pw|default_?pw|salt|secret|api_?key|authorization)\"\\s*:\\s*)\"[^\"]*\"",
+            "(\"(?:access_?token|refresh_?token|\\w*password|\\w*passwd|\\w*pswd|\\w*pwd|salt|secret|api_?key|authorization)\"\\s*:\\s*)\"[^\"]*\"",
             RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
         /// <summary>

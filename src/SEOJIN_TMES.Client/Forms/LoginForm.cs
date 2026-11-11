@@ -8,7 +8,6 @@ using SEOJIN_TMES.Client.Common.Errors;
 using SEOJIN_TMES.Client.Common.Languages;
 using SEOJIN_TMES.Client.Common.Logging;
 using SEOJIN_TMES.Client.Common.Models;
-using SEOJIN_TMES.Client.Common.Security;
 using SEOJIN_TMES.Client.Composition;
 using SEOJIN_TMES.Client.Core;
 using SEOJIN_TMES.Client.Forms.Common;
@@ -518,7 +517,7 @@ namespace SEOJIN_TMES.Client.Forms
 
         /// <summary>
         /// 초기 비밀번호로 로그인했으면 웹에서 비밀번호를 바꾸라고 안내한다.
-        /// 초기 비밀번호는 설정 API(sm/configurations)에서 받는다 — 로그인 토큰이 있어야 부를 수 있어 로그인 성공 뒤에 확인한다.
+        /// 초기 비밀번호는 설정 API(sm/configurations)의 initPswd(평문)다 — 로그인 토큰이 있어야 부를 수 있어 로그인 성공 뒤에 확인한다.
         /// 안내일 뿐이므로 조회가 실패해도 로그인은 그대로 진행한다(로그만 남긴다).
         /// </summary>
         private async Task ShowInitialPasswordNotice(string userId, string password)
@@ -526,7 +525,8 @@ namespace SEOJIN_TMES.Client.Forms
             string initialPassword;
             try
             {
-                initialPassword = await _apiClient.ConfigurationApiClient.GetInitialPassword();
+                var configuration = await _apiClient.ConfigurationApiClient.GetConfiguration();
+                initialPassword = configuration.InitPassword;
             }
             catch (ApiException ex)
             {
@@ -537,7 +537,8 @@ namespace SEOJIN_TMES.Client.Forms
             if (IsDisposed || Disposing)
                 return;
 
-            if (!PasswordHash.MatchesStored(password, initialPassword))
+            // 설정에 초기 비밀번호가 비어 있으면 안내하지 않는다(빈 비밀번호는 로그인 전에 이미 막힌다).
+            if (string.IsNullOrEmpty(initialPassword) || !string.Equals(password, initialPassword, StringComparison.Ordinal))
                 return;
 
             AppLog.Step($"초기 비밀번호로 로그인 - 비밀번호 변경 안내 표시, UserId={userId}");

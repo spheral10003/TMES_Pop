@@ -32,20 +32,6 @@ namespace SEOJIN_TMES.Client.Common.Security
         public static string ForLogin(string plainPassword, string salt) =>
             Sha256Hex(Sha256Hex(plainPassword ?? string.Empty) + (salt ?? string.Empty));
 
-        /// <summary>
-        /// 입력한 평문 비밀번호가 설정에 저장된 비밀번호(초기 비밀번호 등)와 같은지.
-        /// 서버가 그 값을 평문으로 주는지 SHA256(비밀번호)로 주는지 확인되지 않아 두 형태를 모두 대조한다
-        /// (16진수 대소문자는 무시). 둘 중 하나가 비어 있으면 같지 않은 것으로 본다.
-        /// </summary>
-        public static bool MatchesStored(string plainPassword, string storedPassword)
-        {
-            if (string.IsNullOrEmpty(plainPassword) || string.IsNullOrEmpty(storedPassword))
-                return false;
-
-            return string.Equals(plainPassword, storedPassword, StringComparison.Ordinal)
-                || string.Equals(Sha256Hex(plainPassword), storedPassword.Trim(), StringComparison.OrdinalIgnoreCase);
-        }
-
         /// <summary>UTF-8 문자열의 SHA256을 소문자 16진수 문자열로 돌려준다.</summary>
         public static string Sha256Hex(string text)
         {
