@@ -643,7 +643,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// BOM 스팩 한 줄이 측정되고 NG가 아닌지 — 토크 · 각도가 모두 하한~상한 안이어야 한다
         /// (값이 비어 있으면 비교가 false라 통과하지 않는다).
         /// 그리드의 NG 표시 · 설비 결과의 다음 줄 이동 · 자동 진행이 모두 이 기준을 쓴다.
-        /// 참조 줄(서버 refLtl=AR·REF)은 체결 대상이 아니므로 값 없이도 통과로 본다.
+        /// 참조 줄(서버 refLtr=AR·REF)은 체결 대상이 아니므로 값 없이도 통과로 본다.
         /// 각도 하한 · 상한이 둘 다 없는 줄은 각도 관리 대상이 아니라서 토크만 본다
         /// (null 비교가 false라 예전에는 각도 값을 넣어도 영원히 NG로 남아 자동 진행이 막혔다).
         /// </summary>
@@ -703,7 +703,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         //  [투입자재] 그리드 이벤트
         // ─────────────────────────────────────────────────────────────────────────
 
-        /// <summary>참조 자재(서버 refLtl=AR·REF)는 입력 없이 끝난 줄이라 OK 색으로 칠한다(선택 행은 선택 색이 우선).</summary>
+        /// <summary>참조 자재(서버 refLtr=AR·REF)는 입력 없이 끝난 줄이라 OK 색으로 칠한다(선택 행은 선택 색이 우선).</summary>
         private void GridViewMaterial_RowCellStyle(object sender, RowCellStyleEventArgs e)
         {
             if (e.RowHandle < 0)
@@ -809,7 +809,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 return;
             }
 
-            // 참조 줄(서버 refLtl=AR·REF)은 입력 대상이 아니다 — 결과값 칸 · [입력] 버튼 모두 열지 않는다.
+            // 참조 줄(서버 refLtr=AR·REF)은 입력 대상이 아니다 — 결과값 칸 · [입력] 버튼 모두 열지 않는다.
             if (gridViewBomSpec.GetFocusedRow() is PopBomSpecDto spec && spec.IsReference)
             {
                 e.Cancel = true;
@@ -962,7 +962,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// 측정값이 들어온 <b>결과값 칸만</b> 칠한다 — 토크 결과값은 토크 판정으로, 각도 결과값은 각도 판정으로
         /// (하한~상한 안이면 OK 색, 벗어나면 NG 색). 줄 전체를 칠하면 토크 · 각도 중 어느 쪽이 NG인지 보이지 않는다.
         ///  - 각도 하한 · 상한이 둘 다 없는 줄은 각도 판정 대상이 아니라 각도 칸을 칠하지 않는다(<see cref="IsBomSpecPassed"/>와 같은 기준).
-        ///  - 참조 줄(서버 refLtl=AR·REF)은 측정값 없이 끝난 줄이라 예전처럼 줄 전체를 OK 색으로 둔다.
+        ///  - 참조 줄(서버 refLtr=AR·REF)은 측정값 없이 끝난 줄이라 예전처럼 줄 전체를 OK 색으로 둔다.
         /// 칸 정렬을 건드리지 않고, 선택 행은 선택 색이 우선한다(<see cref="AppTheme.NgRowCell"/> 참고).
         /// </summary>
         private void GridViewBomSpec_RowCellStyle(object sender, RowCellStyleEventArgs e)
@@ -1000,7 +1000,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// [입력] 버튼 → 누른 줄과 <b>같은 자재코드(MaterialCode)</b>인 줄을 한 번에 채운다(일괄 입력).
         /// 각 줄의 토크 결과값은 하한~상한의 중간값, 각도 결과값은 목표 각도 — 수동 렌치로 조립할 때는 규격 한가운데를
         /// 목표로 조이므로 같은 자재의 체결 점마다 숫자를 다시 치는 과정을 줄인 것이다.
-        ///  - 참조 줄(서버 refLtl=AR·REF)은 입력 대상이 아니라 건너뛴다.
+        ///  - 참조 줄(서버 refLtr=AR·REF)은 입력 대상이 아니라 건너뛴다.
         ///  - 이미 값(토크 또는 각도)이 들어 있는 줄은 건너뛴다 — 설비 · 직접 입력으로 넣은 실측값을 덮어쓰지 않는다.
         ///  - 토크 하한/상한이 없는 줄도 중간값을 낼 수 없어 건너뛴다.
         ///  - 채운 값은 직접 입력과 같이 수동 입력(<see cref="ManualEquipmentCode"/>)으로 서버에 저장한다.
@@ -1202,7 +1202,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
         /// <summary>
         /// 결과값으로 정해지는 정량 검사의 판정. 정할 수 없으면 null — 그때는 작업자가 판정을 직접 고른다.
-        /// 1) 결과값이 기준 문자(stdLtl, 예: 저항 측정의 "OL")와 같으면 OK.
+        /// 1) 결과값이 기준 문자(stdLtr, 예: 저항 측정의 "OL")와 같으면 OK.
         /// 2) 결과값이 숫자이고 하한 · 상한 중 하나라도 있으면, 있는 기준 안(경계 포함)이면 OK · 벗어나면 NG.
         /// </summary>
         private string GetAutoResultState(PopInspectionSpecDto spec)
@@ -1210,7 +1210,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (!spec.IsQuantitative || string.IsNullOrWhiteSpace(spec.ResultValue))
                 return null;
 
-            if (IsStdLtlMatched(spec))
+            if (IsStdLtrMatched(spec))
                 return PopInspectionSpecDto.ResultOk;
 
             if (!spec.InspectionLower.HasValue && !spec.InspectionUpper.HasValue)
@@ -1277,17 +1277,17 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// 결과값이 서버가 준 기준 문자(stdLtl)와 같은지 — 양쪽 다 앞뒤 공백을 빼고 대문자로 바꿔 비교한다
+        /// 결과값이 서버가 준 기준 문자(stdLtr)와 같은지 — 양쪽 다 앞뒤 공백을 빼고 대문자로 바꿔 비교한다
         /// (" ol"도 "OL"로 본다). 기준 문자가 없는 항목은 비교하지 않는다.
         /// </summary>
-        private bool IsStdLtlMatched(PopInspectionSpecDto spec)
+        private bool IsStdLtrMatched(PopInspectionSpecDto spec)
         {
-            if (string.IsNullOrWhiteSpace(spec.InspectionStdLtl) || string.IsNullOrWhiteSpace(spec.ResultValue))
+            if (string.IsNullOrWhiteSpace(spec.InspectionStdLtr) || string.IsNullOrWhiteSpace(spec.ResultValue))
                 return false;
 
             return string.Equals(
                 spec.ResultValue.Trim().ToUpperInvariant(),
-                spec.InspectionStdLtl.Trim().ToUpperInvariant(),
+                spec.InspectionStdLtr.Trim().ToUpperInvariant(),
                 StringComparison.Ordinal);
         }
 
@@ -1319,11 +1319,11 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// </summary>
         private bool IsNumericCell(GridView view, DevExpress.XtraGrid.Columns.GridColumn column)
         {
-            // 기준 문자(stdLtl, 예: "OL")가 있는 항목은 글자를 쳐야 하므로 문자 키보드를 띄운다.
+            // 기준 문자(stdLtr, 예: "OL")가 있는 항목은 글자를 쳐야 하므로 문자 키보드를 띄운다.
             if (view == gridViewInspection && column.FieldName == "ResultValue")
             {
                 var spec = view.GetFocusedRow() as PopInspectionSpecDto;
-                return spec != null && spec.IsQuantitative && string.IsNullOrWhiteSpace(spec.InspectionStdLtl);
+                return spec != null && spec.IsQuantitative && string.IsNullOrWhiteSpace(spec.InspectionStdLtr);
             }
 
             var type = Nullable.GetUnderlyingType(column.ColumnType) ?? column.ColumnType;

@@ -150,7 +150,7 @@ namespace SEOJIN_TMES.Client.Common.Models
         public bool ItemCodeInputCompleted { get; set; }
 
         /// <summary>
-        /// 참조 항목인지(서버 refLtl=AR·REF). 참조 자재는 작업자가 입력하지 않는다 —
+        /// 참조 항목인지(서버 refLtr=AR·REF). 참조 자재는 작업자가 입력하지 않는다 —
         /// 화면은 OK로 칠하고, 입력 팝업을 열지 않으며, 완료 판단에서도 끝난 것으로 본다.
         /// </summary>
         public bool IsReference { get; set; }
@@ -272,7 +272,7 @@ namespace SEOJIN_TMES.Client.Common.Models
         public string EquipmentCode { get; set; }
 
         /// <summary>
-        /// 참조 항목인지(서버 refLtl=AR·REF). 참조 줄은 체결 · 입력 대상이 아니다 —
+        /// 참조 항목인지(서버 refLtr=AR·REF). 참조 줄은 체결 · 입력 대상이 아니다 —
         /// 화면은 OK로 칠하고, 설비 결과를 채울 행에서 건너뛰며, 결과값 칸 편집도 막는다.
         /// </summary>
         public bool IsReference { get; set; }
@@ -338,10 +338,10 @@ namespace SEOJIN_TMES.Client.Common.Models
         public string InspectionResultRemark { get; set; }
 
         /// <summary>
-        /// 결과값 기준 문자(서버 stdLtl, 예: 저항 측정의 "OL"). 작업자가 넣은 결과값이 이 문자와 같으면
-        /// 화면이 판정을 OK로 채운다(공백 제거 · 대소문자 무시 — PopScreen.IsStdLtlMatched). 없으면 비교하지 않는다.
+        /// 결과값 기준 문자(서버 stdLtr, 예: 저항 측정의 "OL"). 작업자가 넣은 결과값이 이 문자와 같으면
+        /// 화면이 판정을 OK로 채운다(공백 제거 · 대소문자 무시 — PopScreen.IsStdLtrMatched). 없으면 비교하지 않는다.
         /// </summary>
-        public string InspectionStdLtl { get; set; }
+        public string InspectionStdLtr { get; set; }
 
         /// <summary>검사방법이 정량(QNT)인지 — 결과값 입력 · 전송 여부를 가른다.</summary>
         public bool IsQuantitative =>

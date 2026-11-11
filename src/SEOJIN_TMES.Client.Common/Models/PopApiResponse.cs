@@ -76,7 +76,7 @@ namespace SEOJIN_TMES.Client.Common.Models
         [JsonProperty("itemCdInputCompleted")] public bool? ItemCdInputCompleted { get; set; }
 
         /// <summary>참조 구분(AR / REF). 둘 중 하나면 작업자가 입력하지 않는 줄이다 — 화면은 OK로 보여 주고 서버로 보내지 않는다.</summary>
-        [JsonProperty("refLtl")] public string RefLtl { get; set; }
+        [JsonProperty("refLtr")] public string RefLtr { get; set; }
     }
 
     public class BomInspSpecGroupApi
@@ -112,7 +112,7 @@ namespace SEOJIN_TMES.Client.Common.Models
         [JsonProperty("eqpCd")] public string EquipmentCode { get; set; }
 
         /// <summary>참조 구분(AR / REF). 둘 중 하나면 체결하지 않는 줄이다 — 화면은 OK로 보여 주고 서버로 보내지 않는다.</summary>
-        [JsonProperty("refLtl")] public string RefLtl { get; set; }
+        [JsonProperty("refLtr")] public string RefLtr { get; set; }
     }
 
     public class InspChkItemApi
@@ -127,7 +127,7 @@ namespace SEOJIN_TMES.Client.Common.Models
         [JsonProperty("jgmtRslt")] public string JgmtRslt { get; set; }         // OK / NG
         [JsonProperty("inspRsltVl")] public string InspRsltVl { get; set; }
         [JsonProperty("inspRemark")] public string InspRemark { get; set; }
-        [JsonProperty("stdLtl")] public string StdLtl { get; set; }
+        [JsonProperty("stdLtr")] public string StdLtr { get; set; }
     }
 
     // ===== 2. 역직렬화 + DTO 매핑 =====
@@ -193,7 +193,7 @@ namespace SEOJIN_TMES.Client.Common.Models
                     SerialCheckRequired = IsYes(m.SerialVrfcYn),
                     ItemCodeCheckRequired = IsYes(m.ItemCdVrfcYn),
                     ItemCodeInputCompleted = m.ItemCdInputCompleted == true,
-                    IsReference = IsReferenceLtl(m.RefLtl),
+                    IsReference = IsReferenceLtr(m.RefLtr),
                     SerialNumbers = string.IsNullOrWhiteSpace(m.InputtedSerials)
                         ? new List<string>()
                         : m.InputtedSerials.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries)
@@ -221,7 +221,7 @@ namespace SEOJIN_TMES.Client.Common.Models
                     AngleResult = b.AngleRsltVl,
                     EquipmentCode = b.EquipmentCode,
                     IsManualInput = !string.Equals(b.InptMth, "EQP", StringComparison.OrdinalIgnoreCase),
-                    IsReference = IsReferenceLtl(b.RefLtl)
+                    IsReference = IsReferenceLtr(b.RefLtr)
                 }).ToList(),
 
                 BomManualEnabled = bom.ManualEnabled == true,
@@ -233,7 +233,7 @@ namespace SEOJIN_TMES.Client.Common.Models
                     InputPosition = i.IndctLoc,
                     InspectionRemark = i.InspRemark,
                     // 결과값 기준 문자(예: 저항 측정의 "OL") — 결과값이 이 문자와 같으면 화면이 판정을 OK로 채운다.
-                    InspectionStdLtl = i.StdLtl,
+                    InspectionStdLtr = i.StdLtr,
                     // 서버 코드(QNT / QLT)를 그대로 둔다 — 정량/정성 문구는 그리드가 화면 언어로 바꿔 보여 준다.
                     InspectionMethod = i.InspDataType,
                     InspectionLower = i.Lsl,
@@ -272,12 +272,12 @@ namespace SEOJIN_TMES.Client.Common.Models
         }
 
         /// <summary>
-        /// 참조 줄인지 — 서버 refLtl이 AR 또는 REF면 참조다(공백 · 소문자로 와도 같게 본다).
+        /// 참조 줄인지 — 서버 refLtr이 AR 또는 REF면 참조다(공백 · 소문자로 와도 같게 본다).
         /// 그 밖의 값이나 빈 값은 일반 입력 줄이다.
         /// </summary>
-        private static bool IsReferenceLtl(string refLtl)
+        private static bool IsReferenceLtr(string refLtr)
         {
-            var value = refLtl?.Trim();
+            var value = refLtr?.Trim();
             return string.Equals(value, "AR", StringComparison.OrdinalIgnoreCase)
                 || string.Equals(value, "REF", StringComparison.OrdinalIgnoreCase);
         }
