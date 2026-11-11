@@ -62,6 +62,16 @@ namespace SEOJIN_TMES.Client.Theme
         public static readonly Color Rose = Color.FromArgb(244, 63, 94);     // #F43F5E
         public static readonly Color Slate = Color.FromArgb(71, 85, 105);    // #475569
 
+        // 진행 상태 색 — 그리드 상태 구슬(Images/sphere_*.png, StateImageColumn)의 평균색과 맞춘다.
+        // POP 상태 띠와 그리드 구슬이 같은 상태를 같은 색으로 보여 주도록, 구슬 그림을 바꾸면 여기도 같이 바꾼다.
+        public static readonly Color StateReady = Color.FromArgb(74, 122, 217);    // 대기 — sphere_blue
+        public static readonly Color StateProgress = Color.FromArgb(249, 199, 56); // 진행 중 — sphere_yellow
+        public static readonly Color StateFinished = Color.FromArgb(110, 198, 70); // 완료 — sphere_green
+        public static readonly Color StateStopped = Color.FromArgb(214, 64, 74);   // 중지 — sphere_red
+
+        /// <summary>밝은 상태 색(노랑) 위에 얹는 글자색. 흰 글자는 노랑 바탕에서 거의 안 보인다.</summary>
+        private static readonly Color StateDarkText = Color.FromArgb(30, 33, 56);
+
         // 알람 등급 색 — 대시보드 등급 카드 시안(P1 빨강 · P2 주황 · P3 올리브 · P4 파랑)과 맞춘다.
         public static readonly Color AlarmP1 = Color.FromArgb(220, 68, 55);  // #DC4437
         public static readonly Color AlarmP2 = Color.FromArgb(234, 134, 0);  // #EA8600
@@ -1000,6 +1010,17 @@ namespace SEOJIN_TMES.Client.Theme
             label.Appearance.TextOptions.HAlignment = HorzAlignment.Center;
             label.Appearance.TextOptions.VAlignment = VertAlignment.Center;
             label.Appearance.Options.UseTextOptions = true;
+        }
+
+        /// <summary>
+        /// 상태 띠(POP 공정 진행 상태)의 바탕색을 바꾼다. 상태 띠는 WinForms Label이라 BackColor · ForeColor를 바로 쓴다.
+        /// 바탕이 밝으면(노랑) 흰 글자가 묻히므로 글자를 어둡게, 그 밖에는 흰 글자로 둔다.
+        /// </summary>
+        public static void BannerColor(Control label, Color accent)
+        {
+            var brightness = accent.R * 0.299 + accent.G * 0.587 + accent.B * 0.114;
+            label.BackColor = accent;
+            label.ForeColor = brightness > 170 ? StateDarkText : Color.White;
         }
 
         /// <summary>알림 개수 배지(빨간 원). <paramref name="diameter"/>로 원 크기를 명시한다.</summary>

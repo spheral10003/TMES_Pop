@@ -293,7 +293,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// 서버가 준 진행 상태로 상태 띠의 색과 중지 버튼을 바꾼다.
+        /// 서버가 준 진행 상태로 상태 띠의 색과 중지 버튼을 바꾼다. 색은 그리드 상태 구슬과 같다(AppTheme.State*) —
+        /// 대기 파랑 · 진행 중 노랑 · 완료 초록 · 중지 빨강.
         /// 상태 판정은 서버 몫이고, 여기서는 받은 값을 화면에 옮기기만 한다 —
         /// 모르는 값이 오면 기본색(보라)으로 두고 글자만 보여 준다.
         /// 띠에는 화면 언어의 문구를 보이고, 상태 비교(<see cref="IsProgressState"/>)는 서버 코드 그대로 한다.
@@ -307,29 +308,29 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
             if (IsProgressState(StateReady))
             {
-                lblProgressState.BackColor = AppTheme.Slate;
+                AppTheme.BannerColor(lblProgressState, AppTheme.StateReady);
                 btnStopProcess.Text = Language.Pop_StopProcess;
                 btnStopProcess.Tag = PopProcessAction.stop;
             }
             else if (IsProgressState(StateProgress))
             {
-                lblProgressState.BackColor = AppTheme.Emerald;
+                AppTheme.BannerColor(lblProgressState, AppTheme.StateProgress);
                 btnStopProcess.Text = Language.Pop_StopProcess;
                 btnStopProcess.Tag = PopProcessAction.stop;
             }
             else if (IsProgressState(StateStopped))
             {
-                lblProgressState.BackColor = AppTheme.Rose;
+                AppTheme.BannerColor(lblProgressState, AppTheme.StateStopped);
                 btnStopProcess.Text = Language.Pop_RestartProcess;
                 btnStopProcess.Tag = PopProcessAction.resume;
             }
             else if (IsProgressState(StateFinished))
             {
-                lblProgressState.BackColor = AppTheme.Amber;
+                AppTheme.BannerColor(lblProgressState, AppTheme.StateFinished);
             }
             else
             {
-                lblProgressState.BackColor = AppTheme.Violet;
+                AppTheme.BannerColor(lblProgressState, AppTheme.Violet);
             }
         }
 
