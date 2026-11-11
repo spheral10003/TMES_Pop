@@ -36,6 +36,13 @@ namespace SEOJIN_TMES.Client.Forms.Home
         private readonly List<InfoTile> _tiles = new List<InfoTile>();
         private readonly List<NoticeBox> _noticeBoxes = new List<NoticeBox>();
         private TableLayoutPanel _noticeGrid;
+        private NoticeViewer _noticeViewer;
+
+        /// <summary>
+        /// 공지 상자 하나에 보여 줄 최대 건수 — 최근(작성일시 내림차순) 것부터.
+        /// 1920×1080에서 상자 하나에 스크롤 없이 7줄, 1280×1024에서 6줄이 들어가서 작은 쪽에 맞췄다.
+        /// </summary>
+        private const int MaxNoticeRows = 6;
 
         /// <summary>공지 조회가 진행 중인지. 탭을 빠르게 오가며 조회가 겹쳐 나가지 않게 막는다.</summary>
         private bool _noticeLoading;
@@ -137,11 +144,47 @@ namespace SEOJIN_TMES.Client.Forms.Home
             {
                 var box = new NoticeBox(NoticeSpecs[i].NtcType);
                 box.Caption = NoticeSpecs[i].Caption();
+                box.NoticeOpened += NoticeBox_NoticeOpened;
                 _noticeGrid.Controls.Add(box.Panel, i % 2, i / 2);
                 _noticeBoxes.Add(box);
             }
 
+            // 내용 보기는 공지 상자 표와 같은 자리(Fill)에 겹쳐 두고, 열 때 앞으로 올린다.
+            _noticeViewer = new NoticeViewer();
             noticeArea.Controls.Add(_noticeGrid);
+            noticeArea.Controls.Add(_noticeViewer.Panel);
+        }
+
+        /// <summary>공지 줄을 더블클릭하면 공지 상자 자리를 덮어 본문을 보여 준다.</summary>
+        private void NoticeBox_NoticeOpened(object sender, NoticeDto notice)
+        {
+            var index = sender is NoticeBox box ? _noticeBoxes.IndexOf(box) : -1;
+            var typeCaption = index < 0 ? string.Empty : NoticeSpecs[index].Caption();
+            _noticeViewer.Open(notice, typeCaption);
+        }
+
+        /// <summary>내용 보기가 떠 있으면 Esc로도 닫는다(X와 같은 동작).</summary>
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.Escape && _noticeViewer != null && _noticeViewer.IsOpen)
+            {
+                _noticeViewer.Close();
+                return true;
+            }
+
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        /// <summary>
+        /// 한 유형의 최근 공지 <see cref="MaxNoticeRows"/>건(작성일시 내림차순).
+        /// 새 글 여부(newYn)와 상관없이 최근 것부터 채운다 — 상자에 스크롤 없이 들어가는 만큼만 보여 준다.
+        /// </summary>
+        private static List<NoticeDto> RecentNotices(List<NoticeDto> notices, string ntcType)
+        {
+            return notices.Where(n => n.NtcType == ntcType)
+                          .OrderByDescending(n => n.CreatedTime ?? DateTime.MinValue)
+                          .Take(MaxNoticeRows)
+                          .ToList();
         }
 
         /// <summary>
@@ -155,7 +198,7 @@ namespace SEOJIN_TMES.Client.Forms.Home
         }
 
         /// <summary>
-        /// 공지 전체를 한 번에 받아 유형별 상자에 나눠 넣는다(유형 조건 없이 1회 호출).
+        /// 공지 전체를 한 번에 받아 유형별 상자에 최근 <see cref="MaxNoticeRows"/>건씩 나눠 넣는다(유형 조건 없이 1회 호출).
         /// 실패해도 창을 띄우지 않는다 — 홈은 첫 화면이라 서버가 잠깐 안 될 때마다 안내 창이 뜨면 일을 시작할 수 없다.
         /// 대신 상자마다 "불러오지 못했습니다"를 보여 주고 로그를 남긴다.
         /// </summary>
@@ -173,7 +216,7 @@ namespace SEOJIN_TMES.Client.Forms.Home
                     return;
 
                 foreach (var box in _noticeBoxes)
-                    box.SetItems(notices.Where(n => n.NtcType == box.NtcType).ToList());
+                    box.SetItems(RecentNotices(notices, box.NtcType));
             }
             catch (ApiException ex)
             {
@@ -250,6 +293,8 @@ namespace SEOJIN_TMES.Client.Forms.Home
                 _noticeBoxes[i].ApplyLanguage();
             }
 
+            _noticeViewer?.ApplyLanguage();
+
             RefreshInfo();
         }
 
@@ -279,6 +324,8 @@ namespace SEOJIN_TMES.Client.Forms.Home
 
             foreach (var box in _noticeBoxes)
                 box.ApplyTheme();
+
+            _noticeViewer?.ApplyTheme();
         }
 
         /// <summary>공지 상자 하나의 정의 — 공지 유형 코드와 제목(언어가 바뀌면 다시 읽으므로 함수로).</summary>

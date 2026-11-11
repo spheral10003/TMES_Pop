@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DevExpress.XtraEditors;
@@ -409,7 +408,7 @@ namespace SEOJIN_TMES.Client.Forms.Notification
             var senderId = notification?.CreatedBy ?? string.Empty;
             txtSenderId.Text = senderId;
             txtDetailSubject.Text = notification?.Subject ?? string.Empty;
-            SetBodyHtml(GetBodyHtml(notification?.Body));
+            SetBodyHtml(HtmlBody.ForWebBrowser(notification?.Body));
 
             // 알림 응답에는 발신자 이름이 없다 — 사용자 프로필 API로 따로 받아 채운다.
             if (_senderNames.TryGetValue(senderId, out var cachedName))
@@ -485,39 +484,6 @@ namespace SEOJIN_TMES.Client.Forms.Notification
             var html = _pendingBodyHtml;
             _pendingBodyHtml = null;
             webContent.DocumentText = html;
-        }
-
-        /// <summary>
-        /// 본문 HTML을 WebBrowser(IE 엔진)에 넣을 수 있게 다듬는다.
-        ///
-        /// - <b>X-UA-Compatible(IE=edge)를 head 맨 앞에 넣는다.</b> WebBrowser 컨트롤은 레지스트리 설정이 없으면
-        ///   IE7 호환 모드로 그려서 인라인 CSS(여백 · 배경 · 테두리)와 표 레이아웃이 어긋난다.
-        ///   이 meta는 head 안에서 title/meta 말고 다른 요소보다 앞에 있어야 효과가 있다.
-        /// - <b>script 블록은 지운다.</b> 알림 본문은 보여 주기만 하는 메일이라 스크립트가 필요 없고,
-        ///   스크립트로 외부 주소를 부르는 것을 막기 위해서다(링크 · 새 창은 Navigating / NewWindow에서 막는다).
-        ///
-        /// 본문의 색 · 레이아웃 자체는 건드리지 않는다 — 서버가 만든 메일 모양을 그대로 보여 준다.
-        /// </summary>
-        private string GetBodyHtml(string? body)
-        {
-            if (string.IsNullOrWhiteSpace(body))
-                return string.Empty;
-
-            const string compatibleMeta = "<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">";
-            const RegexOptions options = RegexOptions.IgnoreCase | RegexOptions.Singleline;
-
-            var html = Regex.Replace(body, @"<script\b.*?</script\s*>", string.Empty, options);
-
-            var head = Regex.Match(html, @"<head\b[^>]*>", options);
-            if (head.Success)
-                return html.Insert(head.Index + head.Length, compatibleMeta);
-
-            // head가 없는 조각 HTML이면 html 태그 바로 뒤에, 그것도 없으면 맨 앞에 head를 만들어 붙인다.
-            var root = Regex.Match(html, @"<html\b[^>]*>", options);
-            if (root.Success)
-                return html.Insert(root.Index + root.Length, "<head>" + compatibleMeta + "</head>");
-
-            return "<!DOCTYPE html><html><head>" + compatibleMeta + "</head><body>" + html + "</body></html>";
         }
 
         /// <summary>

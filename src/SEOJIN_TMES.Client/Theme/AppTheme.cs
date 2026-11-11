@@ -1128,10 +1128,10 @@ namespace SEOJIN_TMES.Client.Theme
             view.Appearance.HorzLine.Options.UseBackColor = true;
         }
 
-        /// <summary>공지 목록의 등록일시 칸 — 제목보다 작고 흐리게, 오른쪽 정렬.</summary>
+        /// <summary>공지 목록의 작성일시 칸 — 제목과 같은 크기의 보통 굵기 · 흐린 색, 오른쪽 정렬.</summary>
         public static void NoticeDateColumn(GridColumn column)
         {
-            column.AppearanceCell.Font = SmallFont;
+            column.AppearanceCell.Font = BodyFont;
             column.AppearanceCell.ForeColor = TextMuted;
             column.AppearanceCell.TextOptions.HAlignment = HorzAlignment.Far;
             column.AppearanceCell.Options.UseFont = true;

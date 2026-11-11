@@ -17,7 +17,7 @@ namespace SEOJIN_TMES.Client.Forms.Home
     /// <summary>
     /// 홈 화면의 공지 상자 하나(공지 유형 하나 = 상자 하나).
     /// 제목 줄(폴더 아이콘 + 유형 이름) 아래 주황 윗선이 있는 카드에 공지를 한 줄씩 보여 준다 —
-    /// 줄마다 주황 점 · 제목 · 새 글이면 N 배지 · 등록일시.
+    /// 줄마다 주황 점 · 제목 · 새 글이면 N 배지 · 작성일시. 줄을 더블클릭하면 <see cref="NoticeOpened"/>가 난다.
     ///
     /// 정보 타일(<c>HomeScreen.InfoTile</c>)처럼 코드로 조립한다 — 같은 상자를 유형 수만큼 찍어 내므로
     /// 디자이너 화면으로 따로 두면 네 벌을 똑같이 유지해야 한다.
@@ -47,6 +47,9 @@ namespace SEOJIN_TMES.Client.Forms.Home
 
         /// <summary>이 상자가 보여 주는 공지 유형(<see cref="NoticeType"/>).</summary>
         public string NtcType { get; }
+
+        /// <summary>공지 줄을 더블클릭했을 때 — 홈 화면이 내용 보기를 띄운다.</summary>
+        public event EventHandler<NoticeDto>? NoticeOpened;
 
         /// <summary>표 칸(TableLayoutPanel)에 그대로 넣는 바깥 패널.</summary>
         public PanelControl Panel { get; }
@@ -80,15 +83,16 @@ namespace SEOJIN_TMES.Client.Forms.Home
             _grid.MainView = _view;
             _grid.Dock = DockStyle.Fill;
 
-            _colTitle = NewColumn(nameof(NoticeDto.Title), 0);
+            _colTitle = NewColumn(nameof(NoticeDto.Subject), 0);
             _colNew = NewColumn(nameof(NoticeDto.IsNew), 1);
             _colNew.Width = 34;
             _colNew.OptionsColumn.FixedWidth = true;
-            _colDate = NewColumn(nameof(NoticeDto.RegisteredAtText), 2);
-            _colDate.Width = 150;
+            _colDate = NewColumn(nameof(NoticeDto.CreatedAtText), 2);
+            _colDate.Width = 170;
             _colDate.OptionsColumn.FixedWidth = true;
             _view.Columns.AddRange(new[] { _colTitle, _colNew, _colDate });
             _view.CustomDrawCell += View_CustomDrawCell;
+            _view.DoubleClick += View_DoubleClick;
 
             _empty = new LabelControl();
             _empty.AutoSizeMode = LabelAutoSizeMode.None;
@@ -196,6 +200,20 @@ namespace SEOJIN_TMES.Client.Forms.Home
             }
         }
 
+        /// <summary>
+        /// 줄 위를 더블클릭했을 때만 연다 — 빈 바탕을 더블클릭하면 포커스 행이 열려 엉뚱한 공지가 뜬다.
+        /// </summary>
+        private void View_DoubleClick(object sender, EventArgs e)
+        {
+            var point = _grid.PointToClient(Control.MousePosition);
+            var hit = _view.CalcHitInfo(point);
+            if (!hit.InRow)
+                return;
+
+            if (_view.GetRow(hit.RowHandle) is NoticeDto notice)
+                NoticeOpened?.Invoke(this, notice);
+        }
+
         private static void DrawCircle(Graphics graphics, Rectangle bounds)
         {
             var previous = graphics.SmoothingMode;
@@ -208,6 +226,7 @@ namespace SEOJIN_TMES.Client.Forms.Home
         private void Panel_Disposed(object sender, EventArgs e)
         {
             _view.CustomDrawCell -= View_CustomDrawCell;
+            _view.DoubleClick -= View_DoubleClick;
             _badgeFont?.Dispose();
             _badgeFont = null;
         }
