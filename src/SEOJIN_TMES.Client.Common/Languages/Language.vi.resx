@@ -846,6 +846,12 @@ Hệ thống sẽ tự động thử kết nối lại cho đến khi thành cô
   <data name="PopSerial_Saved" xml:space="preserve">
     <value>Đã lưu số sê-ri.</value>
   </data>
+  <data name="PopSerial_ItemCodeSaved" xml:space="preserve">
+    <value>Đã xác nhận và lưu mã sản phẩm.</value>
+  </data>
+  <data name="PopSerial_ItemCodeSerialSaved" xml:space="preserve">
+    <value>Đã lưu mã sản phẩm và số sê-ri.</value>
+  </data>
   <data name="PopTorque_Title" xml:space="preserve">
     <value>Nhập kết quả lực siết</value>
   </data>

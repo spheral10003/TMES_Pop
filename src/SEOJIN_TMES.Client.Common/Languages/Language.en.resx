@@ -846,6 +846,12 @@ Reconnection continues automatically until it succeeds. You can also press [Reco
   <data name="PopSerial_Saved" xml:space="preserve">
     <value>Serial numbers have been saved.</value>
   </data>
+  <data name="PopSerial_ItemCodeSaved" xml:space="preserve">
+    <value>The item code has been verified and saved.</value>
+  </data>
+  <data name="PopSerial_ItemCodeSerialSaved" xml:space="preserve">
+    <value>The item code and serial numbers have been saved.</value>
+  </data>
   <data name="PopTorque_Title" xml:space="preserve">
     <value>Torque Result Entry</value>
   </data>

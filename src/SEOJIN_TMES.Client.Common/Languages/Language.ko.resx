@@ -846,6 +846,12 @@
   <data name="PopSerial_Saved" xml:space="preserve">
     <value>시리얼번호를 저장했습니다.</value>
   </data>
+  <data name="PopSerial_ItemCodeSaved" xml:space="preserve">
+    <value>품목코드를 확인해 저장했습니다.</value>
+  </data>
+  <data name="PopSerial_ItemCodeSerialSaved" xml:space="preserve">
+    <value>품목코드 · 시리얼번호를 저장했습니다.</value>
+  </data>
   <data name="PopTorque_Title" xml:space="preserve">
     <value>토크 결과값 입력</value>
   </data>

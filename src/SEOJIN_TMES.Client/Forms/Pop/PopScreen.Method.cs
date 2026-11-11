@@ -1003,7 +1003,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 완료된 공정은 [리웍]으로 진행 중이 되면 열린다. 그 밖의 상태에서 서버가 거절하면(409) SetMaterialInput이 사유를 알린다.
             if (!IsInputAllowed)
             {
-                AppLog.Info($"[POP] 공정 완료 · 중지 - 시리얼 입력 생략 ({material.MaterialCode}, 상태 {_progressState})");
+                AppLog.Info($"[POP] 공정 완료 · 중지 - 투입자재 입력 생략 ({material.MaterialCode}, 상태 {_progressState})");
                 AppMessageBox.Info(this, Language.Pop_InputNotAllowed, Language.PopSerial_Title);
                 return;
             }
@@ -1241,9 +1241,24 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 시리얼 저장 · 품목코드 저장 모두 품목코드(inputtedItemCd)를 보낸다 — 서버가 받았으므로 다시 조회하지 않고 완료로 옮겨 둔다.
             material.ItemCodeInputCompleted = true;
 
-            AppMessageBox.Success(this, Language.PopSerial_Saved, Language.PopSerial_Title);
+            AppMessageBox.Success(this, GetMaterialSavedMessage(material), Language.PopSerial_Title);
             await TryAutoProgress();
             return true;
+        }
+
+        /// <summary>
+        /// 투입자재 저장 완료 문구 — 그 자재가 확인하는 항목(품목코드 · 시리얼)에 맞춘다.
+        /// 예전에는 늘 "시리얼번호를 저장했습니다"라 품목코드만 확인하는 자재에도 시리얼 문구가 떴다.
+        /// </summary>
+        private static string GetMaterialSavedMessage(PopInputMaterialDto material)
+        {
+            if (material.ItemCodeCheckRequired && material.SerialCheckRequired)
+                return Language.PopSerial_ItemCodeSerialSaved;
+
+            if (material.ItemCodeCheckRequired)
+                return Language.PopSerial_ItemCodeSaved;
+
+            return Language.PopSerial_Saved;
         }
 
         // ─────────────────────────────────────────────────────────────────────────
