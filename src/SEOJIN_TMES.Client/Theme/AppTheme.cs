@@ -8,6 +8,7 @@ using DevExpress.XtraBars.Navigation;
 using DevExpress.XtraEditors;
 using DevExpress.XtraEditors.Controls;
 using DevExpress.XtraGrid;
+using DevExpress.XtraGrid.Columns;
 using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraLayout;
 using DevExpress.XtraTreeList;
@@ -68,6 +69,15 @@ namespace SEOJIN_TMES.Client.Theme
         public static readonly Color StateProgress = Color.FromArgb(249, 199, 56); // 진행 중 — sphere_yellow
         public static readonly Color StateFinished = Color.FromArgb(110, 198, 70); // 완료 — sphere_green
         public static readonly Color StateStopped = Color.FromArgb(214, 64, 74);   // 중지 — sphere_red
+
+        // 홈 공지 상자 — 웹 MES 홈의 공지 영역(주황 윗선 · 주황 점 · N 배지)과 같은 톤으로 맞춘다.
+        public static readonly Color NoticeAccent = Color.FromArgb(217, 133, 59); // #D9853B
+
+        /// <summary>공지 줄에 마우스를 올렸을 때 바탕(주황을 카드 색에 옅게 섞는다 — 다크에서도 어울리게).</summary>
+        public static Color NoticeHover => Blend(NoticeAccent, Card, 0.08f);
+
+        /// <summary>공지가 없을 때 안내 그림(폴더) 색 — 글자보다 한 단계 옅게.</summary>
+        public static Color NoticeEmptyIcon => Blend(TextMuted, Card, 0.35f);
 
         /// <summary>밝은 상태 색(노랑) 위에 얹는 글자색. 흰 글자는 노랑 바탕에서 거의 안 보인다.</summary>
         private static readonly Color StateDarkText = Color.FromArgb(30, 33, 56);
@@ -253,6 +263,9 @@ namespace SEOJIN_TMES.Client.Theme
         public static Font BodyBoldFont => new Font(FontFamily, 9.5F, FontStyle.Bold);
         public static Font SmallFont => new Font(FontFamily, 8.5F, FontStyle.Regular);
         public static Font MonoFont => new Font("Consolas", 9F, FontStyle.Regular);
+
+        /// <summary>공지 목록의 새 글(N) 배지 글자 — 지름 16px 원 안에 들어가는 크기.</summary>
+        public static Font NoticeBadgeFont => new Font(FontFamily, 7F, FontStyle.Bold);
 
         /// <summary>POP 화면의 워크스테이션/공정 상태 띠처럼 멀리서도 읽혀야 하는 큰 글자.</summary>
         public static Font BannerFont => new Font(FontFamily, 14F, FontStyle.Bold);
@@ -1054,6 +1067,95 @@ namespace SEOJIN_TMES.Client.Theme
             label.Appearance.TextOptions.VAlignment = VertAlignment.Center;
             label.Appearance.Options.UseTextOptions = true;
             RoundToCircle(label);
+        }
+
+        /// <summary>홈 공지 상자 제목(폴더 아이콘 + 굵은 글자).</summary>
+        public static void NoticeHeader(LabelControl label)
+        {
+            label.Appearance.Font = BodyBoldFont;
+            label.Appearance.ForeColor = TextPrimary;
+            label.Appearance.Options.UseFont = true;
+            label.Appearance.Options.UseForeColor = true;
+            label.ImageOptions.SvgImage = AppIcons.Get(AppIcons.FolderOpen, TextPrimary);
+            label.ImageOptions.SvgImageSize = new Size(16, 16);
+            label.ImageOptions.SvgImageColorizationMode = SvgImageColorizationMode.None;
+            label.ImageAlignToText = ImageAlignToText.LeftCenter;
+            label.IndentBetweenImageAndText = 6;
+        }
+
+        /// <summary>홈 공지 상자 윗선(주황 띠). 테두리를 끄고 색만 칠한다.</summary>
+        public static void NoticeAccentBar(PanelControl bar)
+        {
+            bar.BorderStyle = BorderStyles.NoBorder;
+            bar.LookAndFeel.UseDefaultLookAndFeel = false;
+            bar.LookAndFeel.Style = LookAndFeelStyle.Flat;
+            bar.Appearance.BackColor = NoticeAccent;
+            bar.Appearance.Options.UseBackColor = true;
+        }
+
+        /// <summary>
+        /// 홈 공지 목록 — 머리글 · 세로선 없이 한 줄씩 넉넉하게, 가로 구분선만 옅게.
+        /// 선택 강조는 끄고 마우스를 올린 줄만 주황 톤으로 보여 준다(누를 것이 없는 목록이라 선택 색은 혼란만 준다).
+        /// </summary>
+        public static void NoticeList(GridControl grid, GridView view)
+        {
+            grid.LookAndFeel.UseDefaultLookAndFeel = false;
+            grid.LookAndFeel.Style = LookAndFeelStyle.Flat;
+            grid.BackColor = Card;
+            view.BorderStyle = BorderStyles.NoBorder;
+
+            view.OptionsView.ShowGroupPanel = false;
+            view.OptionsView.ShowIndicator = false;
+            view.OptionsView.ShowColumnHeaders = false;
+            view.OptionsView.ShowVerticalLines = DefaultBoolean.False;
+            view.OptionsView.ShowHorizontalLines = DefaultBoolean.True;
+            view.OptionsView.EnableAppearanceEvenRow = false;
+            view.OptionsView.EnableAppearanceOddRow = false;
+            view.OptionsView.ColumnAutoWidth = true;
+            view.OptionsBehavior.Editable = false;
+            view.OptionsSelection.EnableAppearanceFocusedCell = false;
+            view.OptionsSelection.EnableAppearanceFocusedRow = false;
+            view.OptionsSelection.EnableAppearanceHideSelection = false;
+            view.OptionsSelection.EnableAppearanceHotTrackedRow = DefaultBoolean.True;
+            view.FocusRectStyle = DevExpress.XtraGrid.Views.Grid.DrawFocusRectStyle.None;
+            view.RowHeight = 44;
+
+            Paint(view.Appearance.Row, Card, TextPrimary, BodyBoldFont);
+            Paint(view.Appearance.HotTrackedRow, NoticeHover, NoticeAccent, BodyBoldFont);
+            Paint(view.Appearance.Empty, Card, TextPrimary, BodyFont);
+
+            view.Appearance.HorzLine.BackColor = CardBorder;
+            view.Appearance.HorzLine.Options.UseBackColor = true;
+        }
+
+        /// <summary>공지 목록의 등록일시 칸 — 제목보다 작고 흐리게, 오른쪽 정렬.</summary>
+        public static void NoticeDateColumn(GridColumn column)
+        {
+            column.AppearanceCell.Font = SmallFont;
+            column.AppearanceCell.ForeColor = TextMuted;
+            column.AppearanceCell.TextOptions.HAlignment = HorzAlignment.Far;
+            column.AppearanceCell.Options.UseFont = true;
+            column.AppearanceCell.Options.UseForeColor = true;
+            column.AppearanceCell.Options.UseTextOptions = true;
+        }
+
+        /// <summary>공지가 없을 때(또는 못 불러왔을 때) 상자 가운데 안내 — 폴더 그림 아래 흐린 글자.</summary>
+        public static void NoticeEmpty(LabelControl label)
+        {
+            label.Appearance.Font = BodyFont;
+            label.Appearance.ForeColor = TextMuted;
+            label.Appearance.BackColor = Card;
+            label.Appearance.TextOptions.HAlignment = HorzAlignment.Center;
+            label.Appearance.TextOptions.VAlignment = VertAlignment.Center;
+            label.Appearance.Options.UseFont = true;
+            label.Appearance.Options.UseForeColor = true;
+            label.Appearance.Options.UseBackColor = true;
+            label.Appearance.Options.UseTextOptions = true;
+            label.ImageOptions.SvgImage = AppIcons.Get(AppIcons.FolderOpen, NoticeEmptyIcon);
+            label.ImageOptions.SvgImageSize = new Size(34, 34);
+            label.ImageOptions.SvgImageColorizationMode = SvgImageColorizationMode.None;
+            label.ImageAlignToText = ImageAlignToText.TopCenter;
+            label.IndentBetweenImageAndText = 8;
         }
 
         /// <summary>사용자 아바타(첫 글자를 넣은 보라색 원). <paramref name="diameter"/>로 원 크기를 명시한다.</summary>

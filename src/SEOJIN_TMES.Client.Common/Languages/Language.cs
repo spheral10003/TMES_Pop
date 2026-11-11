@@ -115,6 +115,12 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string MainForm_TileUser => Get(nameof(MainForm_TileUser));
         public static string MainForm_EquipmentCount => Get(nameof(MainForm_EquipmentCount));
         public static string MainForm_NoAlerts => Get(nameof(MainForm_NoAlerts));
+        public static string Home_NoticeSystem => Get(nameof(Home_NoticeSystem));
+        public static string Home_NoticeGeneral => Get(nameof(Home_NoticeGeneral));
+        public static string Home_NoticeImportant => Get(nameof(Home_NoticeImportant));
+        public static string Home_NoticeUrgent => Get(nameof(Home_NoticeUrgent));
+        public static string Home_NoticeEmpty => Get(nameof(Home_NoticeEmpty));
+        public static string Home_NoticeLoadFailed => Get(nameof(Home_NoticeLoadFailed));
 
         public static string Menu_MEIS => Get(nameof(Menu_MEIS));
         public static string Menu_WorkManagement => Get(nameof(Menu_WorkManagement));

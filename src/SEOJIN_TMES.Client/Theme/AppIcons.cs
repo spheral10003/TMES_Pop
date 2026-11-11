@@ -88,6 +88,9 @@ namespace SEOJIN_TMES.Client.Theme
         /// </summary>
         public const string SpinnerDot = "<circle cx=\"12\" cy=\"12\" r=\"11\" fill=\"{0}\"/>";
 
+        /// <summary>열린 폴더 — 홈 공지 상자 제목 · 공지가 없을 때 안내 그림.</summary>
+        public const string FolderOpen = "<path d=\"M3 6.6A1.6 1.6 0 0 1 4.6 5h4.1l2 2h6.7A1.6 1.6 0 0 1 19 8.6V10H7.4a1.8 1.8 0 0 0-1.7 1.2L3 18.6z\" fill=\"{0}\"/><path d=\"M6.7 11.7a1.1 1.1 0 0 1 1-.7h13.4a.9.9 0 0 1 .9 1.2l-2.3 7.1a1 1 0 0 1-1 .7H3.6z\" fill=\"{0}\"/>";
+
         /// <summary>제품 로고 자리(둥근 사각형 + 링).</summary>
         public const string Brand = "<rect x=\"2.5\" y=\"2.5\" width=\"19\" height=\"19\" rx=\"5.5\" fill=\"{0}\"/><circle cx=\"12\" cy=\"12\" r=\"5.4\" stroke=\"#FFFFFF\" stroke-width=\"1.8\" opacity=\"0.92\"/><circle cx=\"12\" cy=\"12\" r=\"1.9\" fill=\"#FFFFFF\"/>";
 

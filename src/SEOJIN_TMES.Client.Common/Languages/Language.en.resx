@@ -240,6 +240,24 @@
   <data name="MainForm_NoAlerts" xml:space="preserve">
     <value>No new notifications.</value>
   </data>
+  <data name="Home_NoticeSystem" xml:space="preserve">
+    <value>System Notice</value>
+  </data>
+  <data name="Home_NoticeGeneral" xml:space="preserve">
+    <value>General Notice</value>
+  </data>
+  <data name="Home_NoticeImportant" xml:space="preserve">
+    <value>Important Notice</value>
+  </data>
+  <data name="Home_NoticeUrgent" xml:space="preserve">
+    <value>Urgent Notice</value>
+  </data>
+  <data name="Home_NoticeEmpty" xml:space="preserve">
+    <value>No data to display.</value>
+  </data>
+  <data name="Home_NoticeLoadFailed" xml:space="preserve">
+    <value>Failed to load notices.</value>
+  </data>
   <data name="Menu_MEIS" xml:space="preserve">
     <value>MEIS</value>
   </data>

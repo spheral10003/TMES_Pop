@@ -240,6 +240,24 @@
   <data name="MainForm_NoAlerts" xml:space="preserve">
     <value>새 알림이 없습니다.</value>
   </data>
+  <data name="Home_NoticeSystem" xml:space="preserve">
+    <value>시스템공지</value>
+  </data>
+  <data name="Home_NoticeGeneral" xml:space="preserve">
+    <value>일반공지</value>
+  </data>
+  <data name="Home_NoticeImportant" xml:space="preserve">
+    <value>중요공지</value>
+  </data>
+  <data name="Home_NoticeUrgent" xml:space="preserve">
+    <value>긴급공지</value>
+  </data>
+  <data name="Home_NoticeEmpty" xml:space="preserve">
+    <value>조회할 데이터가 없습니다.</value>
+  </data>
+  <data name="Home_NoticeLoadFailed" xml:space="preserve">
+    <value>공지사항을 불러오지 못했습니다.</value>
+  </data>
   <data name="Menu_MEIS" xml:space="preserve">
     <value>MEIS</value>
   </data>

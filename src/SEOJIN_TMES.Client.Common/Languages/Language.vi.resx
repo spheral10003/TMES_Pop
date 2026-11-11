@@ -240,6 +240,24 @@
   <data name="MainForm_NoAlerts" xml:space="preserve">
     <value>Không có thông báo mới.</value>
   </data>
+  <data name="Home_NoticeSystem" xml:space="preserve">
+    <value>Thông báo hệ thống</value>
+  </data>
+  <data name="Home_NoticeGeneral" xml:space="preserve">
+    <value>Thông báo chung</value>
+  </data>
+  <data name="Home_NoticeImportant" xml:space="preserve">
+    <value>Thông báo quan trọng</value>
+  </data>
+  <data name="Home_NoticeUrgent" xml:space="preserve">
+    <value>Thông báo khẩn</value>
+  </data>
+  <data name="Home_NoticeEmpty" xml:space="preserve">
+    <value>Không có dữ liệu.</value>
+  </data>
+  <data name="Home_NoticeLoadFailed" xml:space="preserve">
+    <value>Không thể tải thông báo.</value>
+  </data>
   <data name="Menu_MEIS" xml:space="preserve">
     <value>MEIS</value>
   </data>

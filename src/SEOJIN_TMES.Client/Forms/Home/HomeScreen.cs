@@ -5,6 +5,9 @@ using System.Linq;
 using System.Windows.Forms;
 using DevExpress.XtraEditors;
 using DevExpress.Utils.Svg;
+using SEOJIN_TMES.Client.ApiClient;
+using SEOJIN_TMES.Client.Common.Logging;
+using SEOJIN_TMES.Client.Common.Models;
 using SEOJIN_TMES.Client.Composition;
 using SEOJIN_TMES.Client.Common.Languages;
 using SEOJIN_TMES.Client.Theme;
@@ -31,6 +34,11 @@ namespace SEOJIN_TMES.Client.Forms.Home
         private LabelControl _title;
         private LabelControl _hint;
         private readonly List<InfoTile> _tiles = new List<InfoTile>();
+        private readonly List<NoticeBox> _noticeBoxes = new List<NoticeBox>();
+        private TableLayoutPanel _noticeGrid;
+
+        /// <summary>공지 조회가 진행 중인지. 탭을 빠르게 오가며 조회가 겹쳐 나가지 않게 막는다.</summary>
+        private bool _noticeLoading;
 
         public HomeScreen()
         {
@@ -44,6 +52,8 @@ namespace SEOJIN_TMES.Client.Forms.Home
             _equip = Global.Instance.Devices;
             BuildHeader();
             BuildTiles();
+            BuildNotices();
+            VisibleChanged += HomeScreen_VisibleChanged;
 
             ApplyTheme();
             RefreshInfo();
@@ -95,6 +105,88 @@ namespace SEOJIN_TMES.Client.Forms.Home
                 tile.Panel.Location = new Point(28 + i * TileStride, 110);
                 card.Controls.Add(tile.Panel);
                 _tiles.Add(tile);
+            }
+        }
+
+        /// <summary>
+        /// 홈에 보여 줄 공지 유형 — <b>2×2 칸에 놓이는 순서대로</b>(왼쪽 위 → 오른쪽 위 → 왼쪽 아래 → 오른쪽 아래).
+        /// 서버는 NTC05~07(생산 · 품질 · 안전)도 주지만 홈에는 이 네 가지만 둔다.
+        /// 배치는 웹 MES 홈과 같게 일반 · 시스템 / 중요 · 긴급으로 맞췄다.
+        /// </summary>
+        private static readonly NoticeSpec[] NoticeSpecs =
+        {
+            new NoticeSpec(NoticeType.General,   () => Language.Home_NoticeGeneral),
+            new NoticeSpec(NoticeType.System,    () => Language.Home_NoticeSystem),
+            new NoticeSpec(NoticeType.Important, () => Language.Home_NoticeImportant),
+            new NoticeSpec(NoticeType.Urgent,    () => Language.Home_NoticeUrgent)
+        };
+
+        /// <summary>공지 상자 네 개를 2×2 표에 채운다. 칸 크기는 비율(50%)이라 창 크기에 따라 함께 늘고 준다.</summary>
+        private void BuildNotices()
+        {
+            _noticeGrid = new TableLayoutPanel();
+            _noticeGrid.Dock = DockStyle.Fill;
+            _noticeGrid.ColumnCount = 2;
+            _noticeGrid.RowCount = 2;
+            _noticeGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            _noticeGrid.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            _noticeGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+            _noticeGrid.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+
+            for (var i = 0; i < NoticeSpecs.Length; i++)
+            {
+                var box = new NoticeBox(NoticeSpecs[i].NtcType);
+                box.Caption = NoticeSpecs[i].Caption();
+                _noticeGrid.Controls.Add(box.Panel, i % 2, i / 2);
+                _noticeBoxes.Add(box);
+            }
+
+            noticeArea.Controls.Add(_noticeGrid);
+        }
+
+        /// <summary>
+        /// 홈 탭이 보일 때마다 공지를 다시 받는다 — 다른 화면에서 일하다 홈으로 돌아오면 새 공지가 보이게.
+        /// 처음 탭이 열릴 때도 여기서 첫 조회가 나간다(MainForm이 Init 뒤에 탭을 띄운다).
+        /// </summary>
+        private void HomeScreen_VisibleChanged(object sender, EventArgs e)
+        {
+            if (Visible)
+                LoadNotices();
+        }
+
+        /// <summary>
+        /// 공지 전체를 한 번에 받아 유형별 상자에 나눠 넣는다(유형 조건 없이 1회 호출).
+        /// 실패해도 창을 띄우지 않는다 — 홈은 첫 화면이라 서버가 잠깐 안 될 때마다 안내 창이 뜨면 일을 시작할 수 없다.
+        /// 대신 상자마다 "불러오지 못했습니다"를 보여 주고 로그를 남긴다.
+        /// </summary>
+        private async void LoadNotices()
+        {
+            var api = _appSet?.ApiClients?.NoticeApiClient;
+            if (api == null || _noticeLoading)
+                return;
+
+            _noticeLoading = true;
+            try
+            {
+                var notices = await api.GetNotices();
+                if (IsDisposed || Disposing)
+                    return;
+
+                foreach (var box in _noticeBoxes)
+                    box.SetItems(notices.Where(n => n.NtcType == box.NtcType).ToList());
+            }
+            catch (ApiException ex)
+            {
+                AppLog.Warn($"홈 공지 조회 실패 - {ex.ToLogText()}");
+                if (IsDisposed || Disposing)
+                    return;
+
+                foreach (var box in _noticeBoxes)
+                    box.SetLoadFailed();
+            }
+            finally
+            {
+                _noticeLoading = false;
             }
         }
 
@@ -152,6 +244,12 @@ namespace SEOJIN_TMES.Client.Forms.Home
             for (var i = 0; i < _tiles.Count; i++)
                 _tiles[i].Caption = TileSpecs[i].Caption();
 
+            for (var i = 0; i < _noticeBoxes.Count; i++)
+            {
+                _noticeBoxes[i].Caption = NoticeSpecs[i].Caption();
+                _noticeBoxes[i].ApplyLanguage();
+            }
+
             RefreshInfo();
         }
 
@@ -174,6 +272,26 @@ namespace SEOJIN_TMES.Client.Forms.Home
 
             foreach (var tile in _tiles)
                 tile.ApplyTheme();
+
+            AppTheme.ContentSurface(noticeArea);
+            if (_noticeGrid != null)
+                _noticeGrid.BackColor = AppTheme.Surface;
+
+            foreach (var box in _noticeBoxes)
+                box.ApplyTheme();
+        }
+
+        /// <summary>공지 상자 하나의 정의 — 공지 유형 코드와 제목(언어가 바뀌면 다시 읽으므로 함수로).</summary>
+        private sealed class NoticeSpec
+        {
+            public string NtcType { get; }
+            public Func<string> Caption { get; }
+
+            public NoticeSpec(string ntcType, Func<string> caption)
+            {
+                NtcType = ntcType;
+                Caption = caption;
+            }
         }
 
         /// <summary>
