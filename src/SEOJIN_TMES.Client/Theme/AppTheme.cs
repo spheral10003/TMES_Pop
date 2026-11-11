@@ -206,16 +206,32 @@ namespace SEOJIN_TMES.Client.Theme
         public static Color GridSelectedRow => IsDarkMode ? Color.FromArgb(38, 58, 92) : Color.FromArgb(230, 247, 255); // #E6F7FF
 
         /// <summary>
-        /// 불합격(NG) 행 바탕. 서버가 내려준 결과 상태를 <b>표시</b>만 하는 색이다(판정은 서버가 한다).
-        /// 선택(포커스) 행은 선택 색이 우선한다 — <see cref="NgRowCell"/>로 칠할 것.
+        /// 불합격(NG) 칸 바탕 — 빨강(#FF0000, 사용자 지정). 서버가 내려준 결과 상태를 <b>표시</b>만 하는 색이다(판정은 서버가 한다).
+        /// 현장에서 멀리서도 한눈에 보이도록 옅은 색 대신 원색을 쓰고, 다크 테마에서도 같은 색을 쓴다.
+        /// 선택 행에서도 이 색이 그대로 보인다 — <see cref="NgRowCell"/>로 칠할 것.
         /// </summary>
-        public static Color GridNgRow => IsDarkMode ? Color.FromArgb(92, 44, 52) : Color.FromArgb(248, 215, 218); // #F8D7DA
+        public static Color GridNgRow => Color.FromArgb(255, 0, 0); // #FF0000
+
+        /// <summary>NG 칸 글자 — 빨강 바탕에서 기본 글자색(진한 남색)은 읽기 어려워 흰색을 쓴다.</summary>
+        public static Color GridNgRowText => Color.White;
 
         /// <summary>
-        /// 합격(OK) 행 바탕 — 옅은 초록(#D1E7DD). NG(#F8D7DA)와 같은 밝기의 옅은 색이라 글자는 기본 글자색 그대로 쓴다.
-        /// NG와 마찬가지로 서버 결과를 <b>표시</b>만 하는 색이며, 선택 행은 선택 색이 우선한다 — <see cref="OkRowCell"/>로 칠할 것.
+        /// 합격(OK) 칸 바탕 — 라임(#00FF00, 사용자 지정). NG와 마찬가지로 서버 결과를 <b>표시</b>만 하는 색이며,
+        /// 선택 행에서도 이 색이 그대로 보인다 — <see cref="OkRowCell"/>로 칠할 것.
         /// </summary>
-        public static Color GridOkRow => IsDarkMode ? Color.FromArgb(38, 74, 58) : Color.FromArgb(209, 231, 221); // #D1E7DD
+        public static Color GridOkRow => Color.FromArgb(0, 255, 0); // #00FF00
+
+        /// <summary>OK 칸 글자 — 밝은 라임 바탕이라 다크 테마에서도 검정 글자를 쓴다(밝은 글자색은 묻힌다).</summary>
+        public static Color GridOkRowText => Color.Black;
+
+        /// <summary>
+        /// OK/NG 칸이 선택 행에 있을 때 칸 안쪽에 두르는 선택 테두리 색.
+        /// 선택 바탕(<see cref="GridSelectedRow"/>)은 너무 옅어 라임 · 빨강 위에서 보이지 않아, 같은 계열의 진한 파랑을 쓴다.
+        /// </summary>
+        public static Color GridSelectedBorder => IsDarkMode ? Color.FromArgb(147, 197, 253) : Color.FromArgb(30, 64, 175); // #93C5FD / #1E40AF
+
+        /// <summary>선택 테두리 두께(px).</summary>
+        private const int GridSelectedBorderWidth = 2;
 
         // ── 상단 탭 ── 선택 탭은 진한 청록(#2C5B78) + 흰 글자, 나머지는 옅은 회청(#F4F6FA) + 검정 글자 ──
         // 탭이 놓이는 스트립은 비선택 탭보다 한 톤 진하게 깔아야 비선택 탭의 윤곽이 바탕에 묻히지 않는다.
@@ -1172,13 +1188,13 @@ namespace SEOJIN_TMES.Client.Theme
         /// </summary>
         public static void NgRowCell(GridView view, RowCellStyleEventArgs e)
         {
-            ResultRowCell(view, e, GridNgRow, TextPrimary);
+            ResultRowCell(view, e, GridNgRow, GridNgRowText);
         }
 
         /// <summary>OK 행 칠하기 — <see cref="NgRowCell"/>과 같은 방식, 색만 <see cref="GridOkRow"/>.</summary>
         public static void OkRowCell(GridView view, RowCellStyleEventArgs e)
         {
-            ResultRowCell(view, e, GridOkRow, TextPrimary);
+            ResultRowCell(view, e, GridOkRow, GridOkRowText);
         }
 
         /// <summary>
@@ -1186,17 +1202,57 @@ namespace SEOJIN_TMES.Client.Theme
         ///  - <c>RowStyle</c>이 아니라 <c>RowCellStyle</c>에서 칸마다 <b>색만</b> 바꾼다. 예전에는 RowStyle + <c>HighPriority</c>로
         ///    칠했는데, 그러면 행 모양이 컬럼 모양보다 우선해 컬럼의 가운데 정렬이 풀리고 왼쪽 정렬로 바뀌었다
         ///    (값을 넣어 NG가 되는 순간 글자가 옆으로 튀었다). 칸 모양에는 이미 컬럼 정렬이 합쳐져 있어 그대로 남는다.
-        ///  - 선택(포커스) 행은 칠하지 않는다 — 선택 색이 보여야 지금 어느 줄을 고르고 있는지 알 수 있다.
+        ///  - 선택(포커스) 행도 OK/NG 색을 그대로 칠한다 — 예전에는 선택 색이 덮어 선택한 줄의 결과가 안 보였다(사용자 요구).
+        ///    어느 줄을 골랐는지는 나머지 칸의 선택 바탕과 OK/NG 칸 안쪽의 선택 테두리로 보여 준다(<see cref="ResultCellSelection"/>).
         /// </summary>
         private static void ResultRowCell(GridView view, RowCellStyleEventArgs e, Color back, Color fore)
         {
-            if (e.RowHandle == view.FocusedRowHandle || view.IsRowSelected(e.RowHandle))
-                return;
-
             e.Appearance.BackColor = back;
+            e.Appearance.BackColor2 = Color.Empty;
             e.Appearance.Options.UseBackColor = true;
             e.Appearance.ForeColor = fore;
             e.Appearance.Options.UseForeColor = true;
+        }
+
+        /// <summary>
+        /// OK/NG로 칠한 칸이 선택 행에 있으면 칸 안쪽에 선택 테두리(<see cref="GridSelectedBorder"/>)를 두른다.
+        /// OK/NG 칸은 선택돼도 결과 색을 유지하므로(<see cref="ResultRowCell"/>), 줄 전체를 칠하는 그리드
+        /// (참조 줄 · 작업 현황 NG 줄)에서는 이 테두리가 없으면 어느 줄을 골랐는지 알 수 없다.
+        /// <see cref="NgRowCell"/> / <see cref="OkRowCell"/>을 쓰는 그리드마다 한 번 부른다(여러 번 불러도 한 번만 연결된다).
+        /// </summary>
+        public static void ResultCellSelection(GridView view)
+        {
+            view.CustomDrawCell -= ResultCell_CustomDrawCell;
+            view.CustomDrawCell += ResultCell_CustomDrawCell;
+        }
+
+        private static void ResultCell_CustomDrawCell(object sender, DevExpress.XtraGrid.Views.Base.RowCellCustomDrawEventArgs e)
+        {
+            var view = sender as GridView;
+            if (view == null || e.RowHandle < 0)
+                return;
+
+            if (e.RowHandle != view.FocusedRowHandle && !view.IsRowSelected(e.RowHandle))
+                return;
+
+            // Color 구조체 비교는 이름까지 보므로 ARGB 값으로 비교한다.
+            var back = e.Appearance.BackColor.ToArgb();
+            if (back != GridOkRow.ToArgb() && back != GridNgRow.ToArgb())
+                return;
+
+            e.DefaultDraw();
+
+            var b = e.Bounds;
+            var w = GridSelectedBorderWidth;
+            using (var brush = new SolidBrush(GridSelectedBorder))
+            {
+                e.Cache.FillRectangle(brush, new Rectangle(b.X, b.Y, b.Width, w));
+                e.Cache.FillRectangle(brush, new Rectangle(b.X, b.Bottom - w, b.Width, w));
+                e.Cache.FillRectangle(brush, new Rectangle(b.X, b.Y, w, b.Height));
+                e.Cache.FillRectangle(brush, new Rectangle(b.Right - w, b.Y, w, b.Height));
+            }
+
+            e.Handled = true;
         }
 
         /// <summary>

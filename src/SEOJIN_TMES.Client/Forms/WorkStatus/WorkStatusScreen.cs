@@ -140,6 +140,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
 
             AppTheme.Grid(gridOrders, gridViewOrders, AppTheme.Cyan);
             AppTheme.Grid(gridProgress, gridViewProgress, AppTheme.Violet);
+            AppTheme.ResultCellSelection(gridViewProgress);   // NG 줄은 선택돼도 NG 색 유지, 선택은 테두리로
         }
 
         /// <summary>목록 컬럼 구성(순서·헤더 문구·서식). 헤더 문구는 다국어 리소스에서 가져온다.</summary>
@@ -219,7 +220,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
 
         /// <summary>
         /// 서버가 불합격으로 내려준 줄은 NG 색으로 칠한다(표시만 한다 — 판정은 서버).
-        /// 칸 정렬을 건드리지 않고, 선택 행은 선택 색이 우선한다(<see cref="AppTheme.NgRowCell"/> 참고).
+        /// 칸 정렬을 건드리지 않고, 선택 행도 결과 색을 유지하고 선택은 테두리로 표시한다(<see cref="AppTheme.ResultCellSelection"/> 참고).
         /// </summary>
         private void GridViewProgress_RowCellStyle(object sender, DevExpress.XtraGrid.Views.Grid.RowCellStyleEventArgs e)
         {

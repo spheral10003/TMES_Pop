@@ -118,6 +118,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 AppTheme.GridTextFit(view);
             }
 
+            // OK/NG 칸은 선택돼도 결과 색을 유지한다 — 선택 줄은 그 칸 안쪽 테두리로 표시한다.
+            foreach (var view in new GridView[] { gridViewMaterial, gridViewBomSpec, gridViewInspection })
+                AppTheme.ResultCellSelection(view);
+
             // 터치 POP에는 물리 키보드가 없다 — 값을 넣는 칸의 편집기가 열리면 가상 키보드를 띄운다.
             gridViewBomSpec.ShownEditor += GridView_ShownEditor;
             gridViewInspection.ShownEditor += GridView_ShownEditor;
@@ -703,7 +707,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         //  [투입자재] 그리드 이벤트
         // ─────────────────────────────────────────────────────────────────────────
 
-        /// <summary>참조 자재(서버 refLtr=AR·REF)는 입력 없이 끝난 줄이라 OK 색으로 칠한다(선택 행은 선택 색이 우선).</summary>
+        /// <summary>참조 자재(서버 refLtr=AR·REF)는 입력 없이 끝난 줄이라 OK 색으로 칠한다(선택 행도 OK 색 유지, 선택은 테두리).</summary>
         private void GridViewMaterial_RowCellStyle(object sender, RowCellStyleEventArgs e)
         {
             if (e.RowHandle < 0)
@@ -936,7 +940,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         ///  - 정량: 결과값 · 결과상태 두 칸 — 결과값이 판정 근거라 함께 보여 준다.
         ///  - 정성: 결과상태 칸만 — 결과값 칸은 쓰지 않는다.
         /// 줄 전체를 칠하면 어느 칸이 판정 대상인지 구분이 안 돼서 결과 칸으로 좁혔다.
-        /// 칸 정렬을 건드리지 않고, 선택 행은 선택 색이 우선한다(<see cref="AppTheme.NgRowCell"/> 참고).
+        /// 칸 정렬을 건드리지 않고, 선택 행도 결과 색을 유지하고 선택은 테두리로 표시한다(<see cref="AppTheme.ResultCellSelection"/> 참고).
         /// </summary>
         private void GridViewInspection_RowCellStyle(object sender, RowCellStyleEventArgs e)
         {
@@ -963,7 +967,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// (하한~상한 안이면 OK 색, 벗어나면 NG 색). 줄 전체를 칠하면 토크 · 각도 중 어느 쪽이 NG인지 보이지 않는다.
         ///  - 각도 하한 · 상한이 둘 다 없는 줄은 각도 판정 대상이 아니라 각도 칸을 칠하지 않는다(<see cref="IsBomSpecPassed"/>와 같은 기준).
         ///  - 참조 줄(서버 refLtr=AR·REF)은 측정값 없이 끝난 줄이라 예전처럼 줄 전체를 OK 색으로 둔다.
-        /// 칸 정렬을 건드리지 않고, 선택 행은 선택 색이 우선한다(<see cref="AppTheme.NgRowCell"/> 참고).
+        /// 칸 정렬을 건드리지 않고, 선택 행도 결과 색을 유지하고 선택은 테두리로 표시한다(<see cref="AppTheme.ResultCellSelection"/> 참고).
         /// </summary>
         private void GridViewBomSpec_RowCellStyle(object sender, RowCellStyleEventArgs e)
         {
