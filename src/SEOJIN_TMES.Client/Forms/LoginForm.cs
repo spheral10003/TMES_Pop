@@ -8,8 +8,10 @@ using SEOJIN_TMES.Client.Common.Errors;
 using SEOJIN_TMES.Client.Common.Languages;
 using SEOJIN_TMES.Client.Common.Logging;
 using SEOJIN_TMES.Client.Common.Models;
+using SEOJIN_TMES.Client.Common.Security;
 using SEOJIN_TMES.Client.Composition;
 using SEOJIN_TMES.Client.Core;
+using SEOJIN_TMES.Client.Forms.Common;
 using SEOJIN_TMES.Client.Theme;
 using System;
 using System.Collections.Generic;
@@ -475,6 +477,9 @@ namespace SEOJIN_TMES.Client.Forms
 
                 ServerLog.LoggedIn(userId, corpCd);
 
+                await ShowInitialPasswordNotice(userId, password);
+                if (IsDisposed || Disposing) return;
+
                 DialogResult = DialogResult.OK;
                 Close();
             }
@@ -509,6 +514,34 @@ namespace SEOJIN_TMES.Client.Forms
                 if (!IsDisposed && !Disposing)
                     btnConnect.Enabled = true;
             }
+        }
+
+        /// <summary>
+        /// 초기 비밀번호로 로그인했으면 웹에서 비밀번호를 바꾸라고 안내한다.
+        /// 초기 비밀번호는 설정 API(sm/configurations)에서 받는다 — 로그인 토큰이 있어야 부를 수 있어 로그인 성공 뒤에 확인한다.
+        /// 안내일 뿐이므로 조회가 실패해도 로그인은 그대로 진행한다(로그만 남긴다).
+        /// </summary>
+        private async Task ShowInitialPasswordNotice(string userId, string password)
+        {
+            string initialPassword;
+            try
+            {
+                initialPassword = await _apiClient.ConfigurationApiClient.GetInitialPassword();
+            }
+            catch (ApiException ex)
+            {
+                AppLog.Warn($"초기 비밀번호 확인 실패 - 안내 없이 로그인 진행, UserId={userId}, {ex.ToLogText()}");
+                return;
+            }
+
+            if (IsDisposed || Disposing)
+                return;
+
+            if (!PasswordHash.MatchesStored(password, initialPassword))
+                return;
+
+            AppLog.Step($"초기 비밀번호로 로그인 - 비밀번호 변경 안내 표시, UserId={userId}");
+            AppMessageBox.Warn(this, Language.Login_InitialPasswordMessage, Language.Login_InitialPasswordTitle);
         }
 
         /// <summary>

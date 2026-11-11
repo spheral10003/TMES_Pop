@@ -84,6 +84,8 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string Login_ValidationMessage => Get(nameof(Login_ValidationMessage));
         public static string Login_FailedMessage => Get(nameof(Login_FailedMessage));
         public static string Login_ConnectionErrorMessage => Get(nameof(Login_ConnectionErrorMessage));
+        public static string Login_InitialPasswordTitle => Get(nameof(Login_InitialPasswordTitle));
+        public static string Login_InitialPasswordMessage => Get(nameof(Login_InitialPasswordMessage));
         public static string Login_RememberId => Get(nameof(Login_RememberId));
         public static string Login_StationTitle => Get(nameof(Login_StationTitle));
         public static string Login_StationHint => Get(nameof(Login_StationHint));
