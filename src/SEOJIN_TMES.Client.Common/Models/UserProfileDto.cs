@@ -38,5 +38,16 @@ namespace SEOJIN_TMES.Client.Common.Models
         /// </summary>
         [JsonProperty("deptCd")]
         public string DeptCode { get; set; }
+
+        /// <summary>
+        /// 초기 비밀번호 여부 Y/N — 서버 <c>pswdInitYn</c>(2026-11-10 구미 Test 서버 응답 로그로 확인).
+        /// Y면 아직 비밀번호를 바꾸지 않은 계정이라 로그인 화면이 POP 로그인을 막는다.
+        /// </summary>
+        [JsonProperty("pswdInitYn")]
+        public string PasswordInitYn { get; set; }
+
+        /// <summary>Y/N 문자열을 화면에서 매번 비교하지 않으려는 표시용 파생 값이다.</summary>
+        [JsonIgnore]
+        public bool IsInitialPassword => string.Equals(PasswordInitYn, "Y", System.StringComparison.OrdinalIgnoreCase);
     }
 }

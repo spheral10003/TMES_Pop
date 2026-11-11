@@ -154,8 +154,8 @@
     <value>Thông báo đổi mật khẩu</value>
   </data>
   <data name="Login_InitialPasswordMessage" xml:space="preserve">
-    <value>Bạn đang đăng nhập bằng mật khẩu ban đầu.
-Để bảo mật tài khoản, vui lòng đăng nhập vào trang web (MES) và đổi mật khẩu.</value>
+    <value>Không thể đăng nhập khi tài khoản vẫn đang dùng mật khẩu ban đầu.
+Vui lòng đăng nhập vào trang web (MES), đổi mật khẩu rồi đăng nhập lại.</value>
   </data>
   <data name="Login_RememberId" xml:space="preserve">
     <value>Lưu tài khoản</value>

@@ -463,6 +463,17 @@ namespace SEOJIN_TMES.Client.Forms
                 var userProfile = await _apiClient.UserProfileApiClient.GetProfileAsync(userId);
                 if (IsDisposed || Disposing) return;
 
+                // 초기 비밀번호(pswdInitYn=Y)인 계정은 POP에 들이지 않는다 — 웹에서 비밀번호를 바꾼 뒤 다시 로그인하게 한다.
+                // 받은 토큰은 버린다(남겨 두면 로그인 창 뒤에서 인증된 호출이 가능한 상태로 남는다).
+                // 아이디 저장은 그대로 둔다 — 비밀번호를 바꾸고 돌아와 바로 다시 로그인하기 편하게.
+                if (userProfile?.IsInitialPassword == true)
+                {
+                    _apiClient.TokenProvider.Clear();
+                    AppLog.Warn($"초기 비밀번호 계정이라 로그인 차단 - UserId={userId}");
+                    AppMessageBox.Warn(this, Language.Login_InitialPasswordMessage, Language.Login_InitialPasswordTitle);
+                    return;
+                }
+
                 // 워크스테이션은 여기서 고르지 않는다 — 메인 화면이 뜨면서 선택 화면(LoginStationControl)을 덮어 띄운다.
                 // 워크스테이션이 없어도 로그인은 통과시키고, 공정 시작(작업 진입) 단계에서 막는다.
                 _currentUser = new UserSession
@@ -475,9 +486,6 @@ namespace SEOJIN_TMES.Client.Forms
                 Global.Instance.Settings.CurrentUser = _currentUser;
 
                 ServerLog.LoggedIn(userId, corpCd);
-
-                await ShowInitialPasswordNotice(userId, password);
-                if (IsDisposed || Disposing) return;
 
                 DialogResult = DialogResult.OK;
                 Close();
@@ -513,36 +521,6 @@ namespace SEOJIN_TMES.Client.Forms
                 if (!IsDisposed && !Disposing)
                     btnConnect.Enabled = true;
             }
-        }
-
-        /// <summary>
-        /// 초기 비밀번호로 로그인했으면 웹에서 비밀번호를 바꾸라고 안내한다.
-        /// 초기 비밀번호는 설정 API(sm/configurations)의 initPswd(평문)다 — 로그인 토큰이 있어야 부를 수 있어 로그인 성공 뒤에 확인한다.
-        /// 안내일 뿐이므로 조회가 실패해도 로그인은 그대로 진행한다(로그만 남긴다).
-        /// </summary>
-        private async Task ShowInitialPasswordNotice(string userId, string password)
-        {
-            string initialPassword;
-            try
-            {
-                var configuration = await _apiClient.ConfigurationApiClient.GetConfiguration();
-                initialPassword = configuration.InitPassword;
-            }
-            catch (ApiException ex)
-            {
-                AppLog.Warn($"초기 비밀번호 확인 실패 - 안내 없이 로그인 진행, UserId={userId}, {ex.ToLogText()}");
-                return;
-            }
-
-            if (IsDisposed || Disposing)
-                return;
-
-            // 설정에 초기 비밀번호가 비어 있으면 안내하지 않는다(빈 비밀번호는 로그인 전에 이미 막힌다).
-            if (string.IsNullOrEmpty(initialPassword) || !string.Equals(password, initialPassword, StringComparison.Ordinal))
-                return;
-
-            AppLog.Step($"초기 비밀번호로 로그인 - 비밀번호 변경 안내 표시, UserId={userId}");
-            AppMessageBox.Warn(this, Language.Login_InitialPasswordMessage, Language.Login_InitialPasswordTitle);
         }
 
         /// <summary>

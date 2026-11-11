@@ -21,7 +21,6 @@ namespace SEOJIN_TMES.Client.ApiClient
         public IMenuApiClient MenuApiClient { get; }
         public IClientLogApiClient ClientLogApiClient { get; }
         public INoticeApiClient NoticeApiClient { get; }
-        public IConfigurationApiClient ConfigurationApiClient { get; }
         public ApiClientFactory(ApiClientOptions options)
         {
             TokenProvider = new TokenProvider();
@@ -52,7 +51,6 @@ namespace SEOJIN_TMES.Client.ApiClient
             MenuApiClient = new MenuApiClient(authenticatedClient);
             ClientLogApiClient = new ClientLogApiClient(authenticatedClient);
             NoticeApiClient = new NoticeApiClient(authenticatedClient);
-            ConfigurationApiClient = new ConfigurationApiClient(authenticatedClient);
         }
 
         /// <summary>
