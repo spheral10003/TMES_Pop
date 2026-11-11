@@ -290,6 +290,14 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                         return;
                     }
 
+                    // 서버는 시리얼 목록을 쉼표로 이어 붙여 내려준다 — 쉼표 · 세미콜론이 들어가면 다시 읽을 때 한 시리얼이 여럿으로 쪼개진다.
+                    // 바코드 스캐너가 붙이는 제어 문자(GS 0x1D, Tab 등)도 눈에 안 보인 채 서버로 나가므로 함께 막는다.
+                    if (HasInvalidSerialChar(serial))
+                    {
+                        AppMessageBox.Warn(this, $"{Language.PopSerial_InvalidChar} ({ToVisibleText(serial)})", Language.PopSerial_Title);
+                        return;
+                    }
+
                     if (!seen.Add(serial))
                     {
                         AppMessageBox.Warn(this, $"{Language.PopSerial_Duplicated} ({serial})", Language.PopSerial_Title);
@@ -304,6 +312,29 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             InputtedItemCode = _material.ItemCodeCheckRequired ? txtItemCode.Text.Trim() : null;
             DialogResult = DialogResult.OK;
             Close();
+        }
+
+        /// <summary>시리얼번호에 쓸 수 없는 문자(쉼표 · 세미콜론 · 제어 문자)가 있는지.</summary>
+        private static bool HasInvalidSerialChar(string serial)
+        {
+            foreach (var c in serial)
+            {
+                if (c == ',' || c == ';' || char.IsControl(c))
+                    return true;
+            }
+            return false;
+        }
+
+        /// <summary>안내 창에 보여 줄 때 제어 문자를 '?'로 바꿔 어디가 문제인지 보이게 한다.</summary>
+        private static string ToVisibleText(string serial)
+        {
+            var chars = serial.ToCharArray();
+            for (var i = 0; i < chars.Length; i++)
+            {
+                if (char.IsControl(chars[i]))
+                    chars[i] = '?';
+            }
+            return new string(chars);
         }
     }
 

@@ -76,6 +76,12 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// </summary>
         private int _pendingResultSaves;
 
+        /// <summary>
+        /// 투입자재 입력 팝업 · 저장 요청이 진행 중인지. 저장 응답을 기다리는 동안에는 화면이 막혀 있지 않아
+        /// 같은 칸을 다시 누르면 팝업이 또 열리고, 같은 시리얼이 서버에 한 번 더 전송됐다(서버 중복 오류).
+        /// </summary>
+        private bool _materialInputting;
+
         /// <summary>지금 화면에 띄운 도면의 전체 경로. 같은 도면을 다시 읽어 깜빡이지 않게 비교한다.</summary>
         private string _drawingPath;
 
@@ -1008,6 +1014,33 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 return;
             }
 
+            // 앞선 입력(팝업 · 저장 요청)이 끝나기 전에 다시 불리면 무시한다 — 같은 값이 두 번 전송되는 것을 막는다.
+            if (_materialInputting)
+            {
+                AppLog.Info($"[POP] 투입자재 입력 진행 중 - 중복 요청 무시 ({material.MaterialCode})");
+                return;
+            }
+
+            bool saved;
+            _materialInputting = true;
+            try
+            {
+                saved = await InputMaterial(material);
+            }
+            finally
+            {
+                _materialInputting = false;
+            }
+
+            // 자동 진행은 입력 잠금을 푼 뒤에 한다 — 다음 공정으로 넘어가면 그 공정의 입력 팝업이 이어서 떠야 한다.
+            if (saved && !IsDisposed && !Disposing)
+                await TryAutoProgress();
+        }
+
+        /// <summary>입력 팝업을 띄우고 입력값을 서버에 보낸다(<see cref="InputMaterialSerial"/>가 겹쳐 불리지 않게 감싼다).</summary>
+        /// <returns>서버에 새로 저장했으면 true. 취소 · 변경 없음 · 실패면 false.</returns>
+        private async Task<bool> InputMaterial(PopInputMaterialDto material)
+        {
             List<string> serials;
             string itemCode;
             using (var form = new MaterialSerialForm())
@@ -1015,18 +1048,23 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 form.Initialize(material);
                 form.CenterOn(this);
                 if (form.ShowDialog(this) != DialogResult.OK)
-                    return;
+                    return false;
 
                 serials = form.SerialNumbers;
                 itemCode = form.InputtedItemCode;
             }
 
+            // 이미 저장된 자재를 다시 열어 그대로 [저장]하면 같은 값을 또 보내게 된다 — 서버에 이미 있는 값이므로 보내지 않는다.
+            if (IsSameAsSaved(material, serials))
+            {
+                AppLog.Info($"[POP] 투입자재 입력 변경 없음 - 전송 안 함 ({material.MaterialCode})");
+                ShowMessage(Language.Pop_MaterialInputUnchanged);
+                return false;
+            }
+
             // 품목코드는 화면에 따로 담아 두지 않으므로 실패해도 되돌릴 값이 없다(완료 표시는 저장 성공 때만 바뀐다).
             if (material.IsItemCodeInputOnly)
-            {
-                await SetMaterialItemCode(material, itemCode);
-                return;
-            }
+                return await SetMaterialItemCode(material, itemCode);
 
             // 저장이 실패하면 입력 전 값으로 되돌린다 — 그대로 두면 서버에는 없는 시리얼로 "완료"가 표시되고,
             // 그 화면 값을 믿은 자동 완료가 서버에서 WORK_005(할 일 남음)로 거절됐다.
@@ -1035,12 +1073,29 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             gridViewMaterial.RefreshData();
 
             if (await SetMaterialSerials(material, itemCode))
-                return;
+                return true;
 
-            if (IsDisposed || Disposing) return;
+            if (IsDisposed || Disposing) return false;
 
             material.SerialNumbers = previous;
             gridViewMaterial.RefreshData();
+            return false;
+        }
+
+        /// <summary>
+        /// 입력이 이미 끝난 자재를 같은 값으로 다시 저장하려는지 — 서버가 완료로 내려준 자재이고, 시리얼 목록이 저장된 것과 같을 때(순서 · 대소문자 무시).
+        /// 품목코드는 팝업이 투입자재 코드와 같은 값만 받으므로 따로 비교하지 않는다.
+        /// </summary>
+        private static bool IsSameAsSaved(PopInputMaterialDto material, List<string> serials)
+        {
+            if (!material.IsInputCompleted)
+                return false;
+
+            if (!material.SerialCheckRequired)
+                return true;
+
+            var saved = new HashSet<string>(material.SerialNumbers ?? new List<string>(), StringComparer.OrdinalIgnoreCase);
+            return serials != null && saved.SetEquals(serials) && saved.Count == serials.Count;
         }
 
         /// <summary>
@@ -1169,9 +1224,20 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 return false;
             }
 
+            // 요청 안에 같은 시리얼이 두 번 들어가면 서버가 409로 거절한다 — 팝업이 이미 막지만 여기서도 한 번 더 막는다.
+            var duplicated = serials.GroupBy(s => s.Trim(), StringComparer.OrdinalIgnoreCase).FirstOrDefault(g => g.Count() > 1);
+            if (duplicated != null)
+            {
+                AppLog.Info($"[POP] 시리얼 중복 - 저장 안 함 ({material.MaterialCode}, {duplicated.Key})");
+                if (IsDisposed || Disposing) return false;
+
+                AppMessageBox.Warn(this, $"{Language.PopSerial_Duplicated} ({duplicated.Key})", Language.PopSerial_Title);
+                return false;
+            }
+
             var request = new PopMaterialSerialSaveRequest();
             request.inputtedItemCd = string.IsNullOrWhiteSpace(itemCode) ? material.MaterialCode : itemCode.Trim();
-            request.inputtedSerialList = material.SerialNumbers;
+            request.inputtedSerialList = serials.Select(s => s.Trim()).ToList();
 
             return await SetMaterialInput(material, request);
         }
@@ -1199,12 +1265,19 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             return await SetMaterialInput(material, request);
         }
 
-        /// <summary>투입자재 입력(시리얼 · 품목코드) 저장 요청을 보내고, 성공하면 품목코드 완료로 두고 자동 진행을 시도한다.</summary>
+        /// <summary>
+        /// 투입자재 입력(시리얼 · 품목코드) 저장 요청을 보내고, 성공하면 품목코드 완료로 둔다.
+        /// 자동 진행은 부른 쪽(<see cref="InputMaterialSerial"/>)이 입력 잠금을 푼 뒤에 한다.
+        /// </summary>
         /// <returns>서버에 저장됐으면 true. 실패(사유는 창으로 알린다) · 화면 닫힘이면 false.</returns>
         private async Task<bool> SetMaterialInput(PopInputMaterialDto material, PopMaterialSerialSaveRequest request)
         {
             var saveFailed = false;
             var isConflict = false;
+
+            // API 로그에는 요청 바디가 남지 않는다 — 서버가 거절했을 때 무엇을 보냈는지 알 수 있게 여기서 남긴다.
+            var sentSerials = request.inputtedSerialList ?? new List<string>();
+            AppLog.Info($"[POP] 투입자재 입력 전송 - {material.MaterialCode} : 품목코드 {request.inputtedItemCd}, 시리얼 {sentSerials.Count}건 [{string.Join(", ", sentSerials)}]");
 
             BeginResultSave();
             try
@@ -1242,7 +1315,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             material.ItemCodeInputCompleted = true;
 
             AppMessageBox.Success(this, GetMaterialSavedMessage(material), Language.PopSerial_Title);
-            await TryAutoProgress();
             return true;
         }
 

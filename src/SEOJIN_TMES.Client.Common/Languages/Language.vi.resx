@@ -852,6 +852,12 @@ Hệ thống sẽ tự động thử kết nối lại cho đến khi thành cô
   <data name="PopSerial_ItemCodeSerialSaved" xml:space="preserve">
     <value>Đã lưu mã sản phẩm và số sê-ri.</value>
   </data>
+  <data name="PopSerial_InvalidChar" xml:space="preserve">
+    <value>Số sê-ri chứa ký tự không được phép (dấu phẩy, dấu chấm phẩy hoặc ký tự điều khiển). Hãy quét lại.</value>
+  </data>
+  <data name="Pop_MaterialInputUnchanged" xml:space="preserve">
+    <value>Giá trị nhập giống với giá trị đã lưu nên không gửi lại.</value>
+  </data>
   <data name="PopTorque_Title" xml:space="preserve">
     <value>Nhập kết quả lực siết</value>
   </data>

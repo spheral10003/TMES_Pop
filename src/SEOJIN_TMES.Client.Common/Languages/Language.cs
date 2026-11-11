@@ -376,6 +376,8 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string PopSerial_Saved => Get(nameof(PopSerial_Saved));
         public static string PopSerial_ItemCodeSaved => Get(nameof(PopSerial_ItemCodeSaved));
         public static string PopSerial_ItemCodeSerialSaved => Get(nameof(PopSerial_ItemCodeSerialSaved));
+        public static string PopSerial_InvalidChar => Get(nameof(PopSerial_InvalidChar));
+        public static string Pop_MaterialInputUnchanged => Get(nameof(Pop_MaterialInputUnchanged));
         public static string PopTorque_Title => Get(nameof(PopTorque_Title));
         public static string PopTorque_Invalid => Get(nameof(PopTorque_Invalid));
         public static string Pop_TorqueRangeMissing => Get(nameof(Pop_TorqueRangeMissing));
