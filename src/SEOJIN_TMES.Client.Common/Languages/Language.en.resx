@@ -150,12 +150,8 @@
   <data name="Login_ConnectionErrorMessage" xml:space="preserve">
     <value>Cannot connect to server</value>
   </data>
-  <data name="Login_InitialPasswordTitle" xml:space="preserve">
-    <value>Change Your Password</value>
-  </data>
   <data name="Login_InitialPasswordMessage" xml:space="preserve">
-    <value>You cannot sign in while your account still uses the initial password.
-Please sign in to the web (MES), change your password, and then sign in again.</value>
+    <value>You cannot sign in while your account still uses the initial password. Please sign in to the web (MES), change your password, and then sign in again.</value>
   </data>
   <data name="Login_RememberId" xml:space="preserve">
     <value>Remember ID</value>

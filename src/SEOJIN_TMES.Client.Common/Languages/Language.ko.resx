@@ -150,12 +150,8 @@
   <data name="Login_ConnectionErrorMessage" xml:space="preserve">
     <value>서버에 연결할 수 없습니다</value>
   </data>
-  <data name="Login_InitialPasswordTitle" xml:space="preserve">
-    <value>비밀번호 변경 안내</value>
-  </data>
   <data name="Login_InitialPasswordMessage" xml:space="preserve">
-    <value>초기 비밀번호 상태의 계정으로는 로그인할 수 없습니다.
-웹(MES)에 로그인하여 비밀번호를 변경한 뒤 다시 로그인해 주세요.</value>
+    <value>초기 비밀번호 상태의 계정으로는 로그인할 수 없습니다. 웹(MES)에 로그인하여 비밀번호를 변경한 뒤 다시 로그인해 주세요.</value>
   </data>
   <data name="Login_RememberId" xml:space="preserve">
     <value>아이디 저장</value>

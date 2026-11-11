@@ -10,7 +10,6 @@ using SEOJIN_TMES.Client.Common.Logging;
 using SEOJIN_TMES.Client.Common.Models;
 using SEOJIN_TMES.Client.Composition;
 using SEOJIN_TMES.Client.Core;
-using SEOJIN_TMES.Client.Forms.Common;
 using SEOJIN_TMES.Client.Theme;
 using System;
 using System.Collections.Generic;
@@ -470,7 +469,8 @@ namespace SEOJIN_TMES.Client.Forms
                 {
                     _apiClient.TokenProvider.Clear();
                     AppLog.Warn($"초기 비밀번호 계정이라 로그인 차단 - UserId={userId}");
-                    AppMessageBox.Warn(this, Language.Login_InitialPasswordMessage, Language.Login_InitialPasswordTitle);
+                    // 다른 로그인 실패와 같은 자리(오류 상자)에 띄운다 — 문구는 라벨이 줄바꿈한다.
+                    lblMessage.Text = Language.Login_InitialPasswordMessage;
                     return;
                 }
 
