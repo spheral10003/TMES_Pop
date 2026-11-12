@@ -76,6 +76,17 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// </summary>
         private int _pendingResultSaves;
 
+        /// <summary>보내는 중인 실적 저장이 모두 끝나면 완료되는 신호(<see cref="WaitResultSaves"/>). 저장이 0건에서 시작될 때 새로 만든다.</summary>
+        private TaskCompletionSource<bool> _resultSavesIdle;
+
+        /// <summary>
+        /// 작업자가 고른 공정 이동이 지금 공정의 완료(<see cref="EndCurrentProcess"/>)를 판단 · 요청하는 중인지 — 그동안은 자동 완료하지 않는다.
+        /// 검사 줄을 떠나 저장 응답을 기다리는 사이 [다음 공정] · [공정 목록]을 누르면, 이동이 완료를 보내고
+        /// 뒤늦게 끝난 저장이 자동 완료(<see cref="TryAutoProgress"/>)로 같은 공정에 완료를 한 번 더 보낼 수 있었다
+        /// (완료 응답 전이라 화면은 아직 진행 중이다). 완료는 이동 쪽 한 곳에서만 보낸다.
+        /// </summary>
+        private bool _moveEnding;
+
         /// <summary>
         /// 투입자재 입력 팝업 · 저장 요청이 진행 중인지. 저장 응답을 기다리는 동안에는 화면이 막혀 있지 않아
         /// 같은 칸을 다시 누르면 팝업이 또 열리고, 같은 시리얼이 서버에 한 번 더 전송됐다(서버 중복 오류).
@@ -473,7 +484,11 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (_processMoving)
                 return;
 
+            if (!CanStartMove(offset > 0 ? "다음 공정" : "이전 공정"))
+                return;
+
             _processMoving = true;
+            _moveEnding = true;
             try
             {
                 await MoveProcessBy(offset);
@@ -481,11 +496,17 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             finally
             {
                 _processMoving = false;
+                _moveEnding = false;
             }
         }
 
         private async Task MoveProcessBy(int offset)
         {
+            // 보내는 중인 실적 저장을 먼저 기다린다 — 응답 전엔 그 줄이 "저장됨"으로 셈해져 완료 판단이 앞서 나가고,
+            // 뒤늦게 끝난 저장이 자동 완료로 완료를 한 번 더 보낼 수 있었다(_moveEnding 참고).
+            await WaitResultSaves();
+            if (IsDisposed || Disposing) return;
+
             // 줄을 떠나지 않아 남은 검사 입력을 먼저 저장한다 — 마지막 공정에서 완료만 보내는 경우도 포함.
             if (!await SavePendingInspections())
                 return;
@@ -520,6 +541,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
             if (await EndCurrentProcess() == ProcessEndResult.Failed)
                 return;
+
+            // 완료 판단은 끝났다 — 옮긴 공정에서는 자동 시작 · 자동 완료가 다시 돌아야 한다.
+            _moveEnding = false;
 
             await MoveToProcess(_processes[target]);
             if (IsDisposed || Disposing) return;
@@ -561,17 +585,33 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (selected == null)
                 return;
 
-            // 같은 공정을 다시 골라도 화면을 다시 읽으므로, 줄을 떠나지 않아 남은 검사 입력을 먼저 저장한다.
-            if (!await SavePendingInspections())
+            // 목록을 보는 사이 자동 진행이 시작됐을 수 있다 — 그쪽이 완료 · 이동을 하고 있으면 고른 이동은 버린다.
+            if (!CanStartMove("공정 목록"))
                 return;
 
-            // 지금 공정을 다시 고른 것은 공정을 바꾼 것이 아니므로 완료하지 않는다.
-            var isSameProcess = string.Equals(selected.SubRoutingReference, _key.SubRoutingRef, StringComparison.OrdinalIgnoreCase);
-            if (!isSameProcess && !ConfirmIncompleteMove())
-                return;
+            _moveEnding = true;
+            try
+            {
+                // 보내는 중인 실적 저장을 먼저 기다린다(MoveProcessBy와 같은 이유 — _moveEnding 참고).
+                await WaitResultSaves();
+                if (IsDisposed || Disposing) return;
 
-            if (!isSameProcess && await EndCurrentProcess() == ProcessEndResult.Failed)
-                return;
+                // 같은 공정을 다시 골라도 화면을 다시 읽으므로, 줄을 떠나지 않아 남은 검사 입력을 먼저 저장한다.
+                if (!await SavePendingInspections())
+                    return;
+
+                // 지금 공정을 다시 고른 것은 공정을 바꾼 것이 아니므로 완료하지 않는다.
+                var isSameProcess = string.Equals(selected.SubRoutingReference, _key.SubRoutingRef, StringComparison.OrdinalIgnoreCase);
+                if (!isSameProcess && !ConfirmIncompleteMove())
+                    return;
+
+                if (!isSameProcess && await EndCurrentProcess() == ProcessEndResult.Failed)
+                    return;
+            }
+            finally
+            {
+                _moveEnding = false;
+            }
 
             await MoveToProcess(selected);
             if (IsDisposed || Disposing) return;
@@ -840,6 +880,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
         private void BeginResultSave()
         {
+            if (_pendingResultSaves == 0)
+                _resultSavesIdle = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+
             _pendingResultSaves++;
         }
 
@@ -847,6 +890,31 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         {
             if (_pendingResultSaves > 0)
                 _pendingResultSaves--;
+
+            if (_pendingResultSaves == 0)
+                _resultSavesIdle?.TrySetResult(true);
+        }
+
+        /// <summary>
+        /// 보내는 중인 실적 저장이 모두 끝날 때까지 기다린다(없으면 바로 끝난다).
+        /// 시간 제한을 따로 두지 않는다 — 저장 요청마다 HTTP 타임아웃이 있고, 끝나면 성공 · 실패와 상관없이 EndResultSave가 불린다.
+        /// </summary>
+        private Task WaitResultSaves()
+        {
+            return _pendingResultSaves == 0 || _resultSavesIdle == null ? Task.CompletedTask : _resultSavesIdle.Task;
+        }
+
+        /// <summary>
+        /// 작업자가 공정 이동을 시작할 수 있는지. 자동 완료 · 이동이 도는 중이면 그쪽이 완료와 다음 공정 이동을 이미 하고 있으므로
+        /// 누른 이동은 버린다 — 함께 돌면 같은 공정에 완료가 두 번 나가고 두 이동이 엇갈렸다.
+        /// </summary>
+        private bool CanStartMove(string trigger)
+        {
+            if (!_autoProgressing && !_moveEnding)
+                return true;
+
+            AppLog.Info($"[POP] 자동 진행 · 이동 중 - {trigger} 무시 ({_key?.RoutingOperation}/{_key?.PageOperation})");
+            return false;
         }
 
         /// <summary>
@@ -857,7 +925,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         public async Task TryAutoProgress()
         {
             // 리웍은 자동 완료 · 이동을 하지 않는다 — 작업자가 공정을 옮길 때 EndCurrentProcess가 완료를 판단한다.
-            if (_autoProgressing || _pendingResultSaves > 0 || _reworking)
+            // 작업자가 고른 이동이 완료를 판단하는 중이면 그쪽에 맡긴다(_moveEnding 참고).
+            if (_autoProgressing || _pendingResultSaves > 0 || _reworking || _moveEnding)
                 return;
 
             _autoProgressing = true;
