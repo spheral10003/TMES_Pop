@@ -206,6 +206,20 @@ namespace SEOJIN_TMES.Client.ApiClient
             }, cancellationToken);
 
         /// <summary>
+        /// PATCH 후 응답 본문을 <b>그대로</b>(봉투째) 돌려준다 — 서버가 본문의 status · message로 처리 결과를 알려 주는 호출용.
+        /// 실패 상태코드는 다른 호출과 똑같이 ApiException으로 올리고, 본문이 비어 있으면 default를 돌려준다.
+        /// </summary>
+        protected Task<TResponse> PatchAsync<TRequest, TResponse>(string relativeUrl, TRequest body, CancellationToken cancellationToken = default) =>
+            ExecuteAsync("PATCH", relativeUrl, async () =>
+            {
+                using (var request = new HttpRequestMessage(new HttpMethod("PATCH"), relativeUrl) { Content = ToJsonContent(body) })
+                using (var response = await HttpClient.SendAsync(request, cancellationToken).ConfigureAwait(false))
+                {
+                    return await ReadAsync<TResponse>(response).ConfigureAwait(false);
+                }
+            }, cancellationToken);
+
+        /// <summary>
         /// 호출 한 건(전송 → 본문 읽기 → 역직렬화) 전체를 감싸 <b>어떤 실패든 <see cref="ApiException"/>으로만</b> 올린다.
         /// 화면은 catch(ApiException) 하나로 안내하므로, 다른 예외가 새면 async void 핸들러를 타고 앱이 중단된다.
         ///

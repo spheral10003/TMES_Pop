@@ -150,8 +150,26 @@
   <data name="Login_ConnectionErrorMessage" xml:space="preserve">
     <value>Cannot connect to server</value>
   </data>
-  <data name="Login_InitialPasswordMessage" xml:space="preserve">
-    <value>You cannot sign in while your account still uses the initial password. Please sign in to the web (MES), change your password, and then sign in again.</value>
+  <data name="PasswordChange_Title" xml:space="preserve">
+    <value>Change Password</value>
+  </data>
+  <data name="PasswordChange_Password" xml:space="preserve">
+    <value>Password</value>
+  </data>
+  <data name="PasswordChange_Confirm" xml:space="preserve">
+    <value>Confirm Password</value>
+  </data>
+  <data name="PasswordChange_Apply" xml:space="preserve">
+    <value>Apply</value>
+  </data>
+  <data name="PasswordChange_Empty" xml:space="preserve">
+    <value>Enter both the password and the confirmation.</value>
+  </data>
+  <data name="PasswordChange_Mismatch" xml:space="preserve">
+    <value>The password and the confirmation do not match.</value>
+  </data>
+  <data name="PasswordChange_Failed" xml:space="preserve">
+    <value>Your password could not be changed.</value>
   </data>
   <data name="Login_RememberId" xml:space="preserve">
     <value>Remember ID</value>

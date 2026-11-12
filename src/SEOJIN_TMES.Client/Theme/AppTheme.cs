@@ -149,6 +149,15 @@ namespace SEOJIN_TMES.Client.Theme
         public static readonly Color ButtonBack = Color.FromArgb(109, 124, 146); // #6D7C92
         public static readonly Color ButtonFore = Color.White;
 
+        /// <summary>
+        /// 입력 팝업의 주 동작 버튼([적용] 등) 바탕 — 진한 남색 <c>#2E4A68</c>(웹 MES 팝업의 [적용]과 같은 톤).
+        /// 옆의 [닫기]는 <see cref="ButtonBack"/>이라 둘이 한눈에 구분된다(<see cref="PrimaryButton"/>).
+        /// </summary>
+        public static readonly Color ButtonPrimaryBack = Color.FromArgb(46, 74, 104); // #2E4A68
+
+        /// <summary>흰 머리글 팝업에서 머리글 · 본문 · 버튼 줄을 나누는 가는 선.</summary>
+        public static Color DialogDivider => IsDarkMode ? Color.FromArgb(52, 64, 88) : Color.FromArgb(222, 226, 232);
+
         // ── 내보내기 문서(엑셀) 색 ──
         // 화면 색과 달리 다크 모드를 따라가면 안 된다 — 어두운 테마로 쓰던 중에 내보냈다고
         // 검은 배경 엑셀이 나오면 인쇄·공유가 곤란하다. 그래서 라이트 톤 고정이다.
@@ -849,6 +858,16 @@ namespace SEOJIN_TMES.Client.Theme
         {
             PaintFlatButton(button, ButtonBack, ButtonFore,
                 ControlPaint.Light(ButtonBack, 0.25f), ControlPaint.Dark(ButtonBack, 0.08f));
+
+            if (!keepFont)
+                button.Font = BodyBoldFont;
+        }
+
+        /// <summary>입력 팝업의 주 동작 버튼 — <see cref="ButtonPrimaryBack"/> 바탕 + 흰 글자. 그 밖은 <see cref="StandardButton"/>과 같다.</summary>
+        public static void PrimaryButton(Button button, bool keepFont = false)
+        {
+            PaintFlatButton(button, ButtonPrimaryBack, ButtonFore,
+                ControlPaint.Light(ButtonPrimaryBack, 0.25f), ControlPaint.Dark(ButtonPrimaryBack, 0.08f));
 
             if (!keepFont)
                 button.Font = BodyBoldFont;

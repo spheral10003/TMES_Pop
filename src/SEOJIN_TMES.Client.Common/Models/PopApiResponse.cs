@@ -14,6 +14,14 @@ namespace SEOJIN_TMES.Client.Common.Models
         [JsonProperty("message")] public string Message { get; set; }
         [JsonProperty("code")] public string Code { get; set; }
         [JsonProperty("totalCount")] public int TotalCount { get; set; }
+
+        /// <summary>
+        /// 서버가 본문으로 알린 처리 성공 여부 — status가 2xx이거나 message가 SUCCESS면 성공.
+        /// 판정이 아니라 서버가 준 결과를 읽는 것이며, 화면마다 같은 비교를 반복하지 않으려는 파생 값이다.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsSuccess =>
+            (Status >= 200 && Status < 300) || string.Equals(Message, "SUCCESS", StringComparison.OrdinalIgnoreCase);
     }
 
     public class PopApiResponse

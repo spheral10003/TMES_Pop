@@ -462,16 +462,19 @@ namespace SEOJIN_TMES.Client.Forms
                 var userProfile = await _apiClient.UserProfileApiClient.GetProfileAsync(userId);
                 if (IsDisposed || Disposing) return;
 
-                // 초기 비밀번호(pswdInitYn=Y)인 계정은 POP에 들이지 않는다 — 웹에서 비밀번호를 바꾼 뒤 다시 로그인하게 한다.
-                // 받은 토큰은 버린다(남겨 두면 로그인 창 뒤에서 인증된 호출이 가능한 상태로 남는다).
-                // 아이디 저장은 그대로 둔다 — 비밀번호를 바꾸고 돌아와 바로 다시 로그인하기 편하게.
+                // 초기 비밀번호(pswdInitYn=Y)인 계정은 비밀번호를 바꿔야 들어갈 수 있다 — 변경 팝업을 띄운다.
+                // 변경에 성공하면 그대로 로그인을 이어 가고(받은 토큰은 이미 이 계정의 것), [닫기]로 그만두면
+                // 토큰을 버리고 로그인 창에 남는다(남겨 두면 로그인 창 뒤에서 인증된 호출이 가능한 상태로 남는다).
+                // 아이디 저장은 그대로 둔다 — 다시 로그인하기 편하게.
                 if (userProfile?.IsInitialPassword == true)
                 {
-                    _apiClient.TokenProvider.Clear();
-                    AppLog.Warn($"초기 비밀번호 계정이라 로그인 차단 - UserId={userId}");
-                    // 다른 로그인 실패와 같은 자리(오류 상자)에 띄운다 — 문구는 라벨이 줄바꿈한다.
-                    lblMessage.Text = Language.Login_InitialPasswordMessage;
-                    return;
+                    AppLog.Warn($"초기 비밀번호 계정 - 비밀번호 변경 창 표시, UserId={userId}");
+                    if (!ChangeInitialPassword(string.IsNullOrEmpty(userProfile.EmployeeNo) ? userId : userProfile.EmployeeNo))
+                    {
+                        _apiClient.TokenProvider.Clear();
+                        AppLog.Step($"초기 비밀번호 변경 취소 - 로그인 중단, UserId={userId}");
+                        return;
+                    }
                 }
 
                 // 워크스테이션은 여기서 고르지 않는다 — 메인 화면이 뜨면서 선택 화면(LoginStationControl)을 덮어 띄운다.
@@ -520,6 +523,17 @@ namespace SEOJIN_TMES.Client.Forms
             {
                 if (!IsDisposed && !Disposing)
                     btnConnect.Enabled = true;
+            }
+        }
+
+        /// <summary>비밀번호 변경 팝업을 모달로 띄운다. 바꿨으면 true, [닫기] · Esc로 그만뒀으면 false.</summary>
+        private bool ChangeInitialPassword(string orgNo)
+        {
+            using (var form = new PasswordChangeForm())
+            {
+                form.Initialize(_apiClient, orgNo);
+                form.CenterOn(this);
+                return form.ShowDialog(this) == DialogResult.OK;
             }
         }
 

@@ -32,6 +32,13 @@ namespace SEOJIN_TMES.Client.Common.Security
         public static string ForLogin(string plainPassword, string salt) =>
             Sha256Hex(Sha256Hex(plainPassword ?? string.Empty) + (salt ?? string.Empty));
 
+        /// <summary>
+        /// 비밀번호 변경(<c>PATCH gm/users/{orgNo}/pswd-chg</c>) 바디의 pswd 값 = SHA256(평문 비밀번호), 소문자 16진수 64자.
+        /// 로그인과 달리 salt를 섞지 않는다 — 서버가 저장해 두는 값(로그인 해시의 안쪽 값)을 그대로 보내는 것이다.
+        /// </summary>
+        public static string ForChange(string plainPassword) =>
+            Sha256Hex(plainPassword ?? string.Empty);
+
         /// <summary>UTF-8 문자열의 SHA256을 소문자 16진수 문자열로 돌려준다.</summary>
         public static string Sha256Hex(string text)
         {

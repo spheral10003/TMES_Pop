@@ -1,4 +1,5 @@
 using SEOJIN_TMES.Client.Common.Models;
+using SEOJIN_TMES.Client.Common.Security;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -17,6 +18,18 @@ namespace SEOJIN_TMES.Client.ApiClient
         Task<UserProfileDto> GetProfileAsync(string userId, CancellationToken cancellationToken = default);
 
         Task<WorkstationDto> GetLoginStationAsync(CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// 비밀번호 변경 — <c>PATCH api/v1.0/gm/users/{orgNo}/pswd-chg</c>, 바디 <c>{ "pswd": SHA256(새 비밀번호) }</c>.
+        /// 평문만 넘기면 해시는 여기서 <see cref="PasswordHash.ForChange"/>로 만든다(평문은 서버로 나가지 않는다).
+        /// 비밀번호 규칙(길이 · 문자 조합 · 이전 비밀번호 재사용) 판정은 서버가 하며, 어긋나면 <see cref="ApiException"/>으로 올라온다.
+        /// </summary>
+        /// <param name="orgNo">사번(로그인 아이디와 같은 값).</param>
+        /// <returns>
+        /// 서버 응답 봉투(<c>{status, message, code, data}</c>) — 성공 여부는 <see cref="ApiResponse{T}.IsSuccess"/>로 본다.
+        /// 서버가 2xx에 본문 없이 응답하면 null이다(이때는 상태코드로 이미 성공이 확인된 것이다).
+        /// </returns>
+        Task<ApiResponse<object>> SetPassword(string orgNo, string plainPassword, CancellationToken cancellationToken = default);
     }
 
     public class UserProfileApiClient : ApiClientBase, IUserProfileApiClient
@@ -40,6 +53,14 @@ namespace SEOJIN_TMES.Client.ApiClient
         {
             var response = await GetAsync<ApiDataResponse<WorkstationDto>>(ApiPrefix + "gm/users/self/workstations", cancellationToken).ConfigureAwait(false);
             return response?.Data ?? new WorkstationDto();
+        }
+
+        public Task<ApiResponse<object>> SetPassword(string orgNo, string plainPassword, CancellationToken cancellationToken = default)
+        {
+            // 사번이 경로에 들어가므로 이스케이프한다(GetProfileAsync와 같은 이유).
+            var path = ApiPrefix + "gm/users/" + Uri.EscapeDataString(orgNo ?? string.Empty) + "/pswd-chg";
+            var body = new PasswordChangeRequest { PasswordHash = PasswordHash.ForChange(plainPassword) };
+            return PatchAsync<PasswordChangeRequest, ApiResponse<object>>(path, body, cancellationToken);
         }
     }
 }
