@@ -217,8 +217,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
 
         private async void gridView_RowDoubleClick(object sender, EventArgs e)
         {
-            // 권한과 상관없이 작업 진입 확인 창을 연다(공정 진행 상태 확인).
-            // 저장 권한이 없으면 그 창의 [이동]이 숨겨져 POP로는 들어가지 않는다.
+            // 버튼 권한과 상관없이 작업 진입 확인 창을 연다 — 권한은 메뉴 진입 때 이미 확인했다.
             try
             {
                 await StartWorkAsync();
@@ -352,7 +351,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             RoutingProcessDto process;
             using (var confirm = new WorkEntryConfirmForm())
             {
-                confirm.Initialize(selected, processes, _permission.CanSave);
+                confirm.Initialize(selected, processes);
                 confirm.CenterOn(this);
                 if (confirm.ShowDialog(this) != DialogResult.OK)
                     return;
