@@ -14,6 +14,7 @@ using SEOJIN_TMES.Client.Theme;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace SEOJIN_TMES.Client.Forms.Pop
@@ -44,6 +45,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
         /// <summary>[검사 스팩] 판정 콤보의 펼침 버튼 폭 배율(기본 폭 대비).</summary>
         private const int ResultStateButtonScale = 2;
+
+        /// <summary>클립보드가 다른 프로그램에 잡혀 있을 때 다시 시도하는 횟수와 간격(ms) — 원격 접속 · 클립보드 관리 프로그램이 잠깐씩 잡는다.</summary>
+        private const int ClipboardRetryCount = 5;
+        private const int ClipboardRetryDelayMs = 100;
 
         private List<PopInputMaterialDto> _materials = new List<PopInputMaterialDto>();
         private List<PopBomSpecDto> _bomSpecs = new List<PopBomSpecDto>();
@@ -225,6 +230,11 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
             gridViewBomSpec.OptionsBehavior.Editable = true;
             SetResultInputColumnVisible(false);
+
+            // 복사(Ctrl+C) · 붙여넣기(Ctrl+V)는 GridViewBomSpec_KeyDown에서 직접 처리한다.
+            // 그리드 자체의 붙여넣기(줄 추가 · 여러 칸 덮어쓰기)는 꺼 둔다 — 입력 칸이 아닌 곳의 값이 바뀌면 안 된다.
+            gridViewBomSpec.OptionsClipboard.PasteMode = DevExpress.Export.PasteMode.None;
+            gridViewBomSpec.KeyDown += GridViewBomSpec_KeyDown;
 
             SetGridLineColor(gridViewBomSpec);
         }
@@ -904,6 +914,92 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             {
                 HandleError("BOM 결과 직접 입력", ex);
             }
+        }
+
+        /// <summary>
+        /// Ctrl+C(Ctrl+Insert) = 포커스 칸 하나의 값 복사, Ctrl+V(Shift+Insert) = 입력 칸에만 붙여넣기.
+        ///  - 복사: DevExpress 기본 동작은 <b>줄 전체</b>(머리글 포함)를 복사한다. 자재코드 하나만 옮겨 쓰려는
+        ///    작업자에게는 쓸 수 없는 모양이라, 고른 칸의 값만 넣는다(<see cref="CopyBomSpecCell"/>).
+        ///  - 붙여넣기: "토크 결과값" · "각도 결과값" 칸에서만 받는다(<see cref="PasteBomSpecCell"/>).
+        ///    그 밖의 칸은 키를 여기서 삼켜 아무 일도 일어나지 않게 한다.
+        /// 편집기가 열려 있으면 키가 편집기로 가서 편집기 안의 글자를 복사 · 붙여넣으므로 여기로 오지 않는다.
+        /// </summary>
+        private void GridViewBomSpec_KeyDown(object sender, KeyEventArgs e)
+        {
+            var isCopy = e.KeyData == (Keys.Control | Keys.C) || e.KeyData == (Keys.Control | Keys.Insert);
+            var isPaste = e.KeyData == (Keys.Control | Keys.V) || e.KeyData == (Keys.Shift | Keys.Insert);
+            if (!isCopy && !isPaste)
+                return;
+
+            // 편집 중인 칸의 복사 · 붙여넣기는 편집기 몫이다 — 혹시 여기로 와도 건드리지 않는다.
+            if (gridViewBomSpec.IsEditing)
+                return;
+
+            // 그리드의 기본 처리(줄 전체 복사)를 막는다. 뒤따르는 문자 메시지(Ctrl+V = 0x16)도 함께 지운다 —
+            // 남겨 두면 방금 연 편집기로 넘어가 한 번 더 붙여넣어진다.
+            e.SuppressKeyPress = true;
+
+            if (!gridViewBomSpec.IsDataRow(gridViewBomSpec.FocusedRowHandle))
+                return;
+
+            try
+            {
+                if (isCopy)
+                    CopyBomSpecCell();
+                else
+                    PasteBomSpecCell();
+            }
+            catch (ExternalException ex)
+            {
+                // 다른 프로그램이 클립보드를 잡고 있으면 열지 못한다 — 작업을 막을 일이 아니라 기록만 남긴다.
+                AppLog.Warn($"[POP] BOM 스팩 {(isCopy ? "복사" : "붙여넣기")} 실패 - 클립보드를 열 수 없음: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// 포커스 칸에 <b>보이는 글자</b>를 클립보드에 넣는다(숫자는 화면 서식 그대로).
+        /// 빈 칸이면 클립보드를 비운다 — 앞서 복사해 둔 값이 남아 있으면 "빈 칸을 복사했다"고 생각한 작업자가
+        /// 결과값 칸에 붙여넣을 때 엉뚱한 옛 값이 들어가 서버에 저장된다.
+        /// [입력] 버튼 칸은 값이 있는 칸이 아니라 건드리지 않는다.
+        /// </summary>
+        private void CopyBomSpecCell()
+        {
+            var column = gridViewBomSpec.FocusedColumn;
+            if (column == null || column.FieldName == ResultInputField)
+                return;
+
+            var text = gridViewBomSpec.GetFocusedDisplayText();
+            if (string.IsNullOrEmpty(text))
+                Clipboard.Clear();
+            else
+                Clipboard.SetDataObject(text, true, ClipboardRetryCount, ClipboardRetryDelayMs);
+        }
+
+        /// <summary>
+        /// 입력 칸("토크 결과값" · "각도 결과값")에 클립보드 글자를 넣는다. 값을 칸에 바로 쓰지 않고
+        /// <b>편집기를 열어</b> 넣는다 — 열 수 있는지(참조 줄 · 공정 상태)는 ShowingEditor가,
+        /// 숫자 검사 · 서버 저장은 ValidatingEditor가 손으로 쳤을 때와 똑같이 맡는다.
+        /// 입력 칸이 아니면 아무것도 하지 않는다.
+        /// </summary>
+        private void PasteBomSpecCell()
+        {
+            var fieldName = gridViewBomSpec.FocusedColumn?.FieldName;
+            if (fieldName != TorqueResultField && fieldName != AngleResultField)
+                return;
+
+            if (!Clipboard.ContainsText())
+                return;
+
+            gridViewBomSpec.ShowEditor();
+
+            // ShowingEditor가 거절했으면 편집기가 열리지 않는다(안내는 그쪽에서 이미 했다).
+            var editor = gridViewBomSpec.ActiveEditor as DevExpress.XtraEditors.TextEdit;
+            if (editor == null)
+                return;
+
+            // 들어 있던 값 뒤에 이어 붙지 않게 전체를 고른 뒤 바꿔 넣는다.
+            editor.SelectAll();
+            editor.Paste();
         }
 
         /// <summary>
