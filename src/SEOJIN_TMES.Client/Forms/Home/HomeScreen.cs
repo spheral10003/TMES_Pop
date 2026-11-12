@@ -215,8 +215,7 @@ namespace SEOJIN_TMES.Client.Forms.Home
                 if (IsDisposed || Disposing)
                     return;
 
-                foreach (var box in _noticeBoxes)
-                    box.SetItems(RecentNotices(notices, box.NtcType));
+                ShowNotices(notices);
             }
             catch (ApiException ex)
             {
@@ -231,6 +230,20 @@ namespace SEOJIN_TMES.Client.Forms.Home
             {
                 _noticeLoading = false;
             }
+        }
+
+        /// <summary>
+        /// 받은 공지 목록을 유형별 상자에 최근 <see cref="MaxNoticeRows"/>건씩 나눠 넣는다.
+        /// 홈 탭이 스스로 조회했을 때와, MainForm의 공지 폴링이 새 공지를 찾았을 때 모두 여기로 온다
+        /// (홈 탭이 가려져 있어도 채워 두면 돌아왔을 때 바로 보인다 — 돌아올 때 다시 조회도 한다).
+        /// </summary>
+        public void ShowNotices(List<NoticeDto> notices)
+        {
+            if (IsDisposed || Disposing || notices == null)
+                return;
+
+            foreach (var box in _noticeBoxes)
+                box.SetItems(RecentNotices(notices, box.NtcType));
         }
 
         /// <summary>

@@ -70,6 +70,13 @@ namespace SEOJIN_TMES.Client.Forms
         private readonly HashSet<string> _allowedMenuCodes = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         /// <summary>서버가 알려준 "안 읽은 알림" 개수. 폴링으로 갱신되며 배지 숫자의 근거가 된다.</summary>
         private long _unreadNotificationCount;
+
+        /// <summary>
+        /// 지금까지 받은 공지의 순번(<c>sysSeqId</c>). 폴링 결과에 이 목록에 없는 순번이 섞여 있으면 "새 공지"로 보고 홈 공지 상자를 다시 채운다.
+        /// 서버 응답에 새 글 여부(newYn)가 없어 클라이언트가 직접 비교한다 — 최대 순번 대신 집합으로 두는 이유는
+        /// 순번이 숫자로 온다는 보장이 없어서다. null이면 아직 한 번도 받지 못한 상태(첫 조회는 기준만 잡는다).
+        /// </summary>
+        private HashSet<string> _knownNoticeIds;
         private bool IsMenuVisible(string menuCode) => _allowedMenuCodes.Contains(menuCode);
 
         /// <summary>
@@ -728,8 +735,9 @@ namespace SEOJIN_TMES.Client.Forms
         }
 
         /// <summary>
-        /// 안 읽은 알림 개수를 주기적으로(기본 1분) 물어본다. 주기는 App.config의 NotificationPollingSeconds.
+        /// 안 읽은 알림 개수와 공지를 주기적으로(기본 1분) 물어본다. 주기는 App.config의 NotificationPollingSeconds.
         /// 열자마자 한 번 조회해서 로그인 직후에도 배지가 비어 보이지 않게 한다.
+        /// 알림(my-alarms)과 공지(notices)는 서로 다른 것이라 결과도 따로 쓴다 — 알림은 상단 배지, 공지는 홈 공지 상자.
         /// </summary>
         private void StartNotificationPolling()
         {
@@ -740,11 +748,11 @@ namespace SEOJIN_TMES.Client.Forms
                 return;
             }
 
-            _ = RefreshUnreadCountAsync();
+            PollNotifications();
 
             _notificationTimer = new System.Windows.Forms.Timer();
             _notificationTimer.Interval = seconds * 1000;
-            _notificationTimer.Tick += async (s, e) => await RefreshUnreadCountAsync();
+            _notificationTimer.Tick += NotificationTimer_Tick;
             _notificationTimer.Start();
 
             FormClosed += (s, e) =>
@@ -777,6 +785,53 @@ namespace SEOJIN_TMES.Client.Forms
             catch (Exception ex)
             {
                 ServerLog.Unexpected("알림 미읽음 개수 조회", ex);
+            }
+        }
+
+        private void NotificationTimer_Tick(object sender, EventArgs e)
+        {
+            PollNotifications();
+        }
+
+        /// <summary>폴링 1회 — 알림과 공지를 따로 조회한다(한쪽이 실패해도 다른 쪽은 그대로 진행된다).</summary>
+        private void PollNotifications()
+        {
+            _ = RefreshUnreadCountAsync();
+            _ = RefreshNoticesAsync();
+        }
+
+        /// <summary>
+        /// 공지 폴링 1회. 처음 받은 공지에 없던 순번이 오면 새 공지가 올라온 것으로 보고 홈 공지 상자를 받은 목록으로 다시 채운다.
+        /// 첫 조회는 기준만 잡는다 — 홈 탭이 처음 보일 때 스스로 공지를 받아 두므로 여기서 다시 채울 필요가 없다.
+        /// 실패해도 창을 띄우지 않는다(알림 폴링과 같은 이유). 홈 상자는 이전 내용을 그대로 둔다.
+        /// </summary>
+        private async Task RefreshNoticesAsync()
+        {
+            try
+            {
+                var notices = await _setting.ApiClients.NoticeApiClient.GetNotices();
+
+                if (IsDisposed)
+                    return;
+
+                var ids = new HashSet<string>(notices.Where(n => !string.IsNullOrEmpty(n.SysSeqId)).Select(n => n.SysSeqId));
+                var isFirst = _knownNoticeIds == null;
+                var newCount = isFirst ? 0 : ids.Count(id => !_knownNoticeIds.Contains(id));
+                _knownNoticeIds = ids;
+
+                if (newCount == 0)
+                    return;
+
+                AppLog.Info($"[공지] 새 공지 {newCount}건 — 홈 공지 상자를 다시 채운다");
+                _homeScreen?.ShowNotices(notices);
+            }
+            catch (ApiException ex)
+            {
+                AppLog.Warn($"[공지] 공지 조회 실패(홈 공지 상자는 이전 내용 유지): {ex.Message.Replace(Environment.NewLine, " ")}");
+            }
+            catch (Exception ex)
+            {
+                ServerLog.Unexpected("공지 조회", ex);
             }
         }
 
