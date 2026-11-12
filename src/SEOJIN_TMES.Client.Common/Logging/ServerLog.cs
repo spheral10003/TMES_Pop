@@ -79,14 +79,35 @@ namespace SEOJIN_TMES.Client.Common.Logging
             Enqueue(New(ClientLogType.AppStart, summary));
         }
 
-        /// <summary>로그인 성공. 사용자 정보는 이후 모든 로그에 함께 실린다.</summary>
+        /// <summary>
+        /// 로그인 성공. 사용자 정보는 이후 모든 로그에 함께 실린다.
+        ///
+        /// 로그인 전에 만들어져 대기열에 있는 로그(시작 · 로그인 전 설비 접속)는 corpCd가 비어 있는데,
+        /// 서버는 corpCd를 필수로 받는다 — 여기서 비어 있는 것만 채운다.
+        /// corpCd는 로그인 때 확정되는 사업장 코드라 로그인 전 로그에도 같은 값이 맞다.
+        /// userId는 채우지 않는다 — 로그인 전 일을 그 사용자가 한 것처럼 남기지 않으려고.
+        /// 이 로그들은 메인 화면에서 <see cref="Attach"/>한 뒤에야 나가므로 전송 전에 반드시 채워진다.
+        /// </summary>
         public static void LoggedIn(string userId, string corpCd)
         {
+            int filled = 0;
             lock (SyncRoot)
             {
                 _userId = userId;
                 _corpCd = corpCd;
+
+                foreach (var pending in Pending)
+                {
+                    if (string.IsNullOrEmpty(pending.CorpCd))
+                    {
+                        pending.CorpCd = corpCd;
+                        filled++;
+                    }
+                }
             }
+
+            if (filled > 0)
+                AppLog.Info($"[서버로그] 로그인 전 로그 {filled}건에 CorpCd={corpCd} 채움");
 
             AppLog.Step($"[서버로그] 로그인 - UserId={userId}, CorpCd={corpCd}, PC={Environment.MachineName}");
             Enqueue(New(ClientLogType.Login, $"로그인 - {userId}, PC {Environment.MachineName}"));
