@@ -1265,13 +1265,24 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             try
             {
                 if (!await Screen.SetInspectionResult(spec, "row"))
-                    _pendingInspections.Add(spec);
+                    KeepPendingInspection(spec);
             }
             catch (Exception ex)
             {
-                _pendingInspections.Add(spec);
+                KeepPendingInspection(spec);
                 HandleError("검사 결과 전송", ex);
             }
+        }
+
+        /// <summary>
+        /// 보내지 못한 검사 줄을 다시 "보낼 줄"로 남긴다 — 단 지금 검사 탭의 줄일 때만.
+        /// 전송이 409로 거절되면 공정 정보를 다시 읽어(<see cref="SendInspectionResult"/>) 검사 탭이 새 줄로 바뀌는데,
+        /// 옛 줄을 다시 넣으면 화면에 없는 줄이 남아 공정 이동 때(<see cref="SavePendingInspections"/>) 옛 값이 다시 나간다.
+        /// </summary>
+        private void KeepPendingInspection(PopInspectionSpecDto spec)
+        {
+            if (_inspections.Contains(spec))
+                _pendingInspections.Add(spec);
         }
 
         /// <summary>검사 스팩 한 줄이 서버에 저장까지 끝났는지 — 입력됐어도 아직 보내지 않은 줄은 완료가 아니다.</summary>

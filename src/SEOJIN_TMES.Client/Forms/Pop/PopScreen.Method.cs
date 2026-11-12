@@ -1445,6 +1445,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             result.inspRsltVl = spec.IsQuantitative ? spec.ResultValue ?? string.Empty : null;
             result.inspRemark = spec.InspectionResultRemark ?? string.Empty;
 
+            var isConflict = false;
             BeginResultSave();
             try
             {
@@ -1457,11 +1458,24 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 if (IsDisposed || Disposing) return false;
 
                 AppMessageBox.Warn(this, ex.Message, Language.Pop_TabInspection);
-                return false;
+                isConflict = ex.StatusCode == HttpStatusCode.Conflict;
+                if (!isConflict)
+                    return false;
             }
             finally
             {
                 EndResultSave();
+            }
+
+            // 409는 서버가 지금 상태로는 받을 수 없다는 뜻이다(WORK_002 "이미 완료" 등) — 화면이 아는 공정 상태가 서버와 다르다.
+            // 다시 읽지 않으면 서버는 완료인데 띠가 "진행중"으로 남아, 작업자가 같은 입력을 되풀이하며 같은 거절을 받았다
+            // (현장 2026-11-12). 투입자재 저장(InputMaterial)의 409 처리와 같이 서버 상태로 다시 그린다 —
+            // 다시 읽으면 검사 탭도 서버 값으로 바뀌고 보낼 줄 표시(_pendingInspections)도 비워진다.
+            if (isConflict)
+            {
+                AppLog.Info($"[POP] 검사 결과 전송 409 - 공정 정보 다시 조회 ({_key.RoutingOperation}/{_key.PageOperation}, 화면 상태 {_progressState})");
+                await GetProcessInfo();
+                return false;
             }
 
             return true;
