@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 using SEOJIN_TMES.Client.Common.Errors;
 using SEOJIN_TMES.Client.Common.Models;
 
@@ -353,7 +354,29 @@ namespace SEOJIN_TMES.Client.Common.Logging
                     // 서버가 계속 실패하는 동안 재시도로 대기열이 쌓이면 메모리만 먹는다.
                     // 다음 건은 계속 보낸다 — 한 건의 거절(필드 값 문제 등)로 뒤의 로그까지 버리지 않으려고.
                     AppLog.Warn($"[서버로그] 전송 실패 {log.EventName} {log.OccurredAt}(로컬 파일에는 남아 있다) - {ex.Message.Replace(Environment.NewLine, " ")}");
+
+                    // 보낸 바디를 그대로 남긴다 — 통신 로그(LoggingHandler)는 요청 바디를 남기지 않아,
+                    // 서버가 "본문 해석 실패"로 거절하면 무엇을 보냈는지 로그로 알 길이 없다.
+                    // 이벤트 로그 바디에는 비밀 값이 없고, 같은 내용이 이미 이 파일에 풀어 적혀 있다.
+                    AppLog.Warn($"[서버로그] 전송 실패 바디 {ToBodyJson(log)}");
                 }
+            }
+        }
+
+        /// <summary>
+        /// 서버로 나간 요청 바디와 같은 JSON. <c>ApiClientBase</c>가 바디를 만들 때와 같은 기본 설정으로 직렬화하므로
+        /// 필드명 · null 표기 · 줄바꿈 이스케이프까지 실제 전송분과 같고, 한 줄로 나온다.
+        /// 실패 안내용이라 직렬화가 실패해도 던지지 않는다 — 전송 루프가 멈추면 뒤의 로그가 모두 버려진다.
+        /// </summary>
+        private static string ToBodyJson(ClientLogDto log)
+        {
+            try
+            {
+                return JsonConvert.SerializeObject(log);
+            }
+            catch (Exception ex)
+            {
+                return $"(바디를 JSON으로 만들지 못함: {ex.Message})";
             }
         }
     }
