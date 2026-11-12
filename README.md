@@ -50,7 +50,7 @@ src/
     Localization/                다국어 리소스 (Strings.resx=한국어 기본, .en=영어, .vi=베트남어)
     Composition/                 컴포지션 루트 보조 (App.config 로더, ClientContext)
     Program.cs                   진입점: 설정 로드 → API/설비 조립 → 로그인 → 메인화면
-    App.config                   ApiBaseUrl, 설비(Host/Port) 목록 등 환경설정
+    App.config                   ApiBaseUrl, Modbus 타임아웃 등 환경설정
 
   SEOJIN_TMES.Client.Common/     DTO, 설정 모델, 로깅 (서버·클라이언트 공용 계약)
     Storage/                     도면 PDF 보관소(SMB 공유 폴더) 접근 — 자격증명 연결 + 파일 읽기
@@ -105,7 +105,7 @@ src/
 - 지원 기능 코드: `0x01/0x02/0x03/0x04`(Read), `0x05/0x06/0x0F/0x10`(Write). 표에 없는 벤더 확장 코드는 `ModbusRequest.Custom(fc, data)`로 raw PDU를 그대로 보낼 수 있다.
 - 화면/업무 코드는 논리 명령(`EquipmentCommand.Start/Stop/Reset/StatusRequest`)만 다루고, 실제 주소·값 변환은 `App.config`의 `RegisterMap` 설정이 담당한다 — 레지스터 맵이 바뀌어도 화면 코드는 손대지 않는다.
 - 이벤트 수신 시 장비에 확인(ACK)을 돌려줘야 하는 구성이면 `EventAckMode`를 `"Echo"`로 두면 받은 프레임을 같은 Transaction Id로 회신한다(기본 `"None"`).
-- 설비 접속 정보는 `App.config`의 `Equipments`(JSON)에서 로드한다. 필드 설명은 App.config 주석 참고: `Port`/`EventPort`/`UseStandardConnection`/`UseEventConnection`/`UnitId`/`ResponseTimeoutMs`/`EventAckMode`/`RegisterMap`.
+- 설비 접속 정보(IP · 포트)는 `App.config`에 두지 않는다 — 서버가 내려준 공정의 설비 목록을 POP 화면이 `Devices.Attach`로 넘겨 연결한다.
 - `Connect()`는 즉시 리턴하고, 실제 TCP 접속은 각 Connection 전용 스레드 안에서 수행한다(접속 시도 자체가 UI 스레드를 막지 않도록). 접속 타임아웃은 App.config `ModbusConnectTimeoutMs`(기본 500ms)이고, 접속 후 TCP KeepAlive(`ModbusKeepAliveTimeMs` 기본 5000ms / `ModbusKeepAliveIntervalMs` 기본 5000ms)로 신호 없이 끊긴 연결을 감지한다. **주의**: 실재하지 않는 IP는 항상 접속 타임아웃 후 실패한다 — 정상 동작이며, 실제 설비 IP로 교체하거나 당장 필요 없으면 `AutoConnect`를 `false`로 두면 된다.
 - **확인 방법**: 로컬 가짜 슬레이브(TcpListener)를 띄워 코덱 프레이밍(정상/분할/연속/예외응답/재동기화), 표준 Connection의 요청→응답, 이벤트 Connection의 실시간 push 수신까지 스모크 테스트로 통과 확인했다(2026-08-24). 실장비 연동 시에는 아래 TODO의 레지스터 맵만 채우면 된다.
 
@@ -282,7 +282,7 @@ POP 화면 (PopScreen) — 같은 탭의 내용만 바뀌고, 탭 제목은 "POP
 **동작 규칙 / 가정** — 목업에 명시가 없어 다음과 같이 정했다. 운영 규칙이 다르면 알려주면 맞춘다:
 
 - **합/불 판정은 하지 않는다.** 토크 하한/상한과 검사 결과는 화면에 그대로 보여만 주고 판정은 서버 몫이다(값이 없는 숫자 칸은 `-`로 표기).
-- 설비에서 올라온 프레임의 **첫 레지스터를 1/100 스케일의 토크 값**으로 본다 — 레지스터 맵이 확정되면 `App.config`의 `Equipments[].RegisterMap`으로 지정할 것(아래 TODO 2).
+- 설비에서 올라온 프레임의 **첫 레지스터를 1/100 스케일의 토크 값**으로 본다(레지스터 맵 확정은 아래 TODO 2).
 - 연결 장비 탭의 **장비코드(`EquipmentCode`)가 `App.config`의 `EquipmentId`와 같아야** 실시간 연결 상태가 붙는다. 두 Connection(표준/이벤트) 중 하나라도 연결돼 있으면 "연결 성공"으로 본다.
 - 목업에 없던 **[결과 저장]** 버튼을 BOM 스팩/검사 스팩 탭에 두었다(입력한 결과를 서버로 올릴 통로가 필요해서).
 - 좌측 **작업 표준/도면**은 SMB 공유 폴더의 PDF를 띄운다(바로 아래 [도면 PDF](#작업-표준--도면-pdf--smb-공유-폴더) 참고). 도면이 없거나 읽지 못하면 대각선 자리표시자에 사유만 적고 화면의 나머지 기능은 그대로 쓸 수 있다.
@@ -637,7 +637,7 @@ Visual Studio에서 `SEOJIN_TMES.Client` 프로젝트 우클릭 → **게시(Pub
 ## 다음에 정해줘야 할 것들 (TODO)
 
 1. **REST API 실제 스펙**: 로그인/작업지시/생산실적/설비상태 엔드포인트 경로·필드명 확정 → `SEOJIN_TMES.Client.ApiClient`의 각 `*ApiClient` 클래스 조정
-2. **설비 Modbus 레지스터 맵**: 제어/상태 레지스터 주소와 값의 의미, 실시간 이벤트 프레임의 payload 정의 → `App.config`의 `Equipments[].RegisterMap`과 `PopScreen`의 상태 매핑 채우기 (필요하면 Advertise/Scan ack/Search ack 자동 탐색도 함께)
+2. **설비 Modbus 레지스터 맵**: 제어/상태 레지스터 주소와 값의 의미, 실시간 이벤트 프레임의 payload 정의 → `PopScreen`의 상태 매핑 채우기 (필요하면 Advertise/Scan ack/Search ack 자동 탐색도 함께)
 3. **화면 필드 상세**: 생산현황조회/작업통합현황조회 화면에 실제로 표시·입력할 컬럼/필드 목록
 4. **DevExpress Tab & Navigation, Splash Screen 모듈 설치 여부** → 설치되면 `MainForm.cs` 탭 영역을 `XtraTabControl`로 교체
 5. **ClickOnce 배포 서버 정보**(URL, 서명 인증서) 및 회사명/제품명 확정

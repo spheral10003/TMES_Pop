@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace SEOJIN_TMES.Client.Common.Configuration
 {
     /// <summary>App.config에서 로드되는 클라이언트 실행 설정. 값 자체는 SEOJIN_TMES.Client/App.config에서 관리.</summary>
@@ -39,7 +37,6 @@ namespace SEOJIN_TMES.Client.Common.Configuration
         public int UploadMaxMegaBytes { get; set; } = 10;
         /// <summary>자동 로그아웃까지의 세션 유지 시간(분). 메인 화면 우측 상단 카운트다운의 시작 값이다.</summary>
         public int SessionTimeoutMinutes { get; set; } = 300;
-        //public List<EquipmentEndpoint> Equipments { get; set; } = new List<EquipmentEndpoint>();
 
         /// <summary>
         /// 안 읽은 알림 개수 폴링 주기(초). 상단 종 아이콘 배지 숫자를 이 간격으로 갱신한다.
@@ -146,85 +143,4 @@ namespace SEOJIN_TMES.Client.Common.Configuration
             return Domain.Trim() + "\\" + UserName.Trim();
         }
     }
-
-    /// <summary>
-    /// 설비(Tool) 1대에 대한 Modbus-TCP 접속 정보.
-    /// 장비 스펙에 따라 한 설비에 두 종류의 Connection이 존재한다.
-    ///  - Standard Modbus-TCP connection    : <see cref="Port"/>       (요청/응답 한 쌍으로 동작하는 일반 Modbus 통신, 모든 Read/Write)
-    ///  - Customized Modbus-TCP connection  : <see cref="EventPort"/>  (Port+1, Tool→Controller 실시간 이벤트 전용, Read/Write 미지원)
-    /// 두 포트 번호는 원래 Advertise / Scan ack / Search ack 메시지로 받는 값이며,
-    /// 현재는 App.config에 직접 적어 사용한다(자동 탐색은 TODO).
-    /// </summary>
-    //public class EquipmentEndpoint
-    //{
-    //    public string EquipmentId { get; set; }
-    //    public string EquipmentName { get; set; }
-    //    public string Host { get; set; }
-
-    //    /// <summary>Standard Modbus-TCP connection 포트. Modbus 기본값은 502.</summary>
-    //    public int Port { get; set; } = 502;
-
-    //    /// <summary>
-    //    /// Customized(이벤트) Modbus-TCP connection 포트.
-    //    /// 0 이하면 스펙 기본 규칙대로 <see cref="Port"/> + 1을 사용한다(<see cref="ResolveEventPort"/>).
-    //    /// </summary>
-    //    public int EventPort { get; set; }
-
-    //    /// <summary>표준 Connection(요청/응답) 사용 여부.</summary>
-    //    public bool UseStandardConnection { get; set; } = true;
-
-    //    /// <summary>Customized(이벤트) Connection 사용 여부.</summary>
-    //    public bool UseEventConnection { get; set; } = true;
-
-    //    /// <summary>MBAP Unit Identifier(Slave 주소).</summary>
-    //    public byte UnitId { get; set; } = 1;
-
-    //    /// <summary>표준 Connection에서 요청 후 응답을 기다리는 시간(ms).</summary>
-    //    public int ResponseTimeoutMs { get; set; } = 3000;
-
-    //    public bool AutoConnect { get; set; } = true;
-
-    //    /// <summary>실시간 이벤트 수신 시 장비에 확인(ACK)을 돌려줄지 여부.</summary>
-    //    public ModbusEventAckMode EventAckMode { get; set; } = ModbusEventAckMode.None;
-
-    //    /// <summary>논리 명령(Start/Stop/Reset/상태조회)이 어떤 레지스터로 매핑되는지. 미지정 시 기본값 사용.</summary>
-    //    public ModbusRegisterMap RegisterMap { get; set; }
-
-    //    /// <summary>이벤트 Connection 실제 포트 번호(설정값 없으면 Port+1).</summary>
-    //    public int ResolveEventPort() => EventPort > 0 ? EventPort : Port + 1;
-
-    //    public ModbusRegisterMap ResolveRegisterMap() => RegisterMap ?? new ModbusRegisterMap();
-    //}
-
-    ///// <summary>Customized(이벤트) Connection에서 수신 이벤트에 대한 응답 처리 방식.</summary>
-    //public enum ModbusEventAckMode
-    //{
-    //    /// <summary>아무것도 돌려보내지 않는다(장비가 단방향 push만 기대하는 경우).</summary>
-    //    None,
-
-    //    /// <summary>받은 프레임을 같은 Transaction Id로 그대로 되돌려 보낸다.</summary>
-    //    Echo
-    //}
-
-    ///// <summary>
-    ///// 논리 명령/상태 조회를 실제 Modbus 주소로 옮기는 매핑 표.
-    ///// TODO(장비 레지스터 맵 확정 전 임시값): 실제 주소/값 표를 받으면 App.config의
-    ///// Equipments[].RegisterMap 으로 덮어쓰거나 여기 기본값을 교체한다.
-    ///// </summary>
-    //public class ModbusRegisterMap
-    //{
-    //    /// <summary>Start/Stop/Reset 명령을 쓰는 제어 레지스터 주소.</summary>
-    //    public ushort ControlRegisterAddress { get; set; } = 0;
-
-    //    public ushort StartValue { get; set; } = 1;
-    //    public ushort StopValue { get; set; } = 2;
-    //    public ushort ResetValue { get; set; } = 3;
-
-    //    /// <summary>상태 조회 시 읽을 시작 주소와 레지스터 개수.</summary>
-    //    public ushort StatusRegisterAddress { get; set; } = 0;
-    //    public ushort StatusRegisterCount { get; set; } = 8;
-
-    //    /// <summary>true면 상태 조회에 Input Registers(FC 0x04), false면 Holding Registers(FC 0x03)를 쓴다.</summary>
-    //    public bool StatusUsesInputRegisters { get; set; }
-    //}
 }

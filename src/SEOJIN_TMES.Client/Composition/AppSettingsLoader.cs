@@ -68,13 +68,6 @@ namespace SEOJIN_TMES.Client.Composition
             if (int.TryParse(ConfigurationManager.AppSettings["ModbusTestIntervalMs"], out var testIntervalMs))
                 settings.ModbusTestIntervalMs = testIntervalMs;
 
-            //var equipmentsJson = ConfigurationManager.AppSettings["Equipments"];
-            //if (!string.IsNullOrWhiteSpace(equipmentsJson))
-            //{
-            //    settings.Equipments = JsonConvert.DeserializeObject<System.Collections.Generic.List<EquipmentEndpoint>>(equipmentsJson)
-            //                           ?? new System.Collections.Generic.List<EquipmentEndpoint>();
-            //}
-
             var documentShareJson = ConfigurationManager.AppSettings["DocumentShare"];
             if (!string.IsNullOrWhiteSpace(documentShareJson))
             {

@@ -41,7 +41,7 @@ deploy/
 > **주의:** 계정 · 비밀번호를 넣으면 게시본 `<앱 ID>.exe.config.deploy`에 평문으로 들어가
 > 배포 웹 서버에서 **누구나 내려받을 수 있다.** 되도록 비워 두고 현장 PC 윈도우 계정에 공유 권한을 주는 편이 낫다.
 
-게시본 App.config는 지역 공통으로 `LogApiResponseBody=false`, `Equipments`(설비 목록)는 `[]`.
+게시본 App.config는 지역 공통으로 `LogApiResponseBody=false`.
 
 - `SEOJIN_TMES.Client.csproj`는 `-p:Region=<지역>`이 있을 때만 `regions/<지역>/region.props`를 불러와
   배포 주소 · App.config를 바꾼다. Region 없이 빌드(F5, 일반 빌드)하면 지금처럼 개발용 `src/SEOJIN_TMES.Client/App.config`를 쓴다.
@@ -189,7 +189,6 @@ location /pop/ {
 1. **화면에서 바꿔 exe.config에 저장하는 값은 업데이트 때 초기화된다.**
    ClickOnce는 버전마다 새 폴더에 설치하고 게시본의 exe.config로 덮는다. 현재 해당되는 곳:
    - `Core/Setting.cs` `SaveCulture` — 로그인 화면에서 고른 언어(`DefaultCulture`)
-   - `Core/Devices.cs` `Save` — 설비 목록(`Equipments`)
    → `UserPreferences`(%APPDATA%)처럼 사용자 폴더로 옮겨야 업데이트 후에도 유지된다.
 2. **게시된 App.config는 배포 서버에서 누구나 내려받을 수 있다**(`<앱 ID>.exe.config.deploy`).
    지역 App.config의 `DocumentShare`에 비밀번호를 넣지 말 것 — 도메인 계정 접근(UserName/Password 비움)을 쓰거나
