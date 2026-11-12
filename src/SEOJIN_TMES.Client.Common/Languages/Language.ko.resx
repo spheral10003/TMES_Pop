@@ -279,8 +279,8 @@
   <data name="Home_NoticeLoadFailed" xml:space="preserve">
     <value>공지사항을 불러오지 못했습니다.</value>
   </data>
-  <data name="Menu_MEIS" xml:space="preserve">
-    <value>MEIS</value>
+  <data name="Menu_TMES" xml:space="preserve">
+    <value>TMES</value>
   </data>
   <data name="Menu_WorkManagement" xml:space="preserve">
     <value>작업관리</value>

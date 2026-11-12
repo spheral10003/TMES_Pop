@@ -279,8 +279,8 @@
   <data name="Home_NoticeLoadFailed" xml:space="preserve">
     <value>Failed to load notices.</value>
   </data>
-  <data name="Menu_MEIS" xml:space="preserve">
-    <value>MEIS</value>
+  <data name="Menu_TMES" xml:space="preserve">
+    <value>TMES</value>
   </data>
   <data name="Menu_WorkManagement" xml:space="preserve">
     <value>Work Management</value>

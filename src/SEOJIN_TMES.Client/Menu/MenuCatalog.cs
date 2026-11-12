@@ -25,7 +25,7 @@ namespace SEOJIN_TMES.Client.Menu
         /// <param name="isVisible">MenuCode를 받아 이 화면을 보여 줄지 답한다. null이면 걸러내지 않는다(전체 표시).</param>
         public static MenuNode BuildRoot(Func<string, bool> isVisible = null)
         {
-            var root = new MenuNode("TMES", () => Language.Menu_MEIS);
+            var root = new MenuNode("TMES", () => Language.Menu_TMES);
             root.Icon = AppIcons.Dashboard;
 
             var workManagement = new MenuNode("WorkManagement", () => Language.Menu_WorkManagement);

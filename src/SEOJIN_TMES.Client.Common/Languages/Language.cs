@@ -129,7 +129,7 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string Home_NoticeEmpty => Get(nameof(Home_NoticeEmpty));
         public static string Home_NoticeLoadFailed => Get(nameof(Home_NoticeLoadFailed));
 
-        public static string Menu_MEIS => Get(nameof(Menu_MEIS));
+        public static string Menu_TMES => Get(nameof(Menu_TMES));
         public static string Menu_WorkManagement => Get(nameof(Menu_WorkManagement));
         public static string Menu_POP => Get(nameof(Menu_POP));
         public static string Menu_WorkStatusInquiry => Get(nameof(Menu_WorkStatusInquiry));
