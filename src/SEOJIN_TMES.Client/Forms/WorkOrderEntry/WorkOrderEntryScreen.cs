@@ -89,8 +89,8 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
         private ProgramPermissionDto _permission = ProgramPermissionDto.None();
 
         /// <summary>
-        /// 버튼 권한을 받아 [조회](srchAuthYn) · [작업](strgAuthYn)을 보이거나 숨긴다.
-        /// [작업]은 POP로 들어가 공정을 시작(서버에 실적 기록)하므로 저장 권한으로 본다.
+        /// 버튼 권한을 받아 [조회] · [작업]을 보이거나 숨긴다. 둘 다 조회 권한(srchAuthYn)이다 —
+        /// [작업]을 저장 권한으로 두었더니 조회만 있는 현장 계정이 작업에 들어가지 못해 사용자 지정으로 바꿨다.
         /// </summary>
         private async void SetPermission()
         {
@@ -102,8 +102,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
                 return;
 
             _permission = permission;
-            MenuPermission.SetVisible(_permission.CanSearch, btnSearch);
-            MenuPermission.SetVisible(_permission.CanSave, btnWork);
+            MenuPermission.SetVisible(_permission.CanSearch, btnSearch, btnWork);
         }
 
         /// <summary>
