@@ -76,7 +76,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
             _permission = ProgramPermissionDto.None();
             MenuPermission.SetVisible(false, btnSearch, btnExcelExport);
 
-            var permission = await MenuPermission.Get(MenuCodes.WorkIntegratedStatus, this);
+            var permission = await MenuPermission.Get(MenuCodes.WorkIntegratedStatus);
             if (IsDisposed || Disposing)
                 return;
 

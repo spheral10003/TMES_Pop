@@ -97,7 +97,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             _permission = ProgramPermissionDto.None();
             MenuPermission.SetVisible(false, btnSearch);
 
-            var permission = await MenuPermission.Get(MenuCodes.WorkStatusSearch, this);
+            var permission = await MenuPermission.Get(MenuCodes.WorkStatusSearch);
             if (IsDisposed || Disposing)
                 return;
 

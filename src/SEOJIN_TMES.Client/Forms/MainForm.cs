@@ -956,12 +956,51 @@ namespace SEOJIN_TMES.Client.Forms
 
 
 
-        private void Accordion_ElementClick(object sender, ElementClickEventArgs e)
+        /// <summary>권한을 확인하는 중인 메뉴(Key). 응답 전에 같은 메뉴를 또 눌러 탭이 두 번 열리거나 안내가 겹치지 않게 한다.</summary>
+        private readonly HashSet<string> _checkingMenuKeys = new HashSet<string>();
+
+        /// <summary>
+        /// 이미 열린 화면이면 그 탭으로 간다. 새로 열 때는 먼저 조회 권한(버튼 권한 srchAuthYn)을 서버에 확인해,
+        /// 없으면 "권한이 없습니다" 안내만 띄우고 화면을 만들지 않는다(<see cref="MenuPermission.CanOpen"/>).
+        /// </summary>
+        private async void Accordion_ElementClick(object sender, ElementClickEventArgs e)
         {
-            if (e.Element.Tag is MenuNode node && node.IsScreen)
+            if (!(e.Element.Tag is MenuNode node) || !node.IsScreen)
+                return;
+
+            try
             {
-                ServerLog.MenuClicked(node.Key, node.Text, _openScreens.ContainsKey(node.Key) ? "Focus" : "Open");
-                OpenOrFocusTab(node);
+                if (_openScreens.ContainsKey(node.Key))
+                {
+                    ServerLog.MenuClicked(node.Key, node.Text, "Focus");
+                    OpenOrFocusTab(node);
+                    return;
+                }
+
+                if (!_checkingMenuKeys.Add(node.Key))
+                    return;
+
+                bool canOpen;
+                try
+                {
+                    canOpen = await MenuPermission.CanOpen(node.MenuCode, this);
+                }
+                finally
+                {
+                    _checkingMenuKeys.Remove(node.Key);
+                }
+
+                if (IsDisposed || Disposing)
+                    return;
+
+                ServerLog.MenuClicked(node.Key, node.Text, canOpen ? "Open" : "Denied");
+                if (canOpen)
+                    OpenOrFocusTab(node);
+            }
+            catch (Exception ex)
+            {
+                // async void에서 예외가 새면 앱이 그대로 종료된다.
+                AppLog.Error($"메뉴 열기 실패 - {node.Key}", ex);
             }
         }
 

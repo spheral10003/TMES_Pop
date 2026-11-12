@@ -108,7 +108,7 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             _permission = ProgramPermissionDto.None();
             ShowPermittedButtons();
 
-            var permission = await MenuPermission.Get(MenuCodes.AttachmentSearch, this);
+            var permission = await MenuPermission.Get(MenuCodes.AttachmentSearch);
             if (IsDisposed || Disposing)
                 return;
 
