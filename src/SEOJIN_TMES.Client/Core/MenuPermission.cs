@@ -1,6 +1,9 @@
 using SEOJIN_TMES.Client.ApiClient;
+using SEOJIN_TMES.Client.Common.Languages;
 using SEOJIN_TMES.Client.Common.Logging;
 using SEOJIN_TMES.Client.Common.Models;
+using SEOJIN_TMES.Client.Forms.Common;
+using System;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -22,25 +25,51 @@ namespace SEOJIN_TMES.Client.Core
         /// 확인하지 못한 권한으로 저장 · 삭제 버튼을 열어 두지 않기 위해서다. 실패 사유는 로그에만 남기고 창은 띄우지 않는다
         /// (화면을 열 때마다 부르므로, 서버가 잠깐 불안정할 때 안내 창이 겹겹이 뜨지 않게).
         /// </summary>
-        public static async Task<ProgramPermissionDto> Get(string menuCode)
+        public static Task<ProgramPermissionDto> Get(string menuCode) => Get(menuCode, null);
+
+        /// <summary>
+        /// <see cref="Get(string)"/>와 같되, 서버가 <b>조회 권한 없음</b>으로 답하면(권한 행 없음 포함)
+        /// <paramref name="owner"/> 화면 위에 "권한이 없습니다" 안내를 띄운다(Common_NoPermission, 다국어).
+        /// 조회 자체가 실패한 경우는 권한이 없다고 단정할 수 없으므로 안내하지 않고 로그만 남긴다.
+        /// 응답이 늦게 와 화면이 이미 닫혔으면 띄우지 않는다.
+        /// </summary>
+        /// <param name="owner">안내 창의 소유자. null이면 안내하지 않는다(POP 화면처럼 진입 화면에서 이미 걸러진 경우).</param>
+        public static async Task<ProgramPermissionDto> Get(string menuCode, Control owner)
         {
+            ProgramPermissionDto permission;
             try
             {
-                var permission = await Global.Instance.Settings.ApiClients.AuthorityApiClient.GetProgramPermission(menuCode);
-                if (permission == null)
-                {
-                    AppLog.Warn($"버튼 권한 없음(서버 권한 행 없음) - {menuCode}");
-                    return ProgramPermissionDto.None();
-                }
-
-                AppLog.Info($"버튼 권한 {menuCode} : {permission}");
-                return permission;
+                permission = await Global.Instance.Settings.ApiClients.AuthorityApiClient.GetProgramPermission(menuCode);
             }
             catch (ApiException ex)
             {
                 AppLog.Error($"버튼 권한 조회 실패 - {menuCode} : [{ex.Code}] {ex.Message}", ex);
                 return ProgramPermissionDto.None();
             }
+            catch (Exception ex)
+            {
+                // 화면들이 async void(SetPermission)에서 부르므로 예상 밖 예외도 여기서 막는다 — 새면 앱이 종료된다.
+                AppLog.Error($"버튼 권한 조회 중 예외 - {menuCode}", ex);
+                return ProgramPermissionDto.None();
+            }
+
+            if (permission == null)
+            {
+                AppLog.Warn($"버튼 권한 없음(서버 권한 행 없음) - {menuCode}");
+                permission = ProgramPermissionDto.None();
+            }
+            else
+            {
+                AppLog.Info($"버튼 권한 {menuCode} : {permission}");
+            }
+
+            if (owner != null && !permission.CanSearch && !owner.IsDisposed && !owner.Disposing)
+            {
+                AppLog.Warn($"조회 권한 없음 안내 - {menuCode}");
+                AppMessageBox.Warn(owner, Language.Common_NoPermission, Language.Common_Notice);
+            }
+
+            return permission;
         }
 
         /// <summary>권한 여부로 버튼들의 Visible을 한 번에 정한다.</summary>

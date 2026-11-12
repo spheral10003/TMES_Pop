@@ -22,7 +22,7 @@ using System.Windows.Forms;
 namespace SEOJIN_TMES.Client.Forms.Attachment
 {
     /// <summary>
-    /// TMES &gt; 작업관리 &gt; 첨부파일 조회.
+    /// TMES &gt; 작업관리 &gt; 첨부파일 관리.
     ///
     /// 흐름:
     ///  1) 등록일자 범위 · 시리얼번호 · 작업지시번호로 [조회] → 좌측 [목록]
@@ -108,7 +108,7 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             _permission = ProgramPermissionDto.None();
             ShowPermittedButtons();
 
-            var permission = await MenuPermission.Get(MenuCodes.AttachmentSearch);
+            var permission = await MenuPermission.Get(MenuCodes.AttachmentSearch, this);
             if (IsDisposed || Disposing)
                 return;
 
@@ -306,7 +306,7 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             {
                 if (IsDisposed || Disposing) return;
 
-                AppLog.Error("첨부파일 조회 화면 - 작업지시 조회 실패", ex);
+                AppLog.Error("첨부파일 관리 화면 - 작업지시 조회 실패", ex);
                 AppMessageBox.Warn(this, ex.Message, Language.Attach_Title);
             }
             finally

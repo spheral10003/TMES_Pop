@@ -1183,10 +1183,10 @@ Hệ thống sẽ tự động thử kết nối lại cho đến khi thành cô
     <value>Xóa tệp thất bại</value>
   </data>
   <data name="Menu_AttachmentSearch" xml:space="preserve">
-    <value>Tra cứu tệp đính kèm</value>
+    <value>Quản lý tệp đính kèm</value>
   </data>
   <data name="Attach_Title" xml:space="preserve">
-    <value>Tra cứu tệp đính kèm</value>
+    <value>Quản lý tệp đính kèm</value>
   </data>
   <data name="Attach_RegDate" xml:space="preserve">
     <value>Ngày đăng ký</value>
@@ -1457,5 +1457,8 @@ Hệ thống sẽ tự động thử kết nối lại cho đến khi thành cô
   </data>
   <data name="Error_FILE_013" xml:space="preserve">
     <value>Không thể kết nối tới thư mục chia sẻ. (Lỗi Windows {0})</value>
+  </data>
+  <data name="Common_NoPermission" xml:space="preserve">
+    <value>Bạn không có quyền.</value>
   </data>
 </root>

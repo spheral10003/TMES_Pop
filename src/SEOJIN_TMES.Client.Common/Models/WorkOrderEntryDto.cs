@@ -80,13 +80,13 @@ namespace SEOJIN_TMES.Client.Common.Models
         public string Remark { get; set; }
 
         /// <summary>
-        /// 작업지시에 붙은 첨부파일 개수(첨부파일 조회 화면). 서버가 센 값을 그대로 표시한다.
+        /// 작업지시에 붙은 첨부파일 개수(첨부파일 관리 화면). 서버가 센 값을 그대로 표시한다.
         /// 목록 API(md/work-orders/overview) 응답의 attachmentCount 필드.
         /// </summary>
         [JsonProperty("attachmentCount")]
         public int? AttachmentCount { get; set; }
 
-        /// <summary>최종 수정자(첨부파일 조회 화면 "수정자" 열).</summary>
+        /// <summary>최종 수정자(첨부파일 관리 화면 "수정자" 열).</summary>
         [JsonProperty("updatedBy")]
         public string UpdatedBy { get; set; }
     }

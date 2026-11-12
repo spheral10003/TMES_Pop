@@ -561,5 +561,8 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string Error_FILE_011 => Get(nameof(Error_FILE_011));
         public static string Error_FILE_012 => Get(nameof(Error_FILE_012));
         public static string Error_FILE_013 => Get(nameof(Error_FILE_013));
+
+        /// <summary>화면의 조회 권한(버튼 권한 srchAuthYn)이 없을 때 띄우는 안내.</summary>
+        public static string Common_NoPermission => Get(nameof(Common_NoPermission));
     }
 }

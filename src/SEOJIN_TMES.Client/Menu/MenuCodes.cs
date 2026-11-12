@@ -15,7 +15,7 @@ namespace SEOJIN_TMES.Client.Menu
         /// <summary>작업통합 개요 &gt; 작업통합 현황 조회.</summary>
         public const string WorkIntegratedStatus = "POP03";
 
-        /// <summary>작업관리 &gt; 첨부파일 조회. TODO: 가정값 — 서버 메뉴에 등록된 코드와 맞춰야 사이드바에 보이고 권한도 받는다.</summary>
+        /// <summary>작업관리 &gt; 첨부파일 관리. TODO: 가정값 — 서버 메뉴에 등록된 코드와 맞춰야 사이드바에 보이고 권한도 받는다.</summary>
         public const string AttachmentSearch = "POP04";
     }
 }

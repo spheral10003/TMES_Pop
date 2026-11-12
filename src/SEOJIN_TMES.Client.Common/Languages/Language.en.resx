@@ -1183,10 +1183,10 @@ Reconnection continues automatically until it succeeds. You can also press [Reco
     <value>File delete failed</value>
   </data>
   <data name="Menu_AttachmentSearch" xml:space="preserve">
-    <value>Attachment Search</value>
+    <value>Attachment Management</value>
   </data>
   <data name="Attach_Title" xml:space="preserve">
-    <value>Attachment Search</value>
+    <value>Attachment Management</value>
   </data>
   <data name="Attach_RegDate" xml:space="preserve">
     <value>Registration Date</value>
@@ -1457,5 +1457,8 @@ Reconnection continues automatically until it succeeds. You can also press [Reco
   </data>
   <data name="Error_FILE_013" xml:space="preserve">
     <value>Could not connect to the shared folder. (Windows error {0})</value>
+  </data>
+  <data name="Common_NoPermission" xml:space="preserve">
+    <value>You do not have permission.</value>
   </data>
 </root>

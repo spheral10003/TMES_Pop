@@ -1291,7 +1291,7 @@ namespace SEOJIN_TMES.Client.Theme
 
         /// <summary>
         /// 가로/세로 구분선만 <see cref="GridLine"/>으로 칠한다.
-        /// <see cref="Grid"/>를 쓰지 않고 Designer 값으로 꾸민 그리드(첨부파일 조회 등)도 선 색은 다른 목록과 맞춘다 —
+        /// <see cref="Grid"/>를 쓰지 않고 Designer 값으로 꾸민 그리드(첨부파일 관리 등)도 선 색은 다른 목록과 맞춘다 —
         /// 지정하지 않으면 스킨 기본의 옅은 선이 그대로 나와 그 화면만 선이 흐리다.
         /// </summary>
         public static void GridLines(GridView view)
