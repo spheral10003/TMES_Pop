@@ -31,7 +31,7 @@ namespace SEOJIN_TMES.Client.Menu
             var workManagement = new MenuNode("WorkManagement", () => Language.Menu_WorkManagement);
             workManagement.Icon = AppIcons.Clipboard;
             // POP 메뉴는 진입(도입) 화면을 먼저 연다 — 작업지시 조회 → [작업] → 작업 진입 확인 → [이동] 시 같은 탭이 POP 화면으로 바뀐다.
-            var pop = new MenuNode("POP", "POP01", () => Language.Menu_POP, () =>
+            var pop = new MenuNode("POP", MenuCodes.Pop, () => Language.Menu_POP, () =>
             {
                 var screen = new WorkOrderEntryScreen();
                 screen.Init();
@@ -42,8 +42,8 @@ namespace SEOJIN_TMES.Client.Menu
             workManagement.AddChild(pop);
 
             // 작업지시별 첨부파일 조회 · 다운로드 · 삭제 · 업로드.
-            // TODO: 메뉴 코드(POP04)는 가정값 — 서버 메뉴에 등록된 코드와 맞춰야 사이드바에 보인다.
-            var attachmentSearch = new MenuNode("AttachmentSearch", "POP04", () => Language.Menu_AttachmentSearch, () =>
+            // 메뉴 코드(POP04)는 가정값이다 — MenuCodes.AttachmentSearch 참고.
+            var attachmentSearch = new MenuNode("AttachmentSearch", MenuCodes.AttachmentSearch, () => Language.Menu_AttachmentSearch, () =>
             {
                 var screen = new AttachmentSearchScreen();
                 screen.Init();
@@ -66,7 +66,7 @@ namespace SEOJIN_TMES.Client.Menu
             //workStatusInquiry.AddChild(productionStatus);
 
             // 작업지시 조건 조회 → 선택한 지시의 공정·스팩별 진행 현황까지 한 화면에서 본다.
-            var workStatusSearch = new MenuNode("WorkStatusSearch", "POP02", () => Language.Menu_WorkStatusSearch, () =>
+            var workStatusSearch = new MenuNode("WorkStatusSearch", MenuCodes.WorkStatusSearch, () => Language.Menu_WorkStatusSearch, () =>
             {
                 var screen = new WorkStatusScreen();
                 screen.Init();
@@ -79,7 +79,7 @@ namespace SEOJIN_TMES.Client.Menu
             var workIntegratedOverview = new MenuNode("WorkIntegratedOverview", () => Language.Menu_WorkIntegratedOverview);
             workIntegratedOverview.Icon = AppIcons.Layers;
 
-            var workIntegratedStatus = new MenuNode("WorkIntegratedStatusInquiry", "POP03", () => Language.Menu_WorkIntegratedStatusInquiry, () =>
+            var workIntegratedStatus = new MenuNode("WorkIntegratedStatusInquiry", MenuCodes.WorkIntegratedStatus, () => Language.Menu_WorkIntegratedStatusInquiry, () =>
             {
                 var screen = new WorkIntegratedStatusScreen();
                 screen.Init();

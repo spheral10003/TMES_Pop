@@ -6,6 +6,7 @@ using SEOJIN_TMES.Client.Common.Logging;
 using SEOJIN_TMES.Client.Common.Models;
 using SEOJIN_TMES.Client.Composition;
 using SEOJIN_TMES.Client.Core;
+using SEOJIN_TMES.Client.Menu;
 using SEOJIN_TMES.Client.Forms.Common;
 using SEOJIN_TMES.Client.Forms.Pop;
 using SEOJIN_TMES.Client.Forms.WorkStatus;
@@ -84,7 +85,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             SetPermission();
         }
 
-        /// <summary>서버가 내려준 버튼 권한(/POP). 받기 전에는 모두 없음이라 [조회] · [작업]이 숨어 있다.</summary>
+        /// <summary>서버가 내려준 버튼 권한(POP01). 받기 전에는 모두 없음이라 [조회] · [작업]이 숨어 있다.</summary>
         private ProgramPermissionDto _permission = ProgramPermissionDto.None();
 
         /// <summary>
@@ -96,7 +97,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             _permission = ProgramPermissionDto.None();
             MenuPermission.SetVisible(false, btnSearch, btnWork);
 
-            var permission = await MenuPermission.Get(MenuPermission.Pop);
+            var permission = await MenuPermission.Get(MenuCodes.Pop);
             if (IsDisposed || Disposing)
                 return;
 

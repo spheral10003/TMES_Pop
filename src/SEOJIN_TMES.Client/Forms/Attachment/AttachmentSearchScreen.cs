@@ -7,6 +7,7 @@ using SEOJIN_TMES.Client.Common.Languages;
 using SEOJIN_TMES.Client.Common.Logging;
 using SEOJIN_TMES.Client.Common.Models;
 using SEOJIN_TMES.Client.Core;
+using SEOJIN_TMES.Client.Menu;
 using SEOJIN_TMES.Client.Theme;
 using SEOJIN_TMES.Client.Forms.Common;
 using System;
@@ -55,7 +56,7 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
         private GridImagePreview _preview;
 
         /// <summary>
-        /// 서버가 내려준 버튼 권한(/AttachmentSearch). 받기 전에는 모두 없음이라 조회 · 업로드 · 삭제 · 다운로드 버튼이 숨어 있다.
+        /// 서버가 내려준 버튼 권한(POP04). 받기 전에는 모두 없음이라 조회 · 업로드 · 삭제 · 다운로드 버튼이 숨어 있다.
         /// 버튼 배치(<see cref="ArrangeByTextWidth"/>)는 Visible 대신 이 값을 본다 — 탭이 화면에 붙기 전에는 Visible이 늘 false로 읽힌다.
         /// </summary>
         private ProgramPermissionDto _permission = ProgramPermissionDto.None();
@@ -107,7 +108,7 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             _permission = ProgramPermissionDto.None();
             ShowPermittedButtons();
 
-            var permission = await MenuPermission.Get(MenuPermission.AttachmentSearch);
+            var permission = await MenuPermission.Get(MenuCodes.AttachmentSearch);
             if (IsDisposed || Disposing)
                 return;
 

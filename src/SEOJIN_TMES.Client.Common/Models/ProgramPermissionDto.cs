@@ -4,7 +4,7 @@ using System;
 namespace SEOJIN_TMES.Client.Common.Models
 {
     /// <summary>
-    /// 로그인 사용자의 화면(프로그램)별 버튼 권한 — <c>GET api/v1.0/gm/auth/permissions?path=/메뉴</c> 응답의 알맹이.
+    /// 로그인 사용자의 화면(프로그램)별 버튼 권한 — <c>GET api/v1.0/gm/auth/permissions?path=/POP01</c> 응답의 알맹이.
     /// 필드명은 구미 Test 서버 Swagger(2026-11-11, <c>AuthConfigurationFrameDto</c>)에서 확인했다.
     /// 값은 Y / N / DEFAULT 중 하나이며, 클라이언트는 <b>"Y"일 때만 허용</b>으로 본다 —
     /// 권한 판정은 서버가 하고 화면은 받은 값으로 버튼을 보이거나 숨기기만 한다.

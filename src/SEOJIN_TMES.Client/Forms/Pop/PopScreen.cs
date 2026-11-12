@@ -6,6 +6,7 @@ using SEOJIN_TMES.Client.Common.Languages;
 using SEOJIN_TMES.Client.Common.Logging;
 using SEOJIN_TMES.Client.Common.Models;
 using SEOJIN_TMES.Client.Core;
+using SEOJIN_TMES.Client.Menu;
 using SEOJIN_TMES.Client.Equipment.Core;
 using SEOJIN_TMES.Client.Equipment.Nutrunner;
 using SEOJIN_TMES.Client.Forms.Common;
@@ -244,7 +245,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// 버튼 권한(/POP)을 받아 하단 버튼을 보이거나 숨긴다. 받기 전에는 모두 숨긴다.
+        /// 버튼 권한(POP01)을 받아 하단 버튼을 보이거나 숨긴다. 받기 전에는 모두 숨긴다.
         /// 공정 이동 · 목록(이전 공정 · 다음 공정 · 공정 목록)은 조회(srchAuthYn),
         /// 서버 상태를 바꾸는 공정 중지 · 알림 등록 · 리웍은 저장(strgAuthYn)으로 본다.
         /// 숨긴 버튼 자리는 비워 둔다 — 현장 작업자가 버튼 위치로 기억하므로 남은 버튼을 옮기지 않는다.
@@ -254,7 +255,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         {
             MenuPermission.SetVisible(false, btnPrevProcess, btnNextProcess, btnProcessList, btnStopProcess, btnAdminAlarm, btnRework);
 
-            var permission = await MenuPermission.Get(MenuPermission.Pop);
+            var permission = await MenuPermission.Get(MenuCodes.Pop);
             if (IsDisposed || Disposing)
                 return;
 

@@ -6,6 +6,7 @@ using SEOJIN_TMES.Client.Common.Languages;
 using SEOJIN_TMES.Client.Common.Models;
 using SEOJIN_TMES.Client.Composition;
 using SEOJIN_TMES.Client.Core;
+using SEOJIN_TMES.Client.Menu;
 using SEOJIN_TMES.Client.Forms.Common;
 using SEOJIN_TMES.Client.Theme;
 using System;
@@ -87,7 +88,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             SetPermission();
         }
 
-        /// <summary>서버가 내려준 버튼 권한(/WorkStatusSearch). 받기 전에는 모두 없음이라 [조회]가 숨어 있다.</summary>
+        /// <summary>서버가 내려준 버튼 권한(POP02). 받기 전에는 모두 없음이라 [조회]가 숨어 있다.</summary>
         private ProgramPermissionDto _permission = ProgramPermissionDto.None();
 
         /// <summary>버튼 권한을 받아 [조회](srchAuthYn)를 보이거나 숨긴다.</summary>
@@ -96,7 +97,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkStatus
             _permission = ProgramPermissionDto.None();
             MenuPermission.SetVisible(false, btnSearch);
 
-            var permission = await MenuPermission.Get(MenuPermission.WorkStatusSearch);
+            var permission = await MenuPermission.Get(MenuCodes.WorkStatusSearch);
             if (IsDisposed || Disposing)
                 return;
 
