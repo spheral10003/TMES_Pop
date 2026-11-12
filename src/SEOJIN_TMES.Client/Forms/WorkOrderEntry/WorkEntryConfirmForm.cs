@@ -48,9 +48,17 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             InitializeComponent();
         }
 
-        public void Initialize(WorkOrderEntryDto workOrder, List<RoutingProcessDto> processes)
+        /// <summary>
+        /// POP로 들어갈 수 있는지(버튼 권한 POP01의 저장 권한). 작업지시 목록 더블클릭은 권한과 상관없이 이 창을 열어
+        /// 공정 진행 상태를 볼 수 있게 하고, 공정을 시작하는 [이동] · 행 더블클릭만 이 값으로 막는다.
+        /// </summary>
+        private bool _canMove;
+
+        /// <param name="canMove">false면 [이동]을 숨기고 행 더블클릭에도 반응하지 않는다(조회 전용).</param>
+        public void Initialize(WorkOrderEntryDto workOrder, List<RoutingProcessDto> processes, bool canMove)
         {
             _workOrder = workOrder;
+            _canMove = canMove;
             var allPages = processes ?? new List<RoutingProcessDto>();
 
             Text = Language.WorkEntryConfirm_Title;
@@ -65,6 +73,13 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             btnClose.Text = Language.Common_Close;
 
             ApplyTheme();
+
+            // 이동할 수 없으면 [이동]을 숨기고 [닫기]를 그 자리(오른쪽 끝)로 옮긴다 — 빈자리가 남지 않게.
+            if (!_canMove)
+            {
+                btnMove.Visible = false;
+                btnClose.Left = btnMove.Left;
+            }
 
             // 탭 1 — 라우팅 공정마다 한 줄
             grid.DataSource = RoutingProcessGroups.Representatives(allPages);
@@ -175,6 +190,10 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
         /// <summary>선택한 페이지 공정을 확정한다(보고 있는 탭의 그리드 기준). 선택이 없으면 안내만 하고 창은 유지한다.</summary>
         private void MoveToSelectedProcess()
         {
+            // 저장 권한이 없으면 [이동]을 숨겼으므로 행 더블클릭으로도 들어가지 않는다.
+            if (!_canMove)
+                return;
+
             var view = tabProcess.SelectedTab == pageAllPages ? gridViewAll : gridView;
             var process = view.GetFocusedRow() as RoutingProcessDto;
             if (process == null)
