@@ -5,7 +5,6 @@ using DevExpress.Utils;
 using DevExpress.XtraGrid;
 using DevExpress.XtraGrid.Views.Base;
 using DevExpress.XtraGrid.Views.Grid;
-using SEOJIN_TMES.Client.Core;
 using SEOJIN_TMES.Client.Theme;
 
 namespace SEOJIN_TMES.Client.Forms.Common

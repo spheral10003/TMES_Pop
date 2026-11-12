@@ -57,6 +57,9 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             this.colUpdatedBy = new DevExpress.XtraGrid.Columns.GridColumn();
             this.pnlOrderLine = new System.Windows.Forms.Panel();
             this.lblOrderTitle = new System.Windows.Forms.Label();
+            this.btnUpload = new System.Windows.Forms.Button();
+            this.btnDelete = new System.Windows.Forms.Button();
+            this.btnDownload = new System.Windows.Forms.Button();
             this.gridFiles = new DevExpress.XtraGrid.GridControl();
             this.gridViewFiles = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.colFileNo = new DevExpress.XtraGrid.Columns.GridColumn();
@@ -68,9 +71,6 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             this.colCreatedAt = new DevExpress.XtraGrid.Columns.GridColumn();
             this.pnlFileLine = new System.Windows.Forms.Panel();
             this.lblFileTitle = new System.Windows.Forms.Label();
-            this.btnUpload = new System.Windows.Forms.Button();
-            this.btnDelete = new System.Windows.Forms.Button();
-            this.btnDownload = new System.Windows.Forms.Button();
             this.pnlSearch.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.splitMain)).BeginInit();
             this.splitMain.Panel1.SuspendLayout();
@@ -349,9 +349,9 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             this.colCreatedDate.Visible = true;
             this.colCreatedDate.VisibleIndex = 4;
             this.colCreatedDate.Width = 150;
-            //
+            // 
             // colUpdatedBy
-            //
+            // 
             this.colUpdatedBy.AppearanceCell.Options.UseTextOptions = true;
             this.colUpdatedBy.AppearanceCell.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
             this.colUpdatedBy.Caption = "수정자";
@@ -381,6 +381,60 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             this.lblOrderTitle.TabIndex = 0;
             this.lblOrderTitle.Text = "■ 목록";
             this.lblOrderTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // btnUpload
+            // 
+            this.btnUpload.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnUpload.BackColor = System.Drawing.Color.White;
+            this.btnUpload.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnUpload.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(74)))), ((int)(((byte)(85)))), ((int)(((byte)(120)))));
+            this.btnUpload.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(238)))), ((int)(((byte)(241)))), ((int)(((byte)(248)))));
+            this.btnUpload.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnUpload.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold);
+            this.btnUpload.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(51)))), ((int)(((byte)(51)))));
+            this.btnUpload.Location = new System.Drawing.Point(636, 1);
+            this.btnUpload.Name = "btnUpload";
+            this.btnUpload.Size = new System.Drawing.Size(76, 26);
+            this.btnUpload.TabIndex = 2;
+            this.btnUpload.Text = "업로드";
+            this.btnUpload.UseVisualStyleBackColor = false;
+            this.btnUpload.Click += new System.EventHandler(this.btnUpload_Click);
+            // 
+            // btnDelete
+            // 
+            this.btnDelete.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnDelete.BackColor = System.Drawing.Color.White;
+            this.btnDelete.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnDelete.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(74)))), ((int)(((byte)(85)))), ((int)(((byte)(120)))));
+            this.btnDelete.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(238)))), ((int)(((byte)(241)))), ((int)(((byte)(248)))));
+            this.btnDelete.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnDelete.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold);
+            this.btnDelete.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(51)))), ((int)(((byte)(51)))));
+            this.btnDelete.Location = new System.Drawing.Point(472, 1);
+            this.btnDelete.Name = "btnDelete";
+            this.btnDelete.Size = new System.Drawing.Size(76, 26);
+            this.btnDelete.TabIndex = 1;
+            this.btnDelete.Text = "삭제";
+            this.btnDelete.UseVisualStyleBackColor = false;
+            this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
+            // 
+            // btnDownload
+            // 
+            this.btnDownload.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btnDownload.BackColor = System.Drawing.Color.White;
+            this.btnDownload.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnDownload.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(74)))), ((int)(((byte)(85)))), ((int)(((byte)(120)))));
+            this.btnDownload.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(238)))), ((int)(((byte)(241)))), ((int)(((byte)(248)))));
+            this.btnDownload.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnDownload.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold);
+            this.btnDownload.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(51)))), ((int)(((byte)(51)))));
+            this.btnDownload.Location = new System.Drawing.Point(554, 1);
+            this.btnDownload.Name = "btnDownload";
+            this.btnDownload.Size = new System.Drawing.Size(76, 26);
+            this.btnDownload.TabIndex = 0;
+            this.btnDownload.Text = "다운로드";
+            this.btnDownload.UseVisualStyleBackColor = false;
+            this.btnDownload.Click += new System.EventHandler(this.btnDownload_Click);
             // 
             // gridFiles
             // 
@@ -454,7 +508,7 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             this.colFileNo.OptionsColumn.AllowSort = DevExpress.Utils.DefaultBoolean.False;
             this.colFileNo.UnboundDataType = typeof(int);
             this.colFileNo.Visible = true;
-            this.colFileNo.VisibleIndex = 0;
+            this.colFileNo.VisibleIndex = 1;
             this.colFileNo.Width = 45;
             // 
             // colFileName
@@ -463,7 +517,7 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             this.colFileName.FieldName = "DisplayName";
             this.colFileName.Name = "colFileName";
             this.colFileName.Visible = true;
-            this.colFileName.VisibleIndex = 1;
+            this.colFileName.VisibleIndex = 2;
             this.colFileName.Width = 260;
             // 
             // colFileType
@@ -475,7 +529,7 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             this.colFileType.FieldName = "IsImage";
             this.colFileType.Name = "colFileType";
             this.colFileType.Visible = true;
-            this.colFileType.VisibleIndex = 2;
+            this.colFileType.VisibleIndex = 3;
             this.colFileType.Width = 70;
             // 
             // repoFileTypeText
@@ -491,7 +545,7 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             this.colFileSize.FieldName = "FileSize";
             this.colFileSize.Name = "colFileSize";
             this.colFileSize.Visible = true;
-            this.colFileSize.VisibleIndex = 3;
+            this.colFileSize.VisibleIndex = 4;
             this.colFileSize.Width = 80;
             // 
             // colCreatedBy
@@ -502,7 +556,7 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             this.colCreatedBy.FieldName = "UpdatedBy";
             this.colCreatedBy.Name = "colCreatedBy";
             this.colCreatedBy.Visible = true;
-            this.colCreatedBy.VisibleIndex = 4;
+            this.colCreatedBy.VisibleIndex = 5;
             this.colCreatedBy.Width = 80;
             // 
             // colCreatedAt
@@ -515,7 +569,7 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             this.colCreatedAt.FieldName = "CreatedAt";
             this.colCreatedAt.Name = "colCreatedAt";
             this.colCreatedAt.Visible = true;
-            this.colCreatedAt.VisibleIndex = 5;
+            this.colCreatedAt.VisibleIndex = 6;
             this.colCreatedAt.Width = 120;
             // 
             // pnlFileLine
@@ -538,61 +592,7 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             this.lblFileTitle.TabIndex = 2;
             this.lblFileTitle.Text = "■ 파일 상세목록";
             this.lblFileTitle.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            //
-            // btnUpload
             // 
-            this.btnUpload.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnUpload.BackColor = System.Drawing.Color.White;
-            this.btnUpload.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnUpload.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(74)))), ((int)(((byte)(85)))), ((int)(((byte)(120)))));
-            this.btnUpload.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(238)))), ((int)(((byte)(241)))), ((int)(((byte)(248)))));
-            this.btnUpload.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnUpload.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold);
-            this.btnUpload.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(51)))), ((int)(((byte)(51)))));
-            this.btnUpload.Location = new System.Drawing.Point(635, 1);
-            this.btnUpload.Name = "btnUpload";
-            this.btnUpload.Size = new System.Drawing.Size(76, 26);
-            this.btnUpload.TabIndex = 2;
-            this.btnUpload.Text = "업로드";
-            this.btnUpload.UseVisualStyleBackColor = false;
-            this.btnUpload.Click += new System.EventHandler(this.btnUpload_Click);
-            // 
-            // btnDelete
-            // 
-            this.btnDelete.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnDelete.BackColor = System.Drawing.Color.White;
-            this.btnDelete.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnDelete.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(74)))), ((int)(((byte)(85)))), ((int)(((byte)(120)))));
-            this.btnDelete.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(238)))), ((int)(((byte)(241)))), ((int)(((byte)(248)))));
-            this.btnDelete.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnDelete.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold);
-            this.btnDelete.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(51)))), ((int)(((byte)(51)))));
-            this.btnDelete.Location = new System.Drawing.Point(553, 1);
-            this.btnDelete.Name = "btnDelete";
-            this.btnDelete.Size = new System.Drawing.Size(76, 26);
-            this.btnDelete.TabIndex = 1;
-            this.btnDelete.Text = "삭제";
-            this.btnDelete.UseVisualStyleBackColor = false;
-            this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
-            // 
-            // btnDownload
-            // 
-            this.btnDownload.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnDownload.BackColor = System.Drawing.Color.White;
-            this.btnDownload.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnDownload.FlatAppearance.BorderColor = System.Drawing.Color.FromArgb(((int)(((byte)(74)))), ((int)(((byte)(85)))), ((int)(((byte)(120)))));
-            this.btnDownload.FlatAppearance.MouseOverBackColor = System.Drawing.Color.FromArgb(((int)(((byte)(238)))), ((int)(((byte)(241)))), ((int)(((byte)(248)))));
-            this.btnDownload.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnDownload.Font = new System.Drawing.Font("맑은 고딕", 9F, System.Drawing.FontStyle.Bold);
-            this.btnDownload.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(51)))), ((int)(((byte)(51)))), ((int)(((byte)(51)))));
-            this.btnDownload.Location = new System.Drawing.Point(471, 1);
-            this.btnDownload.Name = "btnDownload";
-            this.btnDownload.Size = new System.Drawing.Size(76, 26);
-            this.btnDownload.TabIndex = 0;
-            this.btnDownload.Text = "다운로드";
-            this.btnDownload.UseVisualStyleBackColor = false;
-            this.btnDownload.Click += new System.EventHandler(this.btnDownload_Click);
-            //
             // AttachmentSearchScreen
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);

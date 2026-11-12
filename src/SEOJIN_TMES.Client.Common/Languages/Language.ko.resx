@@ -1225,7 +1225,7 @@
     <value>다운로드에 실패했습니다.</value>
   </data>
   <data name="Attach_UploadFilter" xml:space="preserve">
-    <value>이미지|*.png;*.jpg;*.jpeg;*.bmp|PDF|*.pdf|모든 파일|*.*</value>
+    <value>모든 파일|*.*|이미지|*.png;*.jpg;*.jpeg;*.bmp|PDF|*.pdf</value>
   </data>
   <data name="Attach_ConditionRequired" xml:space="preserve">
     <value>등록일자를 지정하지 않으면 시리얼번호 또는 작업지시번호 중 하나는 입력해야 합니다.</value>
@@ -1375,7 +1375,7 @@
     <value>자재 품명</value>
   </data>
   <data name="Col_PurchasePlanMethod" xml:space="preserve">
-    <value>구매 계획 방식</value>
+    <value>구매계획방식</value>
   </data>
   <data name="Col_ResultAction" xml:space="preserve">
     <value>결과동작</value>

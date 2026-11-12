@@ -79,7 +79,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 
             this.lblTitle.Location = new System.Drawing.Point(58, 20);
             this.lblTitle.Name = "lblTitle";
-            this.lblTitle.Size = new System.Drawing.Size(68, 14);
+            this.lblTitle.Size = new System.Drawing.Size(44, 14);
             this.lblTitle.TabIndex = 1;
             this.lblTitle.Text = "공정 목록";
             // 

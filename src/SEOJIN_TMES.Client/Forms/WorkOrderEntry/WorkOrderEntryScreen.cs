@@ -251,6 +251,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
                     SerialNo = serialNo,
                     ItemCode = txtItemCode.Text?.Trim(),
                     ItemName = txtItemName.Text?.Trim(),
+                    FCID = txtFcid.Text?.Trim(),
                     WorkStationRef = _appSet.CurrentUser?.WorkstationInfo?.WorkstationRef,
                     StatusList = BuildStatusList()
                 };

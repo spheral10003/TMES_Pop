@@ -124,10 +124,9 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
                 GridColumnGuard.Apply(treeOverview);   // 컬럼 지우기만 막는다
                 // 폭 합계(220 + 250 + 130*8 = 1510)를 화면 기본 폭에 맞춰, 값 컬럼은 고정 폭 + 가로 스크롤로 둔다
                 // (앵글 컬럼까지 억지로 줄여 넣지 않고 화면 설계서처럼 옆으로 밀어 본다).
-                AddColumn("Name", Language.Col_NodeDescription, 250, HorzAlignment.Near);
                 AddColumn("Code", Language.Col_NodeCode, 220, HorzAlignment.Near);
+                AddColumn("Name", Language.Col_NodeDescription, 250, HorzAlignment.Near);
                 
-
                 AddValueColumn("UsageQty", Language.Col_WorkQty, 130);
                 AddValueColumn("Unit", Language.Col_Unit, 130);
                 AddValueColumn("TorqueResult", Language.Col_TorqueResult, 130);

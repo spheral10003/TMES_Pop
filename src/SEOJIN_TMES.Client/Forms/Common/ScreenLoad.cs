@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace SEOJIN_TMES.Client.Core
+namespace SEOJIN_TMES.Client.Forms.Common
 {
     /// <summary>
     /// 화면을 연 직후의 첫 조회를 <b>화면이 다 그려진 뒤</b>에 시작시키는 공용 배선.

@@ -1225,7 +1225,7 @@ Hệ thống sẽ tự động thử kết nối lại cho đến khi thành cô
     <value>Tải xuống thất bại.</value>
   </data>
   <data name="Attach_UploadFilter" xml:space="preserve">
-    <value>Hình ảnh|*.png;*.jpg;*.jpeg;*.bmp|PDF|*.pdf|Tất cả tệp|*.*</value>
+    <value>Tất cả tệp|*.*|Hình ảnh|*.png;*.jpg;*.jpeg;*.bmp|PDF|*.pdf</value>
   </data>
   <data name="Attach_ConditionRequired" xml:space="preserve">
     <value>Nếu không chọn ngày đăng ký, hãy nhập số sê-ri hoặc số lệnh sản xuất.</value>

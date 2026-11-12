@@ -146,8 +146,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             btnAdminAlarm.Text = Language.Pop_AdminAlarm;
             btnRework.Text = Language.Pop_Rework;
 
-            lblWorkerTile.Text = Language.Pop_Worker;
-            lblWorker.Text = ResolveWorkerName();
+            //lblWorkerTile.Text = Language.Pop_Worker;
+            //lblWorker.Text = ResolveWorkerName();
 
             lblInfoTitle.Text = Language.Pop_ProcessInfoTitle;
             lblWorkOrderNo.Text = "· " + Language.Pop_WorkOrderNo;
@@ -220,7 +220,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 제목(lblInfoTitle)은 자동 크기 라벨이라 대상이 아니다 — 카드 폭에 비해 짧아 넘칠 일도 없다.
             _textFitter.Register(TextFitMode.Shrink,
                 btnPrevProcess, btnNextProcess, btnStopProcess, btnProcessList, btnAdminAlarm, btnRework,
-                lblWorkerTile, lblWorker, lblWorkstation, lblProgressState,
+                lblWorkstation, lblProgressState, //lblWorkerTile, lblWorker, 
                 lblWorkOrderNo, lblItemCode, lblProductSerialNo, lblRoutingGroup, lblRoutingOperation,
                 lblPageOperation, lblPageStartTime, lblPageEndTime, lblPageRunTime, lblPageIdleTime, lblPageWorkTime,
                 chkManualWrench);

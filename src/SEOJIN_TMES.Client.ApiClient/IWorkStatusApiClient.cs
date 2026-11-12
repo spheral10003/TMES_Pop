@@ -43,7 +43,9 @@ namespace SEOJIN_TMES.Client.ApiClient
                 ("workPlanNo", condition.ItemCode),
                 ("woNo", condition.WorkOrderNo),
                 ("sn", condition.SerialNo),
-                ("statusList", condition.StatusName));
+                ("statusList", condition.StatusName),
+                ("fcid", condition.FCID)
+                );
             
             var response = await GetAsync<ApiDataResponse<List<WorkOrderEntryDto>>>($"{url}{search}", cancellationToken);
             return response?.Data ?? new List<WorkOrderEntryDto>();

@@ -3,7 +3,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 
-namespace SEOJIN_TMES.Client.Core
+namespace SEOJIN_TMES.Client.Forms.Common
 {
     /// <summary>
     /// Windows 화상 키보드(osk.exe)를 띄운다 — 물리 키보드가 없는 터치 POP에서 입력 칸을 눌렀을 때 쓴다.

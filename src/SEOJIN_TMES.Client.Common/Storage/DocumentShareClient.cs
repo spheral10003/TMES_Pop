@@ -55,8 +55,8 @@ namespace SEOJIN_TMES.Client.Common.Storage
 
             if (!_settings.IsConfigured)
                 throw new DocumentShareException(ErrorCodes.DrawingShareNotConfigured);
-
-            return Path.Combine(_settings.RootPath.TrimEnd('\\'), normalized.TrimStart('\\'));
+            return normalized.TrimStart('\\');
+            //return Path.Combine(_settings.RootPath.TrimEnd('\\'), normalized.TrimStart('\\'));
         }
 
         /// <summary>

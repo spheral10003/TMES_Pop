@@ -34,11 +34,11 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.bodyPanel = new DevExpress.XtraEditors.PanelControl();
             this.tabProcess = new System.Windows.Forms.TabControl();
             this.pageRouting = new System.Windows.Forms.TabPage();
-            this.pageAllPages = new System.Windows.Forms.TabPage();
             this.listCard = new DevExpress.XtraEditors.PanelControl();
             this.grid = new DevExpress.XtraGrid.GridControl();
             this.gridView = new SEOJIN_TMES.Client.Forms.Common.MeisGridView();
             this.lblListTitle = new DevExpress.XtraEditors.LabelControl();
+            this.pageAllPages = new System.Windows.Forms.TabPage();
             this.allCard = new DevExpress.XtraEditors.PanelControl();
             this.gridAll = new DevExpress.XtraGrid.GridControl();
             this.gridViewAll = new SEOJIN_TMES.Client.Forms.Common.MeisGridView();
@@ -55,22 +55,21 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.bodyPanel.SuspendLayout();
             this.tabProcess.SuspendLayout();
             this.pageRouting.SuspendLayout();
-            this.pageAllPages.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.listCard)).BeginInit();
             this.listCard.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.grid)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView)).BeginInit();
+            this.pageAllPages.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.allCard)).BeginInit();
             this.allCard.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridAll)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridViewAll)).BeginInit();
-            this.materialSearch.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.footerPanel)).BeginInit();
             this.footerPanel.SuspendLayout();
             this.SuspendLayout();
-            //
+            // 
             // headerPanel
-            //
+            // 
             this.headerPanel.Controls.Add(this.headerIcon);
             this.headerPanel.Controls.Add(this.lblTitle);
             this.headerPanel.Dock = System.Windows.Forms.DockStyle.Top;
@@ -78,24 +77,24 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.headerPanel.Name = "headerPanel";
             this.headerPanel.Size = new System.Drawing.Size(1200, 56);
             this.headerPanel.TabIndex = 0;
-            //
+            // 
             // headerIcon
-            //
+            // 
             this.headerIcon.Location = new System.Drawing.Point(22, 15);
             this.headerIcon.Name = "headerIcon";
             this.headerIcon.Size = new System.Drawing.Size(26, 26);
             this.headerIcon.TabIndex = 0;
-            //
+            // 
             // lblTitle
-            //
+            // 
             this.lblTitle.Location = new System.Drawing.Point(58, 20);
             this.lblTitle.Name = "lblTitle";
             this.lblTitle.Size = new System.Drawing.Size(68, 14);
             this.lblTitle.TabIndex = 1;
             this.lblTitle.Text = "작업 진입 확인";
-            //
+            // 
             // bodyPanel
-            //
+            // 
             this.bodyPanel.Controls.Add(this.tabProcess);
             this.bodyPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.bodyPanel.Location = new System.Drawing.Point(0, 56);
@@ -103,9 +102,9 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.bodyPanel.Padding = new System.Windows.Forms.Padding(16, 12, 16, 8);
             this.bodyPanel.Size = new System.Drawing.Size(1200, 580);
             this.bodyPanel.TabIndex = 1;
-            //
+            // 
             // tabProcess
-            //
+            // 
             this.tabProcess.Controls.Add(this.pageRouting);
             this.tabProcess.Controls.Add(this.pageAllPages);
             this.tabProcess.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -115,58 +114,48 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.tabProcess.SelectedIndex = 0;
             this.tabProcess.Size = new System.Drawing.Size(1164, 556);
             this.tabProcess.TabIndex = 0;
-            //
+            // 
             // pageRouting
-            //
+            // 
             this.pageRouting.Controls.Add(this.listCard);
-            this.pageRouting.Location = new System.Drawing.Point(4, 30);
+            this.pageRouting.Location = new System.Drawing.Point(4, 29);
             this.pageRouting.Name = "pageRouting";
             this.pageRouting.Padding = new System.Windows.Forms.Padding(4);
-            this.pageRouting.Size = new System.Drawing.Size(1156, 522);
+            this.pageRouting.Size = new System.Drawing.Size(1156, 523);
             this.pageRouting.TabIndex = 0;
             this.pageRouting.Text = "라우팅 공정";
-            //
-            // pageAllPages
-            //
-            this.pageAllPages.Controls.Add(this.allCard);
-            this.pageAllPages.Location = new System.Drawing.Point(4, 30);
-            this.pageAllPages.Name = "pageAllPages";
-            this.pageAllPages.Padding = new System.Windows.Forms.Padding(4);
-            this.pageAllPages.Size = new System.Drawing.Size(1156, 522);
-            this.pageAllPages.TabIndex = 1;
-            this.pageAllPages.Text = "전체 페이지 공정";
-            //
+            // 
             // listCard
-            //
+            // 
             this.listCard.Controls.Add(this.grid);
             this.listCard.Controls.Add(this.lblListTitle);
             this.listCard.Dock = System.Windows.Forms.DockStyle.Fill;
             this.listCard.Location = new System.Drawing.Point(4, 4);
             this.listCard.Name = "listCard";
             this.listCard.Padding = new System.Windows.Forms.Padding(1);
-            this.listCard.Size = new System.Drawing.Size(1148, 514);
+            this.listCard.Size = new System.Drawing.Size(1148, 515);
             this.listCard.TabIndex = 0;
-            //
+            // 
             // grid
-            //
+            // 
             this.grid.Dock = System.Windows.Forms.DockStyle.Fill;
             this.grid.Location = new System.Drawing.Point(3, 35);
             this.grid.MainView = this.gridView;
             this.grid.Name = "grid";
-            this.grid.Size = new System.Drawing.Size(1142, 476);
+            this.grid.Size = new System.Drawing.Size(1142, 477);
             this.grid.TabIndex = 1;
             this.grid.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
             this.gridView});
-            //
+            // 
             // gridView
-            //
+            // 
             this.gridView.Accent = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
             this.gridView.GridControl = this.grid;
             this.gridView.Name = "gridView";
             this.gridView.OptionsBehavior.Editable = false;
-            //
+            // 
             // lblListTitle
-            //
+            // 
             this.lblListTitle.Dock = System.Windows.Forms.DockStyle.Top;
             this.lblListTitle.Location = new System.Drawing.Point(3, 3);
             this.lblListTitle.Name = "lblListTitle";
@@ -174,9 +163,19 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.lblListTitle.Size = new System.Drawing.Size(60, 32);
             this.lblListTitle.TabIndex = 0;
             this.lblListTitle.Text = "공정 목록";
-            //
+            // 
+            // pageAllPages
+            // 
+            this.pageAllPages.Controls.Add(this.allCard);
+            this.pageAllPages.Location = new System.Drawing.Point(4, 28);
+            this.pageAllPages.Name = "pageAllPages";
+            this.pageAllPages.Padding = new System.Windows.Forms.Padding(4);
+            this.pageAllPages.Size = new System.Drawing.Size(192, 68);
+            this.pageAllPages.TabIndex = 1;
+            this.pageAllPages.Text = "전체 페이지 공정";
+            // 
             // allCard
-            //
+            // 
             this.allCard.Controls.Add(this.gridAll);
             this.allCard.Controls.Add(this.materialSearch);
             this.allCard.Controls.Add(this.lblAllTitle);
@@ -184,37 +183,37 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.allCard.Location = new System.Drawing.Point(4, 4);
             this.allCard.Name = "allCard";
             this.allCard.Padding = new System.Windows.Forms.Padding(1);
-            this.allCard.Size = new System.Drawing.Size(1148, 514);
+            this.allCard.Size = new System.Drawing.Size(184, 60);
             this.allCard.TabIndex = 0;
-            //
+            // 
             // gridAll
-            //
+            // 
             this.gridAll.Dock = System.Windows.Forms.DockStyle.Fill;
             this.gridAll.Location = new System.Drawing.Point(3, 79);
             this.gridAll.MainView = this.gridViewAll;
             this.gridAll.Name = "gridAll";
-            this.gridAll.Size = new System.Drawing.Size(1142, 432);
+            this.gridAll.Size = new System.Drawing.Size(178, 0);
             this.gridAll.TabIndex = 2;
             this.gridAll.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
             this.gridViewAll});
-            //
+            // 
             // gridViewAll
-            //
+            // 
             this.gridViewAll.Accent = System.Drawing.Color.FromArgb(((int)(((byte)(79)))), ((int)(((byte)(70)))), ((int)(((byte)(229)))));
             this.gridViewAll.GridControl = this.gridAll;
             this.gridViewAll.Name = "gridViewAll";
             this.gridViewAll.OptionsBehavior.Editable = false;
-            //
+            // 
             // materialSearch
-            //
+            // 
             this.materialSearch.Dock = System.Windows.Forms.DockStyle.Top;
             this.materialSearch.Location = new System.Drawing.Point(3, 35);
             this.materialSearch.Name = "materialSearch";
-            this.materialSearch.Size = new System.Drawing.Size(1142, 44);
+            this.materialSearch.Size = new System.Drawing.Size(178, 44);
             this.materialSearch.TabIndex = 1;
             // 
             // lblAllTitle
-            //
+            // 
             this.lblAllTitle.Dock = System.Windows.Forms.DockStyle.Top;
             this.lblAllTitle.Location = new System.Drawing.Point(3, 3);
             this.lblAllTitle.Name = "lblAllTitle";
@@ -222,9 +221,9 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.lblAllTitle.Size = new System.Drawing.Size(60, 32);
             this.lblAllTitle.TabIndex = 0;
             this.lblAllTitle.Text = "공정 목록";
-            //
+            // 
             // footerPanel
-            //
+            // 
             this.footerPanel.Controls.Add(this.pnlGrip);
             this.footerPanel.Controls.Add(this.btnMove);
             this.footerPanel.Controls.Add(this.btnClose);
@@ -233,17 +232,17 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.footerPanel.Name = "footerPanel";
             this.footerPanel.Size = new System.Drawing.Size(1200, 64);
             this.footerPanel.TabIndex = 2;
-            //
+            // 
             // pnlGrip
-            //
+            // 
             this.pnlGrip.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.pnlGrip.Location = new System.Drawing.Point(1184, 48);
             this.pnlGrip.Name = "pnlGrip";
             this.pnlGrip.Size = new System.Drawing.Size(16, 16);
             this.pnlGrip.TabIndex = 2;
-            //
+            // 
             // btnMove
-            //
+            // 
             this.btnMove.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnMove.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnMove.Location = new System.Drawing.Point(1088, 16);
@@ -252,9 +251,9 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.btnMove.TabIndex = 0;
             this.btnMove.Text = "이동";
             this.btnMove.Click += new System.EventHandler(this.btnMove_Click);
-            //
+            // 
             // btnClose
-            //
+            // 
             this.btnClose.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnClose.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnClose.DialogResult = System.Windows.Forms.DialogResult.Cancel;
@@ -264,9 +263,9 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.btnClose.TabIndex = 1;
             this.btnClose.Text = "닫기";
             this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
-            //
+            // 
             // WorkEntryConfirmForm
-            //
+            // 
             this.Appearance.Options.UseFont = true;
             this.CancelButton = this.btnClose;
             this.ClientSize = new System.Drawing.Size(1200, 700);
@@ -290,19 +289,17 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.bodyPanel.ResumeLayout(false);
             this.tabProcess.ResumeLayout(false);
             this.pageRouting.ResumeLayout(false);
-            this.pageAllPages.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.listCard)).EndInit();
             this.listCard.ResumeLayout(false);
             this.listCard.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.grid)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridView)).EndInit();
+            this.pageAllPages.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.allCard)).EndInit();
             this.allCard.ResumeLayout(false);
             this.allCard.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridAll)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridViewAll)).EndInit();
-            this.materialSearch.ResumeLayout(false);
-            this.materialSearch.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.footerPanel)).EndInit();
             this.footerPanel.ResumeLayout(false);
             this.ResumeLayout(false);

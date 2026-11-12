@@ -32,6 +32,8 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(WorkOrderEntryScreen));
             this.topCard = new DevExpress.XtraEditors.PanelControl();
+            this.lblFcidTitle = new DevExpress.XtraEditors.LabelControl();
+            this.txtFcid = new DevExpress.XtraEditors.TextEdit();
             this.chkWorkStationEnable = new System.Windows.Forms.CheckBox();
             this.chkReady = new System.Windows.Forms.CheckBox();
             this.chkProgress = new System.Windows.Forms.CheckBox();
@@ -53,6 +55,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.lblGridTitle = new DevExpress.XtraEditors.LabelControl();
             ((System.ComponentModel.ISupportInitialize)(this.topCard)).BeginInit();
             this.topCard.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.txtFcid.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtItemName.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtItemCode.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtWorkOrderNo.Properties)).BeginInit();
@@ -65,6 +68,8 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             // 
             // topCard
             // 
+            this.topCard.Controls.Add(this.lblFcidTitle);
+            this.topCard.Controls.Add(this.txtFcid);
             this.topCard.Controls.Add(this.chkWorkStationEnable);
             this.topCard.Controls.Add(this.chkReady);
             this.topCard.Controls.Add(this.chkProgress);
@@ -84,7 +89,26 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.topCard.Name = "topCard";
             this.topCard.Size = new System.Drawing.Size(1509, 88);
             this.topCard.TabIndex = 0;
-            // 
+            //
+            // lblFcidTitle
+            //
+            this.lblFcidTitle.Appearance.Font = new System.Drawing.Font("맑은 고딕", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.lblFcidTitle.Appearance.Options.UseFont = true;
+            this.lblFcidTitle.Location = new System.Drawing.Point(797, 20);
+            this.lblFcidTitle.Name = "lblFcidTitle";
+            this.lblFcidTitle.Size = new System.Drawing.Size(35, 17);
+            this.lblFcidTitle.TabIndex = 14;
+            this.lblFcidTitle.Text = "· FCID";
+            //
+            // txtFcid
+            //
+            this.txtFcid.Location = new System.Drawing.Point(849, 17);
+            this.txtFcid.Name = "txtFcid";
+            this.txtFcid.Properties.Appearance.Font = new System.Drawing.Font("맑은 고딕", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
+            this.txtFcid.Properties.Appearance.Options.UseFont = true;
+            this.txtFcid.Size = new System.Drawing.Size(200, 24);
+            this.txtFcid.TabIndex = 15;
+            //
             // chkWorkStationEnable
             // 
             this.chkWorkStationEnable.AutoSize = true;
@@ -108,7 +132,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.chkReady.Font = new System.Drawing.Font("맑은 고딕", 9.5F);
             this.chkReady.Location = new System.Drawing.Point(540, 54);
             this.chkReady.Name = "chkReady";
-            this.chkReady.Size = new System.Drawing.Size(70, 21);
+            this.chkReady.Size = new System.Drawing.Size(50, 21);
             this.chkReady.TabIndex = 12;
             this.chkReady.Text = "대기";
             this.chkReady.UseVisualStyleBackColor = true;
@@ -122,7 +146,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.chkProgress.Font = new System.Drawing.Font("맑은 고딕", 9.5F);
             this.chkProgress.Location = new System.Drawing.Point(620, 54);
             this.chkProgress.Name = "chkProgress";
-            this.chkProgress.Size = new System.Drawing.Size(70, 21);
+            this.chkProgress.Size = new System.Drawing.Size(63, 21);
             this.chkProgress.TabIndex = 13;
             this.chkProgress.Text = "진행중";
             this.chkProgress.UseVisualStyleBackColor = true;
@@ -309,6 +333,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             ((System.ComponentModel.ISupportInitialize)(this.topCard)).EndInit();
             this.topCard.ResumeLayout(false);
             this.topCard.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.txtFcid.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtItemName.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtItemCode.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txtWorkOrderNo.Properties)).EndInit();
@@ -344,5 +369,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
         private System.Windows.Forms.CheckBox chkReady;
         private System.Windows.Forms.CheckBox chkProgress;
         private System.Windows.Forms.CheckBox chkCompleted;
+        private DevExpress.XtraEditors.LabelControl lblFcidTitle;
+        private DevExpress.XtraEditors.TextEdit txtFcid;
     }
 }

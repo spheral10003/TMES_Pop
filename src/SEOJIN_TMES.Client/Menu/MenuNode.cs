@@ -7,7 +7,7 @@ using SEOJIN_TMES.Client.Composition;
 namespace SEOJIN_TMES.Client.Menu
 {
     /// <summary>
-    /// 3-Depth 트리 메뉴(MEIS > 대분류 > 화면)의 노드 하나.
+    /// 3-Depth 트리 메뉴(TMES > 대분류 > 화면)의 노드 하나.
     /// TextAccessor를 Func로 두는 이유는 언어 전환 시 리소스를 다시 읽어 메뉴 문구를 즉시 갱신하기 위함이다.
     /// 리프 노드(FormFactory != null)만 실제 화면을 연다.
     /// </summary>

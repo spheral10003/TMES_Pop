@@ -2,6 +2,7 @@ using SEOJIN_TMES.Client.Common.Logging;
 using SEOJIN_TMES.Client.Composition;
 using SEOJIN_TMES.Client.Core;
 using SEOJIN_TMES.Client.Forms;
+using SEOJIN_TMES.Client.Forms.Common;
 using System;
 using System.Threading;
 using System.Windows.Forms;

@@ -2,7 +2,7 @@ using SEOJIN_TMES.Client.Common.Logging;
 using System;
 using System.Runtime.InteropServices;
 
-namespace SEOJIN_TMES.Client.Core
+namespace SEOJIN_TMES.Client.Forms.Common
 {
     /// <summary>
     /// 프로그램이 떠 있는 동안 화면 보호기 · 모니터 꺼짐 · 절전 진입을 막는다.

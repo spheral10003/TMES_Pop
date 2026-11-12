@@ -35,7 +35,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(PopScreen));
-            ImageBoxExtensions.DefaultGifAnimator defaultGifAnimator1 = new ImageBoxExtensions.DefaultGifAnimator();
+            ImageBoxExtensions.DefaultGifAnimator defaultGifAnimator2 = new ImageBoxExtensions.DefaultGifAnimator();
             this.btnPrevProcess = new System.Windows.Forms.Button();
             this.spacerTop = new System.Windows.Forms.Panel();
             this.mainPanel = new DevExpress.XtraEditors.PanelControl();
@@ -79,10 +79,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.panel1 = new System.Windows.Forms.Panel();
             this.lblProgressState = new System.Windows.Forms.Label();
             this.lblWorkstation = new System.Windows.Forms.Label();
-            this.lblWorker = new System.Windows.Forms.Label();
-            this.lblWorkerTile = new System.Windows.Forms.Label();
-            this.btnAdminAlarm = new System.Windows.Forms.Button();
             this.btnRework = new System.Windows.Forms.Button();
+            this.btnAdminAlarm = new System.Windows.Forms.Button();
             this.btnProcessList = new System.Windows.Forms.Button();
             this.btnNextProcess = new System.Windows.Forms.Button();
             this.btnStopProcess = new System.Windows.Forms.Button();
@@ -210,7 +208,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // 
             // picView
             // 
-            this.picView.Animator = defaultGifAnimator1;
+            this.picView.Animator = defaultGifAnimator2;
             this.picView.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.picView.ContextMenuStrip = this.menuView;
             this.picView.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -266,6 +264,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // fieldPanel
             // 
             this.fieldPanel.Controls.Add(this.lblWorkOrderNo);
+            this.fieldPanel.Controls.Add(this.lblWorkstation);
             this.fieldPanel.Controls.Add(this.txtWorkOrderNo);
             this.fieldPanel.Controls.Add(this.lblItemCode);
             this.fieldPanel.Controls.Add(this.txtItemCode);
@@ -567,10 +566,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.lblMessage.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.lblMessage.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblMessage.ForeColor = System.Drawing.Color.Black;
-            this.lblMessage.Location = new System.Drawing.Point(14, 400);
+            this.lblMessage.Location = new System.Drawing.Point(14, 464);
             this.lblMessage.Name = "lblMessage";
             this.lblMessage.Padding = new System.Windows.Forms.Padding(8);
-            this.lblMessage.Size = new System.Drawing.Size(358, 115);
+            this.lblMessage.Size = new System.Drawing.Size(358, 51);
             this.lblMessage.TabIndex = 22;
             // 
             // lblInfoTitle
@@ -653,9 +652,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             // panel1
             // 
             this.panel1.Controls.Add(this.lblProgressState);
-            this.panel1.Controls.Add(this.lblWorkstation);
-            this.panel1.Controls.Add(this.lblWorker);
-            this.panel1.Controls.Add(this.lblWorkerTile);
             this.panel1.Controls.Add(this.btnRework);
             this.panel1.Controls.Add(this.btnAdminAlarm);
             this.panel1.Controls.Add(this.btnProcessList);
@@ -675,7 +671,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.lblProgressState.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.lblProgressState.Font = new System.Drawing.Font("Noto Sans KR Medium", 9.75F, System.Drawing.FontStyle.Bold);
             this.lblProgressState.ForeColor = System.Drawing.Color.White;
-            this.lblProgressState.Location = new System.Drawing.Point(768, 7);
+            this.lblProgressState.Location = new System.Drawing.Point(1284, 7);
             this.lblProgressState.Name = "lblProgressState";
             this.lblProgressState.Size = new System.Drawing.Size(205, 31);
             this.lblProgressState.TabIndex = 27;
@@ -688,35 +684,27 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.lblWorkstation.BackColor = System.Drawing.Color.White;
             this.lblWorkstation.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.lblWorkstation.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblWorkstation.Location = new System.Drawing.Point(1233, 7);
+            this.lblWorkstation.Location = new System.Drawing.Point(14, 398);
             this.lblWorkstation.Name = "lblWorkstation";
-            this.lblWorkstation.Size = new System.Drawing.Size(270, 28);
+            this.lblWorkstation.Size = new System.Drawing.Size(358, 28);
             this.lblWorkstation.TabIndex = 26;
             this.lblWorkstation.Text = "Workstation";
             this.lblWorkstation.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // lblWorker
+            // btnRework
             // 
-            this.lblWorker.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblWorker.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.lblWorker.Font = new System.Drawing.Font("Arial", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblWorker.Location = new System.Drawing.Point(1037, 7);
-            this.lblWorker.Name = "lblWorker";
-            this.lblWorker.Size = new System.Drawing.Size(195, 27);
-            this.lblWorker.TabIndex = 18;
-            this.lblWorker.Text = "작업자";
-            this.lblWorker.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // lblWorkerTile
-            // 
-            this.lblWorkerTile.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblWorkerTile.Font = new System.Drawing.Font("Arial", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblWorkerTile.Location = new System.Drawing.Point(977, 8);
-            this.lblWorkerTile.Name = "lblWorkerTile";
-            this.lblWorkerTile.Size = new System.Drawing.Size(65, 27);
-            this.lblWorkerTile.TabIndex = 17;
-            this.lblWorkerTile.Text = "작업자";
-            this.lblWorkerTile.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.btnRework.BackColor = System.Drawing.Color.Gray;
+            this.btnRework.FlatAppearance.MouseOverBackColor = System.Drawing.Color.LightGray;
+            this.btnRework.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.btnRework.Font = new System.Drawing.Font("Noto Sans KR Medium", 9.75F, System.Drawing.FontStyle.Bold);
+            this.btnRework.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
+            this.btnRework.Location = new System.Drawing.Point(663, 7);
+            this.btnRework.Name = "btnRework";
+            this.btnRework.Size = new System.Drawing.Size(99, 31);
+            this.btnRework.TabIndex = 28;
+            this.btnRework.Text = "리 웍";
+            this.btnRework.UseVisualStyleBackColor = false;
+            this.btnRework.Click += new System.EventHandler(this.btnRework_Click);
             // 
             // btnAdminAlarm
             // 
@@ -735,21 +723,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.btnAdminAlarm.Text = "알   림";
             this.btnAdminAlarm.UseVisualStyleBackColor = false;
             this.btnAdminAlarm.Click += new System.EventHandler(this.btnAdminAlarm_Click);
-            // 
-            // btnRework
-            // 
-            this.btnRework.BackColor = System.Drawing.Color.Gray;
-            this.btnRework.FlatAppearance.MouseOverBackColor = System.Drawing.Color.LightGray;
-            this.btnRework.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnRework.Font = new System.Drawing.Font("Noto Sans KR Medium", 9.75F, System.Drawing.FontStyle.Bold);
-            this.btnRework.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(240)))), ((int)(((byte)(240)))), ((int)(((byte)(240)))));
-            this.btnRework.Location = new System.Drawing.Point(663, 7);
-            this.btnRework.Name = "btnRework";
-            this.btnRework.Size = new System.Drawing.Size(99, 31);
-            this.btnRework.TabIndex = 28;
-            this.btnRework.Text = "리 웍";
-            this.btnRework.UseVisualStyleBackColor = false;
-            this.btnRework.Click += new System.EventHandler(this.btnRework_Click);
             // 
             // btnProcessList
             // 
@@ -1113,9 +1086,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private System.Windows.Forms.Button btnAdminAlarm;
         private System.Windows.Forms.Button btnRework;
         private System.Windows.Forms.Button btnProcessList;
-        private System.Windows.Forms.Label lblWorkerTile;
         private DevExpress.XtraEditors.PanelControl toolbarCard;
-        private System.Windows.Forms.Label lblWorker;
         private DevExpress.XtraEditors.CheckEdit chkManualWrench;
         private Common.AccordionHandle btnTabsAccordion;
         private DevExpress.XtraEditors.PanelControl pnlTabHead;

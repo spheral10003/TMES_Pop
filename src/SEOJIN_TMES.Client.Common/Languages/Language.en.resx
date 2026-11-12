@@ -1225,7 +1225,7 @@ Reconnection continues automatically until it succeeds. You can also press [Reco
     <value>Download failed.</value>
   </data>
   <data name="Attach_UploadFilter" xml:space="preserve">
-    <value>Images|*.png;*.jpg;*.jpeg;*.bmp|PDF|*.pdf|All files|*.*</value>
+    <value>All files|*.*|Images|*.png;*.jpg;*.jpeg;*.bmp|PDF|*.pdf</value>
   </data>
   <data name="Attach_ConditionRequired" xml:space="preserve">
     <value>Without a registration date, enter a serial number or a work order number.</value>

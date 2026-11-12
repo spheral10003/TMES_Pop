@@ -20,7 +20,7 @@ namespace SEOJIN_TMES.Client.Forms.Common
 
     /// <summary>
     /// &lt;가상 키보드&gt; 팝업 — 물리 키보드가 없는 터치 POP에서 그리드 셀 값을 넣을 때 쓰던 창.
-    /// 지금은 Windows 화상 키보드(<see cref="Core.OnScreenKeyboard"/>)로 바꿔 띄우지 않고, 코드만 남겨 둔다.
+    /// 지금은 Windows 화상 키보드(<see cref="Common.OnScreenKeyboard"/>)로 바꿔 띄우지 않고, 코드만 남겨 둔다.
     ///
     /// 화면 자판을 눌러 입력값 상자(txtValue)를 채우고 [확인]이면 <see cref="Value"/>로 돌려준다.
     /// 값이 맞는지(숫자인지 등)는 이 창이 판단하지 않는다 — 셀 편집기의 검사(ValidatingEditor)를 그대로 타도록

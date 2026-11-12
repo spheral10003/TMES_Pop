@@ -4,7 +4,7 @@ using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraTreeList;
 using DevExpress.XtraTreeList.Localization;
 
-namespace SEOJIN_TMES.Client.Core
+namespace SEOJIN_TMES.Client.Forms.Common
 {
     /// <summary>
     /// 그리드에서 <b>컬럼을 지우는(숨기는) 조작만</b> 막는다. 정렬 · 이동 · 그룹 · 필터 등 나머지는 그대로 둔다.
@@ -13,7 +13,7 @@ namespace SEOJIN_TMES.Client.Core
     /// 현장 작업자는 컬럼 선택 창으로 되살리는 방법을 모르고 화면을 다시 열어야만 돌아왔다.
     /// 그래서 끌어서 숨기기를 끄고, 우클릭 메뉴에서 숨기기 · 컬럼 선택 창 항목을 뺀다.
     ///
-    /// <see cref="Forms.Common.MeisGridView"/>는 생성될 때 스스로 적용한다.
+    /// <see cref="MeisGridView"/>는 생성될 때 스스로 적용한다.
     /// 일반 GridView · TreeList를 쓰는 화면은 초기화에서 직접 부른다.
     /// (POP 화면은 이보다 강하게 정렬만 남긴다 — PopScreen.LockGridCustomization.)
     /// </summary>
