@@ -100,7 +100,7 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
 
         /// <summary>
         /// 버튼 권한을 받아 버튼을 보이거나 숨기고, 보이는 첨부 버튼만 오른쪽 끝부터 다시 붙인다.
-        /// 조회=srchAuthYn, 업로드=strgAuthYn, 삭제=delAuthYn, 다운로드=prnotAuthYn(파일을 밖으로 내보내는 출력으로 본다).
+        /// 조회=srchAuthYn, 업로드=strgAuthYn, 삭제=delAuthYn, 다운로드=strgAuthYn(업로드와 같은 저장 권한 — 사용자 지정).
         /// </summary>
         private async void SetPermission()
         {
@@ -120,7 +120,7 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             MenuPermission.SetVisible(_permission.CanSearch, btnSearch);
             MenuPermission.SetVisible(_permission.CanSave, btnUpload);
             MenuPermission.SetVisible(_permission.CanDelete, btnDelete);
-            MenuPermission.SetVisible(_permission.CanPrint, btnDownload);
+            MenuPermission.SetVisible(_permission.CanSave, btnDownload);
             ArrangeByTextWidth();
         }
 
@@ -207,7 +207,7 @@ namespace SEOJIN_TMES.Client.Forms.Attachment
             // Designer에서 Top | Right로 고정해 두었으므로 여기서 한 번 맞추면 창 크기가 바뀌어도 오른쪽 끝에 붙어 있다.
             // 권한이 없어 숨긴 버튼은 건너뛴다 — 자리를 비워 두면 버튼 사이가 벌어져 보인다.
             int right = btnUpload.Parent.ClientSize.Width - _fileButtonsRightMargin;
-            var permitted = new[] { _permission.CanSave, _permission.CanDelete, _permission.CanPrint };
+            var permitted = new[] { _permission.CanSave, _permission.CanDelete, _permission.CanSave };
             var buttons = new[] { btnUpload, btnDelete, btnDownload };
             for (int i = 0; i < buttons.Length; i++)
             {
