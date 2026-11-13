@@ -124,7 +124,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             }
 
             // OK/NG 칸은 선택돼도 결과 색을 유지한다 — 선택 줄은 그 칸 안쪽 테두리로 표시한다.
-            foreach (var view in new GridView[] { gridViewMaterial, gridViewBomSpec, gridViewInspection })
+            // 투입자재 그리드는 칠하는 칸이 없어 빠진다(참조 자재도 색을 바꾸지 않는다).
+            foreach (var view in new GridView[] { gridViewBomSpec, gridViewInspection })
                 AppTheme.ResultCellSelection(view);
 
             // 터치 POP에는 물리 키보드가 없다 — 값을 넣는 칸의 편집기가 열리면 가상 키보드를 띄운다.
@@ -177,7 +178,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (stateColumn != null)
                 stateColumn.OptionsColumn.AllowFocus = true;
 
-            gridViewMaterial.RowCellStyle += GridViewMaterial_RowCellStyle;
+            gridViewMaterial.FocusedRowChanged += GridViewMaterial_FocusedRowChanged;
             SetGridLineColor(gridViewMaterial);
         }
 
@@ -580,7 +581,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
-        /// 설비 결과를 채울 첫 행 — NG이거나 결과가 아직 없는 첫 행(참조 줄은 합격으로 보므로 건너뛴다). 그런 행이 없으면 첫 행.
+        /// 설비 결과를 채울 첫 행 — NG이거나 결과가 아직 없는 첫 행(참조 줄은 합격으로 보므로 건너뛴다).
+        /// 그런 행이 없으면 참조 아닌 첫 행, 그것도 없으면(전부 참조 줄) 첫 행.
         /// 그리드에 보이는 순서(정렬 반영)대로 본다. 행이 하나도 없으면 InvalidRowHandle.
         /// </summary>
         private int FindBomSpecTargetRow()
@@ -591,7 +593,11 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                     return rowHandle;
             }
 
-            return gridViewBomSpec.RowCount > 0 ? 0 : DevExpress.XtraGrid.GridControl.InvalidRowHandle;
+            if (gridViewBomSpec.RowCount == 0)
+                return DevExpress.XtraGrid.GridControl.InvalidRowHandle;
+
+            var inputRow = FindInputRow(gridViewBomSpec, -1, 1);
+            return inputRow != DevExpress.XtraGrid.GridControl.InvalidRowHandle ? inputRow : 0;
         }
 
         /// <summary>
@@ -717,14 +723,58 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         //  [투입자재] 그리드 이벤트
         // ─────────────────────────────────────────────────────────────────────────
 
-        /// <summary>참조 자재(서버 refLtr=AR·REF)는 입력 없이 끝난 줄이라 OK 색으로 칠한다(선택 행도 OK 색 유지, 선택은 테두리).</summary>
-        private void GridViewMaterial_RowCellStyle(object sender, RowCellStyleEventArgs e)
+        /// <summary>
+        /// 참조 자재(서버 refLtr=AR·REF)는 OK로 끝난 줄이라 색은 바꾸지 않고, 포커스가 오면 다음 입력 줄로 건너뛴다
+        /// (<see cref="SkipReferenceRow"/>).
+        /// </summary>
+        private void GridViewMaterial_FocusedRowChanged(object sender, FocusedRowChangedEventArgs e)
         {
-            if (e.RowHandle < 0)
-                return;
+            SkipReferenceRow(gridViewMaterial, e);
+        }
 
-            if (gridViewMaterial.GetRow(e.RowHandle) is PopInputMaterialDto material && material.IsReference)
-                AppTheme.OkRowCell(gridViewMaterial, e);
+        /// <summary>
+        /// 참조 줄(서버 refLtr=AR·REF)에 포커스가 오면 움직인 방향(위 · 아래)의 첫 입력 줄로 넘긴다.
+        /// 그 방향에 없으면 반대 방향, 양쪽 다 없으면(전부 참조 줄) 그대로 둔다.
+        /// 참조 줄은 입력 대상이 아니라 그 줄에 머물면 작업자가 할 일이 없다 — 키보드 · 클릭 · 바인딩 직후 첫 행 모두 같다.
+        /// 포커스를 옮기면 FocusedRowChanged가 새 줄로 다시 불리므로, 옮겼으면(true) 부른 쪽은 이번 호출을 끝낸다.
+        /// </summary>
+        private bool SkipReferenceRow(GridView view, FocusedRowChangedEventArgs e)
+        {
+            if (!view.IsDataRow(e.FocusedRowHandle) || !IsReferenceRow(view, e.FocusedRowHandle))
+                return false;
+
+            int step = view.IsDataRow(e.PrevFocusedRowHandle) && e.PrevFocusedRowHandle > e.FocusedRowHandle ? -1 : 1;
+            int target = FindInputRow(view, e.FocusedRowHandle, step);
+            if (target == DevExpress.XtraGrid.GridControl.InvalidRowHandle)
+                target = FindInputRow(view, e.FocusedRowHandle, -step);
+            if (target == DevExpress.XtraGrid.GridControl.InvalidRowHandle)
+                return false;
+
+            view.FocusedRowHandle = target;
+            return true;
+        }
+
+        /// <summary><paramref name="rowHandle"/>에서 <paramref name="step"/> 방향으로 찾은 첫 참조 아닌 줄. 없으면 InvalidRowHandle.</summary>
+        private static int FindInputRow(GridView view, int rowHandle, int step)
+        {
+            for (int next = rowHandle + step; next >= 0 && next < view.RowCount; next += step)
+            {
+                if (!IsReferenceRow(view, next))
+                    return next;
+            }
+
+            return DevExpress.XtraGrid.GridControl.InvalidRowHandle;
+        }
+
+        /// <summary>투입자재 · BOM 스팩 줄이 참조 줄(서버 refLtr=AR·REF)인지.</summary>
+        private static bool IsReferenceRow(GridView view, int rowHandle)
+        {
+            var row = view.GetRow(rowHandle);
+            if (row is PopInputMaterialDto material)
+                return material.IsReference;
+            if (row is PopBomSpecDto spec)
+                return spec.IsReference;
+            return false;
         }
 
         /// <summary>"시리얼번호 입력상태" 칸을 클릭하면 &lt;투입자재 정보 입력&gt; 팝업을 연다.</summary>
@@ -783,6 +833,10 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (IsBomSpecRedrawing)
                 return;
             if (e.FocusedRowHandle < 0)
+                return;
+
+            // 참조 줄은 체결 대상이 아니다 — 다음 체결 줄로 넘기고, 목표 토크는 그 줄로 다시 불린 이 이벤트가 쓴다.
+            if (SkipReferenceRow(gridViewBomSpec, e))
                 return;
 
             var spec = gridViewBomSpec.GetRow(e.FocusedRowHandle) as PopBomSpecDto;
@@ -1062,7 +1116,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// 측정값이 들어온 <b>결과값 칸만</b> 칠한다 — 토크 결과값은 토크 판정으로, 각도 결과값은 각도 판정으로
         /// (하한~상한 안이면 OK 색, 벗어나면 NG 색). 줄 전체를 칠하면 토크 · 각도 중 어느 쪽이 NG인지 보이지 않는다.
         ///  - 각도 하한 · 상한이 둘 다 없는 줄은 각도 판정 대상이 아니라 각도 칸을 칠하지 않는다(<see cref="IsBomSpecPassed"/>와 같은 기준).
-        ///  - 참조 줄(서버 refLtr=AR·REF)은 측정값 없이 끝난 줄이라 예전처럼 줄 전체를 OK 색으로 둔다.
+        ///  - 참조 줄(서버 refLtr=AR·REF)은 측정값 없이 OK로 끝난 줄이라 값과 상관없이 결과값 칸만 OK 색으로 둔다(줄 전체는 칠하지 않는다).
         /// 칸 정렬을 건드리지 않고, 선택 행도 결과 색을 유지하고 선택은 테두리로 표시한다(<see cref="AppTheme.ResultCellSelection"/> 참고).
         /// </summary>
         private void GridViewBomSpec_RowCellStyle(object sender, RowCellStyleEventArgs e)
@@ -1074,13 +1128,14 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (spec == null)
                 return;
 
+            var fieldName = e.Column.FieldName;
             if (spec.IsReference)
             {
-                AppTheme.OkRowCell(gridViewBomSpec, e);
+                if (fieldName == TorqueResultField || (fieldName == AngleResultField && IsAngleManaged(spec)))
+                    AppTheme.OkRowCell(gridViewBomSpec, e);
                 return;
             }
 
-            var fieldName = e.Column.FieldName;
             if (fieldName == TorqueResultField && spec.TorqueResult != null)
                 ResultCell(gridViewBomSpec, e, IsTorquePassed(spec));
             else if (fieldName == AngleResultField && spec.AngleResult != null && IsAngleManaged(spec))

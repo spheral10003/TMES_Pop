@@ -152,7 +152,7 @@ namespace SEOJIN_TMES.Client.Common.Models
 
         /// <summary>
         /// 참조 항목인지(서버 refLtr=AR·REF). 참조 자재는 작업자가 입력하지 않는다 —
-        /// 화면은 OK로 칠하고, 입력 팝업을 열지 않으며, 완료 판단에서도 끝난 것으로 본다.
+        /// 색은 바꾸지 않고 입력상태를 OK로 보여 주며, 입력 팝업을 열지 않고 포커스도 건너뛰며, 완료 판단에서도 끝난 것으로 본다.
         /// </summary>
         public bool IsReference { get; set; }
 
@@ -186,14 +186,14 @@ namespace SEOJIN_TMES.Client.Common.Models
 
         /// <summary>
         /// [투입자재] 그리드의 "시리얼번호 입력상태" 표시 문구.
-        /// 입력 대상이 아니면 "-", 다 입력했으면 "완료", 아니면 "미완료".
+        /// 참조 자재(AR·REF)는 입력 없이 OK로 끝난 줄이라 "OK", 입력 대상이 아니면 "-", 다 입력했으면 "완료", 아니면 "미완료".
         /// 품목코드만 받는 자재는 서버가 내려준 품목코드 완료 여부를 보여 준다.
         /// </summary>
         public string SerialInputStateText
         {
             get
             {
-                if (IsReference) return "-";
+                if (IsReference) return PopInspectionSpecDto.ResultOk;
                 if (IsItemCodeInputOnly) return ItemCodeInputCompleted ? "완료" : "미완료";
                 if (!SerialCheckRequired) return "-";
                 return IsSerialInputCompleted ? "완료" : "미완료";
@@ -287,7 +287,7 @@ namespace SEOJIN_TMES.Client.Common.Models
 
         /// <summary>
         /// 참조 항목인지(서버 refLtr=AR·REF). 참조 줄은 체결 · 입력 대상이 아니다 —
-        /// 화면은 OK로 칠하고, 설비 결과를 채울 행에서 건너뛰며, 결과값 칸 편집도 막는다.
+        /// 화면은 토크 · 각도 결과값 칸만 OK 색으로 칠하고(줄 전체는 칠하지 않는다), 포커스 · 설비 결과를 채울 행에서 건너뛰며, 결과값 칸 편집도 막는다.
         /// </summary>
         public bool IsReference { get; set; }
     }

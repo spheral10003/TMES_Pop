@@ -1364,7 +1364,7 @@ namespace SEOJIN_TMES.Client.Theme
         /// <summary>
         /// OK/NG로 칠한 칸이 선택 행에 있으면 칸 안쪽에 선택 테두리(<see cref="GridSelectedBorder"/>)를 두른다.
         /// OK/NG 칸은 선택돼도 결과 색을 유지하므로(<see cref="ResultRowCell"/>), 줄 전체를 칠하는 그리드
-        /// (참조 줄 · 작업 현황 NG 줄)에서는 이 테두리가 없으면 어느 줄을 골랐는지 알 수 없다.
+        /// (작업 현황 NG 줄)에서는 이 테두리가 없으면 어느 줄을 골랐는지 알 수 없다.
         /// <see cref="NgRowCell"/> / <see cref="OkRowCell"/>을 쓰는 그리드마다 한 번 부른다(여러 번 불러도 한 번만 연결된다).
         /// </summary>
         public static void ResultCellSelection(GridView view)
