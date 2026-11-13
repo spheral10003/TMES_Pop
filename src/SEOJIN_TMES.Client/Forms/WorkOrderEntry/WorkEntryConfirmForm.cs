@@ -36,6 +36,9 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
 
         private WorkOrderEntryDto _workOrder;
 
+        /// <summary>Initialize로 받은 페이지 공정 전체 — <see cref="FocusProcess"/>가 줄 위치를 찾는 데 쓴다.</summary>
+        private List<RoutingProcessDto> _allPages = new List<RoutingProcessDto>();
+
         /// <summary>[이동]으로 확정한 페이지 공정. 취소/닫기면 null.</summary>
         public RoutingProcessDto SelectedProcess { get; private set; }
 
@@ -52,6 +55,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
         {
             _workOrder = workOrder;
             var allPages = processes ?? new List<RoutingProcessDto>();
+            _allPages = allPages;
 
             Text = Language.WorkEntryConfirm_Title;
             lblTitle.Text = _workOrder != null
@@ -76,6 +80,30 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
 
             materialSearch.Initialize(_workOrder, allPages);
             materialSearch.SearchCompleted += materialSearch_SearchCompleted;
+        }
+
+        /// <summary>
+        /// 처음 포커스를 <paramref name="subRoutingRef"/> 페이지에 둔다 — [라우팅 공정] 탭은 그 페이지가 속한 줄,
+        /// [전체 페이지 공정] 탭은 그 페이지. <see cref="Initialize"/> 뒤에 부른다. 목록에 없으면 첫 줄 그대로 둔다.
+        /// POP 화면이 라우팅 그룹 경계에서 이 창을 띄울 때, 이어서 할 공정을 작업자가 찾아 내려가지 않게 하려는 것이다.
+        /// </summary>
+        public void FocusProcess(string subRoutingRef)
+        {
+            if (string.IsNullOrEmpty(subRoutingRef))
+                return;
+
+            var routingIndex = RoutingProcessGroups.RepresentativeIndexOf(_allPages, subRoutingRef);
+            if (routingIndex >= 0)
+                gridView.FocusedRowHandle = gridView.GetRowHandle(routingIndex);
+
+            for (int i = 0; i < _allPages.Count; i++)
+            {
+                if (_allPages[i] != null && string.Equals(_allPages[i].SubRoutingReference, subRoutingRef, StringComparison.OrdinalIgnoreCase))
+                {
+                    gridViewAll.FocusedRowHandle = gridViewAll.GetRowHandle(i);
+                    break;
+                }
+            }
         }
 
         /// <summary>두 탭의 그리드 컬럼 · 상태 구슬 · 더블클릭을 같은 모양으로 맞춘다.</summary>

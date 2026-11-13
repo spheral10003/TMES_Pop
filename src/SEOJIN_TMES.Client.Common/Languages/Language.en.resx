@@ -706,10 +706,10 @@
     <value>This is the last process in the list.</value>
   </data>
   <data name="Pop_RoutingGroupLastProcess" xml:space="preserve">
-    <value>This is the last process of the current routing group. You cannot move to a process in another routing group.</value>
+    <value>This is the last process of the current routing group. Select a process of another routing group in the Work Entry Confirmation window.</value>
   </data>
   <data name="Pop_RoutingGroupFirstProcess" xml:space="preserve">
-    <value>This is the first process of the current routing group. You cannot move to a process in another routing group.</value>
+    <value>This is the first process of the current routing group. Select a process of another routing group in the Work Entry Confirmation window.</value>
   </data>
   <data name="Pop_AdminAlarmSent" xml:space="preserve">
     <value>The alarm has been registered.</value>

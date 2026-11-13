@@ -56,6 +56,25 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         }
 
         /// <summary>
+        /// <see cref="Representatives"/> 목록에서 <paramref name="subRoutingRef"/> 페이지가 속한 줄의 위치. 목록에 없으면 -1.
+        /// &lt;작업 진입 확인&gt;이 특정 페이지의 라우팅 공정 줄을 처음부터 가리키게 할 때 쓴다.
+        /// </summary>
+        public static int RepresentativeIndexOf(IList<RoutingProcessDto> processes, string subRoutingRef)
+        {
+            var groups = Split(processes);
+            for (int i = 0; i < groups.Count; i++)
+            {
+                foreach (var page in groups[i])
+                {
+                    if (string.Equals(page.SubRoutingReference, subRoutingRef, StringComparison.OrdinalIgnoreCase))
+                        return i;
+                }
+            }
+
+            return -1;
+        }
+
+        /// <summary>
         /// <paramref name="subRoutingRef"/> 페이지가 속한 라우팅 그룹의 페이지 공정 전체(그 그룹의 모든 라우팅 공정, 순서 유지).
         /// 서브 라우팅 키로 찾는다 — 목록을 새로 받아 객체가 바뀌어도 찾도록. 목록에 없으면 빈 목록.
         /// </summary>

@@ -518,11 +518,14 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             var target = current + offset;
             var outOfList = current < 0 || target < 0 || target >= _processes.Count;
 
-            // 라우팅 그룹이 다른 공정으로는 옮기지 않는다 — 같은 그룹 안에서는 라우팅 공정이 달라도 옮긴다.
-            // 다른 그룹의 공정은 작업 진입 화면에서 골라 들어온다([공정 목록]도 지금 그룹의 페이지만 보여 준다).
+            // 라우팅 그룹이 다른 공정으로는 바로 옮기지 않는다 — 같은 그룹 안에서는 라우팅 공정이 달라도 옮긴다.
+            // 그룹 경계에서는 알린 뒤 <작업 진입 확인> 창을 띄워 작업자가 이어서 할 공정을 직접 고르게 한다(MoveByEntryConfirm).
             var otherGroup = !outOfList && !RoutingProcessGroups.IsSameRoutingGroup(_processes[current], _processes[target]);
             if (outOfList || otherGroup)
             {
+                // 목록을 다시 받으면 객체가 바뀌므로, 창에서 처음 가리킬 공정(경계 너머의 공정)은 키로 들고 간다.
+                var focusRef = otherGroup ? _processes[target].SubRoutingReference : null;
+
                 AppLog.Info($"[POP] 공정 이동 불가{(otherGroup ? "(라우팅 그룹 다름)" : string.Empty)} - 현재 {current}, 이동 {offset}, 목록 {_processes.Count}건");
 
                 // 그룹의 마지막 공정도 목록의 마지막 공정처럼 완료는 보낸다 — 입력할 항목이 없는 공정은 이 클릭 말고는 끝낼 길이 없다.
@@ -538,11 +541,17 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                     }
 
                     AppMessageBox.Info(this, otherGroup ? Language.Pop_RoutingGroupLastProcess : Language.Pop_LastProcess, Language.Pop_Title);
+
+                    // 완료 판단은 위에서 끝났으므로 고른 공정으로 옮길 때 완료를 또 보내지 않는다.
+                    if (otherGroup)
+                        await MoveByEntryConfirm(focusRef, endCurrent: false);
                 }
                 else if (otherGroup && offset < 0 && !IsDisposed && !Disposing)
                 {
                     // 그룹의 첫 공정에서 [이전 공정] — 아무 반응이 없으면 고장으로 보이므로 이유를 알린다.
                     AppMessageBox.Info(this, Language.Pop_RoutingGroupFirstProcess, Language.Pop_Title);
+
+                    await MoveByEntryConfirm(focusRef, endCurrent: true);
                 }
                 return;
             }
@@ -560,6 +569,64 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (IsDisposed || Disposing) return;
 
             await StartEnteredProcess();
+        }
+
+        /// <summary>
+        /// 라우팅 그룹 경계에서 [이전 공정] · [다음 공정]이 막힌 뒤 — &lt;작업 진입 확인&gt; 창에서 고른 공정으로 옮긴다.
+        /// 고른 뒤의 처리는 [공정 목록]과 같다: 미완료 공정이면 묻고, 지금 공정을 완료 처리한 뒤 옮겨 자동 시작한다.
+        /// 지금 공정을 다시 골랐거나 취소했으면 그대로 머문다.
+        /// </summary>
+        /// <param name="focusSubRoutingRef">창에서 처음 가리킬 공정(경계 너머의 공정).</param>
+        /// <param name="endCurrent">
+        /// 옮기기 전에 지금 공정의 완료를 판단할지. [다음 공정]은 창을 띄우기 전에 이미 판단했으므로 false —
+        /// 서버가 완료를 거절한 공정에 완료를 한 번 더 보내지 않으려는 것이다.
+        /// </param>
+        private async Task MoveByEntryConfirm(string focusSubRoutingRef, bool endCurrent)
+        {
+            var selected = await SelectProcessByEntryConfirm(focusSubRoutingRef);
+            if (selected == null || IsDisposed || Disposing)
+                return;
+
+            if (string.Equals(selected.SubRoutingReference, _key.SubRoutingRef, StringComparison.OrdinalIgnoreCase))
+                return;
+
+            if (!ConfirmIncompleteMove())
+                return;
+
+            if (endCurrent && await EndCurrentProcess() == ProcessEndResult.Failed)
+                return;
+
+            // 완료 판단은 끝났다 — 옮긴 공정에서는 자동 시작 · 자동 완료가 다시 돌아야 한다.
+            _moveEnding = false;
+
+            await MoveToProcess(selected);
+            if (IsDisposed || Disposing) return;
+
+            await StartEnteredProcess();
+        }
+
+        /// <summary>
+        /// &lt;작업 진입 확인&gt; 창(WorkEntryConfirmForm — 작업지시 화면에서 POP으로 들어올 때 쓰는 그 창)을 띄워 공정을 고르게 한다.
+        /// 라우팅 그룹 전체가 보이므로 다른 그룹의 공정도 고를 수 있다 — 그룹을 넘는 이동은 작업자가 직접 골랐을 때만 한다.
+        /// 목록은 새로 받는다: 방금 완료한 공정의 상태가 그대로 보여야 다음에 할 공정을 고를 수 있다.
+        /// </summary>
+        /// <returns>고른 공정. 취소 · 목록 조회 실패 · 화면 닫힘이면 null.</returns>
+        private async Task<RoutingProcessDto> SelectProcessByEntryConfirm(string focusSubRoutingRef)
+        {
+            if (!await GetProcesses(refresh: true))
+                return null;
+
+            using (var confirm = new WorkEntryConfirmForm())
+            {
+                confirm.Initialize(ResolveWorkOrder(), _processes);
+                confirm.FocusProcess(focusSubRoutingRef);
+                confirm.CenterOn(this);
+                if (confirm.ShowDialog(this) != DialogResult.OK)
+                    return null;
+
+                AppLog.Step($"[POP] 라우팅 그룹 경계 - 작업 진입 확인에서 공정 선택 ({confirm.SelectedProcess?.RoutingName}/{confirm.SelectedProcess?.PageName})");
+                return confirm.SelectedProcess;
+            }
         }
 
         /// <summary>
@@ -1026,8 +1093,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
         /// <summary>
         /// 공정 목록의 다음 공정으로 옮기고 자동으로 시작한다(중지 상태면 재시작하지 않고 멈춘다).
-        /// 마지막 공정이었으면 알리고 false. 다음 공정의 라우팅 그룹이 다르면 옮기지 않고 알린 뒤 false
-        /// (<see cref="IsNextInOtherRoutingGroup"/>). 옮긴 공정이 이미 진행 · 완료 상태면
+        /// 마지막 공정이었으면 알리고 false. 다음 공정의 라우팅 그룹이 다르면 바로 옮기지 않고 알린 뒤
+        /// &lt;작업 진입 확인&gt; 창에서 고른 공정으로 옮긴다(<see cref="IsNextInOtherRoutingGroup"/> · 취소하면 false).
+        /// 옮긴 공정이 이미 진행 · 완료 상태면
         /// 시작 요청은 보내지 않고 서버 상태를 그대로 따른다.
         /// </summary>
         private async Task<bool> MoveNextAndStart()
@@ -1045,8 +1113,22 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             if (IsNextInOtherRoutingGroup(current))
             {
                 AppLog.Info($"[POP] 자동 진행 멈춤 - 다음 공정의 라우팅 그룹이 다름 ({_key.RoutingOperation}/{_key.PageOperation})");
+                var focusRef = _processes[current + 1].SubRoutingReference;
                 AppMessageBox.Info(this, Language.Pop_RoutingGroupLastProcess, Language.Pop_Title);
-                return false;
+
+                // 지금 공정은 방금 자동 완료했다 — 작업자가 고른 공정으로 옮겨 자동 진행을 이어 간다.
+                // 취소했거나 지금 공정을 다시 골랐으면 여기서 멈춘다.
+                var selected = await SelectProcessByEntryConfirm(focusRef);
+                if (selected == null || IsDisposed || Disposing)
+                    return false;
+
+                if (string.Equals(selected.SubRoutingReference, _key.SubRoutingRef, StringComparison.OrdinalIgnoreCase))
+                    return false;
+
+                await MoveToProcess(selected);
+                if (IsDisposed || Disposing) return false;
+
+                return await AutoStartProcess();
             }
 
             await MoveToProcess(_processes[current + 1]);
