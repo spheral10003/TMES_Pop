@@ -234,7 +234,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
         /// <summary>
         /// 시리얼번호 입력용 에디터. 바코드 스캐너 입력은 Enter로 끝나므로,
-        /// Enter를 받으면 값을 확정하고 다음 줄로 내려가 바로 이어서 스캔할 수 있게 한다.
+        /// Enter를 받으면 값을 확정하고 다음 줄로 내려가 바로 이어서 스캔할 수 있게 한다(마지막 줄이면 [저장] 버튼으로).
         /// </summary>
         private RepositoryItemTextEdit CreateSerialEditor()
         {
@@ -257,7 +257,13 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
             var next = gridView.FocusedRowHandle + 1;
             if (next < gridView.RowCount)
+            {
                 FocusSerialCell(next);
+                return;
+            }
+
+            // 마지막 줄까지 채웠으면 [저장]으로 넘긴다 — 이어서 Enter만 치면 저장되어 마우스 없이 끝낼 수 있다.
+            btnSave.Focus();
         }
 
         /// <summary>지정한 줄의 시리얼번호 칸으로 포커스를 옮기고 바로 입력 상태로 만든다.</summary>
