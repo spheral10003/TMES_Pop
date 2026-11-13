@@ -124,6 +124,13 @@ namespace SEOJIN_TMES.Client.Theme
         public static Color ButtonDisabledBack => IsDarkMode ? Color.FromArgb(52, 51, 78) : Color.FromArgb(245, 245, 245);
         public static Color ButtonDisabledFore => IsDarkMode ? Color.FromArgb(110, 108, 140) : Color.FromArgb(191, 191, 191);
 
+        // ── 입력란 상태 색 ──
+        // 버튼의 비활성 바탕(245)은 흰 입력란 옆에서 거의 구분되지 않는다 — 입력란은 한 단계 진한 회색을 쓴다.
+        /// <summary>입력이 막힌(비활성) 입력란 바탕 — 회색 <c>#E0E0E0</c>.</summary>
+        public static Color EditorDisabledBack => IsDarkMode ? Color.FromArgb(52, 51, 78) : Color.FromArgb(224, 224, 224);
+        /// <summary>입력이 막힌(비활성) 입력란 글자.</summary>
+        public static Color EditorDisabledFore => IsDarkMode ? Color.FromArgb(110, 108, 140) : Color.FromArgb(115, 122, 145);
+
         /// <summary>
         /// 테두리만 있는 버튼(시안의 Normal)의 바탕·테두리.
         ///
@@ -1247,6 +1254,21 @@ namespace SEOJIN_TMES.Client.Theme
         {
             Editor(edit);
             edit.Properties.CharacterCasing = CharacterCasing.Upper;
+        }
+
+        /// <summary>
+        /// 입력란이 비활성(<c>Enabled = false</c>)일 때만 회색으로 보이게 한다 — 상황에 따라 열리고 닫히는 칸에 쓴다
+        /// (예: 투입자재 팝업의 품목코드 — 확인 대상이 아닌 자재는 입력을 받지 않는다는 것이 눈에 보여야 한다).
+        ///
+        /// 활성 상태의 색(<see cref="Editor"/> · <see cref="CodeEditor"/>)은 건드리지 않고 <c>AppearanceDisabled</c>에만 입히므로,
+        /// 다시 활성화하면 따로 되돌리지 않아도 원래 색으로 그려진다. <see cref="Editor"/> 계열을 먼저 호출한 뒤 덧붙일 것.
+        /// </summary>
+        public static void EditorDisabledGray(BaseEdit edit)
+        {
+            edit.Properties.AppearanceDisabled.BackColor = EditorDisabledBack;
+            edit.Properties.AppearanceDisabled.ForeColor = EditorDisabledFore;
+            edit.Properties.AppearanceDisabled.Options.UseBackColor = true;
+            edit.Properties.AppearanceDisabled.Options.UseForeColor = true;
         }
 
         /// <summary>체크박스(예: 로그인 화면의 "아이디 저장") — 카드 배경 위에 얹히도록 배경은 투명하게 둔다.</summary>

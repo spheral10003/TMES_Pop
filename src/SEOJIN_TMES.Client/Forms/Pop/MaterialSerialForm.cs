@@ -102,6 +102,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             AppTheme.Editor(txtMaterialCode);
             AppTheme.Editor(txtQty);
             AppTheme.CodeEditor(txtItemCode);
+            // 품목코드 확인 대상이 아니면 입력란이 닫힌다(ConfigureItemCode) — 그때만 회색, 열리면 위의 원래 색 그대로.
+            AppTheme.EditorDisabledGray(txtItemCode);
             AppTheme.Grid(grid, gridView, AppTheme.Indigo);
 
             headerIcon.SvgImage = AppIcons.Get(AppIcons.Clipboard, Color.White);
