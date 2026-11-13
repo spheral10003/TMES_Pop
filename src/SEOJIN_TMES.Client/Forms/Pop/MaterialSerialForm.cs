@@ -152,7 +152,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 txtItemCode.KeyDown += TxtItemCode_KeyDown;
         }
 
-        /// <summary>바코드 스캐너 입력은 Enter로 끝난다 — 그때 투입자재 코드와 대조하고, 맞으면 시리얼번호 첫 줄로 넘어간다.</summary>
+        /// <summary>바코드 스캐너 입력은 Enter로 끝난다 — 그때 투입자재 코드와 대조하고, 맞으면 시리얼번호 첫 줄(시리얼이 없으면 [저장] 버튼)로 넘어간다.</summary>
         private void TxtItemCode_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode != Keys.Enter)
@@ -168,7 +168,11 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             {
                 grid.Focus();
                 FocusSerialCell(0);
+                return;
             }
+
+            // 품목코드만 확인하는 자재는 더 받을 값이 없다 — 시리얼 마지막 줄과 같이 [저장]으로 넘긴다.
+            btnSave.Focus();
         }
 
         /// <summary>
