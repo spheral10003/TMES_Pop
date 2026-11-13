@@ -535,10 +535,23 @@ namespace SEOJIN_TMES.Client.Theme
 
             button.Appearance.BackColor = Color.Transparent;
             button.Appearance.BorderColor = Color.Transparent;
-            button.AppearanceHovered.BackColor = IsDarkMode ? Color.FromArgb(58, 56, 92) : Color.FromArgb(238, 240, 250);
-            button.AppearanceHovered.Options.UseBackColor = true;
+            ApplyIconButtonHover(button);
             button.Appearance.Options.UseBackColor = true;
             button.Appearance.Options.UseBorderColor = true;
+        }
+
+        /// <summary>
+        /// 아이콘 버튼의 오버 배경 — 디자이너에서 이미 지정했으면(UseBackColor=true) 그 색을 그대로 둔다.
+        /// MainForm 상단 바 버튼은 사용자 지정으로 디자이너에서 실버를 주므로 여기서 덮어쓰면 안 된다.
+        /// 최대화 버튼처럼 창 상태마다 IconButton을 다시 불러도 한 번 정해진 오버 색은 유지된다.
+        /// </summary>
+        private static void ApplyIconButtonHover(SimpleButton button)
+        {
+            if (button.AppearanceHovered.Options.UseBackColor)
+                return;
+
+            button.AppearanceHovered.BackColor = IsDarkMode ? Color.FromArgb(58, 56, 92) : Color.FromArgb(238, 240, 250);
+            button.AppearanceHovered.Options.UseBackColor = true;
         }
 
         /// <summary>
@@ -559,10 +572,23 @@ namespace SEOJIN_TMES.Client.Theme
 
             button.Appearance.BackColor = Color.Transparent;
             button.Appearance.BorderColor = Color.Transparent;
-            button.AppearanceHovered.BackColor = IsDarkMode ? Color.FromArgb(58, 56, 92) : Color.FromArgb(238, 240, 250);
-            button.AppearanceHovered.Options.UseBackColor = true;
+            ApplyIconButtonHover(button);
             button.Appearance.Options.UseBackColor = true;
             button.Appearance.Options.UseBorderColor = true;
+        }
+
+        /// <summary>
+        /// 상단 바 아이콘 버튼의 마무리 — 아이콘을 버튼 한가운데 두고, 눌러도 포커스 테두리가 남지 않게 한다.
+        /// (오버 색은 MainForm.Designer.cs에서 실버로 지정 — <see cref="ApplyIconButtonHover"/> 참고.)
+        /// 글자 없는 버튼이어도 기본 위치가 가운데가 아니라 아이콘이 한쪽으로 쏠리고,
+        /// 클릭하면 포커스를 가져가 점선 테두리가 띠 위에 남는다.
+        /// 상단 바는 키보드로 오갈 곳이 아니라서 포커스 자체를 받지 않게 둔다(본문 입력칸의 포커스도 뺏지 않는다).
+        /// </summary>
+        public static void TopBarButtonChrome(SimpleButton button)
+        {
+            button.ImageOptions.Location = ImageLocation.MiddleCenter;
+            button.ShowFocusRectangle = DefaultBoolean.False;
+            button.AllowFocus = false;
         }
 
         /// <summary>

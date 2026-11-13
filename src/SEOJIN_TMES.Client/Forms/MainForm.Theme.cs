@@ -138,6 +138,13 @@ namespace SEOJIN_TMES.Client.Forms
             btnMinimize.ToolTip = Language.MainForm_Minimize;
             ApplyWindowStatePresentation();   // 최대화 버튼은 상태에 따라 아이콘·툴팁이 달라진다
 
+            // 상단 바 버튼 전부 — 아이콘 가운데 정렬 + 클릭 뒤 포커스 테두리 없음.
+            // 버튼을 새로 얹어도 따로 챙기지 않도록 panelTop의 버튼을 모두 돈다.
+            foreach (var button in panelTop.Controls.OfType<SimpleButton>())
+            {
+                AppTheme.TopBarButtonChrome(button);
+            }
+
             lblAlertBadge.BringToFront();
 
             foreach (var screen in _openScreens.Values)

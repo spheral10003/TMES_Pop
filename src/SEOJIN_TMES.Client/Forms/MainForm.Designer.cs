@@ -203,6 +203,8 @@ namespace SEOJIN_TMES.Client.Forms
             // 
             // btnMenuToggle
             // 
+            this.btnMenuToggle.AppearanceHovered.BackColor = System.Drawing.Color.Silver;
+            this.btnMenuToggle.AppearanceHovered.Options.UseBackColor = true;
             this.btnMenuToggle.Location = new System.Drawing.Point(5, 5);
             this.btnMenuToggle.Name = "btnMenuToggle";
             this.btnMenuToggle.Size = new System.Drawing.Size(30, 30);
@@ -218,6 +220,8 @@ namespace SEOJIN_TMES.Client.Forms
             // 
             // btnAlerts
             // 
+            this.btnAlerts.AppearanceHovered.BackColor = System.Drawing.Color.Silver;
+            this.btnAlerts.AppearanceHovered.Options.UseBackColor = true;
             this.btnAlerts.Location = new System.Drawing.Point(802, 4);
             this.btnAlerts.Name = "btnAlerts";
             this.btnAlerts.Size = new System.Drawing.Size(30, 30);
@@ -226,6 +230,8 @@ namespace SEOJIN_TMES.Client.Forms
             // 
             // btnModbusTest
             // 
+            this.btnModbusTest.AppearanceHovered.BackColor = System.Drawing.Color.Silver;
+            this.btnModbusTest.AppearanceHovered.Options.UseBackColor = true;
             this.btnModbusTest.Location = new System.Drawing.Point(772, 4);
             this.btnModbusTest.Name = "btnModbusTest";
             this.btnModbusTest.Size = new System.Drawing.Size(30, 30);
@@ -267,6 +273,8 @@ namespace SEOJIN_TMES.Client.Forms
             // 
             // btnUser
             // 
+            this.btnUser.AppearanceHovered.BackColor = System.Drawing.Color.Silver;
+            this.btnUser.AppearanceHovered.Options.UseBackColor = true;
             this.btnUser.Location = new System.Drawing.Point(889, 4);
             this.btnUser.Name = "btnUser";
             this.btnUser.Size = new System.Drawing.Size(30, 30);
@@ -280,6 +288,8 @@ namespace SEOJIN_TMES.Client.Forms
             this.btnLogout.Appearance.BorderColor = System.Drawing.Color.White;
             this.btnLogout.Appearance.Options.UseBackColor = true;
             this.btnLogout.Appearance.Options.UseBorderColor = true;
+            this.btnLogout.AppearanceHovered.BackColor = System.Drawing.Color.Silver;
+            this.btnLogout.AppearanceHovered.Options.UseBackColor = true;
             this.btnLogout.Location = new System.Drawing.Point(979, 3);
             this.btnLogout.Name = "btnLogout";
             this.btnLogout.Size = new System.Drawing.Size(30, 30);
@@ -288,6 +298,8 @@ namespace SEOJIN_TMES.Client.Forms
             // 
             // btnMinimize
             // 
+            this.btnMinimize.AppearanceHovered.BackColor = System.Drawing.Color.Silver;
+            this.btnMinimize.AppearanceHovered.Options.UseBackColor = true;
             this.btnMinimize.Location = new System.Drawing.Point(919, 3);
             this.btnMinimize.Name = "btnMinimize";
             this.btnMinimize.Size = new System.Drawing.Size(30, 30);
@@ -296,6 +308,8 @@ namespace SEOJIN_TMES.Client.Forms
             // 
             // btnMaximize
             // 
+            this.btnMaximize.AppearanceHovered.BackColor = System.Drawing.Color.Silver;
+            this.btnMaximize.AppearanceHovered.Options.UseBackColor = true;
             this.btnMaximize.Location = new System.Drawing.Point(949, 3);
             this.btnMaximize.Name = "btnMaximize";
             this.btnMaximize.Size = new System.Drawing.Size(30, 30);
