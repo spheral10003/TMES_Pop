@@ -705,6 +705,12 @@
   <data name="Pop_LastProcess" xml:space="preserve">
     <value>Đây là công đoạn cuối cùng trong danh sách.</value>
   </data>
+  <data name="Pop_RoutingGroupLastProcess" xml:space="preserve">
+    <value>Đây là công đoạn cuối cùng của nhóm routing hiện tại. Không thể chuyển sang công đoạn của nhóm routing khác.</value>
+  </data>
+  <data name="Pop_RoutingGroupFirstProcess" xml:space="preserve">
+    <value>Đây là công đoạn đầu tiên của nhóm routing hiện tại. Không thể chuyển sang công đoạn của nhóm routing khác.</value>
+  </data>
   <data name="Pop_AdminAlarmSent" xml:space="preserve">
     <value>Đã đăng ký cảnh báo.</value>
   </data>

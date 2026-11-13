@@ -516,11 +516,17 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
             var current = GetProcessIndex();
             var target = current + offset;
-            if (current < 0 || target < 0 || target >= _processes.Count)
-            {
-                AppLog.Info($"[POP] 공정 이동 불가 - 현재 {current}, 이동 {offset}, 목록 {_processes.Count}건");
+            var outOfList = current < 0 || target < 0 || target >= _processes.Count;
 
-                // 마지막 공정 완료 확인에서 취소했으면 이미 안내 칸에 남겼으므로 "목록의 마지막 공정" 안내는 띄우지 않는다.
+            // 라우팅 그룹이 다른 공정으로는 옮기지 않는다 — 같은 그룹 안에서는 라우팅 공정이 달라도 옮긴다.
+            // 다른 그룹의 공정은 작업 진입 화면에서 골라 들어온다([공정 목록]도 지금 그룹의 페이지만 보여 준다).
+            var otherGroup = !outOfList && !RoutingProcessGroups.IsSameRoutingGroup(_processes[current], _processes[target]);
+            if (outOfList || otherGroup)
+            {
+                AppLog.Info($"[POP] 공정 이동 불가{(otherGroup ? "(라우팅 그룹 다름)" : string.Empty)} - 현재 {current}, 이동 {offset}, 목록 {_processes.Count}건");
+
+                // 그룹의 마지막 공정도 목록의 마지막 공정처럼 완료는 보낸다 — 입력할 항목이 없는 공정은 이 클릭 말고는 끝낼 길이 없다.
+                // 마지막 공정 완료 확인에서 취소했으면 이미 안내 칸에 남겼으므로 "마지막 공정" 안내는 띄우지 않는다.
                 if (current >= 0 && offset > 0 && await EndCurrentProcess() == ProcessEndResult.Proceed)
                 {
                     // 옮기지 않고 이 공정에 머문다 — 완료 응답이 비어 상태가 아직 진행 중이면 서버 상태로 다시 읽는다.
@@ -531,7 +537,12 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                         if (IsDisposed || Disposing) return;
                     }
 
-                    AppMessageBox.Info(this, Language.Pop_LastProcess, Language.Pop_Title);
+                    AppMessageBox.Info(this, otherGroup ? Language.Pop_RoutingGroupLastProcess : Language.Pop_LastProcess, Language.Pop_Title);
+                }
+                else if (otherGroup && offset < 0 && !IsDisposed && !Disposing)
+                {
+                    // 그룹의 첫 공정에서 [이전 공정] — 아무 반응이 없으면 고장으로 보이므로 이유를 알린다.
+                    AppMessageBox.Info(this, Language.Pop_RoutingGroupFirstProcess, Language.Pop_Title);
                 }
                 return;
             }
@@ -680,6 +691,15 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// 목록의 <paramref name="current"/> 다음 공정이 다른 라우팅 그룹인지 — 자동 진행이 그룹 경계를 넘지 않게 하는 데 쓴다.
+        /// 다음 공정이 있을 때만 부른다.
+        /// </summary>
+        private bool IsNextInOtherRoutingGroup(int current)
+        {
+            return !RoutingProcessGroups.IsSameRoutingGroup(_processes[current], _processes[current + 1]);
         }
 
         /// <summary>공정 목록에서 지금 보고 있는 공정의 위치. 없으면 -1.</summary>
@@ -1006,7 +1026,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
         /// <summary>
         /// 공정 목록의 다음 공정으로 옮기고 자동으로 시작한다(중지 상태면 재시작하지 않고 멈춘다).
-        /// 마지막 공정이었으면 알리고 false. 옮긴 공정이 이미 진행 · 완료 상태면
+        /// 마지막 공정이었으면 알리고 false. 다음 공정의 라우팅 그룹이 다르면 옮기지 않고 알린 뒤 false
+        /// (<see cref="IsNextInOtherRoutingGroup"/>). 옮긴 공정이 이미 진행 · 완료 상태면
         /// 시작 요청은 보내지 않고 서버 상태를 그대로 따른다.
         /// </summary>
         private async Task<bool> MoveNextAndStart()
@@ -1021,6 +1042,13 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 return false;
             }
 
+            if (IsNextInOtherRoutingGroup(current))
+            {
+                AppLog.Info($"[POP] 자동 진행 멈춤 - 다음 공정의 라우팅 그룹이 다름 ({_key.RoutingOperation}/{_key.PageOperation})");
+                AppMessageBox.Info(this, Language.Pop_RoutingGroupLastProcess, Language.Pop_Title);
+                return false;
+            }
+
             await MoveToProcess(_processes[current + 1]);
             if (IsDisposed || Disposing) return false;
 
@@ -1029,7 +1057,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 
         /// <summary>
         /// 마지막 공정 완료를 취소한 뒤의 자동 진행 — 지금 공정은 진행 중 그대로 두고 다음 공정으로 옮겨 시작한다.
-        /// 공정 목록의 끝이면 옮길 곳이 없으므로 안내 없이 머문다(취소 사실은 이미 안내 칸에 남겼다).
+        /// 공정 목록의 끝이거나 다음 공정의 라우팅 그룹이 다르면 옮길 곳이 없으므로 안내 없이 머문다(취소 사실은 이미 안내 칸에 남겼다).
         /// </summary>
         /// <returns>옮겨서 그 공정이 진행 중이면 true.</returns>
         private async Task<bool> MoveNextWithoutEnd()
@@ -1038,7 +1066,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 return false;
 
             var current = GetProcessIndex();
-            if (current < 0 || current + 1 >= _processes.Count)
+            if (current < 0 || current + 1 >= _processes.Count || IsNextInOtherRoutingGroup(current))
                 return false;
 
             await MoveToProcess(_processes[current + 1]);

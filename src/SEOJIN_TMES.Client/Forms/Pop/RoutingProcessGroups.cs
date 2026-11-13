@@ -87,9 +87,15 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             return result;
         }
 
-        /// <summary>라우팅 그룹 비교 — 키(RoutingGroupRef)가 있으면 키로, 없으면 이름으로 본다.</summary>
-        private static bool IsSameRoutingGroup(RoutingProcessDto a, RoutingProcessDto b)
+        /// <summary>
+        /// 라우팅 그룹 비교 — 키(RoutingGroupRef)가 있으면 키로, 없으면 이름으로 본다.
+        /// POP의 공정 이동([이전 공정] · [다음 공정] · 자동 진행)도 이 기준으로 그룹 경계를 넘지 않게 막는다.
+        /// </summary>
+        public static bool IsSameRoutingGroup(RoutingProcessDto a, RoutingProcessDto b)
         {
+            if (a == null || b == null)
+                return false;
+
             if (!string.IsNullOrEmpty(a.RoutingGroupRef) || !string.IsNullOrEmpty(b.RoutingGroupRef))
                 return string.Equals(a.RoutingGroupRef, b.RoutingGroupRef, StringComparison.OrdinalIgnoreCase);
 

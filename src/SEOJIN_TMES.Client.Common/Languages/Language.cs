@@ -317,6 +317,8 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string Pop_NoProcessList => Get(nameof(Pop_NoProcessList));
         public static string Pop_ProcessMoved => Get(nameof(Pop_ProcessMoved));
         public static string Pop_LastProcess => Get(nameof(Pop_LastProcess));
+        public static string Pop_RoutingGroupLastProcess => Get(nameof(Pop_RoutingGroupLastProcess));
+        public static string Pop_RoutingGroupFirstProcess => Get(nameof(Pop_RoutingGroupFirstProcess));
         public static string Pop_AdminAlarmSent => Get(nameof(Pop_AdminAlarmSent));
         public static string Pop_ManualWrenchOnly => Get(nameof(Pop_ManualWrenchOnly));
         public static string Pop_NoTargetProcess => Get(nameof(Pop_NoTargetProcess));

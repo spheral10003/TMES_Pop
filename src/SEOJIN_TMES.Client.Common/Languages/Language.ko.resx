@@ -705,6 +705,12 @@
   <data name="Pop_LastProcess" xml:space="preserve">
     <value>공정 목록의 마지막 공정입니다.</value>
   </data>
+  <data name="Pop_RoutingGroupLastProcess" xml:space="preserve">
+    <value>지금 라우팅 그룹의 마지막 공정입니다. 다른 라우팅 그룹의 공정으로는 이동할 수 없습니다.</value>
+  </data>
+  <data name="Pop_RoutingGroupFirstProcess" xml:space="preserve">
+    <value>지금 라우팅 그룹의 첫 공정입니다. 다른 라우팅 그룹의 공정으로는 이동할 수 없습니다.</value>
+  </data>
   <data name="Pop_AdminAlarmSent" xml:space="preserve">
     <value>알람을 등록했습니다.</value>
   </data>
