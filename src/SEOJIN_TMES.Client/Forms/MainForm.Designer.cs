@@ -169,8 +169,9 @@ namespace SEOJIN_TMES.Client.Forms
             this.contentHost.Location = new System.Drawing.Point(2, 40);
             this.contentHost.Name = "contentHost";
             this.contentHost.Padding = new System.Windows.Forms.Padding(12, 4, 12, 12);
-            this.contentHost.Size = new System.Drawing.Size(1032, 720);
+            this.contentHost.Size = new System.Drawing.Size(1032, 710);
             this.contentHost.TabIndex = 1;
+            this.contentHost.Paint += new System.Windows.Forms.PaintEventHandler(this.contentHost_Paint);
             // 
             // tabStrip
             // 
@@ -268,7 +269,7 @@ namespace SEOJIN_TMES.Client.Forms
             // 
             this.cboLanguage.Location = new System.Drawing.Point(651, 7);
             this.cboLanguage.Name = "cboLanguage";
-            this.cboLanguage.Size = new System.Drawing.Size(140, 26);
+            this.cboLanguage.Size = new System.Drawing.Size(140, 20);
             this.cboLanguage.TabIndex = 7;
             // 
             // btnUser

@@ -245,12 +245,12 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             GridColumns.Apply(gridViewInspection, Language.Col_No,
                 GridColumns.Text("InspectionSpecName", Language.Col_InspectionSpecName, 300),
                 GridColumns.Text("InputPosition", Language.Col_InputPosition, 80),
-                GridColumns.Left("Description", Language.Col_Description, 300),
+                GridColumns.Text("Description", Language.Col_Description, 300),
                 GridColumns.Text("InspectionMethod", Language.Col_InspectionMethod, 120),
-                GridColumns.Text("ResultState", Language.Col_ResultState, 80),
                 GridColumns.Text("InspectionLower", Language.Col_InspectionLower, 90),
                 GridColumns.Text("InspectionUpper", Language.Col_InspectionUpper, 90),
                 GridColumns.Text("InspectionTarget", Language.Col_InspectionTarget, 90),
+                GridColumns.Text("ResultState", Language.Col_ResultState, 80),
                 GridColumns.Text("ResultValue", Language.Col_ResultValue, 130),
                 GridColumns.Text("InspectionResultRemark", Language.Col_InspectionRemark, 120));
 

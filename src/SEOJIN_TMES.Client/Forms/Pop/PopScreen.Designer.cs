@@ -49,6 +49,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.infoCard = new DevExpress.XtraEditors.PanelControl();
             this.fieldPanel = new DevExpress.XtraEditors.PanelControl();
             this.lblWorkOrderNo = new DevExpress.XtraEditors.LabelControl();
+            this.lblWorkstation = new System.Windows.Forms.Label();
             this.txtWorkOrderNo = new DevExpress.XtraEditors.TextEdit();
             this.lblItemCode = new DevExpress.XtraEditors.LabelControl();
             this.txtItemCode = new DevExpress.XtraEditors.TextEdit();
@@ -78,7 +79,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.btnZoomIn = new System.Windows.Forms.Button();
             this.panel1 = new System.Windows.Forms.Panel();
             this.lblProgressState = new System.Windows.Forms.Label();
-            this.lblWorkstation = new System.Windows.Forms.Label();
             this.btnRework = new System.Windows.Forms.Button();
             this.btnAdminAlarm = new System.Windows.Forms.Button();
             this.btnProcessList = new System.Windows.Forms.Button();
@@ -303,6 +303,19 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.lblWorkOrderNo.Size = new System.Drawing.Size(190, 18);
             this.lblWorkOrderNo.TabIndex = 0;
             this.lblWorkOrderNo.Text = "· 작업지시번호";
+            // 
+            // lblWorkstation
+            // 
+            this.lblWorkstation.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.lblWorkstation.BackColor = System.Drawing.Color.White;
+            this.lblWorkstation.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.lblWorkstation.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblWorkstation.Location = new System.Drawing.Point(14, 398);
+            this.lblWorkstation.Name = "lblWorkstation";
+            this.lblWorkstation.Size = new System.Drawing.Size(358, 28);
+            this.lblWorkstation.TabIndex = 26;
+            this.lblWorkstation.Text = "Workstation";
+            this.lblWorkstation.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // txtWorkOrderNo
             // 
@@ -677,19 +690,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.lblProgressState.TabIndex = 27;
             this.lblProgressState.Text = "공정 상태";
             this.lblProgressState.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            // 
-            // lblWorkstation
-            // 
-            this.lblWorkstation.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.lblWorkstation.BackColor = System.Drawing.Color.White;
-            this.lblWorkstation.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.lblWorkstation.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblWorkstation.Location = new System.Drawing.Point(14, 398);
-            this.lblWorkstation.Name = "lblWorkstation";
-            this.lblWorkstation.Size = new System.Drawing.Size(358, 28);
-            this.lblWorkstation.TabIndex = 26;
-            this.lblWorkstation.Text = "Workstation";
-            this.lblWorkstation.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // btnRework
             // 

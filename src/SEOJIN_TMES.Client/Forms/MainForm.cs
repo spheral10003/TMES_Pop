@@ -1,4 +1,3 @@
-using DevExpress.Drawing;
 using DevExpress.Utils;
 using DevExpress.XtraBars.Navigation;
 using DevExpress.XtraEditors;
@@ -7,9 +6,7 @@ using SEOJIN_TMES.Client.ApiClient;
 using SEOJIN_TMES.Client.Common.Languages;
 using SEOJIN_TMES.Client.Common.Logging;
 using SEOJIN_TMES.Client.Common.Models;
-using SEOJIN_TMES.Client.Composition;
 using SEOJIN_TMES.Client.Core;
-using SEOJIN_TMES.Client.Equipment;
 using SEOJIN_TMES.Client.Equipment.Core;
 using SEOJIN_TMES.Client.Equipment.Nutrunner;
 using SEOJIN_TMES.Client.Forms.Common;
@@ -1302,6 +1299,9 @@ namespace SEOJIN_TMES.Client.Forms
             public TabChip Chip;
         }
 
-        
+        private void contentHost_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
     }
 }

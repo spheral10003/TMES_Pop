@@ -289,7 +289,7 @@
     <value>POP</value>
   </data>
   <data name="Menu_WorkStatusInquiry" xml:space="preserve">
-    <value>작업 현황 조회</value>
+    <value>작업 현황</value>
   </data>
   <data name="Menu_ProductionStatusInquiry" xml:space="preserve">
     <value>생산 현황조회</value>
@@ -934,7 +934,7 @@
     <value>전체</value>
   </data>
   <data name="Menu_WorkStatusSearch" xml:space="preserve">
-    <value>작업 조회 현황</value>
+    <value>작업 현황 조회</value>
   </data>
   <data name="WorkStatus_Title" xml:space="preserve">
     <value>작업 조회 현황</value>
