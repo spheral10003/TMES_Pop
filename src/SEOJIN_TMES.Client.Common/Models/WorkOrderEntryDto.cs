@@ -185,9 +185,13 @@ namespace SEOJIN_TMES.Client.Common.Models
 
         /// <summary>
         /// 페이지 공정의 작업 지시 이미지 위치(App.config의 DocumentShare.RootPath 기준 상대 경로).
-        /// POP [공정 목록] 팝업이 행 위에 마우스를 올렸을 때 이 그림을 미리보기로 띄운다.
+        /// POP [공정 목록] · &lt;작업 진입 확인&gt; 팝업이 [미리보기] 칸에서 이 그림을 미리보기로 띄운다.
         /// </summary>
         [JsonProperty("subRoutingProcImagePath")]
         public string ProcImagePath { get; set; }
+
+        /// <summary>페이지 공정의 비고. 서버가 준 문자열을 그대로 [비고] 칸에 보여 준다(없으면 빈칸).</summary>
+        [JsonProperty("remark")]
+        public string Remark { get; set; }
     }
 }

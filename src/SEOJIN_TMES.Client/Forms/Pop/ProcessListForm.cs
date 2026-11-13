@@ -14,7 +14,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
 {
     /// <summary>
     /// POP [공정 목록] 팝업 — 지금 공정이 속한 **라우팅 그룹 안의 페이지 공정**을
-    /// 라우팅 공정 · 페이지 공정 · 진행 상태로 보여 주고, 행을 더블클릭하거나 [이동]을 누르면 그 페이지 공정으로 옮긴다.
+    /// 라우팅 공정 · 페이지 공정 · 진행 상태 · 비고(서버 remark)로 보여 주고, 행을 더블클릭하거나 [이동]을 누르면 그 페이지 공정으로 옮긴다.
     ///
     /// &lt;작업 진입 확인&gt;(WorkEntryConfirmForm)은 라우팅 공정마다 한 줄로 줄여 보여 주므로,
     /// 페이지 단위로 골라 옮기는 일은 이 팝업이 맡는다.
@@ -66,7 +66,8 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             GridColumns.Apply(gridView, Language.Col_No,
                 GridColumns.Text("RoutingName", Language.Col_RoutingOperation, 160),
                 GridColumns.Text("PageName", Language.Col_PageOperation, 200),
-                GridColumns.Text("ProgressState", Language.Col_ProgressState, 140));
+                GridColumns.Text("ProgressState", Language.Col_ProgressState, 140),
+                GridColumns.Left("Remark", Language.Col_Remark, 200));
             // 진행 상태 앞에 상태 구슬 그림 — 헤더는 진행 상태와 한 칸으로 합쳐 보인다.
             _stateImage = new StateImageColumn(gridView, nameof(RoutingProcessDto.ProgressState));
             _stateImage.Attach();

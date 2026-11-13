@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using DevExpress.XtraEditors;
 using DevExpress.XtraGrid.Views.Base;
 using SEOJIN_TMES.Client.Common.Models;
+using SEOJIN_TMES.Client.Core;
 using SEOJIN_TMES.Client.Forms.Pop;
 using SEOJIN_TMES.Client.Forms.Common;
 using SEOJIN_TMES.Client.Common.Languages;
@@ -22,6 +23,11 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
     ///   작업자가 라우팅 공정을 고르면 이어서 할 페이지로 바로 들어가게 하려는 것.
     /// - [전체 페이지 공정] : 예전 방식대로 페이지 공정을 전부 보여 준다.
     ///   상단 투입자재 검색 줄(<see cref="MaterialSearchBar"/>)로 투입자재 코드를 쓰는 페이지만 추릴 수 있다.
+    ///
+    /// 두 탭 모두 진행 상태 뒤에 [비고](서버 remark)를 보여 주고, 맨 뒤 [미리보기] 칸(사진 아이콘)에 마우스를 올리면 커서 옆에,
+    /// 그 칸을 클릭하면 그 행 옆에 그 줄 페이지의 작업 지시 이미지(DocumentShare.RootPath + subRoutingProcImagePath)를
+    /// 미리보기로 띄운다(<see cref="GridImagePreview"/>, POP [공정 목록] 팝업과 같은 방식).
+    /// [라우팅 공정] 탭의 그림은 그 줄의 대표 페이지 — 곧 [이동]으로 들어갈 페이지의 것이다.
     ///
     /// 결과는 <see cref="SelectedProcess"/>로 받는다(DialogResult.OK일 때만 값이 있다).
     /// 데이터 조회는 호출하는 화면(<see cref="WorkOrderEntryScreen"/>)이 미리 해서 넘겨준다 —
@@ -45,6 +51,10 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
         /// <summary>진행 상태 앞의 상태 구슬 컬럼(이벤트를 걸어 두므로 폼과 수명을 같이한다).</summary>
         private StateImageColumn _stateImage;
         private StateImageColumn _stateImageAll;
+
+        /// <summary>[미리보기] 칸의 작업 지시 이미지 미리보기(탭마다 하나). 폼이 닫힐 때(Disposed) 함께 해제한다.</summary>
+        private GridImagePreview _preview;
+        private GridImagePreview _previewAll;
 
         public WorkEntryConfirmForm()
         {
@@ -80,6 +90,27 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
 
             materialSearch.Initialize(_workOrder, allPages);
             materialSearch.SearchCompleted += materialSearch_SearchCompleted;
+
+            // 작업 지시 이미지 미리보기 — 공유 폴더 계정 접속은 DocShare가 맡는다.
+            // GridColumns.Apply가 목록에 없는 컬럼을 숨기므로 컬럼 구성(ConfigureProcessGrid) 뒤에 만든다.
+            var settings = Global.Instance.Settings;
+            _preview = new GridImagePreview(gridView, PreviewPathOf, settings.DocShare, settings.AppSet.DocumentShare.RootPath);
+            _previewAll = new GridImagePreview(gridViewAll, PreviewPathOf, settings.DocShare, settings.AppSet.DocumentShare.RootPath);
+            Disposed += WorkEntryConfirmForm_Disposed;
+        }
+
+        /// <summary>미리보기할 그림 경로 — 그 줄 페이지 공정의 작업 지시 이미지(subRoutingProcImagePath).</summary>
+        private string PreviewPathOf(object row)
+        {
+            return (row as RoutingProcessDto)?.ProcImagePath;
+        }
+
+        private void WorkEntryConfirmForm_Disposed(object sender, EventArgs e)
+        {
+            _preview?.Dispose();
+            _preview = null;
+            _previewAll?.Dispose();
+            _previewAll = null;
         }
 
         /// <summary>
@@ -113,7 +144,8 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
                 GridColumns.Text("RoutingGroup", Language.Col_RoutingGroup, 150),
                 GridColumns.Text("RoutingName", Language.Col_RoutingOperation, 140),
                 GridColumns.Text("PageName", Language.Col_PageOperation, 140),
-                GridColumns.Text("ProgressState", Language.Col_ProgressState, 120));
+                GridColumns.Text("ProgressState", Language.Col_ProgressState, 120),
+                GridColumns.Left("Remark", Language.Col_Remark, 200));
             // 진행 상태 앞에 상태 구슬 그림 — 헤더는 진행 상태와 한 칸으로 합쳐 보인다.
             var stateImage = new StateImageColumn(view, nameof(RoutingProcessDto.ProgressState));
             stateImage.Attach();
