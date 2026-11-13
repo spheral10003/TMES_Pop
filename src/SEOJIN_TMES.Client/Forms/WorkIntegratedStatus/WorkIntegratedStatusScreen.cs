@@ -15,6 +15,7 @@ using SEOJIN_TMES.Client.Forms.Common;
 using SEOJIN_TMES.Client.Theme;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -299,7 +300,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
         private void ExportOverviewToXlsx(string fileName)
         {
             var writer = new XlsxOutlineWriter(Language.WorkIntegrated_OverviewTitle, BuildExportColumns());
-            var rowCount = AppendNodes(writer, _node, 0);
+            var rowCount = AppendNodes(writer, _node, 0, BuildExportFields());
 
             // 조회 결과가 있는데 한 줄도 못 옮겼다면 제목행만 있는 빈 파일이 된다 — 저장하지 않고 실패로 알린다.
             if (rowCount == 0)
@@ -324,6 +325,22 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
         }
 
         /// <summary>
+        /// 컬럼마다 값을 꺼낼 속성 — 제목(<see cref="BuildExportColumns"/>)과 <b>같은 컬럼 목록·같은 순서</b>로 만든다.
+        ///
+        /// 값 순서를 따로 적어 두지 않는 이유: 화면 컬럼 순서(항목 코드 ↔ 항목 설명)만 바꾸고 값 배열은 그대로 둬서
+        /// 엑셀 제목과 값이 서로 어긋난 채 저장된 적이 있다. 컬럼의 FieldName으로 찾으면 순서를 바꾸거나
+        /// 컬럼을 더해도 제목과 값이 함께 움직인다.
+        /// </summary>
+        private PropertyDescriptor[] BuildExportFields()
+        {
+            var properties = TypeDescriptor.GetProperties(typeof(WorkIntegratedNode));
+            var fields = new PropertyDescriptor[treeOverview.Columns.Count];
+            for (var i = 0; i < fields.Length; i++)
+                fields[i] = properties[treeOverview.Columns[i].FieldName];   // 이름이 안 맞으면 null — 화면처럼 빈 칸 표기가 된다
+            return fields;
+        }
+
+        /// <summary>
         /// 트리에 물린 노드(<see cref="_node"/>)를 화면과 같은 순서로 재귀로 훑어 한 줄씩 넘기고, 넘긴 줄 수를 돌려준다.
         /// 재귀 깊이가 그대로 엑셀 아웃라인 레벨이 된다.
         ///
@@ -331,53 +348,41 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
         /// 트리는 <see cref="WorkIntegratedNode"/>에 바인딩되어 있어 <c>as WorkIntegratedDto</c>가 늘 null이었고,
         /// 행이 조용히 전부 빠져 제목행만 있는 빈 파일이 만들어졌다. 바인딩한 목록을 직접 쓰면 형식이 어긋날 일이 없다.
         /// </summary>
-        private int AppendNodes(XlsxOutlineWriter writer, List<WorkIntegratedNode> nodes, int level)
+        private int AppendNodes(XlsxOutlineWriter writer, List<WorkIntegratedNode> nodes, int level, PropertyDescriptor[] fields)
         {
             var count = 0;
             foreach (var node in nodes)
             {
-                writer.AddRow(level, BuildExportValues(node));
+                writer.AddRow(level, BuildExportValues(node, fields));
                 count++;
-                count += AppendNodes(writer, node.Children, level + 1);
+                count += AppendNodes(writer, node.Children, level + 1, fields);
             }
             return count;
         }
 
         /// <summary>
-        /// 한 줄의 값 — 순서는 <see cref="ConfigureTree"/>의 컬럼 순서와 같아야 한다.
+        /// 한 줄의 값 — <paramref name="fields"/> 순서(= 제목 순서) 그대로 꺼낸다.
         /// 값이 있는 칸은 <b>숫자 그대로</b> 넘겨 엑셀에서 계산·비교가 되게 하고,
         /// 값이 없는 칸은 화면과 같이 ".."로 채운다.
         /// </summary>
-        private object[] BuildExportValues(WorkIntegratedNode node)
+        private object[] BuildExportValues(WorkIntegratedNode node, PropertyDescriptor[] fields)
         {
-            return new object[]
-            {
-                TextOrPlaceholder(node.Name),
-                node.Code ?? string.Empty,
-                ValueOrPlaceholder(node.UsageQty),
-                TextOrPlaceholder(node.Unit),
-                ValueOrPlaceholder(node.TorqueResult),
-                ValueOrPlaceholder(node.TorqueTarget),
-                ValueOrPlaceholder(node.TorqueLower),
-                ValueOrPlaceholder(node.TorqueUpper),
-                ValueOrPlaceholder(node.AngleTarget),
-                ValueOrPlaceholder(node.AngleLower),
-                ValueOrPlaceholder(node.AngleUpper),
-                ValueOrPlaceholder(node.AngleResult)
-            };
+            var values = new object[fields.Length];
+            for (var i = 0; i < fields.Length; i++)
+                values[i] = ValueOrPlaceholder(fields[i]?.GetValue(node));
+            return values;
         }
 
-        /// <summary>값이 있으면 <see cref="decimal"/>(숫자 칸), 없으면 ".." 문자열.</summary>
-        private object ValueOrPlaceholder(decimal? value)
+        /// <summary>
+        /// 숫자는 <see cref="decimal"/> 그대로(숫자 칸), 그 밖은 문자열로 넘긴다.
+        /// 비어 있으면 화면(<see cref="TreeOverview_CustomColumnDisplayText"/>)과 같이 "..".
+        /// </summary>
+        private object ValueOrPlaceholder(object value)
         {
-            if (value.HasValue)
-                return value.Value;
-            return EmptyValueText;
-        }
+            if (value is decimal)
+                return value;
 
-        /// <summary>문자 칸 — 비어 있으면 화면과 같이 "..".</summary>
-        private string TextOrPlaceholder(string text)
-        {
+            var text = value?.ToString();
             if (string.IsNullOrEmpty(text))
                 return EmptyValueText;
             return text;
