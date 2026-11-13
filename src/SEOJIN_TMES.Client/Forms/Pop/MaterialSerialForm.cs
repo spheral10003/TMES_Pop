@@ -70,12 +70,33 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             ConfigureGrid();
 
             grid.DataSource = _rows;
+        }
 
-            // 품목코드를 확인하는 자재면 품목코드부터 스캔하게 하고, 아니면 바로 시리얼번호로 간다.
+        /// <summary>
+        /// 창이 뜬 뒤에 첫 입력 위치를 잡는다 — 품목코드를 확인하는 자재면 품목코드부터 스캔하게 하고,
+        /// 아니면 시리얼번호 첫 줄을 바로 입력 상태로 연다.
+        ///
+        /// <see cref="Initialize"/>는 창이 뜨기 전에 불리므로 거기서 그리드 칸을 열어도 적용되지 않는다
+        /// (포커스가 제목 줄 아이콘에 남아, 셀을 누르기 전에 스캔한 첫 값이 버려졌다).
+        /// </summary>
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+
+            if (_material == null)
+                return;
+
             if (_material.ItemCodeCheckRequired)
-                ActiveControl = txtItemCode;
-            else if (gridView.RowCount > 0)
+            {
+                txtItemCode.Focus();
+                return;
+            }
+
+            if (gridView.RowCount > 0)
+            {
+                grid.Focus();
                 FocusSerialCell(0);
+            }
         }
 
         private void ApplyTheme()
