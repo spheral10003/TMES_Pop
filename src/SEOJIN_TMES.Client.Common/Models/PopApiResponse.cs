@@ -74,6 +74,7 @@ namespace SEOJIN_TMES.Client.Common.Models
         [JsonProperty("unit")] public string Unit { get; set; }
         [JsonProperty("indctLoc")] public string IndctLoc { get; set; }        // 투입위치
         [JsonProperty("inputItemGrp")] public string InputItemGrp { get; set; } // 자재그룹
+        [JsonProperty("prchsPlanMth")] public string PrchsPlanMth { get; set; } // 구매 계획 방식 — null / MRP / ROP / 빈 문자열
         [JsonProperty("serialVrfcYn")] public string SerialVrfcYn { get; set; }
         [JsonProperty("inputtedSerials")] public string InputtedSerials { get; set; } // 구분자 형식은 서버 확인 필요
 
@@ -192,6 +193,7 @@ namespace SEOJIN_TMES.Client.Common.Models
                 {
                     MaterialCode = m.InputItemCd,
                     MaterialName = m.InputItemNm,
+                    PurchasePlanMethod = m.PrchsPlanMth,
                     ItemCode = m.InputItemCd,
                     InputQty = (int)m.UsageQty,
                     InputUnit = m.Unit,

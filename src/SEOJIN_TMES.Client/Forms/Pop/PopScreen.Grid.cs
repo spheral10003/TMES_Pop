@@ -164,6 +164,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             GridColumns.Apply(gridViewMaterial, Language.Col_No,
                 GridColumns.Text("MaterialCode", Language.Col_MaterialCode, 200),
                 GridColumns.Text("MaterialName", Language.Col_MaterialName, 300),
+                GridColumns.Text("PurchasePlanMethod", Language.Col_PurchasePlanMethod, 130),
                 //GridColumns.Text("MaterialGroup", Language.Col_MaterialGroup, 100),
                 GridColumns.Number("InputQty", Language.Col_InputQty, 110),
                 GridColumns.Text("InputUnit", Language.Col_InputUnit, 100),
