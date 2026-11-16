@@ -194,10 +194,30 @@ namespace SEOJIN_TMES.Client.Common.Imaging
             if (e is HandledMouseEventArgs handled) handled.Handled = true;
         }
 
-        /// <summary>휠 이벤트는 포커스를 가진 컨트롤로 가므로, 그림 위에 올라오면 포커스를 준다.</summary>
+        /// <summary>
+        /// 휠 이벤트는 포커스를 가진 컨트롤로 가므로, 그림 위에 올라오면 포커스를 준다.
+        /// 단 글자를 입력하는 중(그리드 셀 편집기 · 텍스트 상자)이면 가져오지 않는다 —
+        /// POP에서 셀을 눌러 화상 키보드로 커서를 옮기다 도면 위를 지나기만 해도 셀 편집기가 닫히고,
+        /// 그 뒤 화상 키보드로 친 글자가 셀이 아니라 도면으로 갔다. 도면을 누르면 ImageBox가 스스로 포커스를 가져간다.
+        /// </summary>
         private void Box_MouseEnter(object sender, EventArgs e)
         {
-            if (!_box.Focused) _box.Focus();
+            if (_box.Focused || IsTextInputFocused()) return;
+            _box.Focus();
+        }
+
+        /// <summary>
+        /// 같은 창에서 지금 포커스를 가진 컨트롤이 글자 입력 칸인지.
+        /// DevExpress 셀 편집기도 안쪽 입력부는 TextBox(TextBoxMaskBox)라 여기서 함께 걸린다.
+        /// ActiveControl은 UserControl(PopScreen) 같은 컨테이너에서 멈출 수 있어 안쪽까지 따라 내려간다.
+        /// </summary>
+        private bool IsTextInputFocused()
+        {
+            Control focused = _box.FindForm();
+            while (focused is ContainerControl container && container.ActiveControl != null)
+                focused = container.ActiveControl;
+
+            return focused is TextBoxBase && focused.Focused;
         }
 
         private void Box_Resize(object sender, EventArgs e)
