@@ -4,6 +4,7 @@
 
 .DESCRIPTION
   지역: GUMI(구미) · HWASEONG(화성) · YONGIN(용인) · VIETNAM(베트남) · USA(미국) · SEOJIN(서진 Test 서버)
+        GUMI_PROD · HWASEONG_PROD · YONGIN_PROD — 같은 사업장의 운영 서버판(운영 도메인 · IsTestServer=false · 운영 전용 앱 ID)
 
   1) deploy/regions/<Region>/ 의 region.props(배포 서버 주소) + App.config 로 Release 게시본을 만든다.
      배포 서버 주소 · API 주소 · 사업장 코드가 비어 있으면 먼저 물어보고 그 지역 파일에 저장한다.
@@ -25,7 +26,7 @@
 param(
     # deploy/regions 아래 폴더 이름
     [Parameter(Mandatory = $true)]
-    [ValidateSet('GUMI', 'HWASEONG', 'YONGIN', 'VIETNAM', 'USA', 'SEOJIN')]
+    [ValidateSet('GUMI', 'HWASEONG', 'YONGIN', 'VIETNAM', 'USA', 'SEOJIN', 'GUMI_PROD', 'HWASEONG_PROD', 'YONGIN_PROD')]
     [string]$Region,
 
     # 게시하지 않고 지역 입력값(배포 서버 주소 · API 주소 · 사업장 코드)만 입력/변경한다
@@ -233,7 +234,8 @@ if (-not $msbuild) { throw 'Visual Studio MSBuild.exe 를 찾지 못했다(vswhe
 # TEST 여부는 앱이 아이콘 · 상단 바 색을 고를 때 쓰는 값(지역 App.config 의 IsTestServer)을 그대로 따른다 — 키가 없으면 false.
 $testMatch    = [regex]::Match([IO.File]::ReadAllText($configPath), '<add key="IsTestServer" value="([^"]*)"')
 $isTestServer = $testMatch.Success -and $testMatch.Groups[1].Value.Trim() -eq 'true'
-$setupName    = "TMES_$Region$(if ($isTestServer) { '_TEST' }).exe"
+# 운영판 지역(<사업장>_PROD)은 사업장 이름만 남겨 TMES_GUMI.exe 처럼 만든다 — 운용/테스트 구분은 _TEST 가 맡는다.
+$setupName    = "TMES_$($Region -replace '_PROD$', '')$(if ($isTestServer) { '_TEST' }).exe"
 
 Write-Host ""
 Write-Host "지역        : $Region"
