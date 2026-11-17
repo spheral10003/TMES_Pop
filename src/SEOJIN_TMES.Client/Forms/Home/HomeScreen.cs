@@ -155,13 +155,41 @@ namespace SEOJIN_TMES.Client.Forms.Home
             noticeArea.Controls.Add(_noticeViewer.Panel);
         }
 
-        /// <summary>공지 줄을 더블클릭하면 공지 상자 자리를 덮어 본문을 보여 준다.</summary>
-        private void NoticeBox_NoticeOpened(object sender, NoticeDto notice)
+        /// <summary>
+        /// 공지 줄을 더블클릭하면 공지 상자 자리를 덮어 본문을 보여 준다.
+        /// 목록에는 본문이 없으므로(<c>exceptBodyYn=Y</c>) 제목부터 띄우고 본문은 <c>GET gm/notices/{sysSeqId}</c>로 받아 넣는다.
+        /// </summary>
+        private async void NoticeBox_NoticeOpened(object sender, NoticeDto notice)
         {
             var index = sender is NoticeBox box ? _noticeBoxes.IndexOf(box) : -1;
             var typeCaption = index < 0 ? string.Empty : NoticeSpecs[index].Caption();
             _noticeViewer.Open(notice, typeCaption);
+
+            var api = _appSet?.ApiClients?.NoticeApiClient;
+            if (api == null)
+                return;
+
+            var sysSeqId = notice.SysSeqId;
+            try
+            {
+                var detail = await api.GetNotice(sysSeqId, _appSet.CurrentUser?.UserId);
+
+                // 받는 사이 닫았거나 다른 공지를 열었으면 버린다 — 늦게 온 본문이 지금 보는 공지를 덮지 않게.
+                if (!IsCurrentNotice(sysSeqId))
+                    return;
+
+                _noticeViewer.ShowBody(detail?.Body);
+            }
+            catch (ApiException ex)
+            {
+                AppLog.Warn($"홈 공지 본문 조회 실패(sysSeqId={sysSeqId}) - {ex.ToLogText()}");
+                if (IsCurrentNotice(sysSeqId))
+                    _noticeViewer.ShowBodyLoadFailed();
+            }
         }
+
+        private bool IsCurrentNotice(string sysSeqId) =>
+            !IsDisposed && !Disposing && _noticeViewer.IsOpen && _noticeViewer.OpenedSysSeqId == sysSeqId;
 
         /// <summary>내용 보기가 떠 있으면 Esc로도 닫는다(X와 같은 동작).</summary>
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)

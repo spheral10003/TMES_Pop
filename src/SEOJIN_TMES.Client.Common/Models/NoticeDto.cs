@@ -26,7 +26,10 @@ namespace SEOJIN_TMES.Client.Common.Models
         [JsonProperty("subject")]
         public string Subject { get; set; }
 
-        /// <summary>본문 — 서버 <c>body</c>. HTML 조각(<c>&lt;div&gt;…</c>)으로 온다.</summary>
+        /// <summary>
+        /// 본문 — 서버 <c>body</c>. HTML 조각(<c>&lt;div&gt;…</c>)으로 온다.
+        /// 목록 조회는 <c>exceptBodyYn=Y</c>로 본문 없이 받으므로 비어 있고, 한 건 조회(<c>gm/notices/{sysSeqId}</c>)에서만 채워진다.
+        /// </summary>
         [JsonProperty("body")]
         public string Body { get; set; }
 

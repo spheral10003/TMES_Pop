@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using System.Net;
 using System.Windows.Forms;
 using DevExpress.XtraEditors;
 using SEOJIN_TMES.Client.Common.Languages;
@@ -111,20 +112,44 @@ namespace SEOJIN_TMES.Client.Forms.Home
             ApplyLanguage();
         }
 
-        /// <summary>공지 하나를 연다. <paramref name="typeCaption"/>은 그 공지가 있던 상자 이름(시스템공지 등).</summary>
+        /// <summary>
+        /// 지금 열려 있는 공지의 순번(닫혀 있으면 null).
+        /// 본문은 열고 난 뒤 따로 받아 오므로, 응답이 왔을 때 아직 그 공지를 보고 있는지 HomeScreen이 이 값으로 확인한다.
+        /// </summary>
+        public string OpenedSysSeqId { get; private set; }
+
+        /// <summary>
+        /// 공지 하나를 연다 — 제목 · 일시만 먼저 보여 주고 본문은 비워 둔다.
+        /// 목록은 본문 없이 받으므로(<c>exceptBodyYn=Y</c>) 본문은 HomeScreen이 한 건 조회로 받아 <see cref="ShowBody"/>로 넣는다.
+        /// <paramref name="typeCaption"/>은 그 공지가 있던 상자 이름(시스템공지 등).
+        /// </summary>
         public void Open(NoticeDto notice, string typeCaption)
         {
+            OpenedSysSeqId = notice.SysSeqId;
             _title.Text = notice.Subject ?? string.Empty;
             _meta.Text = string.IsNullOrEmpty(notice.CreatedAtText) ? typeCaption : $"{typeCaption}  ·  {notice.CreatedAtText}";
 
             Panel.Visible = true;
             Panel.BringToFront();
-            SetBodyHtml(HtmlBody.ForWebBrowser(notice.Body));
+            SetBodyHtml(string.Empty);
+        }
+
+        /// <summary>한 건 조회로 받은 본문(HTML)을 넣는다.</summary>
+        public void ShowBody(string body)
+        {
+            SetBodyHtml(HtmlBody.ForWebBrowser(body));
+        }
+
+        /// <summary>본문 조회 실패 — 본문 자리에 안내 문구만 보여 준다(창은 띄우지 않는다. 홈 공지 상자와 같은 방식).</summary>
+        public void ShowBodyLoadFailed()
+        {
+            SetBodyHtml(HtmlBody.ForWebBrowser($"<div>{WebUtility.HtmlEncode(Language.Home_NoticeLoadFailed)}</div>"));
         }
 
         /// <summary>내용 보기를 닫고 공지 상자들로 돌아간다. 다음에 열 때 앞 본문이 잠깐 비치지 않게 비워 둔다.</summary>
         public void Close()
         {
+            OpenedSysSeqId = null;
             Panel.Visible = false;
             SetBodyHtml(string.Empty);
         }
