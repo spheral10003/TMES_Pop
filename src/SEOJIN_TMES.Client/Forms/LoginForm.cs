@@ -484,6 +484,10 @@ namespace SEOJIN_TMES.Client.Forms
                     UserId = userId,
                     Server = corpCd
                 };
+                // 위에서 받은 프로필을 세션에 넣어 둔다 — 메인 화면 상단 환영 문구가 로그인 직후부터
+                // 아이디 대신 이름으로 나온다(전에는 사용자 정보 팝업을 열어야 이름이 채워졌다).
+                // 프로필 조회가 빈 응답이면 ApplyProfile이 아무것도 안 하고, 환영 문구는 아이디로 남는다.
+                _currentUser.ApplyProfile(userProfile);
 
                 _setting.SaveCulture(_loginCulture.Name);
                 Global.Instance.Settings.CurrentUser = _currentUser;
