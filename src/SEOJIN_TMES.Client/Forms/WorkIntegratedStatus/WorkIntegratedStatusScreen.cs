@@ -119,7 +119,8 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
                 treeOverview.Columns.Clear();
                 treeOverview.OptionsBehavior.PopulateServiceColumns = false;
                 treeOverview.OptionsView.AutoWidth = false;
-                //treeOverview.ChildListFieldName = nameof(WorkIntegratedNode.Children);
+                // 루트 노드 목록만 넘기고 하위 줄은 각 노드의 Children을 따라 그린다 — 빠지면 최상위 1줄만 보인다(11-17 실측).
+                treeOverview.ChildListFieldName = nameof(WorkIntegratedNode.Children);
 
                 treeOverview.OptionsBehavior.Editable = false;
                 treeOverview.OptionsView.ShowIndicator = false;
@@ -128,7 +129,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
                 // (앵글 컬럼까지 억지로 줄여 넣지 않고 화면 설계서처럼 옆으로 밀어 본다).
                 AddColumn("Code", Language.Col_NodeCode, 220, HorzAlignment.Near);
                 AddColumn("Name", Language.Col_NodeDescription, 250, HorzAlignment.Near);
-                // 투입자재의 품목코드/시리얼번호(서버 wholInputMatlCd) — 서버가 만든 문자열을 그대로 보인다. 없으면 ".."
+                // 투입자재의 품목코드/시리얼번호(서버 materialInputCode) — 서버가 만든 문자열을 그대로 보인다. 없으면 ".."
                 AddColumn("Serial", Language.Col_WholeInputMaterialCode, 220, HorzAlignment.Near);
 
                 AddValueColumn("UsageQty", Language.Col_WorkQty, 130);

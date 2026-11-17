@@ -32,9 +32,10 @@ namespace SEOJIN_TMES.Client.Common.Models
 
         /// <summary>
         /// 투입자재의 품목코드/시리얼번호 — 서버가 한 문자열로 만들어 내려준다(화면은 그대로 표시만).
-        /// 필드명은 서버 철자 그대로 <c>wholInputMatlCd</c>다(whole이 아니다).
+        /// 실제 응답 예: "03-192390-01,12"(품목코드,시리얼) · "79-174183-00"(시리얼 없는 자재). BOM 줄에만 값이 있다.
+        /// 처음 안내받은 필드명은 wholInputMatlCd였지만 서버(구미 테스트, 11-17)는 <c>materialInputCode</c>로 보낸다.
         /// </summary>
-        [JsonProperty("wholInputMatlCd")]
+        [JsonProperty("materialInputCode")]
         public string WholeInputMaterialCode { get; set; }
 
         [JsonProperty("level")]

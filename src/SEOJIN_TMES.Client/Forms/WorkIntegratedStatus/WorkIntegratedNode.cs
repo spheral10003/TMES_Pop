@@ -15,7 +15,8 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
         // TreeList 컬럼은 "프로퍼티 이름"으로 바인딩되므로 필요한 값만 노출
         public string Name => Item.NodeDescription;
         public string Code => Item.NodeCode;
-        public string WholeInputMaterialCode => Item.WholeInputMaterialCode;
+        /// <summary>투입자재 품목코드/시리얼번호(서버 materialInputCode). 화면 컬럼 FieldName "Serial"과 이름이 같아야 값이 나온다.</summary>
+        public string Serial => Item.WholeInputMaterialCode;
         public string Type => Item.NodeType;
         public int Level => Item.NodeLevel;
         public int SortSeq => Item.SortSeq;
