@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace SEOJIN_TMES.Client.Core
+namespace SEOJIN_TMES.Client.Forms.Common
 {
     /// <summary>
     /// 서버가 준 본문 HTML(알림 메일 · 공지)을 WebBrowser(IE 엔진)에 넣을 수 있게 다듬는다.

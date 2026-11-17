@@ -2,12 +2,12 @@ using SEOJIN_TMES.Client.ApiClient;
 using SEOJIN_TMES.Client.Common.Languages;
 using SEOJIN_TMES.Client.Common.Logging;
 using SEOJIN_TMES.Client.Common.Models;
-using SEOJIN_TMES.Client.Forms.Common;
+using SEOJIN_TMES.Client.Core;
 using System;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace SEOJIN_TMES.Client.Core
+namespace SEOJIN_TMES.Client.Forms.Common
 {
     /// <summary>
     /// 화면별 버튼 권한(<c>GET api/v1.0/gm/auth/permissions?path=/POP01</c>)을 받아 화면 열기 여부와 버튼 표시를 정한다.

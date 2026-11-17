@@ -5,7 +5,7 @@ using DevExpress.XtraEditors;
 using SEOJIN_TMES.Client.Common.Languages;
 using SEOJIN_TMES.Client.Common.Logging;
 using SEOJIN_TMES.Client.Common.Models;
-using SEOJIN_TMES.Client.Core;
+using SEOJIN_TMES.Client.Forms.Common;
 using SEOJIN_TMES.Client.Theme;
 
 namespace SEOJIN_TMES.Client.Forms.Home
