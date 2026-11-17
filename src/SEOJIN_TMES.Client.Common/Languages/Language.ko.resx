@@ -1086,6 +1086,9 @@
   <data name="Col_NodeDescription" xml:space="preserve">
     <value>항목 설명</value>
   </data>
+  <data name="Col_WholeInputMaterialCode" xml:space="preserve">
+    <value>품목코드/시리얼번호</value>
+  </data>
   <data name="Col_TorqueTarget" xml:space="preserve">
     <value>토크 목푯값</value>
   </data>

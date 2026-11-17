@@ -124,11 +124,13 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
                 treeOverview.OptionsBehavior.Editable = false;
                 treeOverview.OptionsView.ShowIndicator = false;
                 GridColumnGuard.Apply(treeOverview);   // 컬럼 지우기만 막는다
-                // 폭 합계(220 + 250 + 130*8 = 1510)를 화면 기본 폭에 맞춰, 값 컬럼은 고정 폭 + 가로 스크롤로 둔다
+                // 코드·설명 열은 고정 폭, 값 컬럼은 130 고정 폭 + 가로 스크롤로 둔다
                 // (앵글 컬럼까지 억지로 줄여 넣지 않고 화면 설계서처럼 옆으로 밀어 본다).
                 AddColumn("Code", Language.Col_NodeCode, 220, HorzAlignment.Near);
                 AddColumn("Name", Language.Col_NodeDescription, 250, HorzAlignment.Near);
-                
+                // 투입자재의 품목코드/시리얼번호(서버 wholInputMatlCd) — 서버가 만든 문자열을 그대로 보인다. 없으면 ".."
+                AddColumn(nameof(WorkIntegratedNode.WholeInputMaterialCode), Language.Col_WholeInputMaterialCode, 220, HorzAlignment.Near);
+
                 AddValueColumn("UsageQty", Language.Col_WorkQty, 130);
                 AddValueColumn("Unit", Language.Col_Unit, 130);
                 AddValueColumn("TorqueResult", Language.Col_TorqueResult, 130);

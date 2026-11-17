@@ -30,6 +30,13 @@ namespace SEOJIN_TMES.Client.Common.Models
         [JsonProperty("name")]
         public string NodeDescription { get; set; }
 
+        /// <summary>
+        /// 투입자재의 품목코드/시리얼번호 — 서버가 한 문자열로 만들어 내려준다(화면은 그대로 표시만).
+        /// 필드명은 서버 철자 그대로 <c>wholInputMatlCd</c>다(whole이 아니다).
+        /// </summary>
+        [JsonProperty("wholInputMatlCd")]
+        public string WholeInputMaterialCode { get; set; }
+
         [JsonProperty("level")]
         public int NodeLevel { get; set; }
 

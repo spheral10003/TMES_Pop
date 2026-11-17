@@ -438,6 +438,7 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string WorkIntegrated_ExportFailed => Get(nameof(WorkIntegrated_ExportFailed));
         public static string Col_NodeCode => Get(nameof(Col_NodeCode));
         public static string Col_NodeDescription => Get(nameof(Col_NodeDescription));
+        public static string Col_WholeInputMaterialCode => Get(nameof(Col_WholeInputMaterialCode));
         public static string Col_TorqueTarget => Get(nameof(Col_TorqueTarget));
         public static string Col_TorqueMax => Get(nameof(Col_TorqueMax));
         public static string Col_AngleTarget => Get(nameof(Col_AngleTarget));

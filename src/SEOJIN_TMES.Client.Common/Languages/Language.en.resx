@@ -1086,6 +1086,9 @@ Reconnection continues automatically until it succeeds. You can also press [Reco
   <data name="Col_NodeDescription" xml:space="preserve">
     <value>Description</value>
   </data>
+  <data name="Col_WholeInputMaterialCode" xml:space="preserve">
+    <value>Item Code/Serial No.</value>
+  </data>
   <data name="Col_TorqueTarget" xml:space="preserve">
     <value>Torque Target</value>
   </data>

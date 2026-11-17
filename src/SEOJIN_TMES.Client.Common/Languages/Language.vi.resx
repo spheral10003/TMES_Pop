@@ -1086,6 +1086,9 @@ Hệ thống sẽ tự động thử kết nối lại cho đến khi thành cô
   <data name="Col_NodeDescription" xml:space="preserve">
     <value>Mô tả</value>
   </data>
+  <data name="Col_WholeInputMaterialCode" xml:space="preserve">
+    <value>Mã hàng/Số sê-ri</value>
+  </data>
   <data name="Col_TorqueTarget" xml:space="preserve">
     <value>Lực siết mục tiêu</value>
   </data>
