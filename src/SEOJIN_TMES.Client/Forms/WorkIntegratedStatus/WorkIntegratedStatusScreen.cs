@@ -1,5 +1,8 @@
+using DevExpress.Export;
+using DevExpress.Export.Xl;
 using DevExpress.Utils;
 using DevExpress.XtraEditors;
+using DevExpress.XtraPrinting;
 using DevExpress.XtraTreeList;
 using DevExpress.XtraTreeList.Columns;
 using SEOJIN_TMES.Client.ApiClient;
@@ -10,12 +13,10 @@ using SEOJIN_TMES.Client.Common.Logging;
 using SEOJIN_TMES.Client.Common.Models;
 using SEOJIN_TMES.Client.Core;
 using SEOJIN_TMES.Client.Menu;
-using SEOJIN_TMES.Client.Export;
 using SEOJIN_TMES.Client.Forms.Common;
 using SEOJIN_TMES.Client.Theme;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -289,103 +290,73 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
             }
         }
 
-        // ────────────────────────── 엑셀 내보내기 (아웃라인 계층) ──────────────────────────
+        // ────────────────────────── 엑셀 내보내기 (DevExpress DataAware) ──────────────────────────
 
         /// <summary>
-        /// 트리를 xlsx로 쓴다. 계층은 <b>Excel 아웃라인(그룹)</b>이 되어 엑셀에서 접었다 펼 수 있다.
+        /// 트리를 DevExpress의 데이터 내보내기(<see cref="ExportType.DataAware"/>)로 xlsx에 쓴다.
         ///
-        /// <c>treeOverview.ExportToXlsx(...)</c>를 쓰지 않는 이유는
-        /// <see cref="XlsxOutlineWriter"/> 주석에 적어 두었다(요약: 그 API는 아웃라인을 만들지 못한다).
+        /// 이 방식을 쓰는 이유:
+        ///   · 노드 계층이 그대로 <b>엑셀 행 그룹(접기/펼치기)</b>이 되고, 부모 행이 자식 위에 온다.
+        ///   · 사용자가 화면에서 바꾼 <b>열 순서 · 숨김 · 폭 · 노드 접힘</b>이 그대로 따라간다.
+        ///   · WinForms 라이선스에 포함된 기능이라 평가판 경고 시트가 붙지 않는다
+        ///     (경고가 붙는 것은 Office File API·DevExpress.Export.Xl을 직접 쓸 때뿐 — 실측).
+        /// 숫자는 숫자 칸으로, 열 서식(0.00##)도 함께 넘어간다.
+        ///
+        /// 예전 직접 생성기(Export/XlsxOutlineWriter.cs)는 빌드에서 빼고 파일만 남겨 두었다.
         /// </summary>
         private void ExportOverviewToXlsx(string fileName)
         {
-            var writer = new XlsxOutlineWriter(Language.WorkIntegrated_OverviewTitle, BuildExportColumns());
-            var rowCount = AppendNodes(writer, _node, 0, BuildExportFields());
-
-            // 조회 결과가 있는데 한 줄도 못 옮겼다면 제목행만 있는 빈 파일이 된다 — 저장하지 않고 실패로 알린다.
-            if (rowCount == 0)
-                throw new InvalidOperationException(Language.WorkIntegrated_ExportEmpty);
-
-            writer.Save(fileName);
-            AppLog.Info($"[작업통합] 엑셀 행 수 - {rowCount}/{_workIntegrateds.Count}");
-        }
-
-        /// <summary>내보낼 컬럼 구성 — 화면 컬럼의 제목·폭·정렬을 그대로 옮긴다(언어를 바꾸면 제목도 함께 바뀐다).</summary>
-        private List<XlsxColumn> BuildExportColumns()
-        {
-            var columns = new List<XlsxColumn>();
-            foreach (TreeListColumn column in treeOverview.Columns)
+            var options = new XlsxExportOptionsEx
             {
-                var align = column.AppearanceCell.TextOptions.HAlignment == HorzAlignment.Center
-                    ? XlsxAlign.Center
-                    : XlsxAlign.Left;
-                columns.Add(new XlsxColumn(column.Caption, column.Width, align));
-            }
-            return columns;
+                ExportType = ExportType.DataAware,
+                SheetName = Language.WorkIntegrated_OverviewTitle,
+                // 화면에서 정렬을 막아 두었으므로(AllowSort=false) 엑셀에도 자동 필터 단추를 달지 않는다.
+                AllowSortingAndFiltering = DefaultBoolean.False
+            };
+            options.CustomizeCell += ExportOptions_CustomizeCell;
+
+            treeOverview.ExportToXlsx(fileName, options);
+            AppLog.Info($"[작업통합] 엑셀 행 수 - {treeOverview.AllNodesCount}/{_workIntegrateds.Count}");
         }
 
         /// <summary>
-        /// 컬럼마다 값을 꺼낼 속성 — 제목(<see cref="BuildExportColumns"/>)과 <b>같은 컬럼 목록·같은 순서</b>로 만든다.
-        ///
-        /// 값 순서를 따로 적어 두지 않는 이유: 화면 컬럼 순서(항목 코드 ↔ 항목 설명)만 바꾸고 값 배열은 그대로 둬서
-        /// 엑셀 제목과 값이 서로 어긋난 채 저장된 적이 있다. 컬럼의 FieldName으로 찾으면 순서를 바꾸거나
-        /// 컬럼을 더해도 제목과 값이 함께 움직인다.
+        /// 내보내는 칸 하나하나의 모양.
+        ///   · 제목행: 굵게 · 연보라 배경(<see cref="AppTheme.ExportHeaderBack"/>, 다크 테마와 무관한 고정색) · 가운데
+        ///   · 값이 없는 칸: 화면(<see cref="TreeOverview_CustomColumnDisplayText"/>)과 같이 ".."
+        ///     — DataAware는 표시 문구가 아니라 값을 내보내므로 화면의 ".."가 저절로 따라오지 않는다.
+        /// <c>Handled = true</c>면 칸의 기본 서식 대신 여기서 준 서식만 쓰이므로, ".." 칸은 열 정렬을 다시 지정한다.
         /// </summary>
-        private PropertyDescriptor[] BuildExportFields()
+        private void ExportOptions_CustomizeCell(CustomizeCellEventArgs e)
         {
-            var properties = TypeDescriptor.GetProperties(typeof(WorkIntegratedNode));
-            var fields = new PropertyDescriptor[treeOverview.Columns.Count];
-            for (var i = 0; i < fields.Length; i++)
-                fields[i] = properties[treeOverview.Columns[i].FieldName];   // 이름이 안 맞으면 null — 화면처럼 빈 칸 표기가 된다
-            return fields;
-        }
-
-        /// <summary>
-        /// 트리에 물린 노드(<see cref="_node"/>)를 화면과 같은 순서로 재귀로 훑어 한 줄씩 넘기고, 넘긴 줄 수를 돌려준다.
-        /// 재귀 깊이가 그대로 엑셀 아웃라인 레벨이 된다.
-        ///
-        /// 트리 컨트롤(<c>treeOverview.Nodes</c> → <c>GetDataRecordByNode</c>)을 거치지 않는 이유:
-        /// 트리는 <see cref="WorkIntegratedNode"/>에 바인딩되어 있어 <c>as WorkIntegratedDto</c>가 늘 null이었고,
-        /// 행이 조용히 전부 빠져 제목행만 있는 빈 파일이 만들어졌다. 바인딩한 목록을 직접 쓰면 형식이 어긋날 일이 없다.
-        /// </summary>
-        private int AppendNodes(XlsxOutlineWriter writer, List<WorkIntegratedNode> nodes, int level, PropertyDescriptor[] fields)
-        {
-            var count = 0;
-            foreach (var node in nodes)
+            if (e.AreaType == SheetAreaType.Header)
             {
-                writer.AddRow(level, BuildExportValues(node, fields));
-                count++;
-                count += AppendNodes(writer, node.Children, level + 1, fields);
+                e.Formatting.Font = new XlCellFont { Bold = true };
+                e.Formatting.BackColor = AppTheme.ExportHeaderBack;
+                e.Formatting.Alignment = new XlCellAlignment
+                {
+                    HorizontalAlignment = XlHorizontalAlignment.Center,
+                    VerticalAlignment = XlVerticalAlignment.Center
+                };
+                e.Handled = true;
+                return;
             }
-            return count;
+
+            if (e.AreaType != SheetAreaType.DataArea || !IsEmptyValue(e.Value))
+                return;
+
+            var column = treeOverview.Columns[e.ColumnFieldName];
+            var center = column != null && column.AppearanceCell.TextOptions.HAlignment == HorzAlignment.Center;
+
+            e.Value = EmptyValueText;
+            e.Formatting.Alignment = new XlCellAlignment
+            {
+                HorizontalAlignment = center ? XlHorizontalAlignment.Center : XlHorizontalAlignment.Left
+            };
+            e.Handled = true;
         }
 
-        /// <summary>
-        /// 한 줄의 값 — <paramref name="fields"/> 순서(= 제목 순서) 그대로 꺼낸다.
-        /// 값이 있는 칸은 <b>숫자 그대로</b> 넘겨 엑셀에서 계산·비교가 되게 하고,
-        /// 값이 없는 칸은 화면과 같이 ".."로 채운다.
-        /// </summary>
-        private object[] BuildExportValues(WorkIntegratedNode node, PropertyDescriptor[] fields)
-        {
-            var values = new object[fields.Length];
-            for (var i = 0; i < fields.Length; i++)
-                values[i] = ValueOrPlaceholder(fields[i]?.GetValue(node));
-            return values;
-        }
-
-        /// <summary>
-        /// 숫자는 <see cref="decimal"/> 그대로(숫자 칸), 그 밖은 문자열로 넘긴다.
-        /// 비어 있으면 화면(<see cref="TreeOverview_CustomColumnDisplayText"/>)과 같이 "..".
-        /// </summary>
-        private object ValueOrPlaceholder(object value)
-        {
-            if (value is decimal)
-                return value;
-
-            var text = value?.ToString();
-            if (string.IsNullOrEmpty(text))
-                return EmptyValueText;
-            return text;
-        }
+        /// <summary>화면에서 ".."로 보이는 값과 같은 기준(null · DBNull · 빈 문자열).</summary>
+        private bool IsEmptyValue(object value) =>
+            value == null || value is DBNull || (value as string) == string.Empty;
     }
 }

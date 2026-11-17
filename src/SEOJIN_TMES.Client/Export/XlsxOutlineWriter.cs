@@ -11,6 +11,12 @@ namespace SEOJIN_TMES.Client.Export
     /// <summary>
     /// 계층 자료를 <b>Excel 아웃라인(접기/펼치기)</b>이 들어간 xlsx로 쓴다.
     ///
+    /// ※ 현재 빌드에서 제외됨(SEOJIN_TMES.Client.csproj의 Compile Remove) — 참고용으로 파일만 남겨 둔다.
+    ///   작업통합 개요는 <c>TreeList.ExportToXlsx</c> + <c>XlsxExportOptionsEx { ExportType = DataAware }</c>로 바꿨다.
+    ///   실측해 보니 DataAware 방식(이 설치본의 기본값)은 노드 계층을 그대로 엑셀 행 그룹(outlineLevel)으로 쓰고
+    ///   평가판 경고도 붙지 않았다. 아래 "TreeList.ExportToXlsx는 아웃라인을 못 만든다"는 설명은
+    ///   인쇄 방식(WYSIWYG)일 때만 맞다. 사용자가 바꾼 열 순서·숨김·폭·접힘도 DataAware 쪽만 따라간다.
+    ///
     /// 왜 직접 쓰나 — DevExpress의 두 경로가 모두 막혀 있다.
     ///   · <c>TreeList.ExportToXlsx</c>는 인쇄 링크 기반이라 트리 들여쓰기를 <b>그림처럼 재현만</b> 하고
     ///     아웃라인 레벨을 만들지 못한다(<c>XlsxExportOptions</c>·<c>TreeListOptionsPrint</c> 어디에도 그룹 옵션이 없다).

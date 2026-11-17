@@ -106,6 +106,14 @@
   <ItemGroup>
     <Compile Remove="Forms\Pop\ByteToImage.cs" />
   </ItemGroup>
+  <!--
+    작업통합 개요 엑셀 내보내기를 DevExpress TreeList.ExportToXlsx(DataAware)로 바꾸면서 빌드에서 뺀 직접 생성기.
+    파일은 지우지 않고 남겨 둔다(되살릴 때는 아래 두 줄을 지우면 된다). None으로 다시 넣어 VS 솔루션 탐색기에는 보이게 한다.
+  -->
+  <ItemGroup>
+    <Compile Remove="Export\XlsxOutlineWriter.cs" />
+    <None Include="Export\XlsxOutlineWriter.cs" />
+  </ItemGroup>
   <ItemGroup>
     <Content Include="Images\TMES_TEST.ico" />
   </ItemGroup>
@@ -139,9 +147,10 @@
     <!-- 사이드바 하단에 표시하는 ClickOnce 배포 버전(ApplicationDeployment) — Composition/AppVersion.cs -->
     <Reference Include="System.Deployment" />
     <!--
-      엑셀(xlsx) 직접 생성용 — xlsx는 XML 몇 개를 담은 zip이라 ZipArchive만 있으면 만들 수 있다.
-      DevExpress로도 만들 수 있지만 Office File API는 별도 라이선스라
-      이 설치본에서는 "Evaluation Warning" 시트가 붙어 쓸 수 없었다 → Export/XlsxOutlineWriter.cs 참고.
+      엑셀(xlsx) 직접 생성용(Export/XlsxOutlineWriter.cs) — 지금은 그 파일을 빌드에서 빼 두어 쓰는 곳이 없다.
+      엑셀 내보내기는 TreeList.ExportToXlsx(DataAware)가 맡는다 — WinForms 라이선스에 포함되어 평가판 경고가 없고,
+      계층도 엑셀 행 그룹(접기/펼치기)으로 나온다. "Evaluation Warning"이 붙는 것은 Office File API(Workbook)나
+      DevExpress.Export.Xl을 직접 쓸 때뿐이다. XlsxOutlineWriter를 되살릴 때를 위해 참조는 남겨 둔다.
     -->
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.IO.Compression.FileSystem" />
