@@ -119,7 +119,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
                 treeOverview.Columns.Clear();
                 treeOverview.OptionsBehavior.PopulateServiceColumns = false;
                 treeOverview.OptionsView.AutoWidth = false;
-                treeOverview.ChildListFieldName = nameof(WorkIntegratedNode.Children);
+                //treeOverview.ChildListFieldName = nameof(WorkIntegratedNode.Children);
 
                 treeOverview.OptionsBehavior.Editable = false;
                 treeOverview.OptionsView.ShowIndicator = false;
@@ -129,7 +129,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
                 AddColumn("Code", Language.Col_NodeCode, 220, HorzAlignment.Near);
                 AddColumn("Name", Language.Col_NodeDescription, 250, HorzAlignment.Near);
                 // 투입자재의 품목코드/시리얼번호(서버 wholInputMatlCd) — 서버가 만든 문자열을 그대로 보인다. 없으면 ".."
-                AddColumn(nameof(WorkIntegratedNode.WholeInputMaterialCode), Language.Col_WholeInputMaterialCode, 220, HorzAlignment.Near);
+                AddColumn("Serial", Language.Col_WholeInputMaterialCode, 220, HorzAlignment.Near);
 
                 AddValueColumn("UsageQty", Language.Col_WorkQty, 130);
                 AddValueColumn("Unit", Language.Col_Unit, 130);

@@ -112,7 +112,6 @@
   -->
   <ItemGroup>
     <Compile Remove="Export\XlsxOutlineWriter.cs" />
-    <None Include="Export\XlsxOutlineWriter.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Images\TMES_TEST.ico" />
@@ -310,6 +309,10 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Export\" />
   </ItemGroup>
 
 </Project>
