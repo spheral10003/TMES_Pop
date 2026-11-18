@@ -17,6 +17,8 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
         public string Code => Item.NodeCode;
         /// <summary>투입자재 품목코드/시리얼번호(서버 materialInputCode). 화면 컬럼 FieldName "Serial"과 이름이 같아야 값이 나온다.</summary>
         public string Serial => Item.WholeInputMaterialCode;
+        /// <summary>구매 계획 방식(서버 prchsPlanMth). 화면 컬럼 FieldName "PrchsPlanMth"와 이름이 같아야 값이 나온다.</summary>
+        public string PrchsPlanMth => Item.PurchasePlanMethod;
         public string Type => Item.NodeType;
         public int Level => Item.NodeLevel;
         public int SortSeq => Item.SortSeq;

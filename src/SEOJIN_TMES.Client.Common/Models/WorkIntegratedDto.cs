@@ -38,6 +38,13 @@ namespace SEOJIN_TMES.Client.Common.Models
         [JsonProperty("materialInputCode")]
         public string WholeInputMaterialCode { get; set; }
 
+        /// <summary>
+        /// 구매 계획 방식(서버 prchsPlanMth: null / MRP / ROP / 빈 문자열) — PopScreen 투입자재·BOM과 같은 필드.
+        /// md/routings 응답(NodeResponse)에 있다(Swagger 11-18 확인). 서버 값을 그대로 보여 준다.
+        /// </summary>
+        [JsonProperty("prchsPlanMth")]
+        public string PurchasePlanMethod { get; set; }
+
         [JsonProperty("level")]
         public int NodeLevel { get; set; }
 

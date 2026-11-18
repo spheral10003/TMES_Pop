@@ -131,6 +131,8 @@ namespace SEOJIN_TMES.Client.Forms.WorkIntegratedStatus
                 AddColumn("Name", Language.Col_NodeDescription, 250, HorzAlignment.Near);
                 // 투입자재의 품목코드/시리얼번호(서버 materialInputCode) — 서버가 만든 문자열을 그대로 보인다. 없으면 ".."
                 AddColumn("Serial", Language.Col_WholeInputMaterialCode, 220, HorzAlignment.Near);
+                // 구매 계획 방식(서버 prchsPlanMth: MRP / ROP) — PopScreen 투입자재·BOM 그리드와 같은 제목·폭.
+                AddColumn("PrchsPlanMth", Language.Col_PurchasePlanMethod, 130, HorzAlignment.Center);
 
                 AddValueColumn("UsageQty", Language.Col_WorkQty, 130);
                 AddValueColumn("Unit", Language.Col_Unit, 130);
