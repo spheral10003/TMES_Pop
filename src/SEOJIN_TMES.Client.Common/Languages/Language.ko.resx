@@ -490,7 +490,7 @@
     <value>작업지시번호</value>
   </data>
   <data name="Col_ItemCode" xml:space="preserve">
-    <value>품목번호</value>
+    <value>품목코드</value>
   </data>
   <data name="Col_SerialNo" xml:space="preserve">
     <value>시리얼번호</value>
