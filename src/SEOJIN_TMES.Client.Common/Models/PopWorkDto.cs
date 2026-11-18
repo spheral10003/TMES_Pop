@@ -189,8 +189,10 @@ namespace SEOJIN_TMES.Client.Common.Models
 
         /// <summary>
         /// [투입자재] 그리드의 "시리얼번호 입력상태" 표시 문구.
-        /// 참조 자재(AR·REF)는 입력 없이 OK로 끝난 줄이라 "OK", 입력 대상이 아니면 "-", 다 입력했으면 "완료", 아니면 "미완료".
-        /// 품목코드만 받는 자재는 서버가 내려준 품목코드 완료 여부를 보여 준다.
+        /// 참조 자재(AR·REF)는 입력 없이 OK로 끝난 줄이라 "OK", 입력 대상이 아니면 "-", 아직 다 입력하지 않았으면 "미완료".
+        /// 시리얼을 다 입력했으면 "완료" 대신 입력된 시리얼번호를 보여 준다 — 작업자가 팝업을 다시 열지 않고 무엇을 넣었는지 확인하게.
+        /// 여러 개면 쉼표로 잇는다(시리얼 입력에서 쉼표는 막혀 있어 구분이 섞이지 않는다).
+        /// 품목코드만 받는 자재는 시리얼이 없으므로 서버가 내려준 품목코드 완료 여부를 그대로 "완료"/"미완료"로 보여 준다.
         /// </summary>
         public string SerialInputStateText
         {
@@ -199,7 +201,22 @@ namespace SEOJIN_TMES.Client.Common.Models
                 if (IsReference) return PopInspectionSpecDto.ResultOk;
                 if (IsItemCodeInputOnly) return ItemCodeInputCompleted ? "완료" : "미완료";
                 if (!SerialCheckRequired) return "-";
-                return IsSerialInputCompleted ? "완료" : "미완료";
+                return IsSerialInputCompleted ? SerialNumbersText : "미완료";
+            }
+        }
+
+        /// <summary>입력된 시리얼번호를 한 줄로 이은 표시 문구(빈 칸 제외). 하나도 없으면 "완료"로 대신한다(투입 수량 0인 경우).</summary>
+        private string SerialNumbersText
+        {
+            get
+            {
+                var serials = new List<string>();
+                foreach (var serial in SerialNumbers ?? new List<string>())
+                {
+                    if (!string.IsNullOrWhiteSpace(serial))
+                        serials.Add(serial.Trim());
+                }
+                return serials.Count == 0 ? "완료" : string.Join(", ", serials);
             }
         }
 
