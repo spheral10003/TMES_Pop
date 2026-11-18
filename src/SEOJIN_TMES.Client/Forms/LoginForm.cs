@@ -312,7 +312,7 @@ namespace SEOJIN_TMES.Client.Forms
         }
 
         /// <summary>
-        /// 사업부 콤보 — 항목은 하나다. App.config의 ServerName(GUM 구미 · HS 화성 · YI 용인)에 맞는
+        /// 사업부 콤보 — 항목은 하나다. App.config의 ServerName(GUM·GM 구미 · HS 화성 · YI 용인)에 맞는
         /// 이름("Texon 구미" 등)을 보여 주고, 보이는 글자만 다국어로 바꾼다.
         /// 서버로 보내는 사업장 코드는 콤보 값이 아니라 ServerName을 그대로 쓴다(btnConnect_Click).
         /// </summary>
@@ -331,7 +331,9 @@ namespace SEOJIN_TMES.Client.Forms
         {
             switch ((serverName ?? string.Empty).Trim().ToUpperInvariant())
             {
-                case "GUM": return Language.Login_CorpGumi;
+                // 구미는 Test 서버가 GUM, 운영 서버가 GM으로 코드가 다르다 — 둘 다 같은 이름으로 보여 준다.
+                case "GUM":
+                case "GM": return Language.Login_CorpGumi;
                 case "HS": return Language.Login_CorpHwaseong;
                 case "YI": return Language.Login_CorpYongin;
                 default: return serverName;
