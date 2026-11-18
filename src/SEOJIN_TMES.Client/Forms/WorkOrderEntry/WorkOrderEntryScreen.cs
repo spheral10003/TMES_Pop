@@ -151,6 +151,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             AppTheme.CodeEditor(txtSerialNo);
             AppTheme.CodeEditor(txtItemCode);
             AppTheme.CodeEditor(txtItemName);
+            AppTheme.CodeEditor(txtFcid);
             AppTheme.StandardButton(btnSearch);
             AppTheme.StandardButton(btnWork);
 

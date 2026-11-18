@@ -89,26 +89,26 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.topCard.Name = "topCard";
             this.topCard.Size = new System.Drawing.Size(1509, 88);
             this.topCard.TabIndex = 0;
-            //
+            // 
             // lblFcidTitle
-            //
+            // 
             this.lblFcidTitle.Appearance.Font = new System.Drawing.Font("맑은 고딕", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.lblFcidTitle.Appearance.Options.UseFont = true;
-            this.lblFcidTitle.Location = new System.Drawing.Point(797, 20);
+            this.lblFcidTitle.Location = new System.Drawing.Point(746, 19);
             this.lblFcidTitle.Name = "lblFcidTitle";
             this.lblFcidTitle.Size = new System.Drawing.Size(35, 17);
             this.lblFcidTitle.TabIndex = 14;
             this.lblFcidTitle.Text = "· FCID";
-            //
+            // 
             // txtFcid
-            //
-            this.txtFcid.Location = new System.Drawing.Point(849, 17);
+            // 
+            this.txtFcid.Location = new System.Drawing.Point(798, 16);
             this.txtFcid.Name = "txtFcid";
             this.txtFcid.Properties.Appearance.Font = new System.Drawing.Font("맑은 고딕", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.txtFcid.Properties.Appearance.Options.UseFont = true;
-            this.txtFcid.Size = new System.Drawing.Size(200, 24);
+            this.txtFcid.Size = new System.Drawing.Size(157, 24);
             this.txtFcid.TabIndex = 15;
-            //
+            // 
             // chkWorkStationEnable
             // 
             this.chkWorkStationEnable.AutoSize = true;
@@ -150,15 +150,15 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             this.chkProgress.TabIndex = 13;
             this.chkProgress.Text = "진행중";
             this.chkProgress.UseVisualStyleBackColor = true;
-            //
+            // 
             // chkCompleted
-            //
+            // 
             this.chkCompleted.AutoSize = true;
             this.chkCompleted.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.chkCompleted.Font = new System.Drawing.Font("맑은 고딕", 9.5F);
             this.chkCompleted.Location = new System.Drawing.Point(700, 54);
             this.chkCompleted.Name = "chkCompleted";
-            this.chkCompleted.Size = new System.Drawing.Size(70, 21);
+            this.chkCompleted.Size = new System.Drawing.Size(50, 21);
             this.chkCompleted.TabIndex = 14;
             this.chkCompleted.Text = "완료";
             this.chkCompleted.UseVisualStyleBackColor = true;
@@ -242,7 +242,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             // 
             // txtWorkOrderNo
             // 
-            this.txtWorkOrderNo.Location = new System.Drawing.Point(133, 16);
+            this.txtWorkOrderNo.Location = new System.Drawing.Point(149, 16);
             this.txtWorkOrderNo.Name = "txtWorkOrderNo";
             this.txtWorkOrderNo.Properties.Appearance.Font = new System.Drawing.Font("맑은 고딕", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.txtWorkOrderNo.Properties.Appearance.Options.UseFont = true;
@@ -261,7 +261,7 @@ namespace SEOJIN_TMES.Client.Forms.WorkOrderEntry
             // 
             // txtSerialNo
             // 
-            this.txtSerialNo.Location = new System.Drawing.Point(529, 16);
+            this.txtSerialNo.Location = new System.Drawing.Point(519, 16);
             this.txtSerialNo.Name = "txtSerialNo";
             this.txtSerialNo.Properties.Appearance.Font = new System.Drawing.Font("맑은 고딕", 9.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(129)));
             this.txtSerialNo.Properties.Appearance.Options.UseFont = true;

@@ -586,6 +586,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.lblMessage.Padding = new System.Windows.Forms.Padding(8);
             this.lblMessage.Size = new System.Drawing.Size(358, 51);
             this.lblMessage.TabIndex = 22;
+            this.lblMessage.Visible = false;
             // 
             // lblInfoTitle
             // 

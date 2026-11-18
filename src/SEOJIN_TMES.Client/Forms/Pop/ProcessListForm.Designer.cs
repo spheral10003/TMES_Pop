@@ -53,7 +53,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             ((System.ComponentModel.ISupportInitialize)(this.gridView)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.searchRow)).BeginInit();
             this.searchRow.SuspendLayout();
-            this.materialSearch.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.footerPanel)).BeginInit();
             this.footerPanel.SuspendLayout();
             this.SuspendLayout();
@@ -122,9 +121,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.gridView.GridControl = this.grid;
             this.gridView.Name = "gridView";
             this.gridView.OptionsBehavior.Editable = false;
-            //
+            // 
             // searchRow
-            //
+            // 
             this.searchRow.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.NoBorder;
             this.searchRow.Controls.Add(this.materialSearch);
             this.searchRow.Controls.Add(this.lblProcessStats);
@@ -133,17 +132,17 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.searchRow.Name = "searchRow";
             this.searchRow.Size = new System.Drawing.Size(1158, 44);
             this.searchRow.TabIndex = 2;
-            //
+            // 
             // materialSearch
-            //
+            // 
             this.materialSearch.Dock = System.Windows.Forms.DockStyle.Fill;
             this.materialSearch.Location = new System.Drawing.Point(0, 0);
             this.materialSearch.Name = "materialSearch";
             this.materialSearch.Size = new System.Drawing.Size(638, 44);
             this.materialSearch.TabIndex = 0;
-            //
+            // 
             // lblProcessStats
-            //
+            // 
             this.lblProcessStats.Appearance.Options.UseTextOptions = true;
             this.lblProcessStats.Appearance.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Far;
             this.lblProcessStats.Appearance.TextOptions.VAlignment = DevExpress.Utils.VertAlignment.Center;
@@ -237,7 +236,6 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             ((System.ComponentModel.ISupportInitialize)(this.gridView)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.searchRow)).EndInit();
             this.searchRow.ResumeLayout(false);
-            this.materialSearch.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.footerPanel)).EndInit();
             this.footerPanel.ResumeLayout(false);
             this.ResumeLayout(false);
