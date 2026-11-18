@@ -317,6 +317,9 @@ namespace SEOJIN_TMES.Client.Common.Models
         /// <summary>검사 스팩명.</summary>
         public string InspectionSpecName { get; set; }
 
+        /// <summary>판정기준(서버 jgmtStd) — 작업자가 OK/NG를 고를 때 보는 기준 문구. 표시만 한다.</summary>
+        public string JudgmentStandard { get; set; }
+
         /// <summary>투입위치(서버 indctLoc).</summary>
         public string InputPosition { get; set; }
 

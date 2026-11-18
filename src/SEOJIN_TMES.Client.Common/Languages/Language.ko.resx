@@ -801,6 +801,9 @@
   <data name="Col_InspectionSpecName" xml:space="preserve">
     <value>검사 스팩명</value>
   </data>
+  <data name="Col_JudgmentStandard" xml:space="preserve">
+    <value>판정기준</value>
+  </data>
   <data name="Col_InspectionRemark" xml:space="preserve">
     <value>검사 스팩 비고</value>
   </data>

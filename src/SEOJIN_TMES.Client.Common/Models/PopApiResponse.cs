@@ -128,6 +128,7 @@ namespace SEOJIN_TMES.Client.Common.Models
     {
         [JsonProperty("inspItemCd")] public string InspItemCode { get; set; }
         [JsonProperty("inspItemNm")] public string InspItemNm { get; set; }
+        [JsonProperty("jgmtStd")] public string JgmtStd { get; set; }           // 판정기준(작업자 안내 문구)
         [JsonProperty("indctLoc")] public string IndctLoc { get; set; }        // 투입위치
         [JsonProperty("inspDataType")] public string InspDataType { get; set; } // QLT 정성 / QNT 정량
         [JsonProperty("lsl")] public decimal? Lsl { get; set; }                  // 최소값 — 정량 검사만
@@ -240,6 +241,7 @@ namespace SEOJIN_TMES.Client.Common.Models
                 {
                     InspectionItemCode = i.InspItemCode,
                     InspectionSpecName = i.InspItemNm,
+                    JudgmentStandard = i.JgmtStd,
                     InputPosition = i.IndctLoc,
                     InspectionRemark = i.InspRemark,
                     // 결과값 기준 문자(예: 저항 측정의 "OL") — 결과값이 이 문자와 같으면 화면이 판정을 OK로 채운다.

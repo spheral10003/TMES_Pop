@@ -801,6 +801,9 @@ Reconnection continues automatically until it succeeds. You can also press [Reco
   <data name="Col_InspectionSpecName" xml:space="preserve">
     <value>Inspection Spec</value>
   </data>
+  <data name="Col_JudgmentStandard" xml:space="preserve">
+    <value>Judgment Criteria</value>
+  </data>
   <data name="Col_InspectionRemark" xml:space="preserve">
     <value>Remark</value>
   </data>

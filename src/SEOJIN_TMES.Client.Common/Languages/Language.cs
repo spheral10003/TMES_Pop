@@ -359,6 +359,7 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string Col_TorqueUnit => Get(nameof(Col_TorqueUnit));
         public static string Col_TorqueResult => Get(nameof(Col_TorqueResult));
         public static string Col_InspectionSpecName => Get(nameof(Col_InspectionSpecName));
+        public static string Col_JudgmentStandard => Get(nameof(Col_JudgmentStandard));
         public static string Col_InspectionRemark => Get(nameof(Col_InspectionRemark));
         public static string Col_InspectionMethod => Get(nameof(Col_InspectionMethod));
         public static string Col_ResultState => Get(nameof(Col_ResultState));

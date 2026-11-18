@@ -246,6 +246,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             gridInspection.DataSource = new List<PopInspectionSpecDto>();
             GridColumns.Apply(gridViewInspection, Language.Col_No,
                 GridColumns.Text("InspectionSpecName", Language.Col_InspectionSpecName, 300),
+                GridColumns.Text("JudgmentStandard", Language.Col_JudgmentStandard, 200),
                 GridColumns.Text("InputPosition", Language.Col_InputPosition, 80),
                 GridColumns.Text("Description", Language.Col_Description, 300),
                 GridColumns.Text("InspectionMethod", Language.Col_InspectionMethod, 120),

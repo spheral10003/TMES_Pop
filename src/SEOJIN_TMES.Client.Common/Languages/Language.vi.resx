@@ -801,6 +801,9 @@ Hệ thống sẽ tự động thử kết nối lại cho đến khi thành cô
   <data name="Col_InspectionSpecName" xml:space="preserve">
     <value>Tiêu chuẩn kiểm tra</value>
   </data>
+  <data name="Col_JudgmentStandard" xml:space="preserve">
+    <value>Tiêu chí đánh giá</value>
+  </data>
   <data name="Col_InspectionRemark" xml:space="preserve">
     <value>Ghi chú</value>
   </data>
