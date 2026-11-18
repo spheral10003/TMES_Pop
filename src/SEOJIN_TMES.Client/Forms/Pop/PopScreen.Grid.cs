@@ -1519,11 +1519,12 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// OSK는 포커스를 가져가지 않으므로 열린 편집기에 바로 글자가 들어가고, 편집을 닫을 때
         /// ValidatingEditor(숫자 검사 · 서버 저장)와 CellValueChanged(검사 결과 전송)가 직접 타이핑했을 때와 똑같이 돈다.
         /// 자체 가상 키보드(<see cref="VirtualKeyboardForm"/>)는 코드로 남겨 두되 여기서 띄우지 않는다.
+        /// [가상 키보드]를 끈 POP(물리 키보드 사용)에서는 띄우지 않는다.
         /// </summary>
         private void GridView_ShownEditor(object sender, EventArgs e)
         {
             var view = (GridView)sender;
-            if (GetKeyboardMode(view) == null)
+            if (!chkVirtualKeyboard.Checked || GetKeyboardMode(view) == null)
                 return;
 
             OnScreenKeyboard.Show();

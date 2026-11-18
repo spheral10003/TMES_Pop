@@ -684,6 +684,9 @@
   <data name="Pop_TabEquipment" xml:space="preserve">
     <value>Thiết bị</value>
   </data>
+  <data name="Pop_VirtualKeyboard" xml:space="preserve">
+    <value>Bàn phím ảo</value>
+  </data>
   <data name="Pop_ManualWrench" xml:space="preserve">
     <value>Cờ lê thủ công</value>
   </data>

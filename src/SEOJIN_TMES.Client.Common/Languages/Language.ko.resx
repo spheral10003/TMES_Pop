@@ -684,6 +684,9 @@
   <data name="Pop_TabEquipment" xml:space="preserve">
     <value>연결 장비</value>
   </data>
+  <data name="Pop_VirtualKeyboard" xml:space="preserve">
+    <value>가상 키보드</value>
+  </data>
   <data name="Pop_ManualWrench" xml:space="preserve">
     <value>수동 렌치</value>
   </data>

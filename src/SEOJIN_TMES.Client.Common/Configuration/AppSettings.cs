@@ -34,6 +34,12 @@ namespace SEOJIN_TMES.Client.Common.Configuration
         /// 실제로 붙을 서버는 이 값이 아니라 <see cref="ApiBaseUrl"/>이 정하므로 둘을 함께 맞출 것.
         /// </summary>
         public bool IsTestServer { get; set; } = false;
+
+        /// <summary>
+        /// POP 화면에서 BOM · 검사 칸을 편집할 때 Windows 화상 키보드를 띄울지(기본값 true).
+        /// POP 화면의 [가상 키보드] 체크박스로 바꾸며, 바꾼 값은 App.config에 저장돼 다음 실행에도 쓰인다.
+        /// </summary>
+        public bool UseVirtualKeyboard { get; set; } = true;
         public int UploadMaxMegaBytes { get; set; } = 10;
         /// <summary>자동 로그아웃까지의 세션 유지 시간(분). 메인 화면 우측 상단 카운트다운의 시작 값이다.</summary>
         public int SessionTimeoutMinutes { get; set; } = 300;

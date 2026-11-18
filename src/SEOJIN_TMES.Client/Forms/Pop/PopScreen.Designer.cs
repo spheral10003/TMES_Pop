@@ -22,7 +22,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         /// 화면 구성(화면 설계서 기준):
         ///   ┌ toolbarCard : 공정 제어 버튼(이전/다음/중지/공정 목록/알림 — 시작 버튼은 없다, 자동 시작) + 우측 작업자/상태
         ///   ├ mainPanel   : 좌측 viewerCard(작업 표준/도면) + 우측 infoCard(진행 중 공정 정보 + 안내 문구 lblMessage)
-        ///   └ bottomCard  : 탭 헤더(투입자재/BOM 스팩/검사 스팩/연결 장비 + 수동 렌치 + 결과 저장) + 탭별 그리드 4개
+        ///   └ bottomCard  : 탭 헤더(투입자재/BOM 스팩/검사 스팩/연결 장비 + 가상 키보드 + 수동 렌치 + 결과 저장) + 탭별 그리드 4개
         ///
         /// 도킹은 나중에 Add된 컨트롤이 먼저 처리되므로 Add 순서를 바꾸지 말 것
         /// (root: mainPanel → spacerBottom → bottomCard → spacerTop → toolbarCard,
@@ -87,6 +87,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.spacerBottom = new System.Windows.Forms.Panel();
             this.bottomCard = new DevExpress.XtraEditors.PanelControl();
             this.pnlTabHead = new DevExpress.XtraEditors.PanelControl();
+            this.chkVirtualKeyboard = new DevExpress.XtraEditors.CheckEdit();
             this.chkManualWrench = new DevExpress.XtraEditors.CheckEdit();
             this.btnTabsAccordion = new SEOJIN_TMES.Client.Forms.Common.AccordionHandle();
             this.tabSpec = new DevExpress.XtraTab.XtraTabControl();
@@ -129,6 +130,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.bottomCard.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pnlTabHead)).BeginInit();
             this.pnlTabHead.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.chkVirtualKeyboard.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chkManualWrench.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.tabSpec)).BeginInit();
             this.tabSpec.SuspendLayout();
@@ -803,16 +805,28 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.pnlTabHead.Controls.Add(this.btnZoomIn);
             this.pnlTabHead.Controls.Add(this.btnZoomOut);
             this.pnlTabHead.Controls.Add(this.btnFit);
+            this.pnlTabHead.Controls.Add(this.chkVirtualKeyboard);
             this.pnlTabHead.Controls.Add(this.chkManualWrench);
             this.pnlTabHead.Controls.Add(this.btnTabsAccordion);
-            this.pnlTabHead.Location = new System.Drawing.Point(1013, 3);
+            this.pnlTabHead.Location = new System.Drawing.Point(897, 3);
             this.pnlTabHead.Name = "pnlTabHead";
-            this.pnlTabHead.Size = new System.Drawing.Size(494, 28);
+            this.pnlTabHead.Size = new System.Drawing.Size(610, 28);
             this.pnlTabHead.TabIndex = 4;
+            // 
+            // chkVirtualKeyboard
+            // 
+            this.chkVirtualKeyboard.Location = new System.Drawing.Point(272, 5);
+            this.chkVirtualKeyboard.Name = "chkVirtualKeyboard";
+            this.chkVirtualKeyboard.Properties.Appearance.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.chkVirtualKeyboard.Properties.Appearance.Options.UseFont = true;
+            this.chkVirtualKeyboard.Properties.Caption = "가상 키보드";
+            this.chkVirtualKeyboard.Size = new System.Drawing.Size(110, 20);
+            this.chkVirtualKeyboard.TabIndex = 21;
+            this.chkVirtualKeyboard.CheckedChanged += new System.EventHandler(this.chkVirtualKeyboard_CheckedChanged);
             // 
             // chkManualWrench
             // 
-            this.chkManualWrench.Location = new System.Drawing.Point(272, 5);
+            this.chkManualWrench.Location = new System.Drawing.Point(388, 5);
             this.chkManualWrench.Name = "chkManualWrench";
             this.chkManualWrench.Properties.Appearance.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.chkManualWrench.Properties.Appearance.Options.UseFont = true;
@@ -830,7 +844,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.btnTabsAccordion.Edge = SEOJIN_TMES.Client.Forms.Common.AccordionEdge.Left;
             this.btnTabsAccordion.Expanded = true;
             this.btnTabsAccordion.Font = new System.Drawing.Font("맑은 고딕", 8.5F);
-            this.btnTabsAccordion.Location = new System.Drawing.Point(388, 2);
+            this.btnTabsAccordion.Location = new System.Drawing.Point(504, 2);
             this.btnTabsAccordion.Name = "btnTabsAccordion";
             this.btnTabsAccordion.Size = new System.Drawing.Size(104, 24);
             this.btnTabsAccordion.TabIndex = 24;
@@ -1010,6 +1024,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             this.bottomCard.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pnlTabHead)).EndInit();
             this.pnlTabHead.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.chkVirtualKeyboard.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.chkManualWrench.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.tabSpec)).EndInit();
             this.tabSpec.ResumeLayout(false);
@@ -1087,6 +1102,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
         private System.Windows.Forms.Button btnRework;
         private System.Windows.Forms.Button btnProcessList;
         private DevExpress.XtraEditors.PanelControl toolbarCard;
+        private DevExpress.XtraEditors.CheckEdit chkVirtualKeyboard;
         private DevExpress.XtraEditors.CheckEdit chkManualWrench;
         private Common.AccordionHandle btnTabsAccordion;
         private DevExpress.XtraEditors.PanelControl pnlTabHead;

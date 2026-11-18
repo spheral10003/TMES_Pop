@@ -310,6 +310,7 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string Pop_TabBomSpec => Get(nameof(Pop_TabBomSpec));
         public static string Pop_TabInspection => Get(nameof(Pop_TabInspection));
         public static string Pop_TabEquipment => Get(nameof(Pop_TabEquipment));
+        public static string Pop_VirtualKeyboard => Get(nameof(Pop_VirtualKeyboard));
         public static string Pop_ManualWrench => Get(nameof(Pop_ManualWrench));
         public static string Pop_ResultInputColumn => Get(nameof(Pop_ResultInputColumn));
         public static string Pop_InputButton => Get(nameof(Pop_InputButton));

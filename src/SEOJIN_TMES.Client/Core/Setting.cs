@@ -90,27 +90,42 @@ namespace SEOJIN_TMES.Client.Core
                 return;
 
             _appSet.DefaultCulture = cultureName;
+            SaveAppSetting("DefaultCulture", cultureName, "화면 언어");
+        }
 
+        /// <summary>
+        /// POP 화면 [가상 키보드] 체크 여부를 <see cref="AppSettings.UseVirtualKeyboard"/>와 App.config 양쪽에 남긴다.
+        /// 다음 실행 때 POP 화면이 이 값으로 체크박스를 채운다. 저장 실패는 <see cref="SaveCulture"/>와 같이 로그만 남긴다.
+        /// </summary>
+        public void SaveUseVirtualKeyboard(bool useVirtualKeyboard)
+        {
+            _appSet.UseVirtualKeyboard = useVirtualKeyboard;
+            SaveAppSetting("UseVirtualKeyboard", useVirtualKeyboard ? "true" : "false", "가상 키보드 사용 여부");
+        }
+
+        /// <summary>App.config(exe.config)의 appSettings 한 줄을 쓴다. 없으면 추가한다.</summary>
+        private static void SaveAppSetting(string key, string value, string description)
+        {
             try
             {
                 var config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
                 var settings = config.AppSettings.Settings;
 
-                if (settings["DefaultCulture"] == null)
-                    settings.Add("DefaultCulture", cultureName);
+                if (settings[key] == null)
+                    settings.Add(key, value);
                 else
-                    settings["DefaultCulture"].Value = cultureName;
+                    settings[key].Value = value;
 
                 config.Save(ConfigurationSaveMode.Modified);
 
                 // 같은 실행 안에서 AppSettingsLoader.Load()가 다시 불려도 캐시된 옛 값이 나오지 않게 한다.
                 ConfigurationManager.RefreshSection("appSettings");
 
-                AppLog.Step($"화면 언어 저장 - DefaultCulture={cultureName}");
+                AppLog.Step($"{description} 저장 - {key}={value}");
             }
             catch (Exception ex)
             {
-                AppLog.Warn($"화면 언어 저장 실패(DefaultCulture={cultureName}): {ex.Message}");
+                AppLog.Warn($"{description} 저장 실패({key}={value}): {ex.Message}");
             }
         }
 

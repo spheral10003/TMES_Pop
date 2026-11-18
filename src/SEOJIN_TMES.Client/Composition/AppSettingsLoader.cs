@@ -44,6 +44,9 @@ namespace SEOJIN_TMES.Client.Composition
             if (bool.TryParse(ConfigurationManager.AppSettings["IsTestServer"], out var isTestServer))
                 settings.IsTestServer = isTestServer;
 
+            if (bool.TryParse(ConfigurationManager.AppSettings["UseVirtualKeyboard"], out var useVirtualKeyboard))
+                settings.UseVirtualKeyboard = useVirtualKeyboard;
+
             if (int.TryParse(ConfigurationManager.AppSettings["ModbusConnectTimeoutMs"], out var connectTimeoutMs))
                 settings.ModbusConnectTimeoutMs = connectTimeoutMs;
 

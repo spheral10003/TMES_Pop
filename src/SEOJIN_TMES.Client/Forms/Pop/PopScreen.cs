@@ -119,6 +119,9 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             _apiClient = Global.Instance.Settings.ApiClients;
             _key = BuildKey();
 
+            // 지난 실행에서 고른 가상 키보드 사용 여부(App.config UseVirtualKeyboard)를 그대로 보여 준다.
+            chkVirtualKeyboard.Checked = _appSet.AppSet.UseVirtualKeyboard;
+
             _processes = new List<RoutingProcessDto>();
             _viewerMessage = Language.Pop_DrawingNone;
 
@@ -166,6 +169,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
             pageBom.Text = Language.Pop_TabBomSpec;
             pageInspec.Text = Language.Pop_TabInspection;
             pageEquip.Text = Language.Pop_TabEquipment;
+            chkVirtualKeyboard.Text = Language.Pop_VirtualKeyboard;
             chkManualWrench.Text = Language.Pop_ManualWrench;
 
             mnuFit.Text = Language.Pop_ImageFit;
@@ -222,7 +226,7 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                 lblWorkstation, lblProgressState, //lblWorkerTile, lblWorker, 
                 lblWorkOrderNo, lblItemCode, lblProductSerialNo, lblRoutingGroup, lblRoutingOperation,
                 lblPageOperation, lblPageStartTime, lblPageEndTime, lblPageRunTime, lblPageIdleTime, lblPageWorkTime,
-                chkManualWrench);
+                chkVirtualKeyboard, chkManualWrench);
             _textFitter.Register(TextFitMode.Wrap, lblMessage);
         }
 
@@ -532,6 +536,18 @@ namespace SEOJIN_TMES.Client.Forms.Pop
                     chkManualWrench.Visible = false;
                     break;
             }
+        }
+
+        /// <summary>
+        /// [가상 키보드]를 끄면 BOM · 검사 칸을 편집해도 Windows 화상 키보드를 띄우지 않는다(물리 키보드가 있는 POP용).
+        /// 고른 값은 App.config에 남겨 다음 실행 때도 그대로 쓴다 — 시작할 때 같은 값을 넣는 경우는 저장하지 않는다.
+        /// </summary>
+        private void chkVirtualKeyboard_CheckedChanged(object sender, EventArgs e)
+        {
+            if (_appSet == null || _appSet.AppSet.UseVirtualKeyboard == chkVirtualKeyboard.Checked)
+                return;
+
+            _appSet.SaveUseVirtualKeyboard(chkVirtualKeyboard.Checked);
         }
 
         /// <summary>수동 렌치를 켜면 "결과값 입력" 컬럼([입력] 버튼)이 나타난다.</summary>
