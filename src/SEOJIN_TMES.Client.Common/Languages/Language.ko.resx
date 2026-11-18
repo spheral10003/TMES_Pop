@@ -240,6 +240,9 @@
   <data name="MainForm_LogoutConfirm" xml:space="preserve">
     <value>로그아웃하면 열려 있는 화면이 모두 닫힙니다. 로그아웃하시겠습니까?</value>
   </data>
+  <data name="MainForm_WorkstationChangeConfirm" xml:space="preserve">
+    <value>워크스테이션을 변경하면 열려 있는 모든 화면이 닫힙니다. 워크스테이션을 변경하시겠습니까?</value>
+  </data>
   <data name="MainForm_WelcomeHint" xml:space="preserve">
     <value>좌측 메뉴에서 화면을 선택하면 위쪽 탭으로 열립니다.</value>
   </data>

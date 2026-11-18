@@ -37,6 +37,14 @@ namespace SEOJIN_TMES.Client.Forms.Home
         private readonly List<NoticeBox> _noticeBoxes = new List<NoticeBox>();
         private TableLayoutPanel _noticeGrid;
         private NoticeViewer _noticeViewer;
+        private SystemUsageTile _systemTile;
+        private SystemUsageMonitor _systemMonitor;
+
+        /// <summary>
+        /// 워크스테이션 타일을 눌렀다. 바꾸려면 열린 화면을 모두 닫아야 하는데 탭은 MainForm이 들고 있으므로,
+        /// 확인 · 닫기 · 선택 화면 띄우기는 MainForm이 한다(홈 화면은 알리기만 한다).
+        /// </summary>
+        public event EventHandler WorkstationChangeRequested;
 
         /// <summary>
         /// 공지 상자 하나에 보여 줄 최대 건수 — 최근(작성일시 내림차순) 것부터.
@@ -61,9 +69,11 @@ namespace SEOJIN_TMES.Client.Forms.Home
             BuildTiles();
             BuildNotices();
             VisibleChanged += HomeScreen_VisibleChanged;
+            Disposed += HomeScreen_Disposed;
 
             ApplyTheme();
             RefreshInfo();
+            StartSystemMonitor();
         }
 
         /// <summary>브랜드 아이콘 + 제목 + 안내 문구.</summary>
@@ -93,26 +103,79 @@ namespace SEOJIN_TMES.Client.Forms.Home
         /// 제목(다국어)·값·강조색을 한 자리에 모아 두는 이유는, 예전처럼 생성·값 채우기·언어 갱신을
         /// 세 군데에서 인덱스로 다루면 타일을 하나 끼워 넣을 때 조용히 어긋나기 때문이다.
         /// </summary>
+        /// <remarks>
+        /// 접속 서버는 주소가 길어 넓게(240), 나머지 셋은 값이 짧아 200으로 줄였다 — 그 자리에 하드웨어 사용량 타일이 들어간다.
+        /// </remarks>
         private static readonly TileSpec[] TileSpecs =
         {
-            new TileSpec(() => Language.MainForm_TileServer,      s => s.ServerText(),          AppTheme.Indigo),
-            new TileSpec(() => Language.MainForm_TileWorkstation, s => s.WorkstationText(),     AppTheme.Violet),
-            new TileSpec(() => Language.MainForm_TileEquipment,   s => s.EquipmentText(),       AppTheme.Cyan),
-            new TileSpec(() => Language.MainForm_TileUser,        s => s.LoginUserText(),       AppTheme.Emerald)
+            new TileSpec(() => Language.MainForm_TileServer,      s => s.ServerText(),          AppTheme.Indigo,  240),
+            new TileSpec(() => Language.MainForm_TileWorkstation, s => s.WorkstationText(),     AppTheme.Violet,  200,
+                         s => s.RequestWorkstationChange()),
+            new TileSpec(() => Language.MainForm_TileEquipment,   s => s.EquipmentText(),       AppTheme.Cyan,    200),
+            new TileSpec(() => Language.MainForm_TileUser,        s => s.LoginUserText(),       AppTheme.Emerald, 200)
         };
 
-        /// <summary>타일 폭(240) + 사이 간격(20).</summary>
-        private const int TileStride = 260;
+        /// <summary>타일 사이 간격.</summary>
+        private const int TileGap = 20;
+
+        /// <summary>정보 타일 줄의 첫 타일 왼쪽 · 윗선.</summary>
+        private const int TileLeft = 28;
+        private const int TileTop = 110;
 
         private void BuildTiles()
         {
+            var left = TileLeft;
             for (var i = 0; i < TileSpecs.Length; i++)
             {
-                var tile = new InfoTile(TileSpecs[i].Caption(), TileSpecs[i].Accent);
-                tile.Panel.Location = new Point(28 + i * TileStride, 110);
+                var tile = new InfoTile(TileSpecs[i].Caption(), TileSpecs[i].Accent, TileSpecs[i].Width);
+                tile.Panel.Location = new Point(left, TileTop);
+                if (TileSpecs[i].Click != null)
+                    tile.Clicked += InfoTile_Clicked;
                 card.Controls.Add(tile.Panel);
                 _tiles.Add(tile);
+                left += TileSpecs[i].Width + TileGap;
             }
+
+            // 하드웨어 사용량은 정보 타일 줄 끝에 같은 높이로 붙인다.
+            // 색 막대 · 게이지는 회색(Slate) — 업무 정보 타일(남색 · 보라 · 청록 · 초록)과 구분되는 보조 정보라서(사용자 지정).
+            _systemTile = new SystemUsageTile(AppTheme.Slate);
+            _systemTile.Panel.Location = new Point(left, TileTop);
+            card.Controls.Add(_systemTile.Panel);
+        }
+
+        private void InfoTile_Clicked(object sender, EventArgs e)
+        {
+            var index = _tiles.IndexOf((InfoTile)sender);
+            if (index >= 0)
+                TileSpecs[index].Click?.Invoke(this);
+        }
+
+        private void RequestWorkstationChange() => WorkstationChangeRequested?.Invoke(this, EventArgs.Empty);
+
+        /// <summary>
+        /// CPU · 메모리 · 드라이브 사용률을 App.config SystemMonitorPollingMs(기본 500ms)마다 읽어 타일에 넣는다.
+        /// 서버 호출이 아니라 이 PC의 값이라 홈 탭이 가려져 있어도 멈추지 않는다(다시 보일 때 바로 최신 값이 보이게).
+        /// </summary>
+        private void StartSystemMonitor()
+        {
+            _systemMonitor = new SystemUsageMonitor();
+            _systemMonitor.Updated += SystemMonitor_Updated;
+            _systemMonitor.Start(_appSet.AppSet.SystemMonitorPollingMs);
+        }
+
+        private void SystemMonitor_Updated(object sender, SystemUsageSnapshot snapshot)
+        {
+            // 값은 UI 스레드로 오지만, 보내 둔 값이 닫힌 뒤에 도착할 수 있다.
+            if (IsDisposed || Disposing)
+                return;
+
+            _systemTile.SetUsage(snapshot);
+        }
+
+        private void HomeScreen_Disposed(object sender, EventArgs e)
+        {
+            _systemMonitor?.Dispose();
+            _systemMonitor = null;
         }
 
         /// <summary>
@@ -359,6 +422,8 @@ namespace SEOJIN_TMES.Client.Forms.Home
             foreach (var tile in _tiles)
                 tile.ApplyTheme();
 
+            _systemTile?.ApplyTheme();
+
             AppTheme.ContentSurface(noticeArea);
             if (_noticeGrid != null)
                 _noticeGrid.BackColor = AppTheme.Surface;
@@ -392,11 +457,20 @@ namespace SEOJIN_TMES.Client.Forms.Home
             public Func<HomeScreen, string> Value { get; }
             public Color Accent { get; }
 
-            public TileSpec(Func<string> caption, Func<HomeScreen, string> value, Color accent)
+            /// <summary>타일 폭(px). 높이는 모든 타일이 같다(84).</summary>
+            public int Width { get; }
+
+            /// <summary>타일을 눌렀을 때 할 일. null이면 누를 수 없는 타일(손가락 커서도 안 나온다).</summary>
+            public Action<HomeScreen> Click { get; }
+
+            public TileSpec(Func<string> caption, Func<HomeScreen, string> value, Color accent, int width,
+                            Action<HomeScreen> click = null)
             {
                 Caption = caption;
                 Value = value;
                 Accent = accent;
+                Width = width;
+                Click = click;
             }
         }
 
@@ -413,10 +487,10 @@ namespace SEOJIN_TMES.Client.Forms.Home
 
             public PanelControl Panel { get; }
 
-            public InfoTile(string caption, Color accent)
+            public InfoTile(string caption, Color accent, int width)
             {
                 Panel = new PanelControl();
-                Panel.Size = new Size(240, 84);
+                Panel.Size = new Size(width, 84);
 
                 var bar = new PanelControl();
                 bar.Dock = DockStyle.Left;
@@ -433,13 +507,43 @@ namespace SEOJIN_TMES.Client.Forms.Home
                 _value.Location = new Point(20, 42);
                 // 값이 잠깐 빈 문자열이 되어도 폭이 0으로 줄지 않도록 크기를 고정한다(CLAUDE.md 5번).
                 _value.AutoSizeMode = LabelAutoSizeMode.None;
-                _value.Size = new Size(205, 20);
+                _value.Size = new Size(width - 35, 20);   // 왼쪽 여백 20 + 오른쪽 여백 15
                 _value.AutoEllipsis = true;
 
                 Panel.Controls.Add(_caption);
                 Panel.Controls.Add(_value);
                 Panel.Controls.Add(bar);
             }
+
+            private EventHandler _clicked;
+
+            /// <summary>
+            /// 타일 어디를 눌러도 발생한다. 라벨 · 색 막대가 패널 위를 덮고 있어 패널 Click만 걸면 글자 위를 눌렀을 때 놓친다 —
+            /// 그래서 처음 구독할 때 자식 컨트롤까지 함께 걸고 손가락 커서를 켠다.
+            /// </summary>
+            public event EventHandler Clicked
+            {
+                add
+                {
+                    if (_clicked == null)
+                        WireClick();
+                    _clicked += value;
+                }
+                remove => _clicked -= value;
+            }
+
+            private void WireClick()
+            {
+                Panel.Cursor = Cursors.Hand;
+                Panel.Click += Part_Click;
+                foreach (Control child in Panel.Controls)
+                {
+                    child.Cursor = Cursors.Hand;
+                    child.Click += Part_Click;
+                }
+            }
+
+            private void Part_Click(object sender, EventArgs e) => _clicked?.Invoke(this, EventArgs.Empty);
 
             public string Caption
             {

@@ -240,6 +240,9 @@
   <data name="MainForm_LogoutConfirm" xml:space="preserve">
     <value>Đăng xuất sẽ đóng toàn bộ màn hình đang mở. Bạn có muốn đăng xuất?</value>
   </data>
+  <data name="MainForm_WorkstationChangeConfirm" xml:space="preserve">
+    <value>Thay đổi máy trạm sẽ đóng toàn bộ màn hình đang mở. Bạn có muốn thay đổi máy trạm không?</value>
+  </data>
   <data name="MainForm_WelcomeHint" xml:space="preserve">
     <value>Chọn một màn hình từ menu bên trái, màn hình sẽ mở thành thẻ ở phía trên.</value>
   </data>

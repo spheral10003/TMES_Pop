@@ -79,6 +79,15 @@ namespace SEOJIN_TMES.Client.Theme
         /// <summary>공지가 없을 때 안내 그림(폴더) 색 — 글자보다 한 단계 옅게.</summary>
         public static Color NoticeEmptyIcon => Blend(TextMuted, Card, 0.35f);
 
+        // 홈 시스템 사용량 타일 게이지(CPU · 메모리 · 드라이브).
+        // 채움은 타일 왼쪽 색 막대와 같은 색이라 타일마다 따로 두지 않는다(SystemUsageTile이 막대 색을 넘긴다).
+
+        /// <summary>게이지의 빈 부분(트랙) — 카드 테두리보다 한 단계 진하게 해 흰 카드 위에서도 칸이 보이게.</summary>
+        public static Color GaugeTrack => Blend(TextMuted, Card, 0.15f);
+
+        /// <summary>게이지 채움 위에 얹는 % 글자색. 트랙 위 글자는 <see cref="TextPrimary"/>.</summary>
+        public static Color GaugeFillText => Color.White;
+
         /// <summary>밝은 상태 색(노랑) 위에 얹는 글자색. 흰 글자는 노랑 바탕에서 거의 안 보인다.</summary>
         private static readonly Color StateDarkText = Color.FromArgb(30, 33, 56);
 

@@ -51,6 +51,12 @@ namespace SEOJIN_TMES.Client.Common.Configuration
         public int NotificationPollingSeconds { get; set; } = 60;
 
         /// <summary>
+        /// 홈 화면 시스템 사용량 타일(CPU · 메모리 · 디스크) 갱신 주기(ms). 기본 500.
+        /// 0 이하로 두면 갱신하지 않는다.
+        /// </summary>
+        public int SystemMonitorPollingMs { get; set; } = 500;
+
+        /// <summary>
         /// 설비(Nutrunner) TCP 접속 제한 시간(ms). Request · Event 두 채널 모두 적용. 기본 500.
         /// 0 이하면 OS 기본값(약 21초)까지 기다린다. 망이 느려 "접속 시간 초과"가 잦으면 늘린다.
         /// </summary>

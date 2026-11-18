@@ -41,6 +41,9 @@ namespace SEOJIN_TMES.Client.Composition
             if (int.TryParse(ConfigurationManager.AppSettings["NotificationPollingSeconds"], out var pollingSeconds))
                 settings.NotificationPollingSeconds = pollingSeconds;
 
+            if (int.TryParse(ConfigurationManager.AppSettings["SystemMonitorPollingMs"], out var systemMonitorMs))
+                settings.SystemMonitorPollingMs = systemMonitorMs;
+
             if (bool.TryParse(ConfigurationManager.AppSettings["IsTestServer"], out var isTestServer))
                 settings.IsTestServer = isTestServer;
 

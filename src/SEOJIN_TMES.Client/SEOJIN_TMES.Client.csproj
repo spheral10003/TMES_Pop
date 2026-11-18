@@ -276,6 +276,15 @@
     </EmbeddedResource>
   </ItemGroup>
 
+  <!--
+    홈 화면 시스템 사용량 타일(CPU · 메모리 · 드라이브) — Core/SystemUsageMonitor.cs.
+    DLL을 직접 참조하지 않고 패키지로 받는 이유: OpenHardwareMonitorLib.dll 혼자서는 의존 DLL(HidSharp · RAMSPDToolkit-NDD ·
+    System.Management 등)이 없어 실행 중에 로드 실패한다. 패키지는 이것들을 함께 받아 bin · ClickOnce 게시본에 넣는다.
+  -->
+  <ItemGroup>
+    <PackageReference Include="OpenHardwareMonitorLib" Version="1.0.9513" />
+  </ItemGroup>
+
   <ItemGroup>
     <ProjectReference Include="..\ImageBoxEx\ImageBoxEx.csproj" />
     <ProjectReference Include="..\SEOJIN_TMES.Client.Common\SEOJIN_TMES.Client.Common.csproj" />

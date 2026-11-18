@@ -166,7 +166,7 @@ namespace SEOJIN_TMES.Client.Forms
         {
             try
             {
-                await SelectWorkstation();
+                await SelectWorkstation(false);
             }
             catch (Exception ex)
             {
@@ -175,15 +175,72 @@ namespace SEOJIN_TMES.Client.Forms
             }
         }
 
+        /// <summary>선택 화면이 떠 있는 동안 또 띄우지 않게 막는다(덮개가 입력을 막지만 코드에서 겹쳐 부르는 경우 대비).</summary>
+        private bool _selectingWorkstation;
+
         /// <summary>
-        /// 로그인 사용자의 워크스테이션 목록을 받아 선택 화면(<see cref="LoginStationControl"/>)을 띄운다.
+        /// 홈 화면의 워크스테이션 타일을 눌렀다 → 확인 후 열린 화면(탭)을 모두 닫고 로그인 때와 같은 선택 화면을 다시 띄운다.
+        /// 화면을 닫는 이유: 열려 있는 화면(POP · 작업 진입 등)은 열 때의 워크스테이션으로 조회 · 작업하고 있어,
+        /// 그대로 두면 바뀐 워크스테이션과 어긋난 화면에서 작업이 이어진다.
+        /// 선택 화면에서 [취소]하면 워크스테이션은 이전 값 그대로다(화면은 이미 닫혔다).
+        /// </summary>
+        private async void HomeScreen_WorkstationChangeRequested(object sender, EventArgs e)
+        {
+            if (_selectingWorkstation)
+                return;
+
+            if (!AppMessageBox.Confirm(this, Language.MainForm_WorkstationChangeConfirm))
+                return;
+
+            try
+            {
+                AppLog.Info($"워크스테이션 변경 시작 - 현재={_setting.CurrentUser?.Workstation}, 닫는 화면 {_openScreens.Count - 1}개");
+                CloseAllScreens();
+                await SelectWorkstation(true);
+            }
+            catch (Exception ex)
+            {
+                ServerLog.Unexpected("워크스테이션 변경", ex);
+            }
+        }
+
+        /// <summary>홈을 뺀 모든 탭을 닫고 홈 탭을 보여 준다(홈은 닫히지 않는 탭이다).</summary>
+        private void CloseAllScreens()
+        {
+            foreach (var key in _openScreens.Keys.Where(k => k != HomeTabKey).ToList())
+                CloseTab(key);
+
+            ActivateTab(HomeTabKey);
+        }
+
+        /// <summary>
+        /// 로그인 사용자의 워크스테이션 목록을 받아 선택 화면(<see cref="StationSelect"/>)을 띄운다.
         /// 메인 화면 전체를 흐리게 찍은 그림으로 덮고, 그 가운데에 선택 화면(1200×700)을 얹는다 —
         /// 덮개가 입력을 막아 고르기 전에는 메뉴 · 탭을 누를 수 없다.
         /// 카드를 누르면 세션에 넣고 화면을 걷어 낸다.
         /// 목록이 없거나 조회에 실패하거나 [취소]하면 워크스테이션 없이 메인 화면을 쓴다 —
         /// 이때는 작업 진입(공정 시작)에서 막는다(<see cref="WorkOrderEntry.WorkOrderEntryScreen"/>).
+        ///
+        /// <paramref name="userRequested"/>가 true(홈 타일로 바꾸기)면 목록을 못 받았을 때 안내 창을 띄운다 —
+        /// 사용자가 누른 직후라 아무 반응이 없으면 고장처럼 보인다. 로그인 직후에는 예전처럼 로그만 남긴다.
         /// </summary>
-        private async Task SelectWorkstation()
+        private async Task SelectWorkstation(bool userRequested)
+        {
+            if (_selectingWorkstation)
+                return;
+
+            _selectingWorkstation = true;
+            try
+            {
+                await SelectWorkstationCore(userRequested);
+            }
+            finally
+            {
+                _selectingWorkstation = false;
+            }
+        }
+
+        private async Task SelectWorkstationCore(bool userRequested)
         {
             List<WorkstationInfo> stations;
             try
@@ -194,6 +251,8 @@ namespace SEOJIN_TMES.Client.Forms
             catch (ApiException ex)
             {
                 AppLog.Warn($"워크스테이션 목록 조회 실패 - {ex.Message.Replace(Environment.NewLine, " ")}");
+                if (userRequested && !IsDisposed && !Disposing)
+                    AppMessageBox.Warn(this, ex.Message);
                 return;
             }
 
@@ -202,6 +261,8 @@ namespace SEOJIN_TMES.Client.Forms
             if (stations.Count == 0)
             {
                 AppLog.Warn($"워크스테이션 없음 - UserId={_setting.CurrentUser?.UserId}");
+                if (userRequested)
+                    AppMessageBox.Warn(this, Language.Login_NoStation);
                 return;
             }
 
@@ -213,7 +274,7 @@ namespace SEOJIN_TMES.Client.Forms
             backdrop.BackgroundImage = CaptureBlurredClient();
             backdrop.BackgroundImageLayout = ImageLayout.Stretch;
 
-            var selector = new LoginStationControl();
+            var selector = new StationSelect();
             selector.Init();
             backdrop.Controls.Add(selector);
             backdrop.Resize += StationBackdrop_Resize;
@@ -1246,6 +1307,7 @@ namespace SEOJIN_TMES.Client.Forms
         {
             _homeScreen = new HomeScreen();
             _homeScreen.Init();
+            _homeScreen.WorkstationChangeRequested += HomeScreen_WorkstationChangeRequested;
             _homeScreen.Dock = DockStyle.Fill;
             _homeScreen.Visible = false;
             contentHost.Controls.Add(_homeScreen);

@@ -1,6 +1,6 @@
 namespace SEOJIN_TMES.Client.Forms
 {
-    partial class LoginStationControl
+    partial class StationSelect
     {
         /// <summary>디자이너에서 사용하는 필수 변수입니다.</summary>
         private System.ComponentModel.IContainer components = null;
@@ -19,7 +19,7 @@ namespace SEOJIN_TMES.Client.Forms
 
         /// <summary>
         /// 디자이너 지원에 필요한 메서드입니다. (람다식/삼항연산자/문자열보간/객체이니셜라이저 사용 금지 —
-        /// 실제 문구/색/이벤트 로직은 LoginStationControl.cs에 둘 것)
+        /// 실제 문구/색/이벤트 로직은 StationSelect.cs에 둘 것)
         ///
         /// Add 순서: flowStations(Fill) → lblHint(Top) → lblTitle(Top) → pnlFooter(Bottom).
         /// 나중에 Add된 컨트롤이 먼저 도킹되므로 이 순서를 바꾸지 말 것.
@@ -91,14 +91,14 @@ namespace SEOJIN_TMES.Client.Forms
             this.btnCancel.UseVisualStyleBackColor = true;
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             //
-            // LoginStationControl
+            // StationSelect
             // 
             this.Controls.Add(this.flowStations);
             this.Controls.Add(this.lblHint);
             this.Controls.Add(this.lblTitle);
             this.Controls.Add(this.pnlFooter);
             this.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.Name = "LoginStationControl";
+            this.Name = "StationSelect";
             this.Padding = new System.Windows.Forms.Padding(16, 16, 16, 0);
             this.Size = new System.Drawing.Size(1200, 700);
             this.pnlFooter.ResumeLayout(false);

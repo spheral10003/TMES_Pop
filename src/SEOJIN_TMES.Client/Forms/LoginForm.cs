@@ -479,7 +479,7 @@ namespace SEOJIN_TMES.Client.Forms
                     }
                 }
 
-                // 워크스테이션은 여기서 고르지 않는다 — 메인 화면이 뜨면서 선택 화면(LoginStationControl)을 덮어 띄운다.
+                // 워크스테이션은 여기서 고르지 않는다 — 메인 화면이 뜨면서 선택 화면(StationSelect)을 덮어 띄운다.
                 // 워크스테이션이 없어도 로그인은 통과시키고, 공정 시작(작업 진입) 단계에서 막는다.
                 _currentUser = new UserSession
                 {

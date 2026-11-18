@@ -12,7 +12,9 @@ using System.Windows.Forms;
 namespace SEOJIN_TMES.Client.Forms
 {
     /// <summary>
-    /// 로그인 직후 접속할 워크스테이션을 고르는 화면. 메인 화면이 뜨면서 흐린 배경 위 가운데에 1200×700으로 띄운다(<see cref="MainForm"/>).
+    /// 접속할 워크스테이션을 고르는 화면. 메인 화면이 뜨면서 흐린 배경 위 가운데에 1200×700으로 띄운다(<see cref="MainForm"/>).
+    /// 홈 화면의 워크스테이션 타일을 눌러 바꿀 때도 같은 화면을 다시 띄운다 — 로그인 때만 쓰는 것이 아니라서
+    /// 이름에서 Login을 뺐다(예전 LoginStationControl).
     ///
     /// 고르기는 알람 등록 팝업과 같은 <b>카드 타일(<see cref="CardTile"/>)</b>로 한다.
     /// 워크스테이션에는 등급이 없어 모든 카드를 같은 색으로 두고, 코드 · 이름 · 라인/부서만 보여 준다.
@@ -21,7 +23,7 @@ namespace SEOJIN_TMES.Client.Forms
     ///
     /// 문구는 메인 화면이 적용해 둔 스레드 문화권을 그대로 따른다.
     /// </summary>
-    public partial class LoginStationControl : XtraUserControl, IThemedScreen
+    public partial class StationSelect : XtraUserControl, IThemedScreen
     {
         /// <summary>
         /// 카드 한 장 크기. 개수에 맞춰 늘이지 않고 고정해 두고, 목록 폭에 들어가는 만큼 한 줄에 놓고 넘치면 다음 줄로 넘긴다.
@@ -35,7 +37,7 @@ namespace SEOJIN_TMES.Client.Forms
         /// <summary>카드를 누르면 그 워크스테이션, [취소]나 창 닫힘이면 null로 끝난다.</summary>
         private TaskCompletionSource<WorkstationInfo> _selection;
 
-        public LoginStationControl()
+        public StationSelect()
         {
             InitializeComponent();
         }
@@ -47,7 +49,7 @@ namespace SEOJIN_TMES.Client.Forms
             ApplyTheme();
 
             // 고르는 중에 로그인 창을 닫으면 기다리던 쪽이 영영 끝나지 않으므로 취소로 마무리한다.
-            Disposed += LoginStationControl_Disposed;
+            Disposed += StationSelect_Disposed;
         }
 
         private void SetTexts()
@@ -122,7 +124,7 @@ namespace SEOJIN_TMES.Client.Forms
             _selection?.TrySetResult(null);
         }
 
-        private void LoginStationControl_Disposed(object sender, EventArgs e)
+        private void StationSelect_Disposed(object sender, EventArgs e)
         {
             _selection?.TrySetResult(null);
         }

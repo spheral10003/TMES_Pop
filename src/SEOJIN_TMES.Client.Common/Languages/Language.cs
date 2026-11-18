@@ -115,6 +115,7 @@ namespace SEOJIN_TMES.Client.Common.Languages
         public static string MainForm_Maximize => Get(nameof(MainForm_Maximize));
         public static string MainForm_Restore => Get(nameof(MainForm_Restore));
         public static string MainForm_LogoutConfirm => Get(nameof(MainForm_LogoutConfirm));
+        public static string MainForm_WorkstationChangeConfirm => Get(nameof(MainForm_WorkstationChangeConfirm));
         public static string MainForm_WelcomeHint => Get(nameof(MainForm_WelcomeHint));
         public static string MainForm_TileServer => Get(nameof(MainForm_TileServer));
         public static string MainForm_TileWorkstation => Get(nameof(MainForm_TileWorkstation));

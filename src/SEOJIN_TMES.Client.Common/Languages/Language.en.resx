@@ -240,6 +240,9 @@
   <data name="MainForm_LogoutConfirm" xml:space="preserve">
     <value>Logging out closes every open screen. Do you want to log out?</value>
   </data>
+  <data name="MainForm_WorkstationChangeConfirm" xml:space="preserve">
+    <value>Changing the workstation closes every open screen. Do you want to change the workstation?</value>
+  </data>
   <data name="MainForm_WelcomeHint" xml:space="preserve">
     <value>Pick a screen from the left menu and it opens as a tab above.</value>
   </data>
